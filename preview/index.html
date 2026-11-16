@@ -284,7 +284,7 @@ button{font:inherit;color:inherit}
 .prof .prof-top{display:flex;align-items:center;gap:7px}
 .prof-ava{width:48px;height:48px;flex:0 0 48px;border-radius:16px;background:linear-gradient(160deg,#FFF7E9,#EFF9F2);
   border:1px solid #F0E6D6;display:grid;place-items:center;overflow:hidden}
-.prof-ava svg{width:40px;height:46px;display:block}
+.prof-ava svg{width:34px;height:46px;display:block}
 .prof-id{min-width:0;flex:1}
 .prof-name{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:900;letter-spacing:-.5px;flex-wrap:wrap}
 .prof-sub{display:flex;gap:4px;margin-top:2px;font-size:9.5px;font-weight:800;color:#A2937F;flex-wrap:wrap}
@@ -300,8 +300,8 @@ button{font:inherit;color:inherit}
 /* ---------- 선택한 아이 상세 ---------- */
 .kd[hidden]{display:none!important}
 .kd-top{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-.kd-ava{width:26px;height:30px;flex:0 0 26px;display:grid;place-items:center}
-.kd-ava svg{width:22px;height:26px;display:block}
+.kd-ava{width:22px;height:28px;flex:0 0 22px;display:grid;place-items:center}
+.kd-ava svg{width:18px;height:26px;display:block}
 .kd-title{font-size:12.5px;font-weight:900;letter-spacing:-.4px}
 .kd-hf{font-size:10px}
 .kd-fold{margin-left:auto;border:1px solid #EADFCB;background:#FFF8EA;border-radius:999px;padding:3px 9px;
@@ -326,13 +326,20 @@ button{font:inherit;color:inherit}
 .upempty{font-size:9.5px;color:var(--faint);font-weight:700;text-align:center;padding:10px 6px;
   background:#FFFCF6;border:1px dashed #EEE2D0;border-radius:11px;line-height:1.5}
 /* ---------- 캐릭터 꾸미기 시트 ---------- */
-.av-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.av-prev{width:96px;height:110px;flex:0 0 96px;border-radius:18px;background:linear-gradient(160deg,#FFF7E9,#EFF9F2);
+.av-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.av-prev{width:112px;height:150px;flex:0 0 112px;border-radius:20px;background:linear-gradient(160deg,#FFF7E9,#EFF9F2);
   border:1px solid #F0E6D6;display:grid;place-items:center}
-.av-prev svg{width:82px;height:94px;display:block}
-.av-txt{display:flex;flex-direction:column;gap:2px}
+.av-prev svg{width:98px;height:140px;display:block}
+.av-txt{display:flex;flex-direction:column;gap:3px;min-width:0}
 .av-txt b{font-size:13px}
 .av-txt small{font-size:10px;color:var(--sub);font-weight:700}
+.av-tip{font-size:9px;font-weight:800;color:#A99F92;background:#FFF6E9;border:1px solid #F3E6D2;
+  border-radius:999px;padding:2px 8px;align-self:flex-start;margin-top:3px}
+.av-tabs{display:flex;gap:4px;margin:4px 0 2px}
+.avtab{flex:1;height:30px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
+  font-size:10px;font-weight:800;color:#8B7A63;cursor:pointer;white-space:nowrap;padding:0 2px}
+.avtab.on{background:#F5ECFB;border-color:#E2CFF2;color:#7B5AA6;font-weight:900;
+  box-shadow:0 2px 6px rgba(150,120,190,.16)}
 .av-sec{margin-top:8px}
 .av-lab{font-size:10px;font-weight:900;color:#8B7A63;margin-bottom:4px}
 .av-opts{display:flex;flex-wrap:wrap;gap:4px}
@@ -604,7 +611,7 @@ button{font:inherit;color:inherit}
   .prof{padding:6px 7px 5px}
   .prof .prof-top{gap:5px}
   .prof-ava{width:38px;height:38px;flex-basis:38px;border-radius:12px}
-  .prof-ava svg{width:32px;height:36px}
+  .prof-ava svg{width:27px;height:37px}
   .prof-name{font-size:12px;gap:3px}
   .prof-sub{font-size:8px;gap:3px;margin-top:1px}
   .prof .kdots{margin-top:4px;gap:2px}
@@ -1966,32 +1973,36 @@ function schedSaveText(key, id, text){
    12-1. 캐릭터 꾸미기 — state.avatars
    ============================================================ */
 var AV_PARTS = {
-  hair: [ {k:'bob',n:'단발'}, {k:'long',n:'긴머리'}, {k:'twin',n:'양갈래'},
-          {k:'short',n:'짧은 컷'}, {k:'wave',n:'웨이브'}, {k:'bangs',n:'앞머리'} ],
-  hairColor: [ {k:'#3B2B2B',n:'검정'}, {k:'#5B3A26',n:'진갈색'}, {k:'#A9743F',n:'연갈색'},
-               {k:'#E58FB0',n:'핑크'}, {k:'#33415C',n:'네이비'} ],
-  face: [ {k:'sparkle',n:'반짝'}, {k:'smile',n:'웃음'}, {k:'wink',n:'윙크'},
-          {k:'round',n:'동그란'}, {k:'brave',n:'당당'}, {k:'cat',n:'고양이'} ],
-  skin: [ {k:'#FFE6D5',n:'밝음'}, {k:'#F6D3B6',n:'보통'}, {k:'#E8B593',n:'살짝 태닝'} ],
-  outfit: [ {k:'dress',n:'분홍 원피스'}, {k:'tee',n:'노랑 티'}, {k:'hood',n:'민트 후드'},
-            {k:'overall',n:'멜빵바지'}, {k:'sweat',n:'보라 맨투맨'}, {k:'check',n:'체크 남방'},
-            {k:'track',n:'트레이닝복'} ],
-  acc: [ {k:'none',n:'없음'}, {k:'ribbon',n:'리본'}, {k:'star',n:'별핀'},
-         {k:'cat',n:'고양이 머리띠'}, {k:'cap',n:'캡모자'}, {k:'glasses',n:'등근 안경'} ]
+  hair: [ {k:'wavetwin',n:'웨이브 양갈래'}, {k:'dango',n:'만두머리'}, {k:'long',n:'긴 생머리'},
+          {k:'bob',n:'단발'}, {k:'pony',n:'포니테일'}, {k:'boy',n:'덮은 숏컷'}, {k:'sport',n:'스포티 컷'} ],
+  hairColor: [ {k:'#3B2B2B',n:'검정'}, {k:'#6B4530',n:'초코'}, {k:'#C8A57A',n:'밀크티'},
+               {k:'#F0A6C0',n:'딸기핑크'}, {k:'#B39DDB',n:'라벤더'}, {k:'#33415C',n:'네이비'} ],
+  face: [ {k:'sparkle',n:'반짝반짝'}, {k:'smile',n:'웃는 눈'}, {k:'wink',n:'윙크'},
+          {k:'round',n:'초롱초롱'}, {k:'brave',n:'당당'}, {k:'cat',n:'고양이'}, {k:'sleepy',n:'졸린'} ],
+  eyeColor: [ {k:'#3A2E28',n:'검정'}, {k:'#7B4B2A',n:'밤색'}, {k:'#5FA8E0',n:'하늘파랑'},
+              {k:'#9B7BD4',n:'라벤더'}, {k:'#3FA98E',n:'에메랄드'} ],
+  skin: [ {k:'#FFE7D8',n:'밝음'}, {k:'#F7D6BC',n:'보통'}, {k:'#E9BC9C',n:'살짝 태닝'} ],
+  outfit: [ {k:'sailor',n:'세일러복'}, {k:'dress',n:'프릴 원피스'}, {k:'sweat',n:'보라 맨투맨'},
+            {k:'hood',n:'노랑 후드'}, {k:'overall',n:'멜빵바지'}, {k:'uniform',n:'교복'},
+            {k:'cardigan',n:'민트 가디건'}, {k:'pajama',n:'파자마'} ],
+  acc: [ {k:'none',n:'없음'}, {k:'fox',n:'여우 귀'}, {k:'rabbit',n:'토끼 귀'},
+         {k:'ribbon',n:'큰 리본'}, {k:'glasses',n:'동그란 안경'}, {k:'star',n:'별 머리핀'},
+         {k:'cap',n:'캡모자'} ]
 };
 var AV_DEFAULT = {
-  'k1': { hair:'bob',  hairColor:'#3B2B2B', face:'sparkle', skin:'#FFE6D5', outfit:'dress', acc:'ribbon' },
-  'k2': { hair:'twin', hairColor:'#5B3A26', face:'smile',   skin:'#FFE6D5', outfit:'tee',   acc:'star' }
+  'k1': { hair:'wavetwin', hairColor:'#6B4530', eyeColor:'#7B4B2A', face:'sparkle', skin:'#FFE7D8', outfit:'sailor', acc:'fox' },
+  'k2': { hair:'dango', hairColor:'#3B2B2B', eyeColor:'#3A2E28', face:'smile', skin:'#FFE7D8', outfit:'dress', acc:'ribbon' }
 };
-var AV_FALLBACK = { hair:'short', hairColor:'#5B3A26', face:'smile', skin:'#FFE6D5', outfit:'tee', acc:'none' };
+var AV_FALLBACK = { hair:'bob', hairColor:'#3B2B2B', eyeColor:'#3A2E28', face:'sparkle', skin:'#FFE7D8', outfit:'sailor', acc:'none' };
 var AV_OUT = {
-  dress:   { body:'#F7A8C4', trim:'#FFFFFF' },
-  tee:     { body:'#FFD86B', trim:'#FFF8E2' },
-  hood:    { body:'#9BDCC1', trim:'#EEFBF4' },
-  overall: { body:'#FFFFFF', trim:'#FFFFFF' },
-  sweat:   { body:'#B9A2DD', trim:'#F2EAFB' },
-  check:   { body:'#D3E5F7', trim:'#FFFFFF' },
-  track:   { body:'#FFC7A8', trim:'#FFFFFF' }
+  sailor:   { body:'#FFFFFF', skirt:'#7FA3D6', trim:'#EAF1FB', sock:'#FFFFFF', shoe:'#6B5A4C', pants:null },
+  dress:    { body:'#F9B6CB', skirt:'#F9B6CB', trim:'#FFFFFF', sock:'#FFFFFF', shoe:'#E38FAF', pants:null },
+  sweat:    { body:'#B9A2DD', skirt:null,      trim:'#EFE8FA', sock:'#FFFFFF', shoe:'#FFFFFF', pants:'#8AA5C9' },
+  hood:     { body:'#FFD86B', skirt:null,      trim:'#FFF6D9', sock:'#FFFFFF', shoe:'#F2B45E', pants:'#BFD9F2' },
+  overall:  { body:'#FFFFFF', skirt:null,      trim:'#FFFFFF', sock:'#FFFFFF', shoe:'#FFFFFF', pants:'#8FB4DD' },
+  uniform:  { body:'#FFFFFF', skirt:'#6C7BA6', trim:'#EAF0FB', sock:'#FFFFFF', shoe:'#4A4A55', pants:null },
+  cardigan: { body:'#98DCC0', skirt:null,      trim:'#EAFBF3', sock:'#FFFFFF', shoe:'#B99A7E', pants:'#C9C3E8' },
+  pajama:   { body:'#D8C7F0', skirt:null,      trim:'#FFF0F6', sock:'#FFE3EE', shoe:'#F4A8C4', pants:'#D8C7F0' }
 };
 function avValid(key, v){ return (AV_PARTS[key] || []).some(function(o){ return o.k === v; }); }
 function avatarDefaults(id){ return Object.assign({}, AV_FALLBACK, AV_DEFAULT[id] || {}); }
@@ -2001,81 +2012,168 @@ function avatarOf(id){
   Object.keys(out).forEach(function(k){ if (typeof saved[k] === 'string' && avValid(k, saved[k])) out[k] = saved[k]; });
   return out;
 }
-function avHair(style, H){
-  if (style === 'short') return '<path d="M29 39 a21 21 0 0 1 42 0 v1 q-5 5 -10 1 q-5.5 4 -11 0 q-5.5 4 -11 0 q-5 3 -10 -2 z" fill="' + H + '"/>';
-  if (style === 'bangs') return '<path d="M27 41 a23 23 0 0 1 46 0 v5 l-46 0 z" fill="' + H + '"/>';
-  if (style === 'wave') return '<path d="M26 40 a24 24 0 0 1 48 0 v8 q-6 4 -11 -2 q-6 7 -13 1 q-7 6 -13 -1 q-6 5 -11 -3 z" fill="' + H + '"/>';
-  return '<path d="M27 41 a23 23 0 0 1 46 0 v2 q-6 7 -11.5 1 q-5.5 6 -11.5 1 q-6 5 -11.5 -1 q-5.5 6 -11.5 -3 z" fill="' + H + '"/>';
+/* ---------- 몸 ---------- */
+function avShoe(x, c){
+  return '<path d="M' + x + ' 148 q-1 -5 4 -5 h8 q4 0 4 4 v5 q0 3 -3 3 h-10 q-3 0 -3 -3 z" fill="' + c + '"/>'
+    + '<path d="M' + (x + 4) + ' 150 h10" stroke="#FFFFFF" stroke-width="1.3" opacity=".6"/>';
 }
-function avFace(kind){
-  var d = '#3A2E28', m = '#C1736B', s = '';
-  if (kind === 'smile'){
-    s += '<path d="M38 46 q4 -5 8 0" stroke="' + d + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-      +  '<path d="M54 46 q4 -5 8 0" stroke="' + d + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-      +  '<path d="M45 53 q5 6 10 0" stroke="' + m + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
-  } else if (kind === 'wink'){
-    s += '<path d="M38 46 q4 -5 8 0" stroke="' + d + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-      +  '<circle cx="58" cy="45" r="3.6" fill="' + d + '"/>'
-      +  '<path d="M46 53 q4 4 8 0" stroke="' + m + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
-  } else if (kind === 'round'){
-    s += '<circle cx="42" cy="45" r="5.2" fill="' + d + '"/><circle cx="40" cy="43" r="1.8" fill="#fff"/>'
-      +  '<circle cx="58" cy="45" r="5.2" fill="' + d + '"/><circle cx="56" cy="43" r="1.8" fill="#fff"/>'
-      +  '<ellipse cx="50" cy="55" rx="3" ry="2.4" fill="' + m + '"/>';
-  } else if (kind === 'brave'){
-    s += '<path d="M37 45 l9 0" stroke="' + d + '" stroke-width="2.4" stroke-linecap="round"/>'
-      +  '<path d="M54 45 l9 0" stroke="' + d + '" stroke-width="2.4" stroke-linecap="round"/>'
-      +  '<path d="M45 54 l10 0" stroke="' + m + '" stroke-width="2" stroke-linecap="round"/>';
-  } else if (kind === 'cat'){
-    s += '<path d="M37 47 q4.5 -6 9 0" stroke="' + d + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-      +  '<path d="M54 47 q4.5 -6 9 0" stroke="' + d + '" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-      +  '<path d="M46 53 q4 3 4 0 q0 3 4 0" stroke="' + m + '" stroke-width="1.8" fill="none" stroke-linecap="round"/>';
-  } else {
-    s += '<circle cx="42" cy="45" r="4.2" fill="' + d + '"/><circle cx="40.6" cy="43.6" r="1.5" fill="#fff"/>'
-      +  '<circle cx="58" cy="45" r="4.2" fill="' + d + '"/><circle cx="56.6" cy="43.6" r="1.5" fill="#fff"/>'
-      +  '<path d="M46 54 q4 4 8 0" stroke="' + m + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
+function avLegs(av){
+  var o = AV_OUT[av.outfit] || AV_OUT.sailor, s = '';
+  s += '<rect x="47" y="110" width="10" height="36" rx="5" fill="' + av.skin + '"/>';
+  s += '<rect x="63" y="110" width="10" height="36" rx="5" fill="' + av.skin + '"/>';
+  if (o.pants){
+    s += '<rect x="44" y="110" width="15" height="31" rx="6" fill="' + o.pants + '"/>';
+    s += '<rect x="61" y="110" width="15" height="31" rx="6" fill="' + o.pants + '"/>';
   }
-  return s + '<ellipse cx="33" cy="50" rx="4" ry="2.4" fill="#FFB4C2" opacity=".5"/>'
-    + '<ellipse cx="67" cy="50" rx="4" ry="2.4" fill="#FFB4C2" opacity=".5"/>';
-}
-function avAcc(kind){
-  if (kind === 'ribbon') return '<path d="M31 22 l-9 -7 v14 z" fill="#F27BA6"/><path d="M31 22 l9 -7 v14 z" fill="#F27BA6"/><circle cx="31" cy="22" r="3.4" fill="#DD5F8D"/>';
-  if (kind === 'star') return '<path d="M69 15 l2.4 5 5.5 .8 -4 3.9 .9 5.5 -4.8 -2.6 -4.8 2.6 .9 -5.5 -4 -3.9 5.5 -.8z" fill="#FFD166" stroke="#E8B23F" stroke-width="1"/>';
-  if (kind === 'cat') return '<path d="M30 20 l5 -10 6 8 z" fill="#F4B0C8"/><path d="M70 20 l-5 -10 -6 8 z" fill="#F4B0C8"/><path d="M31 23 q19 -9 38 0" stroke="#E58FB0" stroke-width="3" fill="none" stroke-linecap="round"/>';
-  if (kind === 'cap') return '<path d="M27 34 q23 -22 46 0 q-23 -6 -46 0 z" fill="#7FB2E5"/><path d="M24 35 q13 -5 24 1 l-2 4 q-11 -4 -20 0 z" fill="#5E96CC"/>';
-  if (kind === 'glasses') return '<circle cx="42" cy="45" r="7.5" fill="none" stroke="#6B5B4E" stroke-width="2"/><circle cx="58" cy="45" r="7.5" fill="none" stroke="#6B5B4E" stroke-width="2"/><path d="M49.5 45 h1.5" stroke="#6B5B4E" stroke-width="2"/>';
-  return '';
+  s += '<rect x="46" y="135" width="12" height="13" rx="4" fill="' + (o.sock || '#FFFFFF') + '"/>';
+  s += '<rect x="62" y="135" width="12" height="13" rx="4" fill="' + (o.sock || '#FFFFFF') + '"/>';
+  s += avShoe(45, o.shoe || '#8B6B57') + avShoe(61, o.shoe || '#8B6B57');
+  return s;
 }
 function avOutfitDetail(kind, o){
-  if (kind === 'dress') return '<path d="M40 76 q10 9 20 0 l0 6 q-10 7 -20 0 z" fill="' + o.trim + '"/><rect x="37" y="98" width="26" height="4" rx="2" fill="' + o.trim + '" opacity=".75"/>';
-  if (kind === 'tee') return '<path d="M42 76 q8 6 16 0 l0 4 q-8 5 -16 0 z" fill="' + o.trim + '"/><path d="M54 92 l1.6 3.3 3.6.5 -2.6 2.5 .6 3.6 -3.2 -1.7 -3.2 1.7 .6 -3.6 -2.6 -2.5 3.6 -.5z" fill="#FFF1B8"/>';
-  if (kind === 'hood') return '<path d="M35 78 q15 12 30 0" stroke="' + o.trim + '" stroke-width="3" fill="none"/><rect x="42" y="94" width="16" height="12" rx="4" fill="' + o.trim + '" opacity=".85"/><path d="M45 80 v10 M55 80 v10" stroke="#7FC0A4" stroke-width="1.6"/>';
-  if (kind === 'overall') return '<path d="M31 82 q19 -10 38 0 l0 34 h-38 z" fill="#8FB4DD"/><rect x="40" y="70" width="5" height="16" rx="2.5" fill="#8FB4DD"/><rect x="55" y="70" width="5" height="16" rx="2.5" fill="#8FB4DD"/><rect x="44" y="92" width="12" height="9" rx="3" fill="#EAF2FB"/>';
-  if (kind === 'sweat') return '<path d="M42 76 q8 6 16 0 l0 4 q-8 5 -16 0 z" fill="' + o.trim + '"/><rect x="41" y="94" width="18" height="12" rx="5" fill="' + o.trim + '" opacity=".9"/>';
-  if (kind === 'check') return '<path d="M50 76 v40 M30 88 h40 M30 100 h40" stroke="#A9C8E6" stroke-width="1.4"/><path d="M40 76 q10 8 20 0 l0 4 q-10 6 -20 0 z" fill="' + o.trim + '"/>';
-  if (kind === 'track') return '<path d="M50 76 v40" stroke="' + o.trim + '" stroke-width="3"/><path d="M42 76 q8 6 16 0 l0 4 q-8 5 -16 0 z" fill="' + o.trim + '"/>';
+  var T = o.trim;
+  if (kind === 'sailor')
+    return '<path d="M48 84 q12 12 24 0 l-4 10 q-8 7 -16 0 z" fill="' + T + '"/>'
+      + '<path d="M60 98 l-7 -4 v9 z" fill="#E4677F"/><path d="M60 98 l7 -4 v9 z" fill="#E4677F"/><circle cx="60" cy="98" r="2.2" fill="#C94F68"/>'
+      + '<path d="M52 122 l-2 12 M60 122 v12 M68 122 l2 12" stroke="' + T + '" stroke-width="1.4" opacity=".85"/>';
+  if (kind === 'dress')
+    return '<path d="M50 84 q10 8 20 0 l-2 8 q-8 6 -16 0 z" fill="' + T + '"/>'
+      + '<path d="M44 114 h32 l8 22 q-24 7 -48 0 z" fill="none" stroke="' + T + '" stroke-width="2.4"/>'
+      + '<path d="M70 94 q6 4 0 8 q-6 -4 0 -8 z" fill="#F2849E"/><circle cx="60" cy="98" r="1.8" fill="#FFFFFF"/>';
+  if (kind === 'sweat')
+    return '<rect x="53" y="102" width="14" height="10" rx="3" fill="' + T + '"/>'
+      + '<path d="M60 88 l2 4 4.2 .6 -3.1 3 .8 4.2 -3.9 -2.1 -3.9 2.1 .8 -4.2 -3.1 -3 4.2 -.6z" fill="#F7D6E6"/>';
+  if (kind === 'hood')
+    return '<path d="M46 84 q14 10 28 0 q-4 12 -14 12 q-10 0 -14 -12 z" fill="' + T + '"/>'
+      + '<path d="M54 98 v8 M66 98 v8" stroke="' + T + '" stroke-width="1.8"/>'
+      + '<rect x="52" y="106" width="16" height="9" rx="3" fill="' + T + '"/>';
+  if (kind === 'overall')
+    return '<path d="M52 96 h16 v22 h-16 z" fill="#8FB4DD"/>'
+      + '<rect x="50" y="84" width="4" height="14" rx="2" fill="#8FB4DD"/><rect x="66" y="84" width="4" height="14" rx="2" fill="#8FB4DD"/>'
+      + '<circle cx="52" cy="88" r="1.6" fill="#F2D06B"/><circle cx="68" cy="88" r="1.6" fill="#F2D06B"/>'
+      + '<rect x="56" y="104" width="8" height="7" rx="2" fill="#DDEBFA"/>';
+  if (kind === 'uniform')
+    return '<path d="M48 84 h10 v28 h-10 z" fill="#6C7BA6"/><path d="M62 84 h10 v28 h-10 z" fill="#6C7BA6"/>'
+      + '<path d="M56 84 h8 v8 l-4 5 -4 -5z" fill="#EAF0FB"/>'
+      + '<path d="M60 92 l-3 4 3 12 3 -12z" fill="#D96A7A"/>'
+      + '<path d="M52 122 l-2 12 M60 122 v12 M68 122 l2 12" stroke="#EAF0FB" stroke-width="1.6"/>';
+  if (kind === 'cardigan')
+    return '<rect x="53" y="84" width="14" height="30" rx="3" fill="#FFFFFF"/>'
+      + '<circle cx="66" cy="94" r="1.5" fill="#6FAF95"/><circle cx="66" cy="103" r="1.5" fill="#6FAF95"/>'
+      + '<path d="M50 84 q-3 12 -1 30" stroke="' + T + '" stroke-width="2" fill="none"/>';
+  if (kind === 'pajama')
+    return '<path d="M52 84 q8 8 16 0" stroke="' + T + '" stroke-width="2" fill="none"/>'
+      + '<path d="M46 96 h28 M46 105 h28" stroke="' + T + '" stroke-width="1.6" opacity=".9"/>'
+      + '<circle cx="60" cy="100" r="1.6" fill="#FFFFFF"/>';
   return '';
 }
+function avBody(av){
+  var o = AV_OUT[av.outfit] || AV_OUT.sailor, s = '';
+  s += '<rect x="54" y="72" width="12" height="18" rx="5" fill="' + av.skin + '"/>';
+  s += '<rect x="33" y="86" width="10" height="28" rx="5" fill="' + o.body + '" transform="rotate(8 38 100)"/>';
+  s += '<rect x="77" y="86" width="10" height="28" rx="5" fill="' + o.body + '" transform="rotate(-8 82 100)"/>';
+  s += '<path d="M48 84 h24 q6 0 6 7 v22 q0 6 -6 6 h-24 q-6 0 -6 -6 v-22 q0 -7 6 -7 z" fill="' + o.body + '"/>';
+  if (o.skirt) s += '<path d="M44 114 h32 l8 23 q-24 7 -48 0 z" fill="' + o.skirt + '"/>';
+  s += avOutfitDetail(av.outfit, o);
+  s += '<circle cx="34" cy="114" r="5" fill="' + av.skin + '"/><circle cx="86" cy="114" r="5" fill="' + av.skin + '"/>';
+  return s;
+}
+/* ---------- 머리 ---------- */
+function avHairBack(style, H){
+  if (style === 'long') return '<path d="M29 52 q0 -32 31 -32 q31 0 31 32 v46 q0 9 -9 9 h-6 q-2 -18 -5 -24 h-22 q-3 6 -5 24 h-6 q-9 0 -9 -9 z" fill="' + H + '"/>';
+  if (style === 'wavetwin') return '<ellipse cx="23" cy="74" rx="12" ry="16" fill="' + H + '"/><ellipse cx="97" cy="74" rx="12" ry="16" fill="' + H + '"/>'
+    + '<ellipse cx="25" cy="94" rx="9" ry="10" fill="' + H + '"/><ellipse cx="95" cy="94" rx="9" ry="10" fill="' + H + '"/>'
+    + '<circle cx="27" cy="59" r="3.4" fill="#F2849E"/><circle cx="93" cy="59" r="3.4" fill="#F2849E"/>';
+  if (style === 'dango') return '<circle cx="32" cy="26" r="12" fill="' + H + '"/><circle cx="88" cy="26" r="12" fill="' + H + '"/>'
+    + '<circle cx="32" cy="26" r="4" fill="#FFFFFF" opacity=".18"/><circle cx="88" cy="26" r="4" fill="#FFFFFF" opacity=".18"/>';
+  if (style === 'bob') return '<rect x="29" y="24" width="62" height="54" rx="30" fill="' + H + '"/>';
+  if (style === 'pony') return '<path d="M86 44 q18 6 20 26 q1 12 -6 18 q-6 -6 -5 -18 q2 -14 -11 -18 z" fill="' + H + '"/>';
+  return '';
+}
+function avHairFront(style, H){
+  var cap = 'M31 50 q-1 -28 29 -28 q30 0 29 28 q-9 -11 -19 -9 q-10 2 -20 0 q-10 -2 -19 9 z';
+  var hi = '<path d="M45 29 q10 -6 22 -4" stroke="#FFFFFF" stroke-width="3" opacity=".3" fill="none"/>';
+  if (style === 'boy') return '<path d="M30 52 q0 -30 30 -30 q30 0 30 30 q-8 -14 -22 -13 q-8 6 -16 0 q-14 -1 -22 13 z" fill="' + H + '"/>' + hi;
+  if (style === 'sport') return '<path d="M31 48 q-1 -26 29 -26 q30 0 29 26 q-7 -6 -12 -2 q-6 -8 -14 -3 q-9 -5 -15 3 q-9 -3 -17 2 z" fill="' + H + '"/>' + hi;
+  if (style === 'wavetwin') return '<path d="' + cap + '" fill="' + H + '"/>'
+    + '<path d="M33 54 q-6 14 -2 26 q4 -11 9 -15 z" fill="' + H + '"/>'
+    + '<path d="M87 54 q6 14 2 26 q-4 -11 -9 -15 z" fill="' + H + '"/>' + hi;
+  return '<path d="' + cap + '" fill="' + H + '"/>' + hi;
+}
+/* ---------- 얼굴 ---------- */
+function avEyes(kind, EYE){
+  var d = '#3A2E28';
+  function open(cx){
+    return '<ellipse cx="' + cx + '" cy="58" rx="9" ry="10.5" fill="#FFFFFF"/>'
+      + '<circle cx="' + cx + '" cy="59" r="6.4" fill="' + EYE + '"/>'
+      + '<circle cx="' + cx + '" cy="59" r="3.4" fill="#2A211C"/>'
+      + '<circle cx="' + (cx - 2.4) + '" cy="55.4" r="2.3" fill="#FFFFFF"/>'
+      + '<circle cx="' + (cx + 2.6) + '" cy="61.6" r="1.2" fill="#FFFFFF" opacity=".9"/>'
+      + '<path d="M' + (cx - 9.6) + ' 51 q9 -5 19.2 0" stroke="' + d + '" stroke-width="2.4" fill="none"/>'
+      + '<path d="M' + (cx - 9.6) + ' 50.4 q-2.4 -1.4 -4 -3.4" stroke="' + d + '" stroke-width="2" fill="none"/>';
+  }
+  function closed(cx){ return '<path d="M' + (cx - 6) + ' 58 q6 -6.4 12 0" stroke="' + d + '" stroke-width="2.6" fill="none"/>'; }
+  if (kind === 'smile') return closed(48) + closed(72);
+  if (kind === 'wink') return open(48) + closed(72);
+  if (kind === 'cat') return closed(48) + closed(72);
+  if (kind === 'sleepy') return '<path d="M40 58 h16" stroke="' + d + '" stroke-width="2.6" stroke-linecap="round"/>'
+    + '<path d="M64 58 h16" stroke="' + d + '" stroke-width="2.6" stroke-linecap="round"/>';
+  if (kind === 'brave'){
+    return '<ellipse cx="48" cy="59" rx="8.4" ry="9.6" fill="#FFFFFF"/><circle cx="48" cy="60" r="5.6" fill="' + EYE + '"/>'
+      + '<circle cx="48" cy="60" r="3" fill="#2A211C"/><circle cx="45.8" cy="56.6" r="2" fill="#FFFFFF"/>'
+      + '<path d="M39 53.6 h18" stroke="' + d + '" stroke-width="2.6"/>'
+      + '<ellipse cx="72" cy="59" rx="8.4" ry="9.6" fill="#FFFFFF"/><circle cx="72" cy="60" r="5.6" fill="' + EYE + '"/>'
+      + '<circle cx="72" cy="60" r="3" fill="#2A211C"/><circle cx="69.8" cy="56.6" r="2" fill="#FFFFFF"/>'
+      + '<path d="M63 53.6 h18" stroke="' + d + '" stroke-width="2.6"/>';
+  }
+  return open(48) + open(72);
+}
+function avMouth(kind){
+  if (kind === 'cat') return '<path d="M54.5 69 q2.8 3.4 5.5 0 q2.8 3.4 5.5 0" stroke="#C1736B" stroke-width="1.8" fill="none"/>';
+  if (kind === 'smile') return '<path d="M55 68.5 q5 5.4 10 0" stroke="#C1736B" stroke-width="1.9" fill="none"/>';
+  if (kind === 'brave') return '<path d="M55 70 h10" stroke="#C1736B" stroke-width="1.9" stroke-linecap="round"/>';
+  if (kind === 'sleepy') return '<ellipse cx="60" cy="70.5" rx="3" ry="2.2" fill="#C1736B"/>';
+  return '<path d="M56 68.6 q4 4.2 8 0" stroke="#C1736B" stroke-width="1.9" fill="none"/>';
+}
+function avFace(kind, EYE){
+  return avEyes(kind, EYE) + avMouth(kind)
+    + '<ellipse cx="37" cy="67" rx="6.4" ry="3.6" fill="#FFB4C2" opacity=".5"/>'
+    + '<ellipse cx="83" cy="67" rx="6.4" ry="3.6" fill="#FFB4C2" opacity=".5"/>'
+    + '<path d="M60 64 q1.7 1.5 0 2.8" stroke="#D9A08E" stroke-width="1.2" fill="none"/>';
+}
+/* ---------- 소품 ---------- */
+function avAcc(kind){
+  if (kind === 'fox') return '<path d="M33 31 l4 -21 13 13 z" fill="#F7C9A6"/><path d="M87 31 l-4 -21 -13 13 z" fill="#F7C9A6"/>'
+    + '<path d="M37 28 l2 -12 7 8 z" fill="#F3A9A0"/><path d="M83 28 l-2 -12 -7 8 z" fill="#F3A9A0"/>';
+  if (kind === 'rabbit') return '<ellipse cx="42" cy="13" rx="7" ry="17" fill="#FBE4EC"/><ellipse cx="78" cy="13" rx="7" ry="17" fill="#FBE4EC"/>'
+    + '<ellipse cx="42" cy="14" rx="3.4" ry="11" fill="#F7C9D6"/><ellipse cx="78" cy="14" rx="3.4" ry="11" fill="#F7C9D6"/>';
+  if (kind === 'ribbon') return '<path d="M43 26 l-14 -9 v18 z" fill="#F2849E"/><path d="M43 26 l14 -9 v18 z" fill="#F2849E"/><circle cx="43" cy="26" r="4.2" fill="#DE6A87"/>';
+  if (kind === 'glasses') return '<circle cx="48" cy="58" r="11" fill="none" stroke="#6B5B4E" stroke-width="2.2"/>'
+    + '<circle cx="72" cy="58" r="11" fill="none" stroke="#6B5B4E" stroke-width="2.2"/>'
+    + '<path d="M59 58 h2" stroke="#6B5B4E" stroke-width="2.2"/>'
+    + '<path d="M37 56 l-6 -3 M83 56 l6 -3" stroke="#6B5B4E" stroke-width="2"/>';
+  if (kind === 'star') return '<path d="M85 26 l2.6 5.4 5.9 .8 -4.3 4.2 1 5.9 -5.2 -2.8 -5.2 2.8 1 -5.9 -4.3 -4.2 5.9 -.8z" fill="#FFD166"/>';
+  if (kind === 'cap') return '<path d="M31 36 q29 -26 58 0 q-29 -8 -58 0 z" fill="#7FB2E5"/>'
+    + '<path d="M27 37 q16 -6 30 1 l-2 5 q-14 -5 -26 0 z" fill="#5E96CC"/>';
+  return '';
+}
+/* ---------- 조립 (2~2.5등신 SD 전신) ---------- */
 function avatarSvg(idOrAv){
   var av = (idOrAv && typeof idOrAv === 'object') ? idOrAv : avatarOf(idOrAv);
-  var H = av.hairColor, SK = av.skin, o = AV_OUT[av.outfit] || AV_OUT.tee;
-  var s = '<svg viewBox="0 0 100 116" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
-  s += '<rect x="45" y="58" width="10" height="18" rx="5" fill="' + SK + '"/>';
-  s += '<path d="M28 116 Q28 76 50 76 Q72 76 72 116 Z" fill="' + o.body + '"/>';
-  s += '<rect x="20" y="82" width="10" height="26" rx="5" fill="' + o.body + '"/>';
-  s += '<rect x="70" y="82" width="10" height="26" rx="5" fill="' + o.body + '"/>';
-  s += avOutfitDetail(av.outfit, o);
-  if (av.hair === 'long') s += '<rect x="24" y="24" width="52" height="60" rx="26" fill="' + H + '"/>';
-  if (av.hair === 'twin') s += '<circle cx="21" cy="54" r="11" fill="' + H + '"/><circle cx="79" cy="54" r="11" fill="' + H + '"/>'
-    + '<circle cx="28" cy="48" r="3" fill="#F27BA6"/><circle cx="72" cy="48" r="3" fill="#F27BA6"/>';
-  if (av.hair === 'wave') s += '<rect x="24" y="26" width="52" height="46" rx="24" fill="' + H + '"/>';
-  s += '<circle cx="28" cy="46" r="4.5" fill="' + SK + '"/><circle cx="72" cy="46" r="4.5" fill="' + SK + '"/>';
-  s += '<ellipse cx="50" cy="42" rx="22" ry="22" fill="' + SK + '"/>';
-  s += avHair(av.hair, H);
-  s += avFace(av.face);
+  var H = av.hairColor, SK = av.skin, EYE = av.eyeColor || '#7B4B2A';
+  var s = '<svg viewBox="0 0 120 172" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
+  s += '<ellipse cx="60" cy="167" rx="27" ry="5" fill="#7A6A5A" opacity=".14"/>';
+  s += '<g stroke="#5B4436" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">';
+  s += avLegs(av);
+  s += avHairBack(av.hair, H);
+  s += avBody(av);
+  s += '<ellipse cx="60" cy="52" rx="30" ry="29" fill="' + SK + '"/>';
+  s += '<circle cx="30" cy="56" r="5" fill="' + SK + '"/><circle cx="90" cy="56" r="5" fill="' + SK + '"/>';
+  s += avHairFront(av.hair, H);
+  s += avFace(av.face, EYE);
   s += avAcc(av.acc);
-  return s + '</svg>';
+  return s + '</g></svg>';
 }
-
 /* ============================================================
    12-2. 렌더링 — 윤·붐 프로필 카드 + 선택한 아이 상세
    ============================================================ */
@@ -2822,38 +2920,48 @@ var avatarDraft = null;          // { kid, av }
 function openAvatarSheet(id){
   if (!id) return;
   avatarDraft = { kid: id, av: Object.assign({}, avatarOf(id)) };
+  avatarTab = 'hair';
   setText('#sheetTitle', ((FAMILY[id] || {}).name || '') + ' 캐릭터 꾸미기');
   renderAvatarSheet();
   var sh = $('#sheet'); if (sh) sh.hidden = false;
 }
+var avatarTab = 'hair';
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
-  var rows = [
-    ['hair', '✂️ 헤어스타일', AV_PARTS.hair],
-    ['hairColor', '🎨 머리색', AV_PARTS.hairColor, true],
-    ['face', '😊 표정', AV_PARTS.face],
-    ['skin', '🧴 피부톤', AV_PARTS.skin, true],
-    ['outfit', '👚 옷', AV_PARTS.outfit],
-    ['acc', '🎀 소품', AV_PARTS.acc]
-  ];
+  var tabs = [ ['hair', '💇 헤어'], ['face', '👀 눈·표정'], ['outfit', '👗 옷'], ['acc', '🎀 소품'] ];
+  function chips(key, list, sw){
+    return '<div class="av-opts">' + list.map(function(o){
+      var on = av[key] === o.k;
+      return sw
+        ? '<button class="avsw' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="' + key + '" data-v="' + o.k + '" style="background:' + o.k + '" aria-label="' + o.n + '"></button>'
+        : '<button class="avopt' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="' + key + '" data-v="' + o.k + '">' + o.n + '</button>';
+    }).join('') + '</div>';
+  }
+  var pane = '';
+  if (avatarTab === 'face'){
+    pane = '<div class="av-sec"><div class="av-lab">표정</div>' + chips('face', AV_PARTS.face) + '</div>'
+      + '<div class="av-sec"><div class="av-lab">눈동자 색</div>' + chips('eyeColor', AV_PARTS.eyeColor, true) + '</div>'
+      + '<div class="av-sec"><div class="av-lab">피부톤</div>' + chips('skin', AV_PARTS.skin, true) + '</div>';
+  } else if (avatarTab === 'outfit'){
+    pane = '<div class="av-sec"><div class="av-lab">옷 (신발·양말도 함께 바뀌어요)</div>' + chips('outfit', AV_PARTS.outfit) + '</div>';
+  } else if (avatarTab === 'acc'){
+    pane = '<div class="av-sec"><div class="av-lab">머리에 올릴 소품</div>' + chips('acc', AV_PARTS.acc) + '</div>';
+  } else {
+    pane = '<div class="av-sec"><div class="av-lab">헤어스타일</div>' + chips('hair', AV_PARTS.hair) + '</div>'
+      + '<div class="av-sec"><div class="av-lab">머리색</div>' + chips('hairColor', AV_PARTS.hairColor, true) + '</div>';
+  }
   body.innerHTML =
       '<div class="av-top">'
     +   '<div class="av-prev">' + avatarSvg(av) + '</div>'
     +   '<div class="av-txt"><b>' + esc((FAMILY[kid] || {}).name || '') + ' 캐릭터</b>'
-    +     '<small>마음대로 골라서 꾸며 보세요</small></div>'
+    +     '<small>마음대로 골라서 꾸며 보세요</small>'
+    +     '<span class="av-tip">고른 모습이 바로 보여요</span></div>'
     + '</div>'
-    + rows.map(function(r){
-        var key = r[0], lab = r[1], opts = r[2], sw = !!r[3];
-        return '<div class="av-sec"><div class="av-lab">' + lab + '</div><div class="av-opts">'
-          + opts.map(function(o){
-              var on = av[key] === o.k;
-              return sw
-                ? '<button class="avsw' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="' + key + '" data-v="' + o.k + '" style="background:' + o.k + '" aria-label="' + o.n + '"></button>'
-                : '<button class="avopt' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="' + key + '" data-v="' + o.k + '">' + o.n + '</button>';
-            }).join('')
-          + '</div></div>';
-      }).join('')
+    + '<div class="av-tabs">' + tabs.map(function(t){
+        return '<button class="avtab' + (avatarTab === t[0] ? ' on' : '') + '" type="button" data-act="av-tab" data-tab="' + t[0] + '">' + t[1] + '</button>';
+      }).join('') + '</div>'
+    + pane
     + '<div class="av-foot">'
     +   '<button class="av-save" type="button" data-act="av-save">저장</button>'
     +   '<button class="av-cancel" type="button" data-act="sheet-close">취소</button>'
@@ -2883,6 +2991,7 @@ document.addEventListener('click', function(ev){
     if (avatarDraft){ avatarDraft.av[el.dataset.k] = el.dataset.v; renderAvatarSheet(); }
     return;
   }
+  if (act === 'av-tab'){ avatarTab = el.dataset.tab; renderAvatarSheet(); return; }
   if (act === 'av-save'){
     if (!avatarDraft) return;
     var avKid = avatarDraft.kid, avNew = Object.assign({}, avatarDraft.av);
