@@ -563,12 +563,12 @@ button{font:inherit;color:inherit}
   .clock{margin:0 auto;padding:4px 14px}
   .ck-t{font-size:15px}
   .wx{justify-self:auto;padding:4px 9px}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);align-items:start;
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);align-items:stretch;
     grid-template-areas:
-      "k1 k1 k1 k1 k2 k2 k2 k2 cl cl cl cl"
+      "k1 k1 k1 k1 k1 k1 k2 k2 k2 k2 k2 k2"
+      "cl cl cl cl rw rw rw rw wk wk wk wk"
       "kd kd kd kd kd kd kd kd kd kd kd kd"
-      "rw rw rw rw rw rw wk wk wk wk wk wk"
-      "ca ca ca ca ca ca wt wt wt wt wt wt"
+      "ca ca ca ca ca ca ca ca wt wt wt wt"
       "fd fd fd fd fd fd fd fd fd fd fd fd";}
   #kidA{grid-area:k1} #kidB{grid-area:k2} #clean{grid-area:cl}
   #kidDetail{grid-area:kd}
@@ -608,17 +608,17 @@ button{font:inherit;color:inherit}
   .st-plus{font-size:9px;padding:0 8px}
   /* 프로필·상세·달력·꾸미기 — 좁은 높이에 맞춰 축소 */
   .kids2{display:contents}
-  .prof{padding:6px 7px 5px}
-  .prof .prof-top{gap:5px}
-  .prof-ava{width:38px;height:38px;flex-basis:38px;border-radius:12px}
-  .prof-ava svg{width:27px;height:37px}
-  .prof-name{font-size:12px;gap:3px}
-  .prof-sub{font-size:8px;gap:3px;margin-top:1px}
-  .prof .kdots{margin-top:4px;gap:2px}
-  .prof .kdot{height:12px;border-radius:4px;font-size:7px}
-  .prof-foot{margin-top:4px}
-  .prof-meta{font-size:7.5px}
-  .prof-edit{font-size:7.5px;padding:1px 5px}
+  .prof{padding:7px 11px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .prof .prof-top{flex:1 1 auto;gap:9px}
+  .prof-ava{width:50px;height:62px;flex-basis:50px;border-radius:14px}
+  .prof-ava svg{width:42px;height:58px}
+  .prof-name{font-size:13px;gap:4px}
+  .prof-sub{font-size:9px;gap:4px;margin-top:2px}
+  .prof .kdots{flex:1 1 100%;margin-top:2px;gap:3px}
+  .prof .kdot{height:14px;border-radius:5px;font-size:7.5px}
+  .prof-foot{flex:0 0 auto;margin:0}
+  .prof-meta{font-size:8px}
+  .prof-edit{font-size:8.5px;padding:2px 8px;margin-left:0}
   .kd-top{margin-bottom:5px}
   .kd-title{font-size:11px}
   .kd-fold{padding:2px 7px;font-size:8px}
