@@ -1601,7 +1601,7 @@ function renderClean(){
       + '<button class="cj" type="button" data-act="clean-jump" data-d="' + esc(e.date) + '" title="' + esc(e.date) + ' 기록으로 이동">'
       +   esc(cleanMd(e.date)) + ' ' + esc(nm) + '</button>'
       + '<button class="cd" type="button" data-act="clean-del" data-id="' + esc(e.id) + '" data-d="' + esc(e.date) + '" data-n="' + esc(nm) + '"'
-      +   ' aria-label="' + esc(cleanMd(e.date) + ' ' + nm + ' 기록 삭제">×</button>'
+      +   ' aria-label="' + esc(cleanMd(e.date) + ' ' + nm + ' 기록 삭제') + '">×</button>'
       + '</span>';
   }).join('');
   var hint = isToday
