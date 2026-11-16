@@ -426,11 +426,11 @@ button{font:inherit;color:inherit}
   .grid{display:grid;grid-template-columns:repeat(12,1fr);align-items:start;
     grid-template-areas:
       "k1 k1 k1 k1 k2 k2 k2 k2 cl cl cl cl"
-      "mb mb mb mb mb mb wt wt wt rw rw rw"
-      "wk wk wk wk ca ca ca tm tm tm ms ms";}
+      "rw rw rw rw rw rw wk wk wk wk wk wk"
+      "ca ca ca ca ca ca wt wt wt wt wt wt";}
   #kidA{grid-area:k1} #kidB{grid-area:k2} #clean{grid-area:cl}
-  #mail{grid-area:mb} #reward{grid-area:rw} #want{grid-area:wt}
-  #cal{grid-area:ca} #week{grid-area:wk} #timer{grid-area:tm} #mission{grid-area:ms}
+  #reward{grid-area:rw} #want{grid-area:wt}
+  #cal{grid-area:ca} #week{grid-area:wk}
   .kid-name{font-size:13.5px}
   .rt-add{margin-top:3px}
 }
@@ -645,11 +645,8 @@ button.st{padding:0}
     <section class="card" id="clean" aria-label="치즈집 청소"></section>
     <section class="card" id="reward" aria-label="한 달 보상 도장판"></section>
     <section class="card" id="week" aria-label="이번 주 밀림 체크"></section>
-    <section class="card" id="mail" aria-label="가족 우편함"></section>
     <section class="card" id="want" aria-label="이거 사주세요"></section>
     <section class="card" id="cal" aria-label="이번 달 달력과 오늘 일정"></section>
-    <section class="card" id="timer" aria-label="공부 타이머"></section>
-    <section class="card" id="mission" aria-label="오늘의 가족 미션"></section>
   </main>
   <p class="foot">
     <span id="footStore"></span>
@@ -1654,8 +1651,7 @@ function renderChips(){
   var commuteTxt = c ? (c.k === 'now' ? (c.text || '🚗 지금 퇴근 출발!') : (c.icon || '🕐') + ' ' + esc((commuteWho && commuteWho.name) || '') + ' 퇴근 ' + esc(c.label || '')) : '';
   el.innerHTML =
       '<button class="cchip" type="button" data-act="goto" data-t="want">🛒 이거 사주세요 <b>(' + pendingWants() + ')</b></button>'
-    + '<button class="cchip" type="button" data-act="goto" data-t="mail" data-f="foodInput">🍽️ 오늘 먹고 싶은 음식</button>'
-    + (commuteTxt ? '<button class="cchip" type="button" data-act="goto" data-t="mail">' + commuteTxt + '</button>' : '')
+    + (commuteTxt ? '<button class="cchip" type="button" data-act="status-open">' + commuteTxt + '</button>' : '')
     + (both ? '<span class="cchip hf">🙌 온 가족 하이파이브!</span>' : '');
 }
 
@@ -1902,55 +1898,6 @@ function renderWeek(){
 }
 
 /* ============================================================
-   16. 렌더링 — 가족 우편함
-   ============================================================ */
-function senderName(id){
-  if (FAMILY[id]) return FAMILY[id].name;
-  if (id === 'system') return CFG.systemLabel;
-  return id || '';
-}
-function renderMail(){
-  var el = $('#mail'); if (!el || !state || !prefs) return;
-  var fromBtns = MEMBERS.map(function(id){
-    return '<button class="chip' + (prefs.from === id ? ' on' : '') + '" type="button" data-act="mail-from" data-f="' + id + '">' + esc(FAMILY[id].name) + '</button>';
-  }).join('');
-  var toBtns = TO_IDS.map(function(id){
-    return '<button class="chip' + (prefs.to === id ? ' on' : '') + '" type="button" data-act="mail-to" data-t="' + id + '">' + esc(TO_LABEL[id] || id) + '</button>';
-  }).join('');
-  var quick = CFG.quickMsgs.map(function(q){
-    return '<button class="qbtn" type="button" data-act="quick" data-q="' + esc(q) + '">' + esc(q) + '</button>';
-  }).join('');
-  var commute = CFG.commutes.map(function(c){
-    return '<button class="cbtn2' + (state.commute && state.commute.k === c.k ? ' on' : '') + '" type="button" data-act="commute" data-k="' + c.k + '">'
-      + c.icon + ' ' + esc(c.label) + '</button>';
-  }).join('');
-  var foodTags = CFG.foods.map(function(f){
-    var v = state.foods[safeKey(f)] || 0;
-    return '<button class="tag" type="button" data-act="food" data-food="' + esc(f) + '">' + esc(f) + (v ? ' <span class="v">' + v + '</span>' : '') + '</button>';
-  }).join('');
-  var log = state.mail.slice().sort(function(a,b){ return tsNum(a.ts) - tsNum(b.ts); }).slice(-24).reverse().map(function(m){
-    var from = senderName(m.from), to = TO_LABEL[m.to] || m.to, t = new Date(tsNum(m.ts) || Date.now());
-    return '<div class="mm"><span class="mfrom">' + esc(from) + '</span><span class="arw">→</span>'
-      + '<span class="mto">' + esc(to) + '</span><span class="mtx">' + esc(m.text) + '</span>'
-      + '<span class="mts">' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + '</span></div>';
-  }).join('');
-
-  el.innerHTML =
-      '<div class="h2">💌 가족 우편함 <small>' + state.mail.length + '통</small></div>'
-    + '<div class="mrow"><span class="lab">누가</span>' + fromBtns + '</div>'
-    + '<div class="mrow"><span class="lab">누구에게</span>' + toBtns + '</div>'
-    + '<div class="qgrid">' + quick + '</div>'
-    + '<div class="crow"><span class="lab">🚗 퇴근</span>' + commute
-    +   '<button class="cbtn2" type="button" data-act="status-open" data-m="' + ((CFG.adults && CFG.adults[0]) || 'dad') + '">⏰ 직접</button></div>'
-    + '<div class="crow"><span class="lab">🍽 먹고 싶은</span>' + foodTags
-    +   '<input class="minp" id="foodInput" placeholder="직접 입력" aria-label="먹고 싶은 음식 직접 입력">'
-    +   '<button class="cbtag" type="button" data-act="food-custom" style="border:1px solid #D8EADD;background:#fff;border-radius:999px;height:var(--chip-h);padding:0 9px;font-size:10.5px;font-weight:900;color:#7FA98B;cursor:pointer">＋</button></div>'
-    + '<div class="send-row"><input id="mailInput" placeholder="' + esc(FAMILY[prefs.from] ? FAMILY[prefs.from].name : '') + ' → ' + esc(TO_LABEL[prefs.to] || '') + ' 메시지">'
-    +   '<button class="sbtn" type="button" data-act="mail-send">보내기</button></div>'
-    + '<div class="mail-log" id="mailLog">' + (log || '<div class="mempty">아직 주고받은 메시지가 없어요</div>') + '</div>';
-}
-
-/* ============================================================
    17. 렌더링 — 이거 사주세요
    ============================================================ */
 function renderWant(){
@@ -2066,54 +2013,16 @@ function renderCal(){
     +   '<div class="sadd"><input data-addsched data-d="' + esc(sel) + '" placeholder="일정·준비물 추가">'
     +   '<button class="addb" type="button" style="width:26px;height:26px;font-size:12px" data-act="sched-add" data-d="' + esc(sel) + '">＋</button></div></div>';
 }
-function renderMission(){
-  var el = $('#mission'); if (!el || !state) return;
-  var mi = CFG.missions[state.mission.idx] || CFG.missions[0] || { emoji:'🎯', text:'오늘의 미션' };
-  el.innerHTML =
-      '<div class="h2">🎯 오늘의 가족 미션 <small>' + (state.mission.done ? '완료 🙌' : '랜덤') + '</small></div>'
-    + '<div class="mbox' + (state.mission.done ? ' done' : '') + '">'
-    +   '<div class="mi-top"><span class="mi-e">' + mi.emoji + '</span>'
-    +     '<div class="mi-t">' + esc(mi.text) + '</div></div>'
-    +   '<div class="mi-btns">'
-    +     '<button class="btn ' + (state.mission.done ? '' : 'primary') + '" type="button" data-act="mission-done">' + (state.mission.done ? '✓ 다 같이 했어요' : '다 같이 했어요') + '</button>'
-    +     '<button class="btn ghost" type="button" data-act="mission-refresh">🎲 다른 미션</button>'
-    +   '</div></div>';
-}
-function fmt(sec){ sec = Math.max(0, Math.round(sec)); return pad2(Math.floor(sec/60)) + ':' + pad2(sec % 60); }
-function renderTimer(){
-  var el = $('#timer'); if (!el || !state) return;
-  var t = state.timer, a = state.alarm;
-  var presets = [10,20,30].map(function(n){
-    return '<button class="tchip' + (t.minutes === n ? ' on' : '') + '" type="button" data-act="preset" data-min="' + n + '">' + n + '분</button>';
-  }).join('');
-  el.innerHTML =
-      '<div class="h2">⏱ 공부 타이머 <small>태블릿 끄는 알람</small></div>'
-    + '<div class="chips2">' + presets
-    +   '<input class="tin" id="customMin" type="number" min="1" max="180" placeholder="직접">'
-    +   '<button class="btn sm" type="button" data-act="custom">설정</button></div>'
-    + '<div class="tface"><span class="ttime" id="timerTime">' + fmt(t.remaining) + '</span>'
-    +   '<span class="tsub" id="timerSub">' + (t.running ? t.label + '분 집중 중' : t.label + '분 준비') + '</span></div>'
-    + '<div class="tbtns">'
-    +   '<button class="btn primary" type="button" data-act="timer-toggle">' + (t.running ? '⏸ 멈추기' : '▶ 시작') + '</button>'
-    +   '<button class="btn" type="button" data-act="timer-reset">↺ 초기화</button></div>'
-    + '<div class="alarm"><label><input type="checkbox" id="alarmOn"' + (a.on ? ' checked' : '') + '> 🔔 끄는 알람</label>'
-    +   '<label><input type="checkbox" id="alarmSound"' + (a.sound ? ' checked' : '') + '> 소리</label>'
-    +   '<input type="time" id="alarmTime" value="' + esc(a.time || '21:00') + '"></div>';
-}
-function updateTimerFace(){
-  var el = $('#timerTime'); if (el) el.textContent = fmt(state.timer.remaining);
-  var sb = $('#timerSub'); if (sb) sb.textContent = state.timer.running ? state.timer.label + '분 집중 중' : state.timer.label + '분 준비';
-}
 function renderAll(){
   if (!state) return;
   renderClock(); renderWeather(); setSync(syncKind);
   renderKids(); renderClean(); renderReward(); renderWeek();
-  renderMail(); renderWant(); renderCal(); renderMission(); renderTimer();
+  renderWant(); renderCal();
   setText('#appTitle', CFG.appTitle);
   var fs = $('#footStore');
   if (fs) fs.textContent = DB.isRemote()
-    ? '체크·메시지·요청이 가족 기기와 실시간으로 맞춰져요'
-    : '체크·메시지·요청은 이 기기에만 저장돼요 · DB를 연결하면 가족과 함께 써요';
+    ? '체크·일정·요청이 가족 기기와 실시간으로 맞춰져요'
+    : '체크·일정·요청은 이 기기에만 저장돼요 · DB를 연결하면 가족과 함께 써요';
 }
 
 /* ============================================================
@@ -2183,7 +2092,7 @@ function setCommute(k, customLabel){
     s.commute = { k: k, icon: icon, label: label, at: hhmm() };
     pushMailIn(s, (CFG.adults && CFG.adults[0]) || 'dad', 'family', text, 'commute');
   });
-  renderChips(); renderMail();
+  renderChips();
   toast(k === 'now' ? '🚗 퇴근 소식을 알렸어요' : ('🕐 ' + label + ' 퇴근 예정을 알렸어요'), 2600);
 }
 function afterRoutine(){
@@ -2198,7 +2107,6 @@ function checkHighFive(){
       });
       confetti(26); beep(2);
       toast('🙌 ' + FAMILY[id].name + ' 오늘 루틴 완료! 하이파이브', 2800);
-      renderMail();
     }
   });
 }
@@ -2211,7 +2119,7 @@ function openCommuteSheet(){
   var body = $('#sheetBody');
   if (body){
     body.innerHTML =
-        '<div class="sg-t">누르면 가족 우편함으로 바로 알려요</div>'
+        '<div class="sg-t">누르면 가족에게 바로 알려요</div>'
       + '<div class="sg-list">' + btns + '</div>'
       + '<div class="sg-t">몇 시에 퇴근하는지 직접 입력</div>'
       + '<div class="sheet-row"><input type="time" id="commuteCustom" aria-label="퇴근 시간 직접 입력">'
@@ -2317,24 +2225,7 @@ document.addEventListener('click', function(ev){
     return;
   }
 
-  /* 우편함 */
-  if (act === 'mail-from'){ prefs.from = el.dataset.f; savePrefs(); renderMail(); return; }
-  if (act === 'mail-to'){ prefs.to = el.dataset.t; savePrefs(); renderMail(); return; }
-  if (act === 'quick'){
-    mutate(function(s){ pushMailIn(s, prefs.from, prefs.to, el.dataset.q, 'quick'); });
-    renderMail();
-    toast('💌 ' + senderName(prefs.from) + ' → ' + (TO_LABEL[prefs.to] || '') + ' · ' + el.dataset.q);
-    return;
-  }
-  if (act === 'mail-send'){
-    var inpM = $('#mailInput');
-    var vM = ((inpM && inpM.value) || '').trim();
-    if (!vM){ if (inpM) inpM.focus(); return; }
-    mutate(function(s){ pushMailIn(s, prefs.from, prefs.to, vM, 'text'); });
-    renderMail();
-    toast('💌 ' + senderName(prefs.from) + ' → ' + (TO_LABEL[prefs.to] || '') + ' 보냈어요');
-    return;
-  }
+  /* 퇴근 */
   if (act === 'commute'){ setCommute(el.dataset.k); closeCommuteSheet(); return; }
   if (act === 'commute-custom'){
     var inpC2 = $('#commuteCustom');
@@ -2346,31 +2237,6 @@ document.addEventListener('click', function(ev){
     closeCommuteSheet();
     return;
   }
-  if (act === 'food'){
-    var f = el.dataset.food;
-    mutate(function(s){
-      var key = safeKey(f);
-      s.foods[key] = (s.foods[key] || 0) + 1;
-      pushMailIn(s, prefs.from, prefs.to, '🍽 오늘 먹고 싶은 음식 · ' + f, 'food');
-    });
-    renderMail();
-    toast('🍽 ' + f + ' 한 표! 우편함에 알렸어요');
-    return;
-  }
-  if (act === 'food-custom'){
-    var inpF = $('#foodInput');
-    var vF = ((inpF && inpF.value) || '').trim();
-    if (!vF){ if (inpF) inpF.focus(); return; }
-    mutate(function(s){
-      var key = safeKey(vF);
-      s.foods[key] = (s.foods[key] || 0) + 1;
-      pushMailIn(s, prefs.from, prefs.to, '🍽 오늘 먹고 싶은 음식 · ' + vF, 'food');
-    });
-    renderMail();
-    toast('🍽 ' + vF + ' 한 표! 우편함에 알렸어요');
-    return;
-  }
-
   /* 이거 사주세요 */
   if (act === 'want-who'){ prefs.wantWho = el.dataset.w; savePrefs(); renderWant(); return; }
   if (act === 'want-add'){
@@ -2485,61 +2351,6 @@ document.addEventListener('click', function(ev){
     return;
   }
 
-  /* 미션 */
-  if (act === 'mission-refresh'){
-    var idx = state.mission.idx;
-    while (CFG.missions.length > 1 && idx === state.mission.idx) idx = randInt(CFG.missions.length);
-    mutate(function(s){ s.mission = { idx: idx, done: false, date: todayKey() }; });
-    renderMission();
-    toast('🎲 새로운 가족 미션!');
-    return;
-  }
-  if (act === 'mission-done'){
-    mutate(function(s){ s.mission.done = !s.mission.done; });
-    renderMission();
-    if (state.mission.done){ confetti(24); beep(2); toast('🎯 오늘의 가족 미션 완료!'); }
-    return;
-  }
-
-  /* 타이머 */
-  if (act === 'preset'){
-    var nPreset = parseInt(el.dataset.min, 10);
-    mutate(function(s){ s.timer = { minutes: nPreset, remaining: nPreset*60, running:false, endAt:null, label:nPreset }; });
-    renderTimer();
-    return;
-  }
-  if (act === 'custom'){
-    var vCust = parseInt(($('#customMin') || {}).value, 10);
-    if (!vCust || vCust <= 0){ toast('분을 숫자로 적어 주세요'); return; }
-    var nCust = clamp(vCust, 1, 180);
-    mutate(function(s){ s.timer = { minutes: nCust, remaining: nCust*60, running:false, endAt:null, label:nCust }; });
-    renderTimer();
-    toast(nCust + '분으로 맞췄어요');
-    return;
-  }
-  if (act === 'timer-toggle'){
-    mutate(function(s){
-      var t = s.timer;
-      if (t.running){
-        t.remaining = Math.max(0, (t.endAt - Date.now())/1000);
-        t.running = false; t.endAt = null;
-      } else {
-        if (t.remaining <= 0) t.remaining = t.minutes*60;
-        t.running = true; t.endAt = Date.now() + t.remaining*1000;
-      }
-    });
-    if (state.timer.running){ askNotify(); if (state.alarm.sound) beep(1); }
-    renderTimer();
-    return;
-  }
-  if (act === 'timer-reset'){
-    mutate(function(s){
-      s.timer.running = false; s.timer.endAt = null; s.timer.remaining = s.timer.minutes*60;
-    });
-    renderTimer();
-    return;
-  }
-
   /* 퇴근 시트 · 바로가기 · 백업/잠금 */
   if (act === 'status-open'){ openCommuteSheet(); return; }
   if (act === 'sheet-close'){ closeCommuteSheet(); return; }
@@ -2561,10 +2372,7 @@ document.addEventListener('keydown', function(ev){
   if (ev.key !== 'Enter') return;
   var t = ev.target;
   if (!t || !t.getAttribute) return;
-  if (t.id === 'mailInput'){ var b = $('[data-act="mail-send"]'); if (b) b.click(); }
-  else if (t.id === 'foodInput'){ var b2 = $('[data-act="food-custom"]'); if (b2) b2.click(); }
-  else if (t.id === 'commuteCustom'){ var b3 = $('[data-act="commute-custom"]'); if (b3) b3.click(); }
-  else if (t.id === 'customMin'){ var b4 = $('[data-act="custom"]'); if (b4) b4.click(); }
+  if (t.id === 'commuteCustom'){ var b3 = $('[data-act="commute-custom"]'); if (b3) b3.click(); }
   else if (t.id === 'wantItem' || t.id === 'wantMemo'){ var b5 = $('[data-act="want-add"]'); if (b5) b5.click(); }
   else if (t.getAttribute('data-addrt')){
     var b6 = $('[data-act="rt-add"][data-m="' + t.getAttribute('data-addrt') + '"][data-tab="' + t.getAttribute('data-tab') + '"]');
@@ -2600,19 +2408,6 @@ document.addEventListener('change', function(ev){
   if (t.id === 'cleanDate'){
     cleanSetDate(t.value);          // 날짜 선택기·직접 입력 모두 같은 경로로
     return;
-  }
-  if (t.id === 'alarmOn'){
-    mutate(function(s){ s.alarm.on = t.checked; });
-    if (t.checked){ askNotify(); toast('🔔 태블릿 끄는 알람을 켰어요'); }
-  }
-  if (t.id === 'alarmTime'){
-    var v = t.value || '21:00';
-    mutate(function(s){ s.alarm.time = v; });
-    toast('⏰ ' + v + '에 알려줄게요');
-  }
-  if (t.id === 'alarmSound'){
-    mutate(function(s){ s.alarm.sound = t.checked; });
-    if (t.checked) beep(1);
   }
   if (t.id === 'lockRemember' && prefs){
     prefs.remember = !!t.checked; savePrefs();
@@ -2854,7 +2649,6 @@ async function unlockApp(afterPinSetup){
   renderAll();
 
   setInterval(renderClock, 1000);
-  setInterval(tick, 250);
   ensureWeather();
   DB.subscribe(onRemoteRoot);
 
@@ -2883,45 +2677,8 @@ function onRemoteRoot(root){
 }
 
 /* ============================================================
-   24. 타이머 · 알람 · 날씨 루프
+   24. 날씨 루프
    ============================================================ */
-function finishTimer(){
-  var label = state.timer.label;
-  mutate(function(s){
-    s.timer.remaining = 0; s.timer.running = false; s.timer.endAt = null;
-    pushMailIn(s, 'system', 'family', '⏱ 공부 타이머 ' + label + '분 완료! 👏', 'sys');
-  });
-  beep(3);
-  notify('⏰ 공부 타이머 끝!', label + '분 집중 완료 · 태블릿을 끌 시간이에요');
-  toast('⏰ ' + label + '분 끝! 태블릿 끄자', 3200);
-  confetti(16);
-  renderTimer(); renderMail();
-}
-var lastAlarmCheck = 0;
-function checkAlarm(){
-  var now = Date.now();
-  if (now - lastAlarmCheck < 15000) return;
-  lastAlarmCheck = now;
-  var a = state.alarm;
-  if (!a || !a.on) return;
-  var cur = hhmm(), key = todayKey() + ' ' + cur;
-  if (cur === a.time && a.fired !== key){
-    mutate(function(s){ s.alarm.fired = key; });
-    beep(3);
-    notify('🔔 태블릿 끌 시간이에요', '오늘 공부 끝! 태블릿을 끄고 잘 준비해요');
-    toast('🔔 태블릿 끄는 시간이에요!', 3200);
-  }
-}
-function tick(){
-  if (!state) return;
-  var t = state.timer;
-  if (t && t.running){
-    t.remaining = Math.max(0, (t.endAt - Date.now())/1000);
-    updateTimerFace();
-    if (t.remaining <= 0) finishTimer();
-  }
-  checkAlarm();
-}
 function ensureWeather(){
   if (!prefs) return;
   var w = prefs.weather || {};
