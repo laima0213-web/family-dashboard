@@ -459,12 +459,37 @@ button{font:inherit;color:inherit}
   border-bottom:1px dotted #DFD3C2}
 .lock-link[hidden]{display:none}
 .lock-sync{font-size:9.5px;color:#C3B6A6;margin-top:9px;line-height:1.4}
+.gate-pw{width:100%;margin-top:14px;height:48px;border:1.5px solid #E6D9C6;background:#FFFCF5;border-radius:15px;
+  padding:0 14px;font-family:inherit;font-size:15px;font-weight:800;color:#5B4E42;text-align:center;letter-spacing:.6px}
+.gate-pw:focus{outline:none;border-color:#7FC79A;background:#fff}
+.gate-pw[disabled]{opacity:.6}
+.gate-btn{width:100%;margin:10px 0 2px;height:48px;border:0;border-radius:15px;font-family:inherit;font-size:14px;
+  font-weight:900;color:#fff;background:linear-gradient(160deg,#7FC79A,#5FA97A);cursor:pointer;
+  box-shadow:0 6px 16px rgba(95,169,122,.28)}
+.gate-btn:active{transform:scale(.98)}
+.gate-btn[disabled]{opacity:.55}
 .shake{animation:shake .34s}
 @keyframes shake{0%,100%{transform:translateX(0)}18%{transform:translateX(-8px)}38%{transform:translateX(7px)}
   58%{transform:translateX(-5px)}78%{transform:translateX(4px)}}
 </style>
 </head>
 <body>
+
+<!-- ============================================================
+     가족 암호 화면 (처음 1회만) — 이 기기에서는 기억됩니다
+     ============================================================ -->
+<div class="lock" id="gate" hidden>
+  <div class="lock-card">
+    <div class="lock-emoji">🔑</div>
+    <h2 class="lock-title">우리집 대시보드</h2>
+    <p class="lock-sub">처음 한 번만 가족 암호를 넣어 주세요<br>이 기기에서는 기억해요</p>
+    <input class="gate-pw" id="gatePw" type="password" inputmode="text" autocomplete="current-password"
+      autocapitalize="off" spellcheck="false" placeholder="가족 암호">
+    <div class="lock-msg" id="gateMsg"></div>
+    <button class="gate-btn" id="gateBtn" type="button">들어가기</button>
+    <div class="lock-sync" id="gateSync">가족 암호는 가족에게만 알려 주세요</div>
+  </div>
+</div>
 
 <!-- ============================================================
      잠금 화면 (가족 PIN) — 페이지에 들어오면 이 화면이 먼저 뜬다
@@ -556,10 +581,14 @@ button{font:inherit;color:inherit}
    ------------------------------------------------------------
    · FIREBASE_CONFIG 를 비워 두면 → 이 기기(localStorage)에만 저장되는
      데모 모드로 안전하게 동작합니다. (UI 그대로, 동기화만 없음)
-   · 값을 채우면 → Firebase Realtime Database 실시간 동기화가 자동으로 켜집니다.
+   · 값을 채우면 → Firebase 실시간 동기화가 켜지고, 각 기기에서 **처음 1번**
+     가족 암호를 넣어 Firebase에 로그인합니다(이후 자동 유지).
    · DB_ROOT 는 이 앱이 읽고 쓸 DB 경로입니다. (예: "homes/ab12cd34")
+   · DB 보안 규칙은 그 경로를 **가족 계정 1개**에만 열어 둔다. 외부인은
+     코드를 뜯어봐도 가족 암호 없이는 데이터에 접근할 수 없습니다.
    · PIN_HASH / PIN_SALT 를 비워 두면, 처음 실행할 때 화면에서
      가족 PIN 4자리를 직접 만들고 그 해시만 DB(auth/pinHash)에 저장합니다.
+   · 가족 암호는 이 파일에 적지 않습니다. 아이디만 여기에 있습니다.
    · 실제 가족 이름·일정 같은 데이터는 이 파일에 절대 넣지 않습니다.
      → family-dashboard/seed-data.json (git 제외) 에만 있습니다.
    ============================================================ */
@@ -575,6 +604,7 @@ const FIREBASE_CONFIG = {
 
 const CONFIG = {
   DB_ROOT: "homes/6013b071e038aa90",  // Firebase 경로 (가족 데이터는 이 경로 아래에만 있음)
+  FAMILY_ID: "ourhome@family.local", // 가족 공용 Firebase 계정 아이디 (암호는 코드에 없음)
   PIN_HASH: "",                // (선택) 미리 정한 PIN의 SHA-256 hex. 비우면 첫 실행 때 화면에서 생성
   PIN_SALT: "",                // (선택) 위 해시를 만들 때 쓴 salt
   PIN_LEN: 4,
@@ -901,19 +931,51 @@ const LocalAdapter = {
   }
 };
 
-/* 익명 인증(Anonymous Auth): 저장된 세션이 있으면 그대로 쓰고, 없으면 새로 만든다 */
-function ensureAnonAuth(){
-  return new Promise(function(resolve, reject){
+/* ============================================================
+   가족 인증 — Firebase Auth (이메일/비밀번호)
+     · 각 기기에서 처음 한 번만 가족 암호를 넣으면 Firebase가 그 기기에 로그인을 기억한다
+     · 가족 암호는 이 파일에 없다. 여기서는 가족 계정 아이디로 로그인만 한다
+   ============================================================ */
+var fbInitPromise = null;
+function initFirebaseApp(){
+  if (!fbInitPromise) fbInitPromise = (async function(){
+    await loadScriptOnce(CONFIG.SDK_APP);
+    await loadScriptOnce(CONFIG.SDK_AUTH);
+    if (typeof firebase === 'undefined') throw new Error('firebase-sdk-missing');
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     var auth = firebase.auth();
-    var settled = false;
-    var unsub = function(){};
-    var finish = function(fn, v){ if (settled) return; settled = true; try { unsub(); } catch(e){} fn(v); };
-    unsub = auth.onAuthStateChanged(function(user){
-      if (user) finish(resolve, user);
-      else auth.signInAnonymously().then(function(cred){ finish(resolve, cred && cred.user); })
-               .catch(function(err){ finish(reject, err); });
-    }, function(err){ finish(reject, err); });
+    try { await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch(e){}
+    return auth;
+  })();
+  return fbInitPromise;
+}
+/* 현재 로그인된 가족 계정(없으면 null). 저장된 로그인이 복원될 때까지 기다린다 */
+function firebaseUserOrNull(){
+  return new Promise(function(resolve, reject){
+    if (typeof firebase === 'undefined') return reject(new Error('firebase-sdk-missing'));
+    var auth = firebase.auth();
+    var settled = false, unsub = function(){};
+    var done = function(fn, v){ if (settled) return; settled = true; try{ unsub(); }catch(e){} fn(v); };
+    unsub = auth.onAuthStateChanged(function(u){ done(resolve, u || null); },
+                                   function(err){ done(reject, err); });
   });
+}
+async function getFamilyUser(){
+  await initFirebaseApp();
+  return firebaseUserOrNull();
+}
+async function signInFamily(password){
+  var auth = await initFirebaseApp();
+  await auth.signInWithEmailAndPassword(CONFIG.FAMILY_ID, String(password));
+  return firebaseUserOrNull();
+}
+function authErrorText(e){
+  var c = (e && e.code) || '';
+  if (c === 'auth/wrong-password' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') return '가족 암호가 맞지 않아요';
+  if (c === 'auth/user-not-found') return '가족 계정을 찾지 못했어요';
+  if (c === 'auth/too-many-requests') return '조금 뒤에 다시 시도해 주세요';
+  if (c === 'auth/network-request-failed') return '인터넷 연결을 확인해 주세요';
+  return '로그인하지 못했어요 · 다시 시도해 주세요';
 }
 
 const FirebaseAdapter = {
@@ -923,13 +985,12 @@ const FirebaseAdapter = {
   ref: null,
   started: false,
   load: async function(){
-    await loadScriptOnce(CONFIG.SDK_APP);
-    await loadScriptOnce(CONFIG.SDK_AUTH);
     await loadScriptOnce(CONFIG.SDK_DB);
+    await initFirebaseApp();
     if (typeof firebase === 'undefined') throw new Error('firebase-sdk-missing');
-    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    /* DB 규칙이 auth != null 이므로, 읽기·쓰기 전에 익명 로그인 세션을 먼저 확보한다 */
-    await ensureAnonAuth();
+    /* DB 규칙이 가족 계정에만 열려 있으므로, 가족 로그인 세션이 있어야 읽고 쓸 수 있다 */
+    var user = await firebaseUserOrNull();
+    if (!user) throw new Error('auth-required');
     var db = firebase.database();
     this.ref = db.ref(CONFIG.DB_ROOT);
     try {
@@ -2510,10 +2571,52 @@ async function loadWeather(){
   });
 })();
 
-(async function start(){
+/* ============================================================
+   가족 암호 화면 컨트롤 (처음 1회)
+   ============================================================ */
+var gateBusy = false;
+function setGateMsg(t){ var el = $('#gateMsg'); if (el) el.textContent = t || ''; }
+function setGateBusy(on){
+  gateBusy = !!on;
+  var b = $('#gateBtn'), i = $('#gatePw');
+  if (b){ b.disabled = gateBusy; b.textContent = gateBusy ? '확인하는 중…' : '들어가기'; }
+  if (i) i.disabled = gateBusy;
+}
+function showGate(msg){
+  var g = $('#gate'); if (g) g.hidden = false;
+  var lk = $('#lock'); if (lk) lk.hidden = true;
+  setGateMsg(msg || '');
+  setTimeout(function(){ var i = $('#gatePw'); if (i && !i.disabled) i.focus(); }, 250);
+}
+function gateShake(){
+  var card = document.querySelector('#gate .lock-card');
+  if (!card) return;
+  card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+}
+async function submitGate(){
+  if (gateBusy) return;
+  var input = $('#gatePw');
+  var pw = input ? String(input.value || '') : '';
+  if (pw.length < 4){ setGateMsg('가족 암호를 넣어 주세요'); gateShake(); return; }
+  setGateBusy(true); setGateMsg('');
+  try {
+    await signInFamily(pw);
+    if (input) input.value = '';
+    var g = $('#gate'); if (g) g.hidden = true;
+    setGateBusy(false);
+    await finishBoot();
+  } catch(e){
+    setGateBusy(false);
+    setGateMsg(authErrorText(e));
+    gateShake();
+    if (input){ input.value = ''; input.focus(); }
+  }
+}
+
+/* PIN 통과 후 실제 화면 켜기 (기존 start 부분) */
+async function finishBoot(){
   setLockMode('loading');
   paintDots();
-  try { prefs = normalizePrefs(readPrefsRaw()); } catch(e){ prefs = null; }
   var adapter = await DB.connect();
   lastRoot = adapter.root || null;
   applyConfig(lastRoot && lastRoot.config ? lastRoot.config : DEMO_CONFIG);
@@ -2539,6 +2642,26 @@ async function loadWeather(){
   var lk2 = $('#lock'); if (lk2) lk2.hidden = false;
   if (lockSyncEl) lockSyncEl.textContent = (DB.isRemote() ? '가족 DB 연결됨 · ' : '이 기기에 저장 · ')
     + '처음 한 번만 PIN을 만들면 가족 모두 같은 PIN을 써요';
+}
+
+(function boot(){
+  setLockMode('loading');
+  paintDots();
+  var btn = $('#gateBtn'); if (btn) btn.addEventListener('click', submitGate);
+  var pwIn = $('#gatePw');
+  if (pwIn) pwIn.addEventListener('keydown', function(ev){
+    if (ev.key === 'Enter'){ ev.preventDefault(); submitGate(); }
+  });
+
+  try { prefs = normalizePrefs(readPrefsRaw()); } catch(e){ prefs = null; }
+  if (!firebaseConfigured()){ finishBoot(); return; }
+  getFamilyUser().then(function(user){
+    if (user){ finishBoot(); return; }
+    showGate('');
+  }).catch(function(e){
+    console.warn('[dashboard] 가족 로그인 확인 실패:', e && e.message);
+    showGate(e && e.message === 'firebase-sdk-missing' ? '인터넷 연결을 확인한 뒤 새로고침해 주세요' : '');
+  });
 })();
 </script>
 </body>
