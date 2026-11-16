@@ -1519,7 +1519,7 @@ function normalizeStudy(raw){
       });
     if (items.length) out.items[id] = items;
   });
-  if (s.date !== todayKey()){ out.date = todayKey(); out.items = {}; }   // 다른 날 기록은 비우고 새 날로
+  if (typeof s.date === 'string' && s.date !== todayKey()){ out.date = todayKey(); out.items = {}; }   // 다른 날 기록은 비우고 새 날로
   return out;
 }
 function defaultState(){
