@@ -867,12 +867,14 @@ function diffPaths(before, after, base, out){
     return out;
   }
   if (Array.isArray(before) || Array.isArray(after)){
-    var bi = keyed(before || []), ai = keyed(after || []);
-    Object.keys(bi).concat(Object.keys(ai)).filter(function(v,i,a){ return a.indexOf(v) === i; }).forEach(function(k){
-      var b = bi[k], a = ai[k], p = base + '/' + k;
-      if (a === undefined){ out[p] = null; return; }
+    /* Firebase 는 목록을 0,1,2… 인덱스 키로 저장한다. id 키로 쓰면 항목이 중복되므로
+       인덱스 기준으로 바꿔진 자리만 쓴다. (로컬도 findIndexById 가 숫자 키를 인덱스로 받는다) */
+    var bi = before || [], ai = after || [], n = Math.max(bi.length, ai.length);
+    for (var ai_i = 0; ai_i < n; ai_i++){
+      var b = bi[ai_i], a = ai[ai_i], p = base + '/' + ai_i;
+      if (a === undefined){ if (b !== undefined) out[p] = null; continue; }
       if (JSON.stringify(b) !== JSON.stringify(a)) out[p] = a;
-    });
+    }
     return out;
   }
   Object.keys(before).concat(Object.keys(after)).filter(function(v,i,a){ return a.indexOf(v) === i; }).forEach(function(k){
