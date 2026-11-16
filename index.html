@@ -504,6 +504,67 @@ button{font:inherit;color:inherit}
 .shake{animation:shake .34s}
 @keyframes shake{0%,100%{transform:translateX(0)}18%{transform:translateX(-8px)}38%{transform:translateX(7px)}
   58%{transform:translateX(-5px)}78%{transform:translateX(4px)}}
+
+/* ============================================================
+   v4 — 도장판·밀림 체크·달력 클릭 수정 / 일정 편집
+   ============================================================ */
+/* 도장판 칸 · 주간 칸을 버튼으로 써도 모양 그대로 */
+.st[data-act],.cell[data-act],.cd[data-act]{cursor:pointer;padding:0;-webkit-appearance:none;appearance:none}
+button.st,button.cell{border-style:solid;font-family:inherit}
+button.cell{border:0}
+.cell.c-void[data-act]:active,.cell.c-today[data-act]:active{opacity:.6}
+button.st:active{transform:scale(.92)}
+.rhint{font-size:8.5px;font-weight:700;color:#B9AC9C;letter-spacing:0;margin-left:auto;white-space:nowrap}
+.penx{border:1px solid #EFDACF;background:#FFF8F4;border-radius:7px;width:18px;height:18px;font-size:9px;
+  line-height:1;color:#B98D77;cursor:pointer;padding:0;flex:0 0 auto}
+.pen-log .penx{margin-left:3px;vertical-align:middle}
+/* 달력 헤더 월 이동 */
+.cal-mv{display:inline-flex;align-items:center;gap:3px;margin-left:auto}
+.cal-mv b{font-size:10px;font-weight:900;color:#8A7C6B;letter-spacing:0;min-width:34px;text-align:center}
+.cal-mv .cnav{width:18px;height:18px;flex:0 0 18px;font-size:8px;border-radius:6px}
+.cal-mv .cnow{height:18px;font-size:8.5px;padding:0 6px;border-radius:6px}
+/* 달력 셀 */
+.cd{position:relative;border:0;background:transparent;font-family:inherit;padding:0}
+.cd.sel{background:#EAF3FD;box-shadow:0 0 0 2px #BFDBF3 inset;color:#3F729E;font-weight:900}
+.cd.sel.today{background:#FFF3C9;box-shadow:0 0 0 2px #F4DE9B inset;color:#A9801F}
+.cd-dot{position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:#7FC79A}
+/* 일정 항목 편집 */
+.si{gap:5px}
+.sic{display:flex;align-items:center;gap:4px;margin-left:auto;flex:0 0 auto}
+.sib{border:0;background:transparent;color:#C6B7A4;font-size:10px;line-height:1;cursor:pointer;padding:2px 3px}
+.sib:hover{color:#8B7A63}
+.sib.del{font-size:11px}
+.si.editing{padding:2px 0}
+.sx-in{flex:1;min-width:0;height:26px;border:1px solid #CFE4D5;background:#fff;border-radius:9px;
+  padding:0 8px;font-size:11px;font-family:inherit;color:var(--ink)}
+.sx-ok{border:1px solid #9FD0AC;background:#EFF9F1;border-radius:8px;height:24px;padding:0 7px;
+  font-size:11px;font-weight:900;color:#4E8F65;cursor:pointer;line-height:1}
+.sx-no{border:1px solid #EADFCB;background:#FFF8EA;border-radius:8px;height:24px;padding:0 6px;
+  font-size:10px;color:#8B7A63;cursor:pointer;line-height:1}
+.s-empty{font-size:9.5px;color:var(--faint);padding:2px 0 1px}
+/* 루틴 이름 인라인 수정 */
+button.st{padding:0}
+.rt.editing{height:auto;padding:2px 5px;gap:4px}
+.rt.editing .sx-in{height:24px;font-size:11px}
+.rtx.ed,.rt .wbmark + .rtx.ed{margin-left:auto}
+.rtx.ed + .rtx{margin-left:0}
+.rtx.ed{font-size:10px;color:#C9BBA8}
+@media (min-width:1024px){
+  .rhint{font-size:7.5px}
+  .cal-mv b{font-size:8.5px;min-width:28px}
+  .cal-mv .cnav{width:15px;height:15px;flex-basis:15px;font-size:7px}
+  .cal-mv .cnow{height:15px;font-size:7.5px;padding:0 4px}
+  .sd-dot{width:2px;height:2px}
+  .sib{font-size:8.5px;padding:1px 2px}
+  .sx-in{height:20px;font-size:9.5px}
+  .sx-ok{height:18px;font-size:9px;padding:0 5px}
+  .sx-no{height:18px;font-size:8.5px;padding:0 4px}
+  .s-empty{font-size:8.5px}
+  .rt.editing .sx-in{height:16px;font-size:9px}
+  .rt.editing{padding:1px 4px;gap:3px}
+  .rtx.ed{font-size:8px}
+  .penx{width:15px;height:15px;font-size:8px}
+}
 </style>
 </head>
 <body>
@@ -1234,6 +1295,7 @@ function defaultState(){
     want: [],
     foods: {},
     sched: { date: t, items: [] },
+    cal: {},
     mission: { idx: randInt(CFG.missions.length), done: false, date: t },
     timer: { minutes: 20, remaining: 20*60, running: false, endAt: null, label: 20 },
     alarm: { on: true, time: '21:00', sound: true, fired: '' },
@@ -1333,6 +1395,17 @@ function normalizeState(raw){
       return { id: i.id, text: i.text, done:false };
     })};
   }
+  /* 날짜별 일정·준비물 (오늘은 sched, 다른 날은 여기) */
+  var calMap = {};
+  if (r.cal && typeof r.cal === 'object'){
+    Object.keys(r.cal).forEach(function(k){
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+      if (k === todayKey()) return;               // 오늘 몫은 sched 가 정본
+      var list = normalizeList(r.cal[k], [], 's');
+      if (list.length) calMap[k] = list.map(function(i){ return { id:i.id, text:i.text, done:!!i.done }; });
+    });
+  }
+  out.cal = calMap;
   out.mission = (r.mission && typeof r.mission === 'object' && r.mission.date === todayKey())
     ? { idx: (r.mission.idx | 0), done: !!r.mission.done, date: r.mission.date }
     : { idx: randInt(CFG.missions.length), done:false, date: todayKey() };
@@ -1373,6 +1446,51 @@ function streakOf(id){
     else break;
   }
   return n;
+}
+/* 도장판·밀림 체크에서 지난 날짜를 손으로 고친다: 미기록 → done → miss → 미기록 */
+function cycleDayState(id, key){
+  var cur = (state.days[key] || {})[id] || null;
+  var next = !cur ? 'done' : (cur === 'done' ? 'miss' : null);
+  mutate(function(s){
+    if (!s.days[key]) s.days[key] = {};
+    if (next === null) delete s.days[key][id];
+    else s.days[key][id] = next;
+  });
+  return next;
+}
+/* 오늘 도장 = 저녁 '문제집 풀기' 하나로 결정된다 */
+function toggleStudyToday(id){
+  var cur = studyDone(id);
+  mutate(function(s){
+    ((s.kids[id] || {}).evening || []).forEach(function(t){ if (isWB(t)) t.done = !cur; });
+  });
+  return !cur;
+}
+/* 날짜별 일정·준비물: 오늘은 state.sched.items, 다른 날은 state.cal[key] */
+function schedList(key){
+  key = key || calSelKey();
+  if (key === todayKey()) return (state.sched && state.sched.items) || [];
+  return ((state.cal || {})[key]) || [];
+}
+function schedSet(key, transform){
+  key = key || calSelKey();
+  mutate(function(s){
+    if (key === todayKey()){
+      var cur = (s.sched && s.sched.items) ? s.sched.items : [];
+      s.sched = { date: key, items: transform(cur.slice()) || [] };
+    } else {
+      s.cal = s.cal || {};
+      var arr = transform(((s.cal[key] || [])).slice()) || [];
+      if (arr.length) s.cal[key] = arr;
+      else delete s.cal[key];
+    }
+  });
+}
+function schedAddText(key, text){
+  text = String(text || '').trim();
+  if (!text) return false;
+  schedSet(key, function(arr){ return arr.concat([{ id: uid('s'), text: text, done: false }]); });
+  return true;
 }
 function weekDone(id){
   var c = 0;
@@ -1449,7 +1567,12 @@ function ensureDay(){
       s.hf[id] = '';
     });
     s.date = k;
-    s.sched = { date: k, items: (s.sched.items || []).map(function(i){ return { id:i.id, text:i.text, done:false }; }) };
+    var carry = (s.sched.items || []).map(function(i){ return { id:i.id, text:i.text, done:false }; });
+    var planned = ((s.cal || {})[k] || []).map(function(i){ return { id:i.id, text:i.text, done:false }; });
+    planned.forEach(function(p){
+      if (!carry.some(function(x){ return x.text === p.text; })) carry.push(p);
+    });
+    s.sched = { date: k, items: carry };
     s.mission = { idx: randInt(CFG.missions.length), done:false, date:k };
   });
   return true;
@@ -1536,6 +1659,43 @@ function renderChips(){
 /* ============================================================
    12. 렌더링 — 아이 루틴 카드
    ============================================================ */
+/* 윤·봄 루틴 이름 인라인 수정 */
+var rtEdit = null;        // {m, tab, id}
+function focusEditInput(sel){
+  setTimeout(function(){
+    var i = document.querySelector(sel);
+    if (i){ try { i.focus(); if (i.select) i.select(); } catch(e){} }
+  }, 40);
+}
+function rtSaveText(m, tab, id, text){
+  text = String(text || '').trim();
+  if (!text){ toast('할 일 이름을 넣어 주세요'); return false; }
+  var item = listOf(m, tab).filter(function(x){ return x.id === id; })[0];
+  if (!item) return false;
+  var wasWb = isWB(item);            // '문제집 풀기' 표시는 이름을 바꿔도 유지
+  mutate(function(s){
+    ((s.kids[m] || {})[tab] || []).forEach(function(t){
+      if (t.id !== id) return;
+      t.text = text;
+      t.wb = wasWb ? true : false;
+    });
+  });
+  rtEdit = null;
+  afterRoutine();
+  toast('✎ ' + (FAMILY[m] ? FAMILY[m].name : m) + ' 할 일 이름을 바꿨어요');
+  return true;
+}
+function schedSaveText(key, id, text){
+  text = String(text || '').trim();
+  if (!text){ toast('일정 이름을 넣어 주세요'); return false; }
+  schedSet(key, function(arr){
+    return arr.map(function(x){ return x.id === id ? { id: x.id, text: text, done: !!x.done } : x; });
+  });
+  schedEditId = null;
+  renderCal();
+  toast('✎ 일정 이름을 바꿨어요');
+  return true;
+}
 function kidHtml(id){
   var fam = FAMILY[id], tab = (prefs.tabs && prefs.tabs[id]) || 'morning';
   var mc = cnt(id,'morning'), ec = cnt(id,'evening');
@@ -1550,10 +1710,18 @@ function kidHtml(id){
       + (s === 'done' ? '✓' : s === 'miss' ? '✕' : d.getDate()) + '</span>';
   });
   var rows = listOf(id, tab).map(function(t){
+    if (rtEdit && rtEdit.m === id && rtEdit.tab === tab && rtEdit.id === t.id){
+      return '<div class="rt editing">'
+        + '<input class="sx-in rt-in" data-rtein="' + esc(t.id) + '" value="' + esc(t.text) + '" aria-label="할 일 이름">'
+        + '<button class="sx-ok" type="button" data-act="rt-save" data-m="' + id + '" data-tab="' + tab + '" data-id="' + esc(t.id) + '" aria-label="저장">✓</button>'
+        + '<button class="sx-no" type="button" data-act="rt-cancel" aria-label="취소">✕</button>'
+        + '</div>';
+    }
     return '<div class="rt' + (t.done ? ' done' : '') + '">'
       + '<button class="rchk" type="button" data-act="rt-toggle" data-m="' + id + '" data-tab="' + tab + '" data-id="' + t.id + '">' + (t.done ? '✓' : '') + '</button>'
       + '<span class="rtt">' + esc(t.text) + '</span>'
       + (isWB(t) ? '<span class="wbmark">📘 보상</span>' : '')
+      + '<button class="rtx ed" type="button" data-act="rt-edit" data-m="' + id + '" data-tab="' + tab + '" data-id="' + t.id + '" aria-label="이름 수정">✎</button>'
       + '<button class="rtx" type="button" data-act="rt-del" data-m="' + id + '" data-tab="' + tab + '" data-id="' + t.id + '" aria-label="삭제">✕</button>'
       + '</div>';
   }).join('');
@@ -1650,14 +1818,17 @@ function renderReward(){
       if (s === 'done'){ cls = 'st on'; txt = '★'; }
       else if (s === 'miss'){ cls = 'st miss'; txt = '✕'; }
       else if (key === todayKey()){ cls = 'st today'; }
-      cells += '<span class="' + cls + '" title="' + (t.getMonth()+1) + '/' + day + '">' + txt + '</span>';
+      var lbl = (t.getMonth()+1) + '/' + day;
+      cells += (key <= todayKey())
+        ? '<button class="' + cls + '" type="button" data-act="rew-cell" data-k="' + key + '" data-m="' + id + '" title="' + lbl + ' 수정">' + txt + '</button>'
+        : '<span class="' + cls + '" title="' + lbl + '">' + txt + '</span>';
     }
     return '<div class="rwk"><div class="rwk-h"><span class="ava xs">' + AVATAR[fam.av] + '</span><b>' + esc(fam.name) + '</b>'
       + '<span class="rbadge">' + won(fam.reward) + '</span>'
       + '<span class="rwk-m">' + md + '/' + lastDay + '일 · 🔥' + st + '</span></div>'
       + '<div class="stamps">' + cells + '</div></div>';
   }).join('');
-  el.innerHTML = '<div class="h2">🎁 한 달 보상 도장판 <small>문제집 안 밀리면 보상</small></div>' + rows;
+  el.innerHTML = '<div class="h2">🎁 한 달 보상 도장판 <small>날짜를 눌러 ★/✕ 수정</small></div>' + rows;
 }
 
 /* ============================================================
@@ -1683,6 +1854,10 @@ function renderWeek(){
         if (s === 'done'){ cls = 'c-done'; txt = '✓'; }
         else if (s === 'miss'){ cls = 'c-miss'; txt = '✕'; }
       }
+      if (k <= tk){
+        return '<td><button class="cell ' + cls + '" type="button" data-act="week-cell" data-k="' + k + '" data-m="' + id + '"'
+          + ' aria-label="' + (d.getMonth()+1) + '/' + d.getDate() + ' 수정">' + txt + '</button></td>';
+      }
       return '<td><span class="cell ' + cls + '">' + txt + '</span></td>';
     }).join('');
     return '<tr><td class="name">' + esc(FAMILY[id].name) + '</td>' + tds + '</tr>';
@@ -1694,10 +1869,13 @@ function renderWeek(){
     return '<div class="pen-li"><span class="who2">' + esc(FAMILY[id].name) + '</span>'
       + '<span class="cnt2">경고 ' + lastWeekMiss(id) + '</span>'
       + '<input data-pen="' + id + '" placeholder="삭제한 앱 (예: 동영상 앱)" value="' + esc(state.penaltyNotes[id] || '') + '">'
-      + '<button class="btn sm" type="button" data-act="save-pen" data-m="' + id + '">저장</button></div>';
+      + '<button class="btn sm" type="button" data-act="save-pen" data-m="' + id + '">저장</button>'
+      + (state.penaltyNotes[id] ? '<button class="penx" type="button" data-act="pen-del" data-m="' + id + '" aria-label="기록 지우기">×</button>' : '')
+      + '</div>';
   }).join('');
   var logs = KIDS.filter(function(id){ return state.penaltyNotes[id]; })
-    .map(function(id){ return '<b>' + esc(FAMILY[id].name) + '</b> — ' + esc(state.penaltyNotes[id]); }).join(' · ');
+    .map(function(id){ return '<b>' + esc(FAMILY[id].name) + '</b> — ' + esc(state.penaltyNotes[id])
+      + '<button class="penx" type="button" data-act="pen-del" data-m="' + id + '" aria-label="기록 지우기">×</button>'; }).join(' · ');
 
   var lastMon = addDays(mondayOf(new Date()), -7);
   var lastLabel = (lastMon.getMonth()+1) + '/' + lastMon.getDate() + '~' + addDays(lastMon,6).getDate();
@@ -1706,7 +1884,7 @@ function renderWeek(){
     + (lastMiss.length ? lastMiss.map(function(x){ return x.name + ' ' + x.c + '일 밀림'; }).join(', ') + ' → 경고' : '모두 지킴 🎉');
 
   el.innerHTML =
-      '<div class="h2">📅 이번 주 밀림 체크 <small>월~일 · 일요일 마감</small></div>'
+      '<div class="h2">📅 이번 주 밀림 체크 <small>칸을 눌러 수정</small></div>'
     + '<table class="wk"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>'
     + '<div class="dday">⏰ 일(' + sunday.getDate() + '일) 마감 · ' + (left > 0 ? 'D-' + left : 'D-DAY')
     +   '<span class="rest">' + (7-left) + '일 지남</span></div>'
@@ -1802,9 +1980,40 @@ function renderWant(){
 /* ============================================================
    18. 렌더링 — 달력 · 일정 · 미션 · 타이머
    ============================================================ */
+/* 달력 — 기기별로 보는 달·골라둔 날짜 (동기화하지 않음) */
+var calSel = null;        // null이면 오늘
+var calView = null;       // {y, m} null이면 이번 달
+var schedEditId = null;   // 인라인 수정 중인 일정 id
+function calSelKey(){ return calSel || todayKey(); }
+function calLabel(key){
+  if (key === todayKey()) return '오늘(' + cleanMd(key) + ')';
+  var d = parseKey(key);
+  return cleanMd(key) + '(' + ['일','월','화','수','목','금','토'][d.getDay()] + ')';
+}
+function calSetSel(key){
+  calSel = (key === todayKey()) ? null : key;
+  var p = String(key).split('-').map(Number);
+  calView = { y: p[0], m: p[1] - 1 };
+  schedEditId = null;
+  renderCal();
+}
+function calThisMonth(){ var t = new Date(); return { y: t.getFullYear(), m: t.getMonth() }; }
+function calShiftMonth(delta){
+  var v = calView || calThisMonth(), y = v.y, m = v.m + delta;
+  y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+  calView = { y: y, m: m };
+  var sp = calSelKey().split('-').map(Number);
+  if (sp[0] !== y || (sp[1] - 1) !== m){
+    var tm = calThisMonth();
+    var day = (y === tm.y && m === tm.m) ? new Date().getDate() : 1;
+    calSel = (ymd(new Date(y, m, day)) === todayKey()) ? null : ymd(new Date(y, m, day));
+  }
+  schedEditId = null;
+  renderCal();
+}
 function renderCal(){
   var el = $('#cal'); if (!el || !state) return;
-  var t = new Date(), y = t.getFullYear(), mo = t.getMonth();
+  var v = calView || calThisMonth(), y = v.y, mo = v.m, t = new Date(), today = todayKey(), sel = calSelKey();
   var first = new Date(y, mo, 1), lastDay = new Date(y, mo+1, 0).getDate();
   var cells = '';
   ['일','월','화','수','목','금','토'].forEach(function(d,i){
@@ -1812,23 +2021,45 @@ function renderCal(){
   });
   for (var i=0;i<first.getDay();i++) cells += '<span class="cd blank"></span>';
   for (var d=1; d<=lastDay; d++){
-    var w = new Date(y,mo,d).getDay(), cls = 'cd';
-    if (d === t.getDate()) cls += ' today';
+    var key = ymd(new Date(y, mo, d)), w = new Date(y, mo, d).getDay(), cls = 'cd';
+    if (key === today) cls += ' today';
+    if (key === sel) cls += ' sel';
     if (w === 0) cls += ' sun';
     if (w === 6) cls += ' sat';
-    cells += '<span class="' + cls + '">' + d + '</span>';
+    var has = schedList(key).length > 0;
+    cells += '<button class="' + cls + '" type="button" data-act="cal-day" data-d="' + key + '"'
+      + ' aria-label="' + (mo+1) + '/' + d + ' 일정 보기">' + d + (has ? '<i class="cd-dot"></i>' : '') + '</button>';
   }
-  var items = state.sched.items.map(function(it){
+  var tm = calThisMonth();
+  var nav = '<span class="cal-mv">'
+    + '<button class="cnav" type="button" data-act="cal-prevm" aria-label="이전 달">◀</button>'
+    + '<b>' + (mo+1) + '월</b>'
+    + '<button class="cnav" type="button" data-act="cal-nextm" aria-label="다음 달">▶</button>'
+    + ((y === tm.y && mo === tm.m && sel === today) ? '' : '<button class="cnow" type="button" data-act="cal-today">오늘</button>')
+    + '</span>';
+  var items = schedList(sel).map(function(it){
+    if (schedEditId === it.id){
+      return '<div class="si editing">'
+        + '<input class="sx-in" data-editin="' + esc(it.id) + '" value="' + esc(it.text) + '" aria-label="일정 이름">'
+        + '<button class="sx-ok" type="button" data-act="sched-save" data-id="' + esc(it.id) + '" aria-label="저장">✓</button>'
+        + '<button class="sx-no" type="button" data-act="sched-cancel" aria-label="취소">✕</button>'
+        + '</div>';
+    }
     return '<div class="si' + (it.done ? ' done' : '') + '">'
-      + '<button class="schk" type="button" data-act="sched-toggle" data-id="' + it.id + '">' + (it.done ? '✓' : '') + '</button>'
-      + '<span class="stx">' + esc(it.text) + '</span></div>';
+      + '<button class="schk" type="button" data-act="sched-toggle" data-id="' + esc(it.id) + '">' + (it.done ? '✓' : '') + '</button>'
+      + '<span class="stx">' + esc(it.text) + '</span>'
+      + '<span class="sic">'
+      +   '<button class="sib" type="button" data-act="sched-edit" data-id="' + esc(it.id) + '" aria-label="이름 수정">✎</button>'
+      +   '<button class="sib del" type="button" data-act="sched-del" data-id="' + esc(it.id) + '" aria-label="삭제">×</button>'
+      + '</span></div>';
   }).join('');
   el.innerHTML =
-      '<div class="h2">📅 ' + (mo+1) + '월 우리집 달력 <small>오늘 ' + t.getDate() + '일 ' + ['일','월','화','수','목','금','토'][t.getDay()] + '요일</small></div>'
+      '<div class="h2">📅 우리집 달력 ' + nav + '</div>'
     + '<div class="cal">' + cells + '</div>'
-    + '<div class="sched"><div class="sh">🎒 오늘 일정·준비물</div>' + items
-    +   '<div class="sadd"><input data-addsched placeholder="일정·준비물 추가">'
-    +   '<button class="addb" type="button" style="width:26px;height:26px;font-size:12px" data-act="sched-add">＋</button></div></div>';
+    + '<div class="sched"><div class="sh">🎒 ' + esc(calLabel(sel)) + ' 일정·준비물</div>'
+    +   (items || '<div class="s-empty">아직 일정이 없어요 · 아래에 추가해 보세요</div>')
+    +   '<div class="sadd"><input data-addsched data-d="' + esc(sel) + '" placeholder="일정·준비물 추가">'
+    +   '<button class="addb" type="button" style="width:26px;height:26px;font-size:12px" data-act="sched-add" data-d="' + esc(sel) + '">＋</button></div></div>';
 }
 function renderMission(){
   var el = $('#mission'); if (!el || !state) return;
@@ -1992,7 +2223,7 @@ document.addEventListener('click', function(ev){
 
   /* 아이 루틴 */
   if (act === 'kid-tab'){
-    prefs.tabs[m] = el.dataset.tab; savePrefs(); renderKids();
+    prefs.tabs[m] = el.dataset.tab; savePrefs(); rtEdit = null; renderKids();
     return;
   }
   if (act === 'rt-toggle'){
@@ -2023,6 +2254,19 @@ document.addEventListener('click', function(ev){
     afterRoutine();
     return;
   }
+  if (act === 'rt-edit'){
+    rtEdit = { m: m, tab: el.dataset.tab, id: el.dataset.id };
+    renderKids();
+    focusEditInput('[data-rtein]');
+    return;
+  }
+  if (act === 'rt-save'){
+    var rowR = el.closest ? el.closest('.rt') : null;
+    var inpR = rowR ? rowR.querySelector('[data-rtein]') : null;
+    rtSaveText(m, el.dataset.tab, el.dataset.id, inpR ? inpR.value : '');
+    return;
+  }
+  if (act === 'rt-cancel'){ rtEdit = null; renderKids(); return; }
 
   /* 치즈집 청소 — 고른 날짜(기본 오늘) 기준으로 추가·해제 */
   if (act === 'clean'){
@@ -2158,19 +2402,71 @@ document.addEventListener('click', function(ev){
 
   /* 달력 · 일정 */
   if (act === 'sched-toggle'){
-    var idS = el.dataset.id;
-    var itS = (state.sched.items || []).filter(function(x){ return x.id === idS; })[0];
+    var idS = el.dataset.id, kS = calSelKey();
+    var itS = schedList(kS).filter(function(x){ return x.id === idS; })[0];
     if (!itS) return;
-    mutate(function(){ itS.done = !itS.done; });
+    schedSet(kS, function(arr){
+      return arr.map(function(x){ return x.id === idS ? { id: x.id, text: x.text, done: !x.done } : x; });
+    });
     renderCal();
     return;
   }
   if (act === 'sched-add'){
+    var kA = el.dataset.d || calSelKey();
     var inpS = $('[data-addsched]');
     var vS = ((inpS && inpS.value) || '').trim();
     if (!vS){ if (inpS) inpS.focus(); return; }
-    mutate(function(s){ s.sched.items = (s.sched.items || []).concat([{ id: uid('s'), text: vS, done: false }]); });
+    schedAddText(kA, vS);
+    if (inpS) inpS.value = '';
     renderCal();
+    toast('🎒 ' + calLabel(kA) + ' 일정에 추가했어요');
+    return;
+  }
+  if (act === 'sched-edit'){
+    schedEditId = el.dataset.id;
+    renderCal();
+    focusEditInput('[data-editin]');
+    return;
+  }
+  if (act === 'sched-save'){
+    var rowE = el.closest ? el.closest('.si') : null;
+    var inpE = rowE ? rowE.querySelector('[data-editin]') : null;
+    schedSaveText(calSelKey(), el.dataset.id, inpE ? inpE.value : '');
+    return;
+  }
+  if (act === 'sched-cancel'){ schedEditId = null; renderCal(); return; }
+  if (act === 'sched-del'){
+    var idD = el.dataset.id, kD = calSelKey();
+    var itD = schedList(kD).filter(function(x){ return x.id === idD; })[0];
+    if (!itD) return;
+    schedSet(kD, function(arr){ return arr.filter(function(x){ return x.id !== idD; }); });
+    renderCal();
+    toast('🗑 ' + (itD.text || '일정') + ' 을(를) 지웠어요');
+    return;
+  }
+  if (act === 'cal-day'){ calSetSel(el.dataset.d); return; }
+  if (act === 'cal-prevm'){ calShiftMonth(-1); return; }
+  if (act === 'cal-nextm'){ calShiftMonth(1); return; }
+  if (act === 'cal-today'){ calSel = null; calView = null; schedEditId = null; renderCal(); return; }
+
+  /* 도장판 · 밀림 체크 칸 수정 */
+  if (act === 'rew-cell' || act === 'week-cell'){
+    var ck = el.dataset.k, cm = el.dataset.m;
+    var cname = FAMILY[cm] ? FAMILY[cm].name : cm;
+    if (ck === todayKey()){
+      var onNow = toggleStudyToday(cm);
+      toast('📘 ' + cname + ' 오늘 문제집 ' + (onNow ? '완료 · 도장 켜짐 ★' : '해제 · 도장 꺼짐'));
+    } else {
+      var nx = cycleDayState(cm, ck);
+      toast('✎ ' + cleanMd(ck) + ' ' + cname + ' · ' + (nx === 'done' ? '완료 ★' : nx === 'miss' ? '밀림 ✕' : '기록 지움'));
+    }
+    renderKids(); renderReward(); renderWeek();
+    return;
+  }
+  if (act === 'pen-del'){
+    mutate(function(s){ delete s.penaltyNotes[m]; });
+    renderWeek();
+    toast('🗑 지난 기록을 지웠어요');
     return;
   }
 
@@ -2271,6 +2567,25 @@ document.addEventListener('keydown', function(ev){
   }
   else if (t.getAttribute('data-addsched') !== null){ var b7 = $('[data-act="sched-add"]'); if (b7) b7.click(); }
   else if (t.getAttribute('data-pen')){ var b8 = $('[data-act="save-pen"][data-m="' + t.getAttribute('data-pen') + '"]'); if (b8) b8.click(); }
+});
+
+/* ---------- 인라인 이름 수정: Enter 저장 · Esc 취소 ---------- */
+document.addEventListener('keydown', function(ev){
+  var t = ev.target;
+  if (!t || !t.getAttribute || !state) return;
+  var isRt = t.getAttribute('data-rtein') !== null;
+  var isSc = t.getAttribute('data-editin') !== null;
+  if (!isRt && !isSc) return;
+  if (ev.key === 'Enter'){
+    ev.preventDefault();
+    var row = t.closest ? t.closest(isRt ? '.rt' : '.si') : null;
+    var btn = row ? row.querySelector('[data-act="' + (isRt ? 'rt-save' : 'sched-save') + '"]') : null;
+    if (btn) btn.click();
+  } else if (ev.key === 'Escape'){
+    ev.preventDefault();
+    if (isRt){ rtEdit = null; renderKids(); }
+    else { schedEditId = null; renderCal(); }
+  }
 });
 
 /* ---------- 알람 설정 ---------- */
