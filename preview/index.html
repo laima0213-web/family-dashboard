@@ -2902,6 +2902,7 @@ function openCommuteSheet(){
       + x.icon + ' ' + esc(x.label) + '</button>';
   }).join('');
   setText('#sheetTitle', '퇴근 시간 알리기');
+  var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '퇴근 시간 알리기');
   var body = $('#sheetBody');
   if (body){
     body.innerHTML =
@@ -2924,6 +2925,7 @@ function openAvatarSheet(id){
   setText('#sheetTitle', ((FAMILY[id] || {}).name || '') + ' 캐릭터 꾸미기');
   renderAvatarSheet();
   var sh = $('#sheet'); if (sh) sh.hidden = false;
+  var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '캐릭터 꾸미기');
 }
 var avatarTab = 'hair';
 function renderAvatarSheet(){
