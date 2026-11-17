@@ -273,6 +273,12 @@ button{font:inherit;color:inherit}
   background:#FFFCF6;border:1px dashed #EFE3D2;border-radius:12px}
 .st-list{display:flex;flex-direction:column;gap:4px}
 .st-list .rt .rtt{flex:1 1 auto}
+/* 📖 오늘 탭 — 오늘의 할 일과 같은 체크리스트 한 줄 목록 */
+#study .rts{margin-top:7px}
+#study .rts .rt{height:auto;min-height:var(--rt-h);padding:2px 8px}
+#study .rts .rt .rtt{flex:1 1 auto;min-width:0;white-space:normal;overflow:visible;text-overflow:clip;
+  overflow-wrap:anywhere;line-height:1.25;padding:1px 0}
+#study .rts .st-sub{margin-right:1px}
 /* ---------- 이번 달의 독서리스트 ---------- */
 .rd-nav{display:flex;align-items:center;gap:4px;margin:0 0 6px}
 .rd-mon{font-size:12.5px;font-weight:900;color:#7A6A58;min-width:32px;text-align:center}
@@ -367,6 +373,16 @@ button{font:inherit;color:inherit}
 .wk-p.on{background:#EAF2FB;border-color:#CFE0F3;color:#4C7FA8}
 .wk-p.wk-pw{border-style:dashed;padding:0 7px}
 .wk-hint{margin-left:auto;font-size:10px;font-weight:900;color:#A99A86;white-space:nowrap}
+/* 요일별 반복 — 추가 박스(과목 태그 · 저장 요일 · 한 줄 입력) */
+.wk-addbox{margin-top:6px;padding:5px 6px;background:#FAFCF9;border:1px solid #E9F1EA;border-radius:12px}
+.wk-addbox .wk-subrow{margin:0 0 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.wk-addbox .wk-subrow::-webkit-scrollbar{display:none}
+.wk-addbox .chip{flex:0 0 auto}
+.wk-addbox .chip.none{border-style:dashed;color:#8B7A63}
+.wk-addbox .wk-picks{margin:0 0 4px}
+.wk-plab{flex:0 0 auto;font-size:10px;font-weight:900;color:#A99A86;margin-right:2px;white-space:nowrap}
+.wk-addrow{margin-top:0}
+.wk-addrow .st-plus{font-size:11.5px;padding:0 9px}
 /* ---------- 윤·봄 프로필 카드 ---------- */
 .kids2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .prof{padding:9px 9px 8px;cursor:pointer;transition:box-shadow .15s,transform .12s}
@@ -681,6 +697,8 @@ button{font:inherit;color:inherit}
   .ktab{padding:3px 0;font-size:11.5px}
   .rts{gap:3px;margin-top:4px}
   .rtt{font-size:12px}
+  #study .rts{margin-top:4px}
+  #study .rts .rt{padding:1px 6px}
   .rchk{width:15px;height:15px;flex:0 0 15px;border-radius:5px;font-size:10.5px}
   .rt{padding:0 6px;gap:5px}
   .qgrid{gap:3px;grid-template-columns:repeat(6,1fr)}
@@ -766,6 +784,11 @@ button{font:inherit;color:inherit}
   .wk-picks{gap:2px;margin-top:4px}
   .wk-p{height:16px;font-size:9.5px;padding:0 6px}
   .wk-hint{font-size:8.5px}
+  .wk-addbox{padding:4px 5px;margin-top:4px}
+  .wk-addbox .wk-subrow{margin-bottom:3px}
+  .wk-addbox .wk-picks{margin-bottom:3px}
+  .wk-plab{font-size:8.5px}
+  .wk-addrow .st-plus{font-size:10px;padding:0 7px}
   /* 프로필·상세·달력·꾸미기 — 좁은 높이에 맞춰 축소 */
   .kids2{display:contents}
   .prof{padding:7px 11px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -3309,9 +3332,10 @@ function studyParentOnly(run){
 function studyKidId(){ return activeKid(); }
 function studySubjects(){ return (state && state.study && state.study.subjects) || []; }
 function studySubject(){
+  /* '' 이면 '과목 없음' — 문제집 이름만 적는 기본값. 과목 태그를 누를 때만 붙는다 */
   var subs = studySubjects(), id = prefs && prefs.studySubject;
-  var hit = subs.filter(function(s){ return s.id === id; })[0];
-  return hit || subs[0] || null;
+  if (!id) return null;
+  return subs.filter(function(s){ return s.id === id; })[0] || null;
 }
 function studyItems(id){ return ((state.study && state.study.items) || {})[id] || []; }
 function studyPresets(id, sid){ return (((state.study || {}).presets || {})[id] || {})[sid] || []; }
@@ -3407,7 +3431,7 @@ function studyAdd(name, subjectName){
   var kid = studyKidId();
   name = String(name || '').trim();
   if (!name) return false;
-  if (subjectName === undefined) subjectName = (studySubject() || {}).name || '';
+  if (subjectName === undefined) subjectName = '';
   var dup = studyItems(kid).some(function(x){ return !x.done && x.text === name && (x.subjectName || '') === subjectName; });
   if (dup){ toast('이미 오늘 목록에 있어요'); return false; }
   mutate(function(s){
@@ -3433,10 +3457,9 @@ function studyChip(kind, id, name, on, actRename, actDel){
   }
   return '<button class="pchip" type="button" data-act="preset-use" data-id="' + esc(id) + '">' + esc(name) + '</button>';
 }
-/* 요일별 자동 반복 패널 */
+/* 요일별 자동 반복 패널 — 요일 탭 · 저장된 목록 · (과목 없음 기본) 추가 박스 */
 function studyWeekHtml(kid, sub){
   var sel = dowView(), dow = dowKey();
-  var famName = (FAMILY[kid] || {}).name || '';
   var counts = {};
   DOW_KEYS.forEach(function(k){ counts[k] = studyWeekList(kid, k).length; });
   var dayTabs = DOW_KEYS.map(function(k){
@@ -3449,26 +3472,27 @@ function studyWeekHtml(kid, sub){
   var rows = list.map(function(w){
     if (wkEditId === w.id){
       return '<div class="wk-row editing">'
-        + '<span class="st-sub">' + esc(w.subjectName || '공부') + '</span>'
-        + '<input class="sx-in rt-in" data-wkin="' + esc(w.id) + '" value="' + esc(w.text) + '" aria-label="반복 공부 내용">'
+        + (w.subjectName ? '<span class="st-sub">' + esc(w.subjectName) + '</span>' : '')
+        + '<input class="sx-in rt-in" data-wkin="' + esc(w.id) + '" value="' + esc(w.text) + '" aria-label="반복할 문제집 이름">'
         + '<button class="sx-ok" type="button" data-act="wk-save" data-id="' + esc(w.id) + '" aria-label="저장">✓</button>'
         + '<button class="sx-no" type="button" data-act="wk-cancel" aria-label="취소">✕</button>'
         + '</div>';
     }
     return '<div class="wk-row">'
-      + '<span class="st-sub">' + esc(w.subjectName || '공부') + '</span>'
+      + (w.subjectName ? '<span class="st-sub">' + esc(w.subjectName) + '</span>' : '')
       + '<span class="rtt">' + esc(w.text) + '</span>'
       + '<button class="rtx ed" type="button" data-act="wk-edit" data-id="' + esc(w.id) + '" aria-label="수정">✎</button>'
       + '<button class="rtx" type="button" data-act="wk-del" data-id="' + esc(w.id) + '" aria-label="삭제">✕</button>'
       + '</div>';
   }).join('');
-  var subChips = studySubjects().map(function(s){
-    return '<button class="chip' + (sub && sub.id === s.id ? ' on' : '') + '" type="button" data-act="study-sub" data-id="' + esc(s.id) + '">' + esc(s.name) + '</button>';
-  }).join('');
-  var presets = sub ? studyPresets(kid, sub.id) : [];
-  var presetChips = presets.map(function(p){
-    return '<button class="pchip" type="button" data-act="wk-preset" data-id="' + esc(p.id) + '">' + esc(p.name) + '</button>';
-  }).join('');
+  /* 과목 태그 — 기본은 '과목 없음'(문제집 이름만), 원하면 눌러서 태그 */
+  var subChips = '<button class="chip none' + (sub ? '' : ' on') + '" type="button" data-act="study-sub" data-id=""'
+      + ' aria-pressed="' + (sub ? 'false' : 'true') + '">과목 없음</button>'
+    + studySubjects().map(function(s){
+        var on = !!(sub && sub.id === s.id);
+        return '<button class="chip' + (on ? ' on' : '') + '" type="button" data-act="study-sub" data-id="' + esc(s.id) + '"'
+          + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(s.name) + '</button>';
+      }).join('');
   var picked = studyWeekPicked();
   var wAll = ['1','2','3','4','5'].every(function(k){ return picked.indexOf(k) > -1; });
   var pickChips = DOW_KEYS.map(function(k){
@@ -3476,18 +3500,18 @@ function studyWeekHtml(kid, sub){
       + ' aria-pressed="' + (picked.indexOf(k) > -1 ? 'true' : 'false') + '">' + DOW_NAME[k] + '</button>';
   }).join('')
     + '<button class="wk-p wk-pw' + (wAll ? ' on' : '') + '" type="button" data-act="wk-pick-week" aria-pressed="' + (wAll ? 'true' : 'false') + '">평일</button>';
-  var hint = picked.map(function(k){ return DOW_NAME[k]; }).join('·') + ' 저장';
+  var wl = picked.map(function(k){ return DOW_NAME[k]; }).join('·');
+  var saveLab = (picked.length > 3 ? picked.length + '일' : wl) + ' 저장';
   return '<div class="st-body wk-body">'
-    +   '<div class="wk-subrow">' + (famName ? '<span class="wk-who">' + esc(famName) + '</span>' : '') + subChips + '</div>'
     +   '<div class="wk-days">' + dayTabs + '</div>'
     +   (rows ? '<div class="wk-list">' + rows + '</div>'
-             : '<div class="wk-empty">이 요일에 저장된 반복 공부가 없어요</div>')
-    +   (presetChips
-        ? '<div class="presets"><span class="lab">' + esc(sub ? sub.name : '과목') + ' 문제집</span>' + presetChips + '</div>'
-        : '')
-    +   '<div class="wk-picks">' + pickChips + '<span class="wk-hint">' + esc(hint) + '</span></div>'
-    +   '<div class="st-add"><input id="wkInput" placeholder="이 요일마다 반복할 공부" aria-label="반복할 공부 내용">'
-    +     '<button class="st-plus" type="button" data-act="wk-add">+ 요일 저장</button></div>'
+             : '<div class="wk-empty">' + DOW_NAME[sel] + '요일에 저장된 반복 문제집이 없어요</div>')
+    +   '<div class="wk-addbox">'
+    +     '<div class="wk-subrow" role="group" aria-label="과목 태그">' + subChips + '</div>'
+    +     '<div class="wk-picks"><span class="wk-plab">저장 요일</span>' + pickChips + '</div>'
+    +     '<div class="st-add wk-addrow"><input id="wkInput" placeholder="반복할 문제집 이름" aria-label="반복할 문제집 이름">'
+    +       '<button class="st-plus" type="button" data-act="wk-add">＋ ' + esc(saveLab) + '</button></div>'
+    +   '</div>'
     + '</div>';
 }
 function renderStudy(){
@@ -3495,11 +3519,10 @@ function renderStudy(){
   var kid = studyKidId(), sub = studySubject();
   var items = studyItems(kid);
   var done = items.filter(function(x){ return x.done; }).length;
-  var kidChips = '';
   var rows = items.map(function(it){
     if (studyEditId === it.id){
       return '<div class="rt editing">'
-        + '<input class="sx-in rt-in" data-stin="' + esc(it.id) + '" value="' + esc(it.text) + '" aria-label="공부 내용">'
+        + '<input class="sx-in rt-in" data-stin="' + esc(it.id) + '" value="' + esc(it.text) + '" aria-label="문제집·공부 내용">'
         + '<button class="sx-ok" type="button" data-act="study-save" data-id="' + esc(it.id) + '" aria-label="저장">✓</button>'
         + '<button class="sx-no" type="button" data-act="study-cancel" aria-label="취소">✕</button>'
         + '</div>';
@@ -3512,13 +3535,6 @@ function renderStudy(){
       + '<button class="rtx" type="button" data-act="study-del" data-id="' + esc(it.id) + '" aria-label="삭제">✕</button>'
       + '</div>';
   }).join('');
-  var subChips = studySubjects().map(function(s){
-    return studyChip('sub', s.id, s.name, !!sub && sub.id === s.id, 'study-sub-rename', 'study-sub-del');
-  }).join('');
-  var presets = sub ? studyPresets(kid, sub.id) : [];
-  var presetChips = presets.map(function(p){
-    return studyChip('pre', p.id, p.name, false, 'preset-rename', 'preset-del');
-  }).join('');
   var weekToday = studyWeekTodayCount(kid);
   var tabs =
       '<div class="st-tabs">'
@@ -3527,37 +3543,17 @@ function renderStudy(){
     + '</div>';
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
-    +   '<span class="st-kids">' + kidChips + '</span>'
     +   '<span class="st-badge">' + done + ' / ' + items.length + ' 완료</span>'
     +   studyLockHtml()
     + '</div>'
     + '<div class="st-prog"><i style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></i></div>'
     + tabs
     + (studyView === 'week' ? studyWeekHtml(kid, sub) :
-      '<div class="st-body">'
-    +   '<div class="st-main">'
-    +     (rows ? '<div class="st-list">' + rows + '</div>'
-              : '<div class="st-empty">📚 오늘 공부할 내용을 적어 볼까요?</div>')
+      '<div class="rts">'
+    +     (rows || '<div class="st-empty">📚 오늘 공부할 문제집을 적어 볼까요?</div>')
     +   '</div>'
-    +   '<div class="st-tools">'
-    +     '<div class="st-subrow">' + subChips
-    +       '<button class="st-editbtn' + (studyEditMode ? ' on' : '') + '" type="button" data-act="study-editbtn">'
-    +         (studyEditMode ? '✓ 편집 끝' : '✎ 과목 편집') + '</button>'
-    +     '</div>'
-    +     (studyEditMode
-        ? '<div class="st-add"><input id="studySubInput" placeholder="새 과목 이름" aria-label="새 과목 이름">'
-          + '<button class="st-plus" type="button" data-act="study-sub-add">+ 과목</button></div>'
-        : '')
-    +     '<div class="presets">'
-    +       '<span class="lab">' + esc(sub ? sub.name : '과목') + ' 문제집</span>'
-    +       (presetChips || '<span class="pempty">' + (studyEditMode ? '아직 없어요' : '문제집을 등록해 두면 눌러서 바로 넣어요') + '</span>')
-    +       '<input class="minp" id="presetInput" placeholder="문제집 이름 적기" aria-label="문제집 이름">'
-    +       '<button class="fb-add" type="button" data-act="preset-add" aria-label="문제집 추가">＋</button>'
-    +     '</div>'
-    +     '<div class="st-add"><input id="studyInput" placeholder="공부할 내용을 적어 주세요" aria-label="공부할 내용">'
-    +       '<button class="st-plus" type="button" data-act="study-add">+ 추가</button></div>'
-    +   '</div>'
-    + '</div>')
+    +   '<div class="rt-add"><input id="studyInput" placeholder="문제집·공부 추가" aria-label="문제집·공부 추가">'
+    +     '<button class="addb" type="button" data-act="study-add" aria-label="추가">+</button></div>')
     + remainBoxHtml(items.length - done, items.length, kid);
 }
 /* ============================================================
@@ -4429,7 +4425,8 @@ document.addEventListener('click', function(ev){
     /* 버튼 자체가 엄빠 전용 — 빈칸이어도 먼저 PIN을 묻고, 통과한 뒤 칸에 포커스 */
     studyParentOnly(function(){
       if (!sgV){ var sgNow = $('#studyInput'); if (sgNow) sgNow.focus(); return; }
-      studyAdd(sgV);
+      var okAdd = studyAdd(sgV, '');   /* 📖 오늘 탭 — 과목 뱃지 없이 문제집 이름만 */
+      if (okAdd){ var sgNext = $('#studyInput'); if (sgNext) sgNext.focus(); }   /* 여러 권 연속으로 적기 편하게 */
     });
     return;
   }
@@ -4474,6 +4471,7 @@ document.addEventListener('click', function(ev){
       renderStudy();
       if (!n) toast('이미 저장된 반복 공부예요');
       else toast('📅 ' + wkDays.map(function(k){ return DOW_NAME[k]; }).join('·') + '요일 반복에 넣었어요', 1800);
+      var wkNext = $('#wkInput'); if (wkNext) wkNext.focus();
     });
     return;
   }
@@ -4691,6 +4689,18 @@ document.addEventListener('keydown', function(ev){
   if (!t || !t.getAttribute || !t.getAttribute('data-srename')) return;
   if (ev.key === 'Enter'){ ev.preventDefault(); studyRenameSave(); }
   else if (ev.key === 'Escape'){ ev.preventDefault(); studyRename = null; renderStudy(); }
+});
+
+/* ---------- 오늘 공부 인라인 수정: Enter 저장 · Esc 취소 ---------- */
+document.addEventListener('keydown', function(ev){
+  var t = ev.target;
+  if (!t || !t.getAttribute || t.getAttribute('data-stin') === null) return;
+  if (ev.key === 'Enter'){
+    ev.preventDefault();
+    var b = document.querySelector('[data-act="study-save"]'); if (b) b.click();
+  } else if (ev.key === 'Escape'){
+    ev.preventDefault(); studyEditId = null; renderStudy();
+  }
 });
 
 /* ---------- 요일별 반복 수정: Enter 저장 · Esc 취소 ---------- */
