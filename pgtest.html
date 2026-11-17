@@ -6498,6 +6498,11 @@ async function finishBoot(){
         g.add(pgSph(0.075, [C.pink, C.lemon, C.coral][i], wx + fx, 0.96, 1.28, 7));
       });
     });
+    /* 뒷면 창 */
+    g.add(pgBox(0.5, 0.5, 0.07, '#FFFDF8', 0, 1.2, -1.16));
+    var pane2 = pgBox(0.4, 0.4, 0.05, '#FFE9A8', 0, 1.2, -1.19);
+    pane2.material = new THREE.MeshLambertMaterial({ color: 0xFFEFC0, emissive: new THREE.Color(0xFFCE63), emissiveIntensity: 0.5 });
+    g.add(pane2);
     /* 지붕 다락 창 */
     g.add(pgCyl(0.26, 0.26, 0.07, '#FFE9A8', 0, 2.45, 0.92, 12));
     /* 울타리 · 정원 */
@@ -6547,6 +6552,12 @@ async function finishBoot(){
       g.add(pgSph(0.1, [C.pink, C.mint, C.lemon][k], p[0], p[1], 1.3, 8));
       g.add(pgCone(0.07, 0.16, '#E8B87A', p[0], p[1] - 0.16, 1.3, 7));
     });
+    /* 뒷면 창 · 문 */
+    g.add(pgBox(1.1, 0.7, 0.07, '#FFFDF8', 0, 1.3, -1.23));
+    var back = pgBox(0.95, 0.55, 0.05, '#FFE7C8', 0, 1.3, -1.26);
+    back.material = new THREE.MeshLambertMaterial({ color: 0xFFE3B8, emissive: new THREE.Color(0xFFCED8), emissiveIntensity: 0.35 });
+    g.add(back);
+    g.add(pgBox(0.62, 1.05, 0.07, '#E7C39A', 0, 0.72, -1.22));
     /* 야외 테이블 + 의자 */
     var t = new THREE.Group();
     t.position.set(1.9, 0, 0.55);
@@ -7338,7 +7349,7 @@ async function finishBoot(){
       var a = i / N * Math.PI * 2;
       var rr = 2.2 + Math.sin(a * 2 + 0.3) * 0.28;
       var hill = Math.max(0, Math.sin(a * 2 + 0.75));
-      var yy = 0.62 + Math.pow(hill, 1.1) * 1.55;
+      var yy = 0.6 + Math.pow(hill, 1.25) * 2.05;
       pts.push(new THREE.Vector3(Math.cos(a) * rr * 1.05, yy, Math.sin(a) * rr * 0.9));
     }
     var curve = new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0.5);
@@ -7401,42 +7412,49 @@ async function finishBoot(){
   function pgViking(g){
     var H = 3.6;
     pgPad(g, 1.85, '#FFF3E2', C.sky);
-    [-0.72, 0.72].forEach(function(sz){
+    [-0.78, 0.78].forEach(function(sz){
       [-2.15, 2.15].forEach(function(sx){
         g.add(pgBeam([sx, 0.05, sz], [sx * 0.08, H + 0.05, sz * 0.86], 0.095, '#7ECBC4', 7));
       });
       g.add(pgBeam([-1.7, 1.85, sz], [1.7, 1.85, sz], 0.055, '#FFFDF6', 6));
     });
-    g.add(pgBeam([0, H, -0.7], [0, H, 0.7], 0.11, C.iron, 9));
+    g.add(pgBeam([0, H, -0.75], [0, H, 0.75], 0.11, C.iron, 9));
     var ship = new THREE.Group();
     ship.position.set(0, H, 0);
     g.add(ship);
-    ship.add(pgBox(2.15, 0.62, 2.7, '#FFD9A8', 0, -2.1, 0));
-    ship.add(pgBox(1.9, 0.28, 2.4, '#F2BE84', 0, -1.72, 0));
-    ship.add(pgBox(2.0, 0.08, 2.5, '#E9B87C', 0, -1.64, 0));
-    var prow1 = pgCone(0.44, 0.7, '#F0A45C', 0, -2.05, 1.52, 8);
-    prow1.rotation.x = Math.PI / 2; ship.add(prow1);
-    var prow2 = pgCone(0.44, 0.7, '#F0A45C', 0, -2.05, -1.52, 8);
-    prow2.rotation.x = -Math.PI / 2; ship.add(prow2);
-    /* 난간 */
-    ship.add(pgBox(2.1, 0.06, 0.06, '#E0B98A', 0, -1.5, 1.22));
-    ship.add(pgBox(2.1, 0.06, 0.06, '#E0B98A', 0, -1.5, -1.22));
+    /* 둥근 선체 + 갑판 */
+    var hull = pgSph(1.18, '#F2BE84', 0, -2.42, 0, 16);
+    hull.scale.set(0.95, 0.66, 1.32);
+    ship.add(hull);
+    ship.add(pgBox(1.8, 0.12, 2.5, '#FFD9A8', 0, -2.06, 0));
+    [-0.9, 0.9].forEach(function(sx){
+      ship.add(pgBox(0.1, 0.46, 2.5, '#E9B87C', sx, -1.86, 0));
+    });
+    ship.add(pgBox(1.9, 0.46, 0.1, '#E9B87C', 0, -1.86, 1.25));
+    ship.add(pgBox(1.9, 0.46, 0.1, '#E9B87C', 0, -1.86, -1.25));
+    /* 뱃머리 · 고물 */
+    var prow = pgCone(0.46, 1.0, '#F0A45C', 0, -2.0, 1.62, 10);
+    prow.rotation.x = Math.PI / 2.05; ship.add(prow);
+    var stern = pgCone(0.44, 0.85, '#F0A45C', 0, -2.05, -1.6, 10);
+    stern.rotation.x = -Math.PI / 2.05; ship.add(stern);
+    var prowTip = pgSph(0.2, '#E3894B', 0, -1.62, 2.02, 9);
+    ship.add(prowTip);
     /* 돛대 · 돛 · 깃발 */
-    ship.add(pgCyl(0.055, 0.075, 2.9, C.woodD, 0, -0.25, 0, 8));
-    var sail = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 1.35), new THREE.MeshLambertMaterial({
+    ship.add(pgCyl(0.05, 0.07, 2.35, C.woodD, 0, -0.95, 0, 8));
+    var sail = new THREE.Mesh(new THREE.PlaneGeometry(1.52, 1.5), new THREE.MeshLambertMaterial({
       color: 0xFFFDF6, side: THREE.DoubleSide
     }));
-    sail.position.set(0, -0.48, 0.04); ship.add(sail);
-    var stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 0.2), new THREE.MeshLambertMaterial({
+    sail.position.set(0, -0.9, 0.05); ship.add(sail);
+    var stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.52, 0.22), new THREE.MeshLambertMaterial({
       color: new THREE.Color(C.pink), side: THREE.DoubleSide
     }));
-    stripe.position.set(0, -0.66, 0.05); ship.add(stripe);
+    stripe.position.set(0, -1.1, 0.06); ship.add(stripe);
     var flag = pgFlag(C.coral, 0.38, 0.3);
-    flag.position.set(0, 1.15, 0); ship.add(flag);
+    flag.position.set(0, 0.22, 0); ship.add(flag);
     /* 좌석 */
-    [-0.95, -0.32, 0.32, 0.95].forEach(function(z){
-      ship.add(pgBox(1.7, 0.08, 0.3, '#FFE7C8', 0, -1.58, z));
-      ship.add(pgBox(1.7, 0.04, 0.06, '#E0C39B', 0, -1.38, z - 0.18));
+    [-0.75, -0.15, 0.45].forEach(function(z){
+      ship.add(pgBox(1.5, 0.08, 0.3, '#FFE7C8', 0, -1.98, z));
+      ship.add(pgBox(1.5, 0.05, 0.06, '#E0C39B', 0, -1.78, z - 0.17));
     });
     PG.dyn.push(function(t){
       ship.rotation.x = Math.sin(t * 0.85) * 0.82;
@@ -7444,10 +7462,10 @@ async function finishBoot(){
     });
     g.userData.pose = function(idx, t){
       var ph = Math.sin(t * 0.85) * 0.82;
-      var row = idx % 4, side = idx % 2;
-      var px = side ? 0.55 : -0.55;
-      var pz = -0.95 + row * 0.64;
-      var py = -1.52;
+      var row = idx % 3, side = idx % 2;
+      var px = side ? 0.5 : -0.5;
+      var pz = -0.75 + row * 0.6;
+      var py = -1.92;
       return {
         x: px,
         y: H + (py * Math.cos(ph) - pz * Math.sin(ph)),
@@ -7455,9 +7473,9 @@ async function finishBoot(){
         tilt: Math.sin(ph) * 0.12
       };
     };
-    g.userData.labelY = H + 2.15;
+    g.userData.labelY = H + 1.75;
     g.userData.radius = 2.5;
-    g.userData.spots = [{ x:0, y:-1.5, z:0 }];
+    g.userData.spots = [{ x:0, y:-1.9, z:0 }];
   }
 
   function pgTeacup(g){
