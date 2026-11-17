@@ -9461,7 +9461,7 @@ async function finishBoot(){
       if (R){
         var L = R.g, ph = 0;
         if (d.ride === 'slide'){
-          var ph = (t * 0.19 + c.ph * 0.16) % 1;          /* 55%는 계단 오르기, 나머지는 미끄러지기 */
+          ph = (t * 0.19 + c.ph * 0.16) % 1;               /* 55%는 계단 오르기, 나머지는 미끄러지기 */
           var k = ph < 0.55 ? (ph / 0.55) : (1 - (ph - 0.55) / 0.45);
           lx = 0; lz = 2.55 - 2.35 * k; ly = 0.28 + 1.82 * k;
           if (ph < 0.55) tilt = -0.12;
