@@ -2296,29 +2296,18 @@ function mealShift(delta){
   mealSel = ymd(addDays(ymdParse(mealSelKey()), delta));
   renderMeal();
 }
-function mealCacheGet(sch, ym){
-  var key = sch.atpt + '/' + sch.code + '/' + ym;
+function mealCacheGet(sch, monKey){
+  var key = sch.atpt + '/' + sch.code + '/' + monKey;
   if (mealCache[key]) return mealCache[key];
   var c = mealCache[key] = { loading:true, days:{}, code:'', err:'' };
-  var last = new Date(Number(ym.slice(0,4)), Number(ym.slice(4,6)), 0).getDate();
-  var url = 'https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json'
-    + '&ATPT_OFCDC_SC_CODE=' + encodeURIComponent(sch.atpt)
-    + '&SD_SCHUL_CODE=' + encodeURIComponent(sch.code)
-    + '&MLSV_FROM_YMD=' + ym + '01'
-    + '&MLSV_TO_YMD=' + ym + (last < 10 ? '0' + last : '' + last);
-  fetch(url, { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(js){
-    var body = js && js.mealServiceDietInfo;
-    var head = body && body[0] && body[0].head;
-    var res = head && head[1] && head[1].RESULT;
-    var rows = (body && body[1] && body[1].row) || [];
-    if (rows && !Array.isArray(rows)) rows = [rows];
+  var mon = ymdParse(monKey), sun = addDays(mon, 6);
+  mealFetchRange(sch, ymd(mon), ymd(sun)).then(function(rows){
     rows.forEach(function(r){
       var k = String(r.MLSV_YMD || '').replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
       if (!k) return;
       var prev = c.days[k];
       if (!prev || (r.MMEAL_SC_CODE === '2' && prev.MMEAL_SC_CODE !== '2')) c.days[k] = r;
     });
-    c.code = res ? res.CODE : '';
     c.loading = false;
     if (!mealSearchOpen) renderMeal();
   }).catch(function(e){
@@ -2327,6 +2316,30 @@ function mealCacheGet(sch, ym){
     if (!mealSearchOpen) renderMeal();
   });
   return c;
+}
+/* 나이스는 한 번에 5행까지만 돌려준다 → 범위가 넘치면 반으로 나눠 다시 받는다 */
+function mealFetchRange(sch, fromKey, toKey){
+  var from = fromKey.replace(/-/g, ''), to = toKey.replace(/-/g, '');
+  var url = 'https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pIndex=1&pSize=100'
+    + '&ATPT_OFCDC_SC_CODE=' + encodeURIComponent(sch.atpt)
+    + '&SD_SCHUL_CODE=' + encodeURIComponent(sch.code)
+    + '&MLSV_FROM_YMD=' + from
+    + '&MLSV_TO_YMD=' + to;
+  return fetch(url, { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(js){
+    var body = js && js.mealServiceDietInfo;
+    var head = body && body[0] && body[0].head;
+    var total = head && head[0] && head[0].list_total_count;
+    var rows = (body && body[1] && body[1].row) || [];
+    if (rows && !Array.isArray(rows)) rows = [rows];
+    if (typeof total === 'number' && total > rows.length && fromKey !== toKey){
+      var a = ymdParse(fromKey), b = ymdParse(toKey);
+      var midKey = ymd(addDays(a, Math.floor((b - a) / 86400000 / 2)));
+      var nextKey = ymd(addDays(ymdParse(midKey), 1));
+      return Promise.all([ mealFetchRange(sch, fromKey, midKey), mealFetchRange(sch, nextKey, toKey) ])
+        .then(function(parts){ return parts[0].concat(parts[1]); });
+    }
+    return rows;
+  });
 }
 /* DDISH_NM 에서 알레르기 번호·별표를 지우고 메뉴 이름만 */
 function mealDishes(txt){
@@ -2372,8 +2385,8 @@ function renderMeal(){
     + '<button class="ml-arw" type="button" data-act="meal-next" aria-label="하루 뒤">▶</button>'
     + (isToday ? '' : '<button class="ml-now" type="button" data-act="meal-today">오늘</button>')
     + '</div>';
-  var ym = sel.slice(0,4) + sel.slice(5,7);
-  var c = mealCacheGet(sch, ym);
+  var monKey = ymd(mondayOf(d));
+  var c = mealCacheGet(sch, monKey);
   var body;
   if (c.loading) body = '<div class="ml-msg">급식표를 불러오는 중…</div>';
   else if (c.err) body = '<div class="ml-msg">급식을 불러오지 못했어요<small>인터넷 연결을 확인하고 다시 열어 주세요</small></div>';
