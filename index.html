@@ -8609,7 +8609,7 @@ async function finishBoot(){
     wizard_robe: { ly:361, by:390, gs:183, ge:201, sx:192, lcx:171, rcx:213 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
-  var PG_WALK = { N:12, ANG:0.26, LIFT:7, STRIDE:2.5, FADE:5, BOB:2.6, BROT:0.02, MAX:8 };
+  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:8 };
   function pgLegOf(k){ return PG_LEG[k] || PG_LEG_DEF; }
   function pgWalkTexCount(){ var n = 0; for (var q in PG.walkTex) if (PG.walkTex[q]) n++; return n; }
   function pgPresetWalking(k){
