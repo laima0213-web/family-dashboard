@@ -921,6 +921,8 @@ const CONFIG = {
   LOCAL_KEY: "familyDash.root.v3",
   BCAST: "family-dashboard-v3",
   VERSION: 3,
+  GRADE_START_MONTH: 1,        // 학년이 올라가는 기준 월 (1 = 매년 1월 1일, 3 = 3월 신학기)
+  GRADE_BASE_YEAR: 2026,       // 아래 GRADE_BASE 의 학년은 이 해 기준
   SDK_APP:  "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js",
   SDK_AUTH: "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js",
   SDK_DB:   "https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"
@@ -1440,6 +1442,45 @@ function applyConfig(raw){
   TO_IDS = ['family'].concat(MEMBERS);
   TO_LABEL = { family: out.groupLabel };
   MEMBERS.forEach(function(id){ TO_LABEL[id] = FAMILY[id].label; });
+}
+
+/* ============================================================
+   6-1. 학년 — 해가 바뀌면 자동으로 한 학년 올라감
+   2026년 기준 윤 초5 · 봄 초2 → 2027년엔 초6 · 초3
+   기준일은 CONFIG.GRADE_START_MONTH (1 = 매년 1월 1일)
+   ============================================================ */
+var GRADE_BASE = { k1: 5, k2: 2 };          // 2026년 기준 학년 (초5 · 초2)
+function schoolYearNow(){
+  var now = new Date();
+  var m = now.getMonth() + 1;
+  return (m >= (CONFIG.GRADE_START_MONTH || 1)) ? now.getFullYear() : now.getFullYear() - 1;
+}
+function gradeName(g){
+  if (!g || g < 1) return '';
+  if (g <= 6)  return '초' + g;
+  if (g <= 9)  return '중' + (g - 6);
+  if (g <= 12) return '고' + (g - 9);
+  return '졸업';
+}
+function gradeOf(id){
+  var base = GRADE_BASE[id];
+  if (!base) return 0;
+  return base + (schoolYearNow() - (CONFIG.GRADE_BASE_YEAR || 2026));
+}
+function gradeTag(id, rawRole){
+  var g = gradeOf(id);
+  if (!g) return rawRole || ((FAMILY[id] || {}).role || '');
+  return gradeName(g);
+}
+function gradeTip(id){
+  var g = gradeOf(id);
+  if (!g) return '';
+  return schoolYearNow() + '년 기준 ' + gradeName(g) + ' · ' + (schoolYearNow() + 1) + '년엔 ' + gradeName(g + 1);
+}
+function gradeBadge(id){
+  var t = gradeTag(id);
+  if (!t) return '';
+  return '<span class="ktag gtag" title="' + esc(gradeTip(id)) + '">' + esc(t) + '</span>';
 }
 
 /* ============================================================
@@ -1998,12 +2039,12 @@ var AV_PARTS = {
          {k:'cap',n:'캡모자'} ]
 };
 var AV_DEFAULT = {
-  'k1': { hair:'wavetwin', hairColor:'#6B4530', eyeColor:'#7B4B2A', face:'sparkle', skin:'#FFE7D8', outfit:'sailor', acc:'fox' },
-  'k2': { hair:'dango', hairColor:'#3B2B2B', eyeColor:'#3A2E28', face:'smile', skin:'#FFE7D8', outfit:'dress', acc:'ribbon' }
+  'k1': { hair:'wavetwin', hairColor:'#C8A57A', eyeColor:'#5FA8E0', face:'sparkle', skin:'#FFE7D8', outfit:'sailor', acc:'fox' },
+  'k2': { hair:'dango', hairColor:'#3B2B2B', eyeColor:'#7B4B2A', face:'sparkle', skin:'#FFE7D8', outfit:'dress', acc:'ribbon' }
 };
 var AV_FALLBACK = { hair:'bob', hairColor:'#3B2B2B', eyeColor:'#3A2E28', face:'sparkle', skin:'#FFE7D8', outfit:'sailor', acc:'none' };
 var AV_OUT = {
-  sailor:   { body:'#FFFFFF', skirt:'#7FA3D6', trim:'#EAF1FB', sock:'#FFFFFF', shoe:'#6B5A4C', pants:null },
+  sailor:   { body:'#FFFFFF', skirt:'#7FA3D6', trim:'#DCE8F8', sock:'#FFFFFF', shoe:'#6B5A4C', pants:null },
   dress:    { body:'#F9B6CB', skirt:'#F9B6CB', trim:'#FFFFFF', sock:'#FFFFFF', shoe:'#E38FAF', pants:null },
   sweat:    { body:'#B9A2DD', skirt:null,      trim:'#EFE8FA', sock:'#FFFFFF', shoe:'#FFFFFF', pants:'#8AA5C9' },
   hood:     { body:'#FFD86B', skirt:null,      trim:'#FFF6D9', sock:'#FFFFFF', shoe:'#F2B45E', pants:'#BFD9F2' },
@@ -2020,165 +2061,270 @@ function avatarOf(id){
   Object.keys(out).forEach(function(k){ if (typeof saved[k] === 'string' && avValid(k, saved[k])) out[k] = saved[k]; });
   return out;
 }
-/* ---------- 몸 ---------- */
-function avShoe(x, c){
-  return '<path d="M' + x + ' 148 q-1 -5 4 -5 h8 q4 0 4 4 v5 q0 3 -3 3 h-10 q-3 0 -3 -3 z" fill="' + c + '"/>'
-    + '<path d="M' + (x + 4) + ' 150 h10" stroke="#FFFFFF" stroke-width="1.3" opacity=".6"/>';
+
+/* ---------- 색 도우미 ---------- */
+var AV_LINE = '#826051';          /* 부드러운 코코아 갈색 외곽선 */
+var AV_LASH = '#7A5449';          /* 속눈썹 */
+var AV_MOUTH = '#C77F79';
+var _avSeq = 0;
+function avMix(hex, to, t){
+  var a = String(hex || '#000000').replace('#', ''), b = String(to || '#000000').replace('#', '');
+  if (a.length === 3) a = a.charAt(0)+a.charAt(0)+a.charAt(1)+a.charAt(1)+a.charAt(2)+a.charAt(2);
+  if (b.length === 3) b = b.charAt(0)+b.charAt(0)+b.charAt(1)+b.charAt(1)+b.charAt(2)+b.charAt(2);
+  var r = parseInt(a.slice(0,2),16), g = parseInt(a.slice(2,4),16), bl = parseInt(a.slice(4,6),16);
+  var R = parseInt(b.slice(0,2),16), G = parseInt(b.slice(2,4),16), B = parseInt(b.slice(4,6),16);
+  if (isNaN(r) || isNaN(R)) return hex;
+  function f(x, y){ return ('0' + Math.round(x + (y - x) * t).toString(16)).slice(-2); }
+  return '#' + f(r,R) + f(g,G) + f(bl,B);
+}
+function avDark(c, t){ return avMix(c, '#000000', t); }
+function avLight(c, t){ return avMix(c, '#FFFFFF', t); }
+function avN(v){ return Math.round(v * 100) / 100; }
+
+/* ---------- 다리·신발 ---------- */
+function avShoe(cx, c){
+  var l = avN(cx - 5.9);
+  return '<path d="M' + l + ' 145.4 q0 -5.2 5.9 -5.2 q5.9 0 5.9 5.2 v3.2 q0 3.8 -3.8 3.8 h-4.2 q-3.8 0 -3.8 -3.8 z" fill="' + c + '"/>'
+    + '<path d="M' + avN(l + 2.2) + ' 147.6 h7.4" stroke="' + avLight(c, .62) + '" stroke-width="1.1" opacity=".8"/>';
 }
 function avLegs(av){
   var o = AV_OUT[av.outfit] || AV_OUT.sailor, s = '';
-  s += '<rect x="47" y="110" width="10" height="36" rx="5" fill="' + av.skin + '"/>';
-  s += '<rect x="63" y="110" width="10" height="36" rx="5" fill="' + av.skin + '"/>';
+  var sock = o.sock || '#FFFFFF', shoe = o.shoe || '#A2806A';
+  s += '<rect x="48.8" y="106" width="8.8" height="34" rx="4.4" fill="' + av.skin + '"/>';
+  s += '<rect x="62.4" y="106" width="8.8" height="34" rx="4.4" fill="' + av.skin + '"/>';
   if (o.pants){
-    s += '<rect x="44" y="110" width="15" height="31" rx="6" fill="' + o.pants + '"/>';
-    s += '<rect x="61" y="110" width="15" height="31" rx="6" fill="' + o.pants + '"/>';
+    s += '<rect x="46.6" y="100" width="12" height="34" rx="5.6" fill="' + o.pants + '"/>';
+    s += '<rect x="61.4" y="100" width="12" height="34" rx="5.6" fill="' + o.pants + '"/>';
   }
-  s += '<rect x="46" y="135" width="12" height="13" rx="4" fill="' + (o.sock || '#FFFFFF') + '"/>';
-  s += '<rect x="62" y="135" width="12" height="13" rx="4" fill="' + (o.sock || '#FFFFFF') + '"/>';
-  s += avShoe(45, o.shoe || '#8B6B57') + avShoe(61, o.shoe || '#8B6B57');
+  s += '<rect x="48.4" y="132.4" width="9.6" height="10.4" rx="4.2" fill="' + sock + '"/>';
+  s += '<rect x="62" y="132.4" width="9.6" height="10.4" rx="4.2" fill="' + sock + '"/>';
+  if (o.skirt){
+    s += '<path d="M48.9 134.4 q2.3 2.2 4.6 0 q2.3 2.2 4.6 0" fill="none" stroke="' + avDark(sock, .12) + '" stroke-width=".9" opacity=".7"/>';
+    s += '<path d="M62.5 134.4 q2.3 2.2 4.6 0 q2.3 2.2 4.6 0" fill="none" stroke="' + avDark(sock, .12) + '" stroke-width=".9" opacity=".7"/>';
+  }
+  s += avShoe(53.2, shoe) + avShoe(66.8, shoe);
   return s;
 }
+
+/* ---------- 옷 ---------- */
 function avOutfitDetail(kind, o){
   var T = o.trim;
   if (kind === 'sailor')
-    return '<path d="M48 84 q12 12 24 0 l-4 10 q-8 7 -16 0 z" fill="' + T + '"/>'
-      + '<path d="M60 98 l-7 -4 v9 z" fill="#E4677F"/><path d="M60 98 l7 -4 v9 z" fill="#E4677F"/><circle cx="60" cy="98" r="2.2" fill="#C94F68"/>'
-      + '<path d="M52 122 l-2 12 M60 122 v12 M68 122 l2 12" stroke="' + T + '" stroke-width="1.4" opacity=".85"/>';
+    return '<path d="M49 84.4 q11 11.4 22 0 l-2.6 9.6 q-8.4 6.6 -16.8 0 z" fill="' + T + '"/>'
+      + '<path d="M49.4 84.6 q10.6 11 21.2 0" fill="none" stroke="#7C9FCB" stroke-width="1.2" opacity=".75"/>'
+      + '<path d="M60 96.4 l-6.2 -3.6 v8.6 z" fill="#E4677F"/><path d="M60 96.4 l6.2 -3.6 v8.6 z" fill="#E4677F"/>'
+      + '<circle cx="60" cy="96.4" r="2.2" fill="#C94F68"/>'
+      + '<path d="M46.6 108.6 h26.8" stroke="#7FA3D6" stroke-width="1.7" opacity=".9"/>'
+      + '<path d="M50 112.6 q-1.6 4 -2.4 7 M70 112.6 q1.6 4 2.4 7" stroke="' + T + '" stroke-width="1.4" fill="none" opacity=".8"/>';
   if (kind === 'dress')
-    return '<path d="M50 84 q10 8 20 0 l-2 8 q-8 6 -16 0 z" fill="' + T + '"/>'
-      + '<path d="M44 114 h32 l8 22 q-24 7 -48 0 z" fill="none" stroke="' + T + '" stroke-width="2.4"/>'
-      + '<path d="M70 94 q6 4 0 8 q-6 -4 0 -8 z" fill="#F2849E"/><circle cx="60" cy="98" r="1.8" fill="#FFFFFF"/>';
+    return '<path d="M50 84.4 q10 8.4 20 0 l-1.8 7.6 q-8.2 5.8 -16.4 0 z" fill="' + T + '"/>'
+      + '<path d="M60 95.4 c-3.6 -3.2 -7.6 -.4 -5.4 2.6 c1.4 2 5.4 4.4 5.4 4.4 c0 0 4 -2.4 5.4 -4.4 c2.2 -3 -1.8 -5.8 -5.4 -2.6 z" fill="#F2849E"/>'
+      + '<circle cx="60" cy="107.4" r="1.6" fill="#FFFFFF" opacity=".9"/>'
+      + '<path d="M50.4 116.6 q9.6 3 19.2 0" stroke="' + T + '" stroke-width="1.4" fill="none" opacity=".85"/>';
   if (kind === 'sweat')
-    return '<rect x="53" y="102" width="14" height="10" rx="3" fill="' + T + '"/>'
-      + '<path d="M60 88 l2 4 4.2 .6 -3.1 3 .8 4.2 -3.9 -2.1 -3.9 2.1 .8 -4.2 -3.1 -3 4.2 -.6z" fill="#F7D6E6"/>';
+    return '<rect x="53.6" y="82.6" width="12.8" height="5.6" rx="2.8" fill="' + T + '"/>'
+      + '<path d="M60 92.4 l1.7 3.5 3.9 .6 -2.8 2.7 .7 3.8 -3.5 -1.9 -3.5 1.9 .7 -3.8 -2.8 -2.7 3.9 -.6z" fill="#F7D6E6"/>'
+      + '<path d="M47.4 89.4 q12.6 4.4 25.2 0" stroke="' + T + '" stroke-width="1.3" fill="none" opacity=".8"/>';
   if (kind === 'hood')
-    return '<path d="M46 84 q14 10 28 0 q-4 12 -14 12 q-10 0 -14 -12 z" fill="' + T + '"/>'
-      + '<path d="M54 98 v8 M66 98 v8" stroke="' + T + '" stroke-width="1.8"/>'
-      + '<rect x="52" y="106" width="16" height="9" rx="3" fill="' + T + '"/>';
+    return '<path d="M47.4 83 q12.6 11.6 25.2 0 q-2.6 11.2 -12.6 11.2 q-10 0 -12.6 -11.2 z" fill="' + T + '"/>'
+      + '<path d="M56.6 93.4 v9.4 M63.4 93.4 v9.4" stroke="' + T + '" stroke-width="1.6" fill="none"/>'
+      + '<rect x="52.6" y="98" width="14.8" height="8.4" rx="3.4" fill="' + T + '" opacity=".85"/>';
   if (kind === 'overall')
-    return '<path d="M52 96 h16 v22 h-16 z" fill="#8FB4DD"/>'
-      + '<rect x="50" y="84" width="4" height="14" rx="2" fill="#8FB4DD"/><rect x="66" y="84" width="4" height="14" rx="2" fill="#8FB4DD"/>'
-      + '<circle cx="52" cy="88" r="1.6" fill="#F2D06B"/><circle cx="68" cy="88" r="1.6" fill="#F2D06B"/>'
-      + '<rect x="56" y="104" width="8" height="7" rx="2" fill="#DDEBFA"/>';
+    return '<path d="M51.6 91.6 h16.8 v15.4 h-16.8 z" fill="#8FB4DD" opacity=".95"/>'
+      + '<rect x="50.4" y="82.6" width="4.2" height="13" rx="2.1" fill="#8FB4DD"/>'
+      + '<rect x="65.4" y="82.6" width="4.2" height="13" rx="2.1" fill="#8FB4DD"/>'
+      + '<circle cx="52.5" cy="85.4" r="1.7" fill="#F2D06B"/><circle cx="67.5" cy="85.4" r="1.7" fill="#F2D06B"/>'
+      + '<rect x="56" y="99" width="8" height="6.6" rx="2" fill="#DDEBFA"/>';
   if (kind === 'uniform')
-    return '<path d="M48 84 h10 v28 h-10 z" fill="#6C7BA6"/><path d="M62 84 h10 v28 h-10 z" fill="#6C7BA6"/>'
-      + '<path d="M56 84 h8 v8 l-4 5 -4 -5z" fill="#EAF0FB"/>'
-      + '<path d="M60 92 l-3 4 3 12 3 -12z" fill="#D96A7A"/>'
-      + '<path d="M52 122 l-2 12 M60 122 v12 M68 122 l2 12" stroke="#EAF0FB" stroke-width="1.6"/>';
+    return '<path d="M46.4 84 h9.4 v21.8 h-9.4 z" fill="#6C7BA6"/><path d="M64.2 84 h9.4 v21.8 h-9.4 z" fill="#6C7BA6"/>'
+      + '<path d="M55.8 84 h8.4 v7.4 l-4.2 4.6 -4.2 -4.6 z" fill="' + T + '"/>'
+      + '<path d="M60 91.4 l-2.6 3.6 2.6 9.4 2.6 -9.4 z" fill="#D96A7A"/>'
+      + '<path d="M50.6 114.6 q-1.4 4 -2 7 M69.4 114.6 q1.4 4 2 7" stroke="' + T + '" stroke-width="1.3" fill="none" opacity=".85"/>';
   if (kind === 'cardigan')
-    return '<rect x="53" y="84" width="14" height="30" rx="3" fill="#FFFFFF"/>'
-      + '<circle cx="66" cy="94" r="1.5" fill="#6FAF95"/><circle cx="66" cy="103" r="1.5" fill="#6FAF95"/>'
-      + '<path d="M50 84 q-3 12 -1 30" stroke="' + T + '" stroke-width="2" fill="none"/>';
+    return '<rect x="53" y="83" width="14" height="23.6" rx="3" fill="#FFFFFF"/>'
+      + '<circle cx="65.6" cy="91" r="1.6" fill="#6FAF95"/><circle cx="65.6" cy="99" r="1.6" fill="#6FAF95"/><circle cx="65.6" cy="107" r="1.6" fill="#6FAF95"/>'
+      + '<path d="M53.6 83 q-2.6 12 -1.4 23" stroke="' + T + '" stroke-width="1.9" fill="none"/>'
+      + '<path d="M53.6 98 c-2.6 -2.6 -5.6 -.4 -4 2 c1 1.6 4 3.4 4 3.4 c0 0 3 -1.8 4 -3.4 c1.6 -2.4 -1.4 -4.6 -4 -2 z" fill="#F5A9BF"/>';
   if (kind === 'pajama')
-    return '<path d="M52 84 q8 8 16 0" stroke="' + T + '" stroke-width="2" fill="none"/>'
-      + '<path d="M46 96 h28 M46 105 h28" stroke="' + T + '" stroke-width="1.6" opacity=".9"/>'
-      + '<circle cx="60" cy="100" r="1.6" fill="#FFFFFF"/>';
+    return '<path d="M52 83 q8 7 16 0" stroke="' + T + '" stroke-width="1.9" fill="none"/>'
+      + '<path d="M46.6 92.6 h26.8 M46.6 101.6 h26.8" stroke="' + T + '" stroke-width="1.5" opacity=".9" fill="none"/>'
+      + '<circle cx="60" cy="97" r="1.7" fill="#FFFFFF"/>'
+      + '<path d="M62.4 88.4 l1.2 2.4 2.6 .4 -1.9 1.8 .5 2.6 -2.4 -1.3 -2.4 1.3 .5 -2.6 -1.9 -1.8 2.6 -.4z" fill="#FFFFFF" opacity=".9" stroke="none"/>';
   return '';
 }
 function avBody(av){
   var o = AV_OUT[av.outfit] || AV_OUT.sailor, s = '';
-  s += '<rect x="54" y="72" width="12" height="18" rx="5" fill="' + av.skin + '"/>';
-  s += '<rect x="33" y="86" width="10" height="28" rx="5" fill="' + o.body + '" transform="rotate(8 38 100)"/>';
-  s += '<rect x="77" y="86" width="10" height="28" rx="5" fill="' + o.body + '" transform="rotate(-8 82 100)"/>';
-  s += '<path d="M48 84 h24 q6 0 6 7 v22 q0 6 -6 6 h-24 q-6 0 -6 -6 v-22 q0 -7 6 -7 z" fill="' + o.body + '"/>';
-  if (o.skirt) s += '<path d="M44 114 h32 l8 23 q-24 7 -48 0 z" fill="' + o.skirt + '"/>';
+  s += '<path d="M53.4 60 h13.2 v26 q-6.6 3.6 -13.2 0 z" fill="' + avDark(av.skin, .05) + '"/>';
+  s += '<path d="M50 82 q10 -5.4 20 0 q4.4 2.2 4.8 7.4 v10 q0 4.6 -4.6 4.6 h-20.4 q-4.6 0 -4.6 -4.6 v-10 q.4 -5.2 4.8 -7.4 z" fill="' + o.body + '"/>';
+  if (o.skirt){
+    s += '<path d="M46.4 104 h27.2 q2.6 0 3 2.6 l2.8 13.4 q.4 2.8 -2.6 3.4 q-8.4 1.8 -16.8 1.8 q-8.4 0 -16.8 -1.8 q-3 -.6 -2.6 -3.4 l2.8 -13.4 q.4 -2.6 3 -2.6 z" fill="' + o.skirt + '"/>';
+    s += '<path d="M55.4 106.6 l-1.6 15 M60 106.6 v15.2 M64.6 106.6 l1.6 15" stroke="' + avDark(o.skirt, .16) + '" stroke-width="1" fill="none" opacity=".5"/>';
+    s += '<path d="M44.4 122.6 q15.6 3.2 31.2 0" stroke="' + avLight(o.skirt, .55) + '" stroke-width="1.1" fill="none" opacity=".85"/>';
+  }
   s += avOutfitDetail(av.outfit, o);
-  s += '<circle cx="34" cy="114" r="5" fill="' + av.skin + '"/><circle cx="86" cy="114" r="5" fill="' + av.skin + '"/>';
+  var armL = 'M50.6 87 Q42.8 97 40.6 109.6', armR = 'M69.4 87 Q77.2 97 79.4 109.6';
+  s += '<path d="' + armL + '" fill="none" stroke="' + AV_LINE + '" stroke-width="10.2" stroke-linecap="round"/>';
+  s += '<path d="' + armR + '" fill="none" stroke="' + AV_LINE + '" stroke-width="10.2" stroke-linecap="round"/>';
+  s += '<path d="' + armL + '" fill="none" stroke="' + o.body + '" stroke-width="7.8" stroke-linecap="round"/>';
+  s += '<path d="' + armR + '" fill="none" stroke="' + o.body + '" stroke-width="7.8" stroke-linecap="round"/>';
+  s += '<circle cx="40.6" cy="112.2" r="4.5" fill="' + av.skin + '"/><circle cx="79.4" cy="112.2" r="4.5" fill="' + av.skin + '"/>';
   return s;
 }
-/* ---------- 머리 ---------- */
+
+/* ---------- 머리 (뒷머리 · 앞머리) ---------- */
 function avHairBack(style, H){
-  if (style === 'long') return '<path d="M29 52 q0 -32 31 -32 q31 0 31 32 v46 q0 9 -9 9 h-6 q-2 -18 -5 -24 h-22 q-3 6 -5 24 h-6 q-9 0 -9 -9 z" fill="' + H + '"/>';
-  if (style === 'wavetwin') return '<ellipse cx="23" cy="74" rx="12" ry="16" fill="' + H + '"/><ellipse cx="97" cy="74" rx="12" ry="16" fill="' + H + '"/>'
-    + '<ellipse cx="25" cy="94" rx="9" ry="10" fill="' + H + '"/><ellipse cx="95" cy="94" rx="9" ry="10" fill="' + H + '"/>'
-    + '<circle cx="27" cy="59" r="3.4" fill="#F2849E"/><circle cx="93" cy="59" r="3.4" fill="#F2849E"/>';
-  if (style === 'dango') return '<circle cx="32" cy="26" r="12" fill="' + H + '"/><circle cx="88" cy="26" r="12" fill="' + H + '"/>'
-    + '<circle cx="32" cy="26" r="4" fill="#FFFFFF" opacity=".18"/><circle cx="88" cy="26" r="4" fill="#FFFFFF" opacity=".18"/>';
-  if (style === 'bob') return '<rect x="29" y="24" width="62" height="54" rx="30" fill="' + H + '"/>';
-  if (style === 'pony') return '<path d="M86 44 q18 6 20 26 q1 12 -6 18 q-6 -6 -5 -18 q2 -14 -11 -18 z" fill="' + H + '"/>';
+  var D = avDark(H, .16);
+  if (style === 'long')
+    return '<path d="M25.6 50 C22.4 21 41 10.6 60 10.6 C79 10.6 97.6 21 94.4 50 L93.6 88 q0 6.4 -6.4 6.4 h-9 q-1.6 -18 -5 -26 h-26.4 q-3.4 8 -5 26 h-9 q-6.4 0 -6.4 -6.4 z" fill="' + H + '"/>'
+      + '<path d="M29.6 58 q-1.6 16 -2.6 28 M90.4 58 q1.6 16 2.6 28" stroke="' + D + '" stroke-width="1.1" fill="none" opacity=".4"/>';
+  if (style === 'wavetwin')
+    return '<path d="M27 47 C14.6 52 10.4 66 13.2 78 C15.6 87.4 20.4 93 23.4 96 C23.8 89 26.4 85 29.2 81 C23.8 73 24.2 61 31.2 55 Z" fill="' + H + '"/>'
+      + '<path d="M93 47 C105.4 52 109.6 66 106.8 78 C104.4 87.4 99.6 93 96.6 96 C96.2 89 93.6 85 90.8 81 C96.2 73 95.8 61 88.8 55 Z" fill="' + H + '"/>'
+      + '<path d="M18.6 70 q4.6 -4 8.4 -1.4 M101.4 70 q-4.6 -4 -8.4 -1.4" stroke="' + D + '" stroke-width="1.1" fill="none" opacity=".4"/>';
+  if (style === 'bob')
+    return '<path d="M25 50 C22.6 22 41 12 60 12 C79 12 97.4 22 95 50 L95 72 C95 80.6 89 84.6 82.6 82.4 C87.2 74 87.6 64.4 87.6 56 H32.4 C32.4 64.4 32.8 74 37.4 82.4 C31 84.6 25 80.6 25 72 Z" fill="' + H + '"/>';
+  if (style === 'pony')
+    return '<path d="M84 40 C99 43 105.4 58 101.4 74 C98.8 84 93.2 91 87.4 95 C91.2 86 94.2 78 92.4 68 C90.2 56 85.4 51 81 49 Z" fill="' + H + '"/>'
+      + '<path d="M95 64 q3 8 .6 14" stroke="' + D + '" stroke-width="1.1" fill="none" opacity=".4"/>';
+  if (style === 'dango') return '<path d="M26 52 C24.6 30 42 20 60 20 C78 20 95.4 30 94 52 L94 60 q-34 8 -68 0 z" fill="' + H + '"/>';
   return '';
 }
 function avHairFront(style, H){
-  var hi = '';
-  var cap = 'M31 46 q-1 -25 29 -25 q30 0 29 25 q-10 -6 -20 -4 q-10 2 -18 0 q-9 -2 -20 4 z';
-  if (style === 'boy') return '<path d="M30 48 q0 -28 30 -28 q30 0 30 28 q-9 -10 -21 -9 q-9 4 -18 0 q-12 -1 -21 9 z" fill="' + H + '"/>' + hi;
-  if (style === 'sport') return '<path d="M31 44 q-1 -23 29 -23 q30 0 29 23 q-7 -5 -12 -2 q-6 -7 -14 -3 q-9 -4 -15 3 q-9 -2 -17 2 z" fill="' + H + '"/>' + hi;
-  if (style === 'wavetwin') return '<path d="' + cap + '" fill="' + H + '"/>'
-    + '<path d="M33 54 q-6 14 -2 26 q4 -11 9 -15 z" fill="' + H + '"/>'
-    + '<path d="M87 54 q6 14 2 26 q-4 -11 -9 -15 z" fill="' + H + '"/>' + hi;
-  return '<path d="' + cap + '" fill="' + H + '"/>' + hi;
+  var D = avDark(H, .2), L = avLight(H, .55);
+  var cap = 'M26.6 55 C24 25 41 13.6 60 13.6 C79 13.6 96 25 93.4 55 C90.4 42 85 38.6 78 39.4 C71 40.2 65.6 37.8 60 38.6 C54.4 37.8 49 40.2 42 39.4 C35 38.6 29.6 42 26.6 55 Z';
+  var s = '';
+  if (style === 'boy'){
+    s += '<path d="M26.8 52 C25.4 24 42 13 60 13 C78 13 94.6 24 93.2 52 C89 41 83 37.6 75.4 38.6 C68 39.6 61 37 53 39.4 C46 41.6 31 40.6 26.8 52 Z" fill="' + H + '"/>';
+  } else if (style === 'sport'){
+    s += '<path d="' + cap + '" fill="' + H + '"/>';
+    s += '<path d="M26.8 33 C36 21 48 15.6 60 15.6 C72 15.6 84 21 93.2 33 C82 24 71 20.6 60 20.6 C49 20.6 38 24 26.8 33 Z" fill="' + L + '" opacity=".9" stroke="none"/>';
+  } else if (style === 'dango'){
+    s += '<circle cx="36.6" cy="15.4" r="9.6" fill="' + H + '"/><circle cx="83.4" cy="15.4" r="9.6" fill="' + H + '"/>';
+    s += '<path d="M32.4 13 q3.4 -2.6 6.8 -.8 M83.4 12.6 q3.4 -2 6.6 .4" stroke="' + L + '" stroke-width="1.7" fill="none" opacity=".55" stroke-linecap="round"/>';
+    s += '<path d="M44 24.4 q3.4 1.6 4.2 4 q-3.4 .8 -5.4 -1.4 z" fill="#F5A0BA" stroke="none"/>'
+      + '<path d="M76 24.4 q-3.4 1.6 -4.2 4 q3.4 .8 5.4 -1.4 z" fill="#F5A0BA" stroke="none"/>';
+    s += '<path d="' + cap + '" fill="' + H + '"/>';
+    s += '<path d="M40 24 q20 -5.4 40 0" stroke="' + D + '" stroke-width="1" fill="none" opacity=".3"/>';
+  } else {
+    s += '<path d="' + cap + '" fill="' + H + '"/>';
+  }
+  if (style === 'wavetwin'){
+    s += '<path d="M26.4 49.4 q-3.6 2 -4.8 5.6 M93.6 49.4 q3.6 2 4.8 5.6" stroke="' + H + '" stroke-width="6.6" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M26.8 46.6 q-5.2 1.8 -6.2 5.4 q3.4 1.4 6.6 -.6 z" fill="#F5A0BA" stroke="none"/>'
+      + '<path d="M93.2 46.6 q5.2 1.8 6.2 5.4 q-3.4 1.4 -6.6 -.6 z" fill="#F5A0BA" stroke="none"/>'
+      + '<circle cx="21.6" cy="51.2" r="1.5" fill="#EC8AA8" stroke="none"/><circle cx="98.4" cy="51.2" r="1.5" fill="#EC8AA8" stroke="none"/>';
+  }
+  if (style === 'pony'){
+    s += '<path d="M83.6 41.4 q3.4 -2.6 7 -.4 l-.6 4.2 q-3.6 -1.8 -6.6 .2 z" fill="#F7A8C0" stroke="none"/>';
+  }
+  s += '<path d="M35.4 28.6 q8 -9.4 20 -11.6" fill="none" stroke="' + avLight(H, .62) + '" stroke-width="2.4" stroke-linecap="round" opacity=".34"/>';
+  return s;
 }
-/* ---------- 얼굴 ---------- */
-function avEyes(kind, EYE){
-  var d = '#4A382C';
-  function open(cx){
-    return '<ellipse cx="' + cx + '" cy="57" rx="8.4" ry="9.6" fill="' + EYE + '" stroke="#5B4436" stroke-width="1.4"/>'
-      + '<circle cx="' + cx + '" cy="58.4" r="3.7" fill="#2A211C"/>'
-      + '<circle cx="' + (cx - 2.7) + '" cy="53" r="2.6" fill="#FFFFFF"/>'
-      + '<circle cx="' + (cx + 3) + '" cy="61.6" r="1.3" fill="#FFFFFF" opacity=".9"/>'
-      + '<path d="M' + (cx - 7.8) + ' 49.6 q7.8 -3.4 15.6 .4" stroke="' + d + '" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
-      + '<path d="M' + (cx - 8.4) + ' 48.6 q-2 -1 -3.4 -2.4" stroke="' + d + '" stroke-width="1.6" fill="none"/>';
-  }
-  function closed(cx){ return '<path d="M' + (cx - 6) + ' 57 q6 -6 12 0" stroke="' + d + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>'; }
-  if (kind === 'smile' || kind === 'cat') return closed(49) + closed(71);
-  if (kind === 'wink') return open(49) + closed(71);
-  if (kind === 'sleepy') return '<path d="M41 57 h16" stroke="' + d + '" stroke-width="2.4" stroke-linecap="round"/>'
-    + '<path d="M63 57 h16" stroke="' + d + '" stroke-width="2.4" stroke-linecap="round"/>';
-  if (kind === 'brave'){
-    return '<ellipse cx="49" cy="58" rx="8.2" ry="9" fill="' + EYE + '" stroke="#5B4436" stroke-width="1.4"/>'
-      + '<circle cx="49" cy="59.4" r="3.3" fill="#2A211C"/>'
-      + '<circle cx="46.6" cy="55" r="2.3" fill="#FFFFFF"/>'
-      + '<path d="M41 52.8 h16" stroke="' + d + '" stroke-width="2.2" stroke-linecap="round"/>'
-      + '<ellipse cx="71" cy="58" rx="8.2" ry="9" fill="' + EYE + '" stroke="#5B4436" stroke-width="1.4"/>'
-      + '<circle cx="71" cy="59.4" r="3.3" fill="#2A211C"/>'
-      + '<circle cx="68.6" cy="55" r="2.3" fill="#FFFFFF"/>'
-      + '<path d="M63 52.8 h16" stroke="' + d + '" stroke-width="2.2" stroke-linecap="round"/>';
-  }
-  return open(49) + open(71);
+
+/* ---------- 얼굴 (눈·입·볼) ---------- */
+function avEyeOpen(cx, cy, EYE, gid, sc){
+  sc = sc || 1;
+  var rx = 10.3 * sc, ry = 11.4 * sc, ix = rx - 0.9, iy = ry - 0.8;
+  var s = '';
+  s += '<ellipse cx="' + avN(cx) + '" cy="' + avN(cy) + '" rx="' + avN(rx) + '" ry="' + avN(ry) + '" fill="#FFFCF8"/>';
+  s += '<ellipse cx="' + avN(cx) + '" cy="' + avN(cy + 0.9) + '" rx="' + avN(ix) + '" ry="' + avN(iy) + '" fill="url(#' + gid + ')"/>';
+  s += '<ellipse cx="' + avN(cx) + '" cy="' + avN(cy + 0.9) + '" rx="' + avN(ix) + '" ry="' + avN(iy) + '" fill="none" stroke="' + avDark(EYE, .22) + '" stroke-width=".7" opacity=".5"/>';
+  s += '<ellipse cx="' + avN(cx) + '" cy="' + avN(cy + 2.6 * sc) + '" rx="' + avN(3.7 * sc) + '" ry="' + avN(4.9 * sc) + '" fill="#2C221C" opacity=".92"/>';
+  s += '<ellipse cx="' + avN(cx) + '" cy="' + avN(cy + 7.2 * sc) + '" rx="' + avN(4.8 * sc) + '" ry="' + avN(1.8 * sc) + '" fill="#FFFFFF" opacity=".4"/>';
+  s += '<circle cx="' + avN(cx - 3.5 * sc) + '" cy="' + avN(cy - 3.9 * sc) + '" r="' + avN(3.9 * sc) + '" fill="#FFFFFF" opacity=".96"/>';
+  s += '<circle cx="' + avN(cx + 3.9 * sc) + '" cy="' + avN(cy + 4.9 * sc) + '" r="' + avN(1.4 * sc) + '" fill="#FFFFFF" opacity=".9"/>';
+  /* 위쪽 눈꺼풀: 초승달 모양 속눈썹 (위는 볼록, 아래는 살짝 오목) */
+  function fx(v){ return avN(cx + v * sc); }
+  function fy(v){ return avN(cy + v * sc); }
+  s += '<path d="M' + fx(-rx / sc) + ' ' + fy(0)
+     + ' C' + fx(-rx / sc) + ' ' + fy(-6.3) + ' ' + fx(-5.7) + ' ' + fy(-11.4) + ' ' + fx(0) + ' ' + fy(-11.4)
+     + ' C' + fx(5.7) + ' ' + fy(-11.4) + ' ' + fx(rx / sc) + ' ' + fy(-6.3) + ' ' + fx(rx / sc) + ' ' + fy(0)
+     + ' C' + fx(6.6) + ' ' + fy(-6.9) + ' ' + fx(3.6) + ' ' + fy(-9.6) + ' ' + fx(0) + ' ' + fy(-9.6)
+     + ' C' + fx(-3.6) + ' ' + fy(-9.6) + ' ' + fx(-6.6) + ' ' + fy(-6.9) + ' ' + fx(-rx / sc) + ' ' + fy(0)
+     + ' Z" fill="' + AV_LASH + '" stroke="none"/>';
+  return s;
+}
+function avEyeClosed(cx, cy){
+  return '<path d="M' + avN(cx - 6) + ' ' + avN(cy + 1.2) + ' q6 -7.2 12 0" fill="none" stroke="' + AV_LASH + '" stroke-width="2.3" stroke-linecap="round"/>'
+    + '<path d="M' + avN(cx + 6.4) + ' ' + avN(cy + 0.6) + ' q2.6 -2 3.6 -3.4" fill="none" stroke="' + AV_LASH + '" stroke-width="1.6" stroke-linecap="round"/>';
+}
+function avEyes(kind, EYE, gid){
+  var cy = 55;
+  if (kind === 'smile' || kind === 'cat') return avEyeClosed(45, cy) + avEyeClosed(75, cy);
+  if (kind === 'wink') return avEyeOpen(45, cy, EYE, gid) + avEyeClosed(75, cy);
+  if (kind === 'sleepy')
+    return '<path d="M36.4 56.4 q8.6 4.6 17.2 .6" fill="none" stroke="' + AV_LASH + '" stroke-width="2.3" stroke-linecap="round"/>'
+      + '<path d="M66.4 57 q8.6 4 17.2 -.6" fill="none" stroke="' + AV_LASH + '" stroke-width="2.3" stroke-linecap="round"/>'
+      + '<path d="M38 59.6 h1 M40.6 61.4 h1 M82 59.6 h-1" stroke="' + AV_LASH + '" stroke-width="1.2" stroke-linecap="round"/>';
+  if (kind === 'brave') return avEyeOpen(45, cy, EYE, gid) + avEyeOpen(75, cy, EYE, gid);
+  if (kind === 'round') return avEyeOpen(45, cy, EYE, gid, 1.06) + avEyeOpen(75, cy, EYE, gid, 1.06);
+  return avEyeOpen(45, cy, EYE, gid) + avEyeOpen(75, cy, EYE, gid);
 }
 function avMouth(kind){
-  if (kind === 'cat') return '<path d="M54.5 67 q2.8 3.4 5.5 0 q2.8 3.4 5.5 0" stroke="#C1736B" stroke-width="1.8" fill="none"/>';
-  if (kind === 'smile') return '<path d="M55 66.5 q5 5.4 10 0" stroke="#C1736B" stroke-width="1.9" fill="none"/>';
-  if (kind === 'brave') return '<path d="M55 68 h10" stroke="#C1736B" stroke-width="1.9" stroke-linecap="round"/>';
-  if (kind === 'sleepy') return '<ellipse cx="60" cy="68.5" rx="3" ry="2.2" fill="#C1736B"/>';
-  return '<path d="M56 66.6 q4 4.2 8 0" stroke="#C1736B" stroke-width="1.9" fill="none"/>';
+  if (kind === 'cat') return '<path d="M56.2 67.4 q1.9 2.6 3.8 0 q1.9 2.6 3.8 0" fill="none" stroke="' + AV_MOUTH + '" stroke-width="1.7" stroke-linecap="round"/>';
+  if (kind === 'smile') return '<path d="M56 66.8 q4 5.2 8 0" fill="#E9898F" stroke="' + AV_MOUTH + '" stroke-width="1.4" stroke-linejoin="round"/>';
+  if (kind === 'brave') return '<path d="M56.6 68.4 h6.8" fill="none" stroke="' + AV_MOUTH + '" stroke-width="1.8" stroke-linecap="round"/>';
+  if (kind === 'sleepy') return '<ellipse cx="60" cy="68.8" rx="2.5" ry="1.9" fill="#E9898F" stroke="' + AV_MOUTH + '" stroke-width="1.1"/>';
+  return '<path d="M57.2 67.2 q2.8 3.2 5.6 0" fill="none" stroke="' + AV_MOUTH + '" stroke-width="1.8" stroke-linecap="round"/>';
 }
-function avFace(kind, EYE){
-  return avEyes(kind, EYE) + avMouth(kind)
-    + '<ellipse cx="36" cy="64" rx="6.4" ry="3.6" fill="#FFB4C2" opacity=".5"/>'
-    + '<ellipse cx="84" cy="64" rx="6.4" ry="3.6" fill="#FFB4C2" opacity=".5"/>'
-    + '<path d="M60 61.6 q1.7 1.5 0 2.8" stroke="#D9A08E" stroke-width="1.2" fill="none"/>';
+function avFace(kind, EYE, gid){
+  return avEyes(kind, EYE, gid) + avMouth(kind)
+    + '<ellipse cx="30.4" cy="67.2" rx="7.6" ry="4.3" fill="#FF9FB4" opacity=".42"/>'
+    + '<ellipse cx="89.6" cy="67.2" rx="7.6" ry="4.3" fill="#FF9FB4" opacity=".42"/>';
 }
+
 /* ---------- 소품 ---------- */
 function avAcc(kind){
-  if (kind === 'fox') return '<path d="M33 31 l4 -21 13 13 z" fill="#F7C9A6"/><path d="M87 31 l-4 -21 -13 13 z" fill="#F7C9A6"/>'
-    + '<path d="M37 28 l2 -12 7 8 z" fill="#F3A9A0"/><path d="M83 28 l-2 -12 -7 8 z" fill="#F3A9A0"/>';
-  if (kind === 'rabbit') return '<ellipse cx="42" cy="13" rx="7" ry="17" fill="#FBE4EC"/><ellipse cx="78" cy="13" rx="7" ry="17" fill="#FBE4EC"/>'
-    + '<ellipse cx="42" cy="14" rx="3.4" ry="11" fill="#F7C9D6"/><ellipse cx="78" cy="14" rx="3.4" ry="11" fill="#F7C9D6"/>';
-  if (kind === 'ribbon') return '<path d="M43 26 l-14 -9 v18 z" fill="#F2849E"/><path d="M43 26 l14 -9 v18 z" fill="#F2849E"/><circle cx="43" cy="26" r="4.2" fill="#DE6A87"/>';
-  if (kind === 'glasses') return '<circle cx="48" cy="58" r="11" fill="none" stroke="#6B5B4E" stroke-width="2.2"/>'
-    + '<circle cx="72" cy="58" r="11" fill="none" stroke="#6B5B4E" stroke-width="2.2"/>'
-    + '<path d="M59 58 h2" stroke="#6B5B4E" stroke-width="2.2"/>'
-    + '<path d="M37 56 l-6 -3 M83 56 l6 -3" stroke="#6B5B4E" stroke-width="2"/>';
-  if (kind === 'star') return '<path d="M85 26 l2.6 5.4 5.9 .8 -4.3 4.2 1 5.9 -5.2 -2.8 -5.2 2.8 1 -5.9 -4.3 -4.2 5.9 -.8z" fill="#FFD166"/>';
-  if (kind === 'cap') return '<path d="M31 36 q29 -26 58 0 q-29 -8 -58 0 z" fill="#7FB2E5"/>'
-    + '<path d="M27 37 q16 -6 30 1 l-2 5 q-14 -5 -26 0 z" fill="#5E96CC"/>';
+  if (kind === 'fox')
+    return '<path d="M32.6 34 C29.6 22.6 32.4 9.4 39.4 4.2 C46.6 9.6 50 21.6 49.4 32 Z" fill="#F8DFC9"/>'
+      + '<path d="M36 29.4 C34.2 20.6 35.6 12.4 39.4 8.4 C43 12.2 45.2 20.8 45.2 28 Z" fill="#F7BFC0" stroke="none"/>'
+      + '<path d="M87.4 34 C90.4 22.6 87.6 9.4 80.6 4.2 C73.4 9.6 70 21.6 70.6 32 Z" fill="#F8DFC9"/>'
+      + '<path d="M84 29.4 C85.8 20.6 84.4 12.4 80.6 8.4 C77 12.2 74.8 20.8 74.8 28 Z" fill="#F7BFC0" stroke="none"/>';
+  if (kind === 'rabbit')
+    return '<ellipse cx="43.6" cy="7.4" rx="6.2" ry="16.4" transform="rotate(-9 43.6 7.4)" fill="#FBECF1"/>'
+      + '<ellipse cx="44" cy="8.4" rx="3.2" ry="11.8" transform="rotate(-9 44 8.4)" fill="#F7C7D6" stroke="none"/>'
+      + '<ellipse cx="76.4" cy="7.4" rx="6.2" ry="16.4" transform="rotate(9 76.4 7.4)" fill="#FBECF1"/>'
+      + '<ellipse cx="76" cy="8.4" rx="3.2" ry="11.8" transform="rotate(9 76 8.4)" fill="#F7C7D6" stroke="none"/>';
+  if (kind === 'ribbon')
+    return '<path d="M79.6 24.6 C74 18.8 67.4 17.6 66 21.6 C64.6 25.6 71.4 28.6 78.6 27.6 Z" fill="#F58BA8"/>'
+      + '<path d="M79.6 24.6 C85.2 18.8 91.8 17.6 93.2 21.6 C94.6 25.6 87.8 28.6 80.6 27.6 Z" fill="#F58BA8"/>'
+      + '<circle cx="79.6" cy="24.4" r="3.4" fill="#E2738F"/>'
+      + '<path d="M71.6 21.6 q4 1 7 3.4 M87.6 21.6 q-4 1 -7 3.4" stroke="#FFFFFF" stroke-width="1.1" fill="none" opacity=".55" stroke-linecap="round"/>';
+  if (kind === 'glasses')
+    return '<circle cx="45" cy="55" r="11.6" fill="#FFFFFF" opacity=".13" stroke="#8A6A55" stroke-width="1.5"/>'
+      + '<circle cx="75" cy="55" r="11.6" fill="#FFFFFF" opacity=".13" stroke="#8A6A55" stroke-width="1.5"/>'
+      + '<path d="M56.6 53.4 q3.4 -2.4 6.8 0" fill="none" stroke="#8A6A55" stroke-width="1.5"/>'
+      + '<path d="M33.4 52.4 q-4.4 -2.4 -5.6 -5.4 M86.6 52.4 q4.4 -2.4 5.6 -5.4" fill="none" stroke="#8A6A55" stroke-width="1.4" stroke-linecap="round"/>';
+  if (kind === 'star')
+    return '<path d="M84 18.6 l2.4 5 5.5 .7 -4 3.9 .9 5.5 -4.8 -2.6 -4.8 2.6 .9 -5.5 -4 -3.9 5.5 -.7z" fill="#FFD166"/>'
+      + '<path d="M84 21.2 l1.4 2.9 3.2 .4 -2.3 2.3 .5 3.2 -2.8 -1.5 -2.8 1.5 .5 -3.2 -2.3 -2.3 3.2 -.4z" fill="#FFF3C4" stroke="none"/>';
+  if (kind === 'cap')
+    return '<path d="M26.8 36 C26.8 19.4 42 11.6 60 11.6 C78 11.6 93.2 19.4 93.2 36 Z" fill="#8FBFE8"/>'
+      + '<path d="M91.4 35.4 q12.4 .6 14.6 6.4 q-12 3.4 -16.4 -2.2 z" fill="#76A9D6"/>'
+      + '<circle cx="60" cy="12.4" r="2.6" fill="#76A9D6"/>'
+      + '<path d="M36 24 q20 -8 42 -2" stroke="#FFFFFF" stroke-width="1.6" fill="none" opacity=".5" stroke-linecap="round"/>';
   return '';
 }
-/* ---------- 조립 (2~2.5등신 SD 전신) ---------- */
+
+/* ---------- 조립 (2등신 SD 전신) ---------- */
 function avatarSvg(idOrAv){
   var av = (idOrAv && typeof idOrAv === 'object') ? idOrAv : avatarOf(idOrAv);
   var H = av.hairColor, SK = av.skin, EYE = av.eyeColor || '#7B4B2A';
-  var s = '<svg viewBox="0 0 120 172" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
-  s += '<ellipse cx="60" cy="167" rx="27" ry="5" fill="#7A6A5A" opacity=".14"/>';
-  s += '<g stroke="#5B4436" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">';
+  var gid = 'avg' + (++_avSeq);
+  var s = '<svg viewBox="0 0 120 166" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
+  s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+     + '<stop offset="0" stop-color="' + avDark(EYE, .3) + '"/>'
+     + '<stop offset=".55" stop-color="' + EYE + '"/>'
+     + '<stop offset="1" stop-color="' + avLight(EYE, .34) + '"/></linearGradient></defs>';
+  s += '<ellipse cx="60" cy="158" rx="24" ry="4.4" fill="#B9A48C" opacity=".2"/>';
+  s += '<g stroke="' + AV_LINE + '" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round">';
   s += avLegs(av);
   s += avHairBack(av.hair, H);
   s += avBody(av);
-  s += '<ellipse cx="60" cy="50" rx="30" ry="27" fill="' + SK + '"/>';
-  s += '<circle cx="30" cy="53" r="4.6" fill="' + SK + '"/><circle cx="90" cy="53" r="4.6" fill="' + SK + '"/>';
+  s += '<ellipse cx="60" cy="47" rx="34" ry="31" fill="' + SK + '"/>';
+  s += '<circle cx="27.6" cy="50" r="5" fill="' + SK + '"/><circle cx="92.4" cy="50" r="5" fill="' + SK + '"/>';
   s += avHairFront(av.hair, H);
-  s += avFace(av.face, EYE);
+  s += '<g stroke="none">' + avFace(av.face, EYE, gid) + '</g>';
   s += avAcc(av.acc);
   return s + '</g></svg>';
 }
@@ -2237,7 +2383,7 @@ function kidProfileHtml(id){
   return '<div class="prof-top">'
     + '<div class="prof-ava">' + avatarSvg(id) + '</div>'
     + '<div class="prof-id">'
-    +   '<div class="prof-name">' + esc(fam.name || id) + '<span class="ktag">' + esc(fam.role || '') + '</span>'
+    +   '<div class="prof-name">' + esc(fam.name || id) + gradeBadge(id)
     +     (tabDone(id, currentTab(id)) ? '<span class="hfi">🙌</span>' : '') + '</div>'
     +   '<div class="prof-sub"><span class="pms' + (mD ? ' on' : '') + '">☀️ ' + mc.done + '/' + mc.total + (mD ? '🙌' : '') + '</span>'
     +     '<span class="pms' + (eD ? ' on' : '') + '">🌙 ' + ec.done + '/' + ec.total + (eD ? '🙌' : '') + '</span></div>'
@@ -2245,7 +2391,7 @@ function kidProfileHtml(id){
     + '</div>'
     + '<div class="kdots">' + kidDotsHtml(id) + '</div>'
     + '<div class="prof-foot">'
-    +   '<span class="prof-meta">📘 🔥 ' + st + '일 · 주 ' + wk + '/7</span>'
+    +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
     +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '">꾸미러 가기 ›</button>'
     + '</div>';
 }
@@ -2258,7 +2404,7 @@ function renderKidDetail(){
   el.innerHTML =
       '<div class="kd-top">'
     +   '<span class="kd-ava">' + avatarSvg(id) + '</span>'
-    +   '<span class="kd-title">' + esc(fam.name || id) + ' 오늘의 기록</span>'
+    +   '<span class="kd-title">' + esc(fam.name || id) + gradeBadge(id) + ' 오늘의 기록</span>'
     +   (hf ? '<span class="kd-hf">' + hf + '</span>' : '')
     +   '<button class="kd-fold" type="button" data-act="kid-fold">접기 ▴</button>'
     + '</div>'
@@ -2360,7 +2506,7 @@ function renderReward(){
     }
     return '<div class="rwk"><div class="rwk-h"><span class="ava xs">' + AVATAR[fam.av] + '</span><b>' + esc(fam.name) + '</b>'
       + '<span class="rbadge">' + won(fam.reward) + '</span>'
-      + '<span class="rwk-m">' + md + '/' + lastDay + '일 · 🔥' + st + '</span></div>'
+      + '<span class="rwk-m">이번 달 ★' + md + '/' + lastDay + ' · 연속 ' + st + '일</span></div>'
       + '<div class="stamps">' + cells + '</div></div>';
   }).join('');
   el.innerHTML = '<div class="h2">🎁 한 달 보상 도장판 <small>날짜를 눌러 ★/✕ 수정</small></div>' + rows;
@@ -2964,7 +3110,7 @@ function renderAvatarSheet(){
   body.innerHTML =
       '<div class="av-top">'
     +   '<div class="av-prev">' + avatarSvg(av) + '</div>'
-    +   '<div class="av-txt"><b>' + esc((FAMILY[kid] || {}).name || '') + ' 캐릭터</b>'
+    +   '<div class="av-txt"><b>' + esc((FAMILY[kid] || {}).name || '') + gradeBadge(kid) + ' 캐릭터</b>'
     +     '<small>마음대로 골라서 꾸며 보세요</small>'
     +     '<span class="av-tip">고른 모습이 바로 보여요</span></div>'
     + '</div>'
