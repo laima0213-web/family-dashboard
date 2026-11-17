@@ -8926,10 +8926,17 @@ async function finishBoot(){
     PG.rideOrder = PG.rideOrder.filter(function(x){ return x !== key; });
     PG.rideOrder.push(key);
     if (pgRideTexCount() > PG_RIDE.MAX){
+      var victim = '';
       for (var q = 0; q < PG.rideOrder.length; q++){
         var old = PG.rideOrder[q];
-        if (old !== key && !pgRideTexUsed(old)){ pgDropRideTex(old); break; }
+        if (old !== key && !pgRideTexUsed(old)){ victim = old; break; }
       }
+      if (!victim){                       /* 다 타고 있으면 가장 오래된 것부터 */
+        for (var q2 = 0; q2 < PG.rideOrder.length; q2++){
+          if (PG.rideOrder[q2] !== key){ victim = PG.rideOrder[q2]; break; }
+        }
+      }
+      if (victim) pgDropRideTex(victim);
     }
     return out;
   }
