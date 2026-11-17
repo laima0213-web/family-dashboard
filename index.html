@@ -4079,8 +4079,8 @@ document.addEventListener('click', function(ev){
   if (act === 'study-sub-add'){
     var si = $('#studySubInput');
     var sv = ((si && si.value) || '').trim();          /* PIN 입력 중 화면이 다시 그려져도 값이 살아 있게 미리 잡아 둔다 */
-    if (!sv){ if (si) si.focus(); return; }
     studyParentOnly(function(){
+      if (!sv){ var si2 = $('#studySubInput'); if (si2) si2.focus(); return; }
       if (studySubjects().some(function(x){ return x.name === sv; })){ toast('이미 있는 과목이에요'); return; }
       var nid = uid('sb');
       mutate(function(s){ var st = studyEnsure(s); st.subjects = st.subjects.concat([{ id: nid, name: sv }]); });
@@ -4094,9 +4094,9 @@ document.addEventListener('click', function(ev){
     if (!subP){ toast('과목을 먼저 골라 주세요'); return; }
     var pi = $('#presetInput');
     var pv = ((pi && pi.value) || '').trim();
-    if (!pv){ if (pi) pi.focus(); return; }
     var kidP = studyKidId(), subPId = subP.id;
     studyParentOnly(function(){
+      if (!pv){ var pi2 = $('#presetInput'); if (pi2) pi2.focus(); return; }
       if (studyPresets(kidP, subPId).some(function(x){ return x.name === pv; })){ toast('이미 있는 문제집이에요'); return; }
       mutate(function(s){
         var st = studyEnsure(s);
@@ -4181,8 +4181,11 @@ document.addEventListener('click', function(ev){
   if (act === 'study-add'){
     var sgIn = $('#studyInput');
     var sgV = ((sgIn && sgIn.value) || '').trim();
-    if (!sgV){ if (sgIn) sgIn.focus(); return; }
-    studyParentOnly(function(){ studyAdd(sgV); });
+    /* 버튼 자체가 엄빠 전용 — 빈칸이어도 먼저 PIN을 묻고, 통과한 뒤 칸에 포커스 */
+    studyParentOnly(function(){
+      if (!sgV){ var sgNow = $('#studyInput'); if (sgNow) sgNow.focus(); return; }
+      studyAdd(sgV);
+    });
     return;
   }
 
