@@ -10,11 +10,12 @@
   #state{margin-top:8px;font-size:11px;color:#5b5348;white-space:nowrap}
 </style></head>
 <body>
-<iframe id="f" src="./index.html?pgtest=1"></iframe>
+<iframe id="f"></iframe>
 <div id="wrap"><div id="log">시작…</div><div id="state"></div></div>
 <script>
 (function(){
   var out = [], f = document.getElementById('f'), box = document.getElementById('log');
+  f.src = './index.html?pgtest=' + Date.now();
   function L(s){ out.push(s); box.textContent = out.join('\n'); }
   function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   function until(fn, ms){
@@ -52,7 +53,7 @@
 
   async function run(){
     var w = f.contentWindow, d = w.document;
-    L('iframe load');
+    L('iframe load · 수정본=' + (w.document.documentElement.innerHTML.indexOf('applyMatrix4(L.matrixWorld)') > -1));
 
     await until(function(){ return w.__pg; }, 20000);
     try {
