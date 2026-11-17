@@ -8886,8 +8886,8 @@ async function finishBoot(){
         brot = s * 0.03;
       } else if (mode === 'swing'){
         /* 0% 뒤로 굽힘 → 50% 축 늘어짐 → 100% 앞으로 쭉 뻗기 */
-        if (u < 0.5){ w = u / 0.5; f = 0.54 + 0.46 * w; ang = -0.22 * (1 - w); dy = (1 - w) * 0.05 * legLen; }
-        else { w = (u - 0.5) / 0.5; f = 1 - 0.58 * w; ang = 0.26 * w; dy = -0.07 * w * legLen; }
+        if (u < 0.5){ w = u / 0.5; f = 0.5 + 0.5 * w; ang = -0.26 * (1 - w); dy = -0.05 * (1 - w) * legLen; }
+        else { w = (u - 0.5) / 0.5; f = 1 - 0.62 * w; ang = 0.3 * w; dy = -0.09 * w * legLen; }
         pgStampLeg(c, ly, 0, ang, f, 0, dy);
         pgStampLeg(c, ly, 1, ang * 1.12, f * 0.96, 0, dy * 0.9);
         bob = Math.sin(u * Math.PI) * 4;
