@@ -5876,7 +5876,7 @@ async function finishBoot(){
   var PG = {
     on:false, kid:null, ready:false, loading:false, failed:false,
     renderer:null, scene:null, camera:null, raf:0, frames:0,
-    azim:0.62, polar:1.02, dist:20, distGoal:20, target:null,
+    azim:0.62, polar:0.95, dist:32, distGoal:32, target:null,
     ray:null, ndc:null, vec:null, plane:null,
     rides:{}, rideList:[], labels:[], dyn:[],
     chars:{}, charOrder:[], tex:{}, mats:{},
@@ -6051,10 +6051,10 @@ async function finishBoot(){
     sc.background = pgSkyTexture();
     sc.fog = new THREE.Fog(0xE8F6FF, 62, 128);
     PG.scene = sc;
-    PG.target = new THREE.Vector3(0, 1.3, 0);
+    PG.target = new THREE.Vector3(0, 0.8, 0);
     PG.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 220);
     var asp0 = (stage.clientWidth || window.innerWidth) / (stage.clientHeight || window.innerHeight);
-    PG.dist = PG.distGoal = (asp0 < 0.72) ? 33 : 29;
+    PG.dist = PG.distGoal = (asp0 < 0.72) ? 35 : 32;
     PG.ray = new THREE.Raycaster();
     PG.ndc = new THREE.Vector2();
     PG.vec = new THREE.Vector3();
@@ -8390,7 +8390,7 @@ async function finishBoot(){
       return;
     }
     var rs = t.closest('#pgReset');
-    if (rs){ PG.azim = 0.62; PG.polar = 1.02; PG.distGoal = 29; PG.dist = Math.max(29, PG.dist); return; }
+    if (rs){ PG.azim = 0.62; PG.polar = 0.95; PG.distGoal = PG.distGoal > 34 ? 32 : 32; PG.dist = 32; return; }
   }, true);
 
   window.addEventListener('resize', function(){ if (PG.on) pgResize(); });
