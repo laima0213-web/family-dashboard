@@ -1555,8 +1555,8 @@ body.pg-open{overflow:hidden!important}
     <button type="button" class="pg-exit" id="pgExit">✕ 나가기</button>
   </div>
 
-  <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
-  <div class="pg-hint" id="pgHint">빈 곳을 드래그하면 360도 회전 · 캐릭터와 집을 끌어 옮겨요</div>
+  <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터를 데려와요</div>
+  <div class="pg-hint" id="pgHint">빈 곳을 드래그하면 360도 회전 · 캐릭터를 끌어 옮겨요</div>
 
   <div class="pg-zoom">
     <button type="button" id="pgZoomIn" aria-label="확대">＋</button>
@@ -8840,7 +8840,7 @@ async function finishBoot(){
     PG.lastSig = pgSig();
     pgRenderDeco(); pgHintEmpty();
     if (typeof confetti === 'function') confetti(12);
-    toast(pgBuildIcon(kind) + ' ' + pgBuildName(kind) + ' 지었어요! 손가락으로 옮겨 보세요', 2200);
+    toast('🏡 ' + pgBuildIcon(kind) + ' ' + pgBuildName(kind) + ' 지었어요!', 2000);
   }
   /* ＋ 짓기 — 원하는 자리에 바로 (내부·검증용) */
   function pgBuildPlaceAt(kind, x, z, rot){
