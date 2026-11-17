@@ -8710,7 +8710,7 @@ async function finishBoot(){
       var a = angles[ai] * Math.PI / 180;
       for (var ri = 0; ri < radii.length; ri++){
         var x = Math.cos(a) * radii[ri], z = Math.sin(a) * radii[ri];
-        if (pgSpotFree(x, z, R)) return { x: x, z: z, rot: Math.atan2(-x, -z) };
+        if (pgSpotFree(x, z, R)) return { x: x, z: z, rot: Math.atan2(x, z) };   /* 앞면은 바깥(카메라 쪽)을 바라봄 */
       }
     }
     return null;
@@ -8823,6 +8823,7 @@ async function finishBoot(){
   /* ＋ 짓기 */
   function pgBuildAdd(kind){
     if (!PG.kid) return;
+    if (!PG.ready || !PG.scene || typeof THREE === 'undefined'){ toast('놀이터를 준비하는 중이에요 · 잠시 뒤 다시', 2000); return; }
     if (!avUnlocked(PG.kid, 'build', kind)){ toast('상점에서 산 집만 지을 수 있어요', 2400); return; }
     if (pgBuildRecords(PG.kid).length >= PG_BUILD_MAX){ toast('집은 ' + PG_BUILD_MAX + '채까지 지을 수 있어요', 2400); return; }
     var spot = pgBuildFreeSpot(kind);
