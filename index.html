@@ -648,11 +648,12 @@ button{font:inherit;color:inherit}
       "k1 k1 k1 k1 k1 k1 k2 k2 k2 k2 k2 k2"
       "cl cl cl cl rw rw rw rw wk wk wk wk"
       "kd kd kd kd kd kd kd kd kd kd kd kd"
-      "ca ca ca ca ca ca ca ca wt wt wt wt"
-      "fd fd fd fd fd fd fd fd fd fd fd fd";}
+      "ca ca ca ca ca ca ml ml ml ml ml ml"
+      "wt wt wt wt wt wt fd fd fd fd fd fd";}
   #kidA{grid-area:k1} #kidB{grid-area:k2} #clean{grid-area:cl}
   #kidDetail{grid-area:kd}
   #foodbar{grid-area:fd}
+  #meal{grid-area:ml}
   #reward{grid-area:rw} #want{grid-area:wt}
   #cal{grid-area:ca} #week{grid-area:wk}
   .ktab .kth{font-size:9.5px}
@@ -852,6 +853,128 @@ button.st{padding:0}
   .rtx.ed{font-size:9.5px}
   .penx{width:15px;height:15px;font-size:9.5px}
 }
+
+/* ============================================================
+   v8 — 학교 급식 · 꾸미기 상점 · 미세 UI 보정
+   ============================================================ */
+/* ---------- 🍱 학교 급식 ---------- */
+.ml-top{display:flex;align-items:center;gap:5px;margin-bottom:6px;flex-wrap:wrap}
+.ml-top .h2{margin:0}
+.ml-school{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:900;color:#5E7FA8;
+  background:#F1F7FE;border:1px solid #DCE9F8;border-radius:999px;padding:1px 7px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ml-chg{margin-left:auto;border:1px solid #EADFCB;background:#FFF8EA;border-radius:999px;padding:2px 8px;
+  font-size:10.5px;font-weight:900;color:#8B7A63;cursor:pointer;white-space:nowrap}
+.ml-chg:active{transform:scale(.96)}
+.ml-nav{display:flex;align-items:center;gap:4px;margin-bottom:6px}
+.ml-arw{width:26px;height:28px;flex:0 0 26px;border:1px solid #E7DCCB;background:#fff;border-radius:9px;
+  font-size:11px;font-weight:900;color:#8B7A63;cursor:pointer;padding:0;line-height:1}
+.ml-arw:active{transform:scale(.94)}
+.ml-date{flex:1 1 auto;min-width:0;text-align:center;font-size:13px;font-weight:900;color:#5C5044;
+  letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-date i{font-style:normal;font-size:10.5px;font-weight:800;color:#4E8F65;margin-left:3px}
+.ml-now{flex:0 0 auto;height:28px;border:1px solid #CFE4D5;background:#EFF9F1;border-radius:9px;padding:0 8px;
+  font-size:11.5px;font-weight:900;color:#4E8F65;cursor:pointer;white-space:nowrap}
+.ml-tray{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:#F3F8FD;
+  border:1px solid #E3EEF9;border-radius:12px;padding:6px 4px;margin-bottom:6px}
+.ml-tray svg{width:100%;height:26px;display:block}
+.ml-menu{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.ml-menu li{position:relative;padding-left:12px;font-size:13.5px;font-weight:800;color:#4E4136;
+  letter-spacing:-.3px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-menu li::before{content:"•";position:absolute;left:1px;color:#9CC7AC;font-weight:900}
+.ml-msg{font-size:12px;font-weight:800;color:#A2937F;background:#FFFCF4;border:1px dashed #EEE2D0;
+  border-radius:11px;padding:12px 10px;text-align:center;line-height:1.5}
+.ml-msg small{display:block;font-size:10.5px;color:#BCAE9B;font-weight:700;margin-top:2px}
+.ml-mon{margin-top:8px;border:1px solid #CFE4D5;background:#EFF9F1;border-radius:999px;padding:3px 10px;
+  font-size:11.5px;font-weight:900;color:#4E8F65;cursor:pointer}
+.ml-srow{display:flex;gap:4px}
+.ml-srow input{flex:1;min-width:0;height:30px;border:1px dashed #DFD0BB;background:#FFFDF8;border-radius:10px;
+  padding:0 8px;font-size:12.5px;font-family:inherit;color:var(--ink)}
+.ml-srow input::placeholder{color:#C6B7A4}
+.ml-sbtn{flex:0 0 auto;height:30px;border:1px solid var(--mintd);background:var(--mintd);color:#fff;border-radius:10px;
+  padding:0 11px;font-size:12px;font-weight:900;cursor:pointer}
+.ml-res{display:block;width:100%;text-align:left;border:1px solid #EFE6D7;background:#FFFDF8;border-radius:10px;
+  padding:5px 8px;margin-top:4px;cursor:pointer;font:inherit}
+.ml-res:active{transform:scale(.99)}
+.ml-res b{display:block;font-size:12.5px;font-weight:900;color:#4E4136}
+.ml-res small{display:block;font-size:10.5px;color:#A2937F;font-weight:700;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-cancel{margin-top:6px;border:0;background:transparent;color:#9A8C7B;font-size:11.5px;font-weight:800;
+  cursor:pointer;padding:2px 0}
+
+/* ---------- 🛍️ 꾸미기 상점 ---------- */
+.av-ptbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:linear-gradient(100deg,#F4F1FE,#FFF2F7);
+  border:1px solid #E7DEF8;border-radius:13px;padding:6px 9px;margin:1px 0 4px}
+.av-ptbig{font-size:14px;font-weight:900;color:#6D57A8;letter-spacing:-.4px;white-space:nowrap}
+.av-ptunit{font-size:10px;font-weight:900;color:#8A72C0;background:#fff;border:1px solid #E7DEF8;
+  border-radius:999px;padding:1px 6px;white-space:nowrap}
+.av-ptadj{margin-left:auto;display:flex;gap:3px}
+.av-ptadj button{border:1px solid #E7DEF8;background:#fff;border-radius:999px;height:19px;padding:0 6px;
+  font-size:9.5px;font-weight:900;color:#8B7A63;cursor:pointer;line-height:1;white-space:nowrap}
+.av-ptadj button:active{transform:scale(.94)}
+.av-ptnote{flex:1 1 100%;font-size:10px;font-weight:800;color:#9C8EC0;line-height:1.35;letter-spacing:-.2px}
+.av-card{position:relative}
+.av-card.locked{background:#FCFAF5;border-style:dashed;border-color:#EADCC5}
+.av-card-pr{position:absolute;top:4px;right:4px;font-size:9px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
+  border:1px solid #E5D8F6;border-radius:999px;padding:0 5px;line-height:1.55;z-index:3}
+.av-card-img{width:100%;height:62px;display:grid;place-items:center;overflow:hidden;flex:0 0 auto}
+.av-card-img img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;display:block}
+.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:11.5px;
+  line-height:1.3;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av-card.on .av-card-n{color:#3E7A54}
+.av-card-emoji{font-size:26px;line-height:1}
+.av-own{display:block;width:100%;text-align:center;font-size:9px;font-weight:900;color:#6FA97E;line-height:1.7}
+.av-buy{display:block;width:100%;margin-top:1px;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
+  border-radius:999px;height:19px;font-size:9.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
+.av-buy:active{transform:scale(.96)}
+.av-grid{align-items:stretch}
+.av-bggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
+.av-bgdot{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
+.av-card.on .av-bgdot{box-shadow:0 0 0 2.5px #5FA97A}
+.av-lab-note{margin-left:4px;font-size:9.5px;font-weight:900;color:#8A72C0;background:#F4EFFE;
+  border-radius:999px;padding:1px 6px}
+.avtab i{font-style:normal;font-size:9px;font-weight:900;color:#B79BE0;margin-left:2px}
+.av-note-lock{margin-top:6px;font-size:10.5px;font-weight:800;color:#A9762F;background:#FFF8E6;
+  border:1px solid #F3E7C9;border-radius:10px;padding:5px 8px;line-height:1.4}
+/* 프로필 카드 포인트 배지 */
+.pt-badge{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:900;color:#6D57A8;
+  background:#F3EEFF;border:1px solid #E3D8F8;border-radius:999px;padding:0 6px;white-space:nowrap;line-height:1.6}
+
+@media (min-width:1024px){
+  .ml-top{gap:4px;margin-bottom:4px}
+  .ml-school{font-size:9.5px;padding:0 5px}
+  .ml-chg{font-size:9px;padding:1px 6px}
+  .ml-nav{gap:3px;margin-bottom:4px}
+  .ml-arw{width:18px;height:19px;flex-basis:18px;font-size:8.5px;border-radius:6px}
+  .ml-date{font-size:11px}
+  .ml-date i{font-size:9px}
+  .ml-now{height:19px;font-size:9px;padding:0 6px;border-radius:6px}
+  .ml-tray{padding:3px 3px;gap:2px;margin-bottom:4px;border-radius:9px}
+  .ml-tray svg{height:17px}
+  .ml-menu li{font-size:10.8px;line-height:1.45;padding-left:10px}
+  .ml-msg{font-size:10.5px;padding:8px 6px;line-height:1.4}
+  .ml-msg small{font-size:9px}
+  .ml-mon{margin-top:5px;font-size:9px;padding:1px 7px}
+  .ml-srow input{height:22px;font-size:10.5px;border-radius:8px}
+  .ml-sbtn{height:22px;font-size:10px;padding:0 8px;border-radius:8px}
+  .ml-res{padding:3px 6px;margin-top:3px;border-radius:8px}
+  .ml-res b{font-size:10.5px}
+  .ml-res small{font-size:9px}
+  .ml-cancel{font-size:10px;margin-top:4px}
+  .av-ptbar{padding:4px 8px;margin:1px 0 3px;border-radius:10px}
+  .av-ptbig{font-size:12px}
+  .av-ptnote{font-size:9px}
+  .av-card-img{height:54px}
+  .av-card-n{font-size:10.5px}
+  .av-buy{height:17px;font-size:9px}
+  .av-own{font-size:8.5px}
+}
+/* 390px 모바일 — 문제집 입력 줄이 잘리지 않게 두 줄 배치 */
+@media (max-width:430px){
+  .presets .lab{flex:0 0 auto}
+  .presets .minp{order:9;flex:1 1 58%;max-width:none;min-width:0;height:var(--inp-h);border-radius:10px}
+  .presets .fb-add{order:10;width:var(--inp-h);height:var(--inp-h);flex:0 0 auto}
+}
 </style>
 </head>
 <body>
@@ -933,6 +1056,7 @@ button.st{padding:0}
     <section class="card" id="reward" aria-label="한 달 보상 도장판"></section>
     <section class="card" id="week" aria-label="이번 주 밀림 체크"></section>
     <section class="card" id="cal" aria-label="우리집 달력과 다가오는 일정"></section>
+    <section class="card" id="meal" aria-label="학교 급식"></section>
     <section class="card" id="want" aria-label="이거 사주세요"></section>
     <section class="card foodbar" id="foodbar" aria-label="오늘 먹고 싶은 음식"></section>
   </main>
@@ -1671,6 +1795,8 @@ function defaultState(){
     study: defaultStudy(),
     reading: {},
     avatars: {},
+    mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
+    shop: { bonus:{}, spent:{}, unlocked:{} },
     sched: { date: t, items: [] },
     cal: {},
     mission: { idx: randInt(CFG.missions.length), done: false, date: t },
@@ -1794,6 +1920,31 @@ function normalizeState(raw){
     };
   });
   out.avatars = avs;
+  /* 학교 급식 — 나이스 학교 등록 (없으면 석산초등학교) */
+  var ms = (r.mealSchool && typeof r.mealSchool === 'object') ? r.mealSchool : null;
+  out.mealSchool = (ms && typeof ms.atpt === 'string' && ms.atpt && typeof ms.code === 'string' && ms.code && typeof ms.name === 'string' && ms.name)
+    ? { atpt: ms.atpt, code: ms.code, name: ms.name, addr: typeof ms.addr === 'string' ? ms.addr : '' }
+    : { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' };
+  /* 꾸미기 상점 포인트 — 보너스·사용·해금 목록 */
+  var shopRaw = (r.shop && typeof r.shop === 'object') ? r.shop : {};
+  var shopNum = function(src){
+    var o = {};
+    if (src && typeof src === 'object') Object.keys(src).forEach(function(k){
+      if (KIDS.indexOf(k) < 0) return;
+      var n = Number(src[k]);
+      if (isFinite(n) && n) o[k] = n;
+    });
+    return o;
+  };
+  var shopUnlocked = {};
+  if (shopRaw.unlocked && typeof shopRaw.unlocked === 'object') Object.keys(shopRaw.unlocked).forEach(function(k){
+    if (KIDS.indexOf(k) < 0) return;
+    var arr = shopRaw.unlocked[k];
+    if (!Array.isArray(arr)) return;
+    var list = arr.filter(function(x){ return typeof x === 'string' && x; });
+    if (list.length) shopUnlocked[k] = list;
+  });
+  out.shop = { bonus: shopNum(shopRaw.bonus), spent: shopNum(shopRaw.spent), unlocked: shopUnlocked };
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
   if (sc && sc.date === todayKey()){
     out.sched = { date: sc.date, items: normalizeList(sc.items, [], 's') };
@@ -2118,6 +2269,206 @@ function schedSaveText(key, id, text){
   return true;
 }
 /* ============================================================
+   12-0. 🍱 학교 급식 — 나이스(NEIS) Open API
+   ============================================================ */
+var MEAL_DEFAULT_SCHOOL = { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' };
+var MEAL_TRAY = [
+  /* 밥 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#FBF3E4"/><path d="M8 21h24a12 12 0 0 1-24 0z" fill="#FFFDF7" stroke="#E6D8C4" stroke-width="1.6"/><path d="M12 21c1.5-4.5 4.5-6.5 8-6.5s6.5 2 8 6.5z" fill="#F4EBDD" stroke="#E8DBC8" stroke-width="1.2"/></svg>',
+  /* 국 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#EAF3FB"/><path d="M8 21h24a12 12 0 0 1-24 0z" fill="#FFFDF7" stroke="#DCE7F1" stroke-width="1.6"/><ellipse cx="20" cy="21" rx="12" ry="3.5" fill="#F6DFB9"/><path d="M16 11.5c0 2-2 2-2 3.5M23 10c0 2-2 2-2 3.5" stroke="#E2C9A4" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>',
+  /* 나물 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#EFF7EF"/><ellipse cx="20" cy="22" rx="11.5" ry="7.8" fill="#FFFDF7" stroke="#DEE9DC" stroke-width="1.6"/><path d="M13 22c1-3 4-4 6-2s5-1 7 1-2 4-6 4-8-1-7-3z" fill="#BFDDBF"/></svg>',
+  /* 김치 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#FDF0EC"/><path d="M9 20h22l-2 8H11z" fill="#FFFDF7" stroke="#F0DCD4" stroke-width="1.5"/><path d="M12 20c2-2 5-1 6 0s5-2 7 0 3 0 3 0H12z" fill="#E28D7C"/></svg>',
+  /* 계란 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#FFF8E7"/><ellipse cx="20" cy="22" rx="11.5" ry="8.2" fill="#fff" stroke="#EFE2C9" stroke-width="1.5"/><circle cx="20" cy="22" r="4.2" fill="#FFD469"/></svg>',
+  /* 우유 */ '<svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="12.5" fill="#EEF4FD"/><path d="M15 12.5h10l1.5 4v13H13.5v-13z" fill="#fff" stroke="#DCE7F4" stroke-width="1.5"/><path d="M15 12.5h10l1.5 4h-13z" fill="#CFE2F7"/></svg>'
+].join('');
+var mealCache = {};                    /* 'S10/9151118/202611' → { loading, days:{}, code, err } */
+var mealSel = '';                      /* 보고 있는 날 ('YYYY-MM-DD', ''=오늘) */
+var mealSearchOpen = false, mealSearchQ = '', mealSearchBusy = false, mealSearchErr = '', mealSearchRes = null;
+var WD_KO = ['일','월','화','수','목','금','토'];
+
+function ymdParse(k){ return new Date(Number(k.slice(0,4)), Number(k.slice(5,7)) - 1, Number(k.slice(8,10))); }
+function mealSchool(){
+  var s = state && state.mealSchool;
+  if (s && s.atpt && s.code && s.name) return s;
+  return MEAL_DEFAULT_SCHOOL;
+}
+function mealSelKey(){ return mealSel || todayKey(); }
+function mealShift(delta){
+  mealSel = ymd(addDays(ymdParse(mealSelKey()), delta));
+  renderMeal();
+}
+function mealCacheGet(sch, ym){
+  var key = sch.atpt + '/' + sch.code + '/' + ym;
+  if (mealCache[key]) return mealCache[key];
+  var c = mealCache[key] = { loading:true, days:{}, code:'', err:'' };
+  var last = new Date(Number(ym.slice(0,4)), Number(ym.slice(4,6)), 0).getDate();
+  var url = 'https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json'
+    + '&ATPT_OFCDC_SC_CODE=' + encodeURIComponent(sch.atpt)
+    + '&SD_SCHUL_CODE=' + encodeURIComponent(sch.code)
+    + '&MLSV_FROM_YMD=' + ym + '01'
+    + '&MLSV_TO_YMD=' + ym + (last < 10 ? '0' + last : '' + last);
+  fetch(url, { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(js){
+    var body = js && js.mealServiceDietInfo;
+    var head = body && body[0] && body[0].head;
+    var res = head && head[1] && head[1].RESULT;
+    var rows = (body && body[1] && body[1].row) || [];
+    if (rows && !Array.isArray(rows)) rows = [rows];
+    rows.forEach(function(r){
+      var k = r.MLSV_YMD; if (!k) return;
+      var prev = c.days[k];
+      if (!prev || (r.MMEAL_SC_CODE === '2' && prev.MMEAL_SC_CODE !== '2')) c.days[k] = r;
+    });
+    c.code = res ? res.CODE : '';
+    c.loading = false;
+    if (!mealSearchOpen) renderMeal();
+  }).catch(function(e){
+    c.loading = false;
+    c.err = (e && e.message) || 'fetch';
+    if (!mealSearchOpen) renderMeal();
+  });
+  return c;
+}
+/* DDISH_NM 에서 알레르기 번호·별표를 지우고 메뉴 이름만 */
+function mealDishes(txt){
+  return String(txt || '').split(/<br\s*\/?>/i).map(function(s){
+    return s.replace(/&amp;/g, '&')
+            .replace(/\([0-9.\s*]*\)/g, '')
+            .replace(/\*/g, '')
+            .replace(/\s+/g, ' ').trim();
+  }).filter(function(s){ return s && s !== '.' && s !== '-' ; });
+}
+function mealSearchHtml(){
+  var res = '';
+  if (mealSearchBusy) res = '<div class="ml-msg">학교를 찾는 중…</div>';
+  else if (mealSearchErr) res = '<div class="ml-msg">' + esc(mealSearchErr) + '</div>';
+  else if (mealSearchRes && mealSearchRes.length){
+    res = mealSearchRes.map(function(s){
+      return '<button class="ml-res" type="button" data-act="meal-pick" data-atpt="' + esc(s.atpt || '') + '" data-code="' + esc(s.code || '')
+        + '" data-name="' + esc(s.name || '') + '" data-addr="' + esc(s.addr || '') + '">'
+        + '<b>' + esc(s.name || '') + '</b><small>' + esc(s.addr || s.atptName || '') + '</small></button>';
+    }).join('');
+  } else if (mealSearchRes) {
+    res = '<div class="ml-msg">검색 결과가 없어요<small>학교 이름을 조금 더 정확히 적어 주세요</small></div>';
+  }
+  return '<div class="ml-search">'
+    + '<div class="ml-srow"><input id="mealSchoolIn" type="search" placeholder="학교 이름 (예: 석산초등학교)" aria-label="학교 이름" value="' + esc(mealSearchQ) + '">'
+    +   '<button class="ml-sbtn" type="button" data-act="meal-search">검색</button></div>'
+    + res
+    + '<button class="ml-cancel" type="button" data-act="meal-school">취소</button>'
+    + '</div>';
+}
+function renderMeal(){
+  var el = $('#meal'); if (!el || !state) return;
+  var sch = mealSchool();
+  var sel = mealSelKey(), d = ymdParse(sel), isToday = (sel === todayKey());
+  var head = '<div class="ml-top"><div class="h2">🍱 학교 급식</div>'
+    + '<span class="ml-school" title="' + esc(sch.addr || '') + '">🏫 ' + esc(sch.name) + '</span>'
+    + '<button class="ml-chg" type="button" data-act="meal-school">' + (mealSearchOpen ? '닫기' : '학교 변경') + '</button>'
+    + '</div>';
+  if (mealSearchOpen){ el.innerHTML = head + mealSearchHtml(); return; }
+  var nav = '<div class="ml-nav">'
+    + '<button class="ml-arw" type="button" data-act="meal-prev" aria-label="하루 전">◀</button>'
+    + '<span class="ml-date">' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + WD_KO[d.getDay()] + ')' + (isToday ? '<i>· 오늘</i>' : '') + '</span>'
+    + '<button class="ml-arw" type="button" data-act="meal-next" aria-label="하루 뒤">▶</button>'
+    + (isToday ? '' : '<button class="ml-now" type="button" data-act="meal-today">오늘</button>')
+    + '</div>';
+  var ym = sel.slice(0,4) + sel.slice(5,7);
+  var c = mealCacheGet(sch, ym);
+  var body;
+  if (c.loading) body = '<div class="ml-msg">급식표를 불러오는 중…</div>';
+  else if (c.err) body = '<div class="ml-msg">급식을 불러오지 못했어요<small>인터넷 연결을 확인하고 다시 열어 주세요</small></div>';
+  else if (!c.days[sel]){
+    var wd = d.getDay();
+    body = '<div class="ml-msg">🍱 이날은 급식이 없어요<small>주말·공휴일·방학에는 급식이 없어요</small>'
+      + ((wd === 0 || wd === 6) ? '<button class="ml-mon" type="button" data-act="meal-mon">다음 월요일 급식 보기 ›</button>' : '')
+      + '</div>';
+  } else {
+    var dishes = mealDishes(c.days[sel].DDISH_NM);
+    body = '<div class="ml-tray" aria-hidden="true">' + MEAL_TRAY + '</div>'
+      + (dishes.length ? '<ul class="ml-menu">' + dishes.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
+                       : '<div class="ml-msg">메뉴가 비어 있어요</div>');
+  }
+  el.innerHTML = head + nav + body;
+}
+function mealSearchRun(){
+  var inp = $('#mealSchoolIn');
+  var q = String((inp && inp.value) || mealSearchQ || '').trim();
+  mealSearchQ = q;
+  if (q.length < 2){ toast('학교 이름을 두 글자 이상 적어 주세요'); return; }
+  mealSearchBusy = true; mealSearchErr = ''; mealSearchRes = null;
+  renderMeal();
+  fetch('https://open.neis.go.kr/hub/schoolInfo?Type=json&pIndex=1&pSize=20&SCHUL_NM=' + encodeURIComponent(q), { cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(js){
+      var body = js && js.schoolInfo;
+      var rows = (body && body[1] && body[1].row) || [];
+      if (rows && !Array.isArray(rows)) rows = [rows];
+      mealSearchRes = rows.map(function(r){
+        return { atpt: r.ATPT_OFCDC_SC_CODE, code: r.SD_SCHUL_CODE, name: r.SCHUL_NM, addr: r.ORG_RDNMA || r.ORG_RDNDA || '', atptName: r.ATPT_OFCDC_SC_NM };
+      });
+      mealSearchBusy = false;
+      renderMeal();
+    }).catch(function(){
+      mealSearchBusy = false;
+      mealSearchErr = '학교를 찾지 못했어요 · 잠시 후 다시';
+      renderMeal();
+    });
+}
+document.addEventListener('keydown', function(ev){
+  if (ev.key !== 'Enter') return;
+  var t = ev.target;
+  if (t && t.id === 'mealSchoolIn'){ ev.preventDefault(); mealSearchRun(); }
+});
+
+/* ============================================================
+   12-0b. 💎 공부 포인트 & 꾸미기 상점
+   ============================================================ */
+var POINTS_START_MONDAY = '2026-11-16';      /* 이번 주 월요일부터 집계 */
+var ITEM_PRICE = 1;                           /* 모든 아이템 1개 = 💎 1P */
+var AV_FREE = {
+  preset: ['fox_sailor','bun_ribbon','pony_star','mint_hood'],
+  bg: ['cream','pink'],
+  deco: ['none','sparkle']
+};
+function shopRaw(){ return (state && state.shop) || {}; }
+/* 월~일 7일을 모두 ✓ 한 주마다 +1P (중복·누락 없는 결정적 계산) */
+function pointsWeeks(kid){
+  var start = ymdParse(POINTS_START_MONDAY);
+  var curMon = mondayOf(new Date());
+  var n = 0;
+  for (var d = new Date(start); d <= curMon; d = addDays(d, 7)){
+    var all = true;
+    for (var i = 0; i < 7; i++){
+      if (dayState(kid, ymd(addDays(d, i))) !== 'done'){ all = false; break; }
+    }
+    if (all) n++;
+  }
+  return n;
+}
+function pointsRaw(kid){
+  var sh = shopRaw();
+  return pointsWeeks(kid) + (Number((sh.bonus || {})[kid]) || 0) - (Number((sh.spent || {})[kid]) || 0);
+}
+function pointsOf(kid){ var p = pointsRaw(kid); return p > 0 ? p : 0; }
+function avIsFree(kind, key){ return (AV_FREE[kind] || []).indexOf(key) > -1; }
+function avUnlocked(kid, kind, key){
+  if (avIsFree(kind, key)) return true;
+  if (((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1) return true;
+  var worn = (state && state.avatars && state.avatars[kid]) || {};   /* 이미 착용 중이면 보유로 간주 */
+  return worn[kind] === key;
+}
+function avShopCard(kind, key, label, inner, kid, av){
+  var on = (av[kind] === key), has = avUnlocked(kid, kind, key);
+  return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
+    + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? ' (보유)' : ' · 💎 1P') + '">'
+    + (has ? '' : '<span class="av-card-pr">💎 1P</span>')
+    + inner
+    + '<span class="av-card-n">' + esc(label) + '</span>'
+    + (has ? '<span class="av-own">보유 ✓</span>'
+           : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '">1P로 구매</button>')
+    + '</div>';
+}
+
+/* ============================================================
    12-1. 캐릭터 꾸미기 — 마이홈 일러스트 12종 · state.avatars
    ============================================================ */
 var AV_PRESETS = [
@@ -2260,6 +2611,7 @@ function kidProfileHtml(id){
     + '<div class="prof-ava">' + avatarFace(id) + '</div>'
     + '<div class="prof-id">'
     +   '<div class="prof-name">' + esc(fam.name || id) + gradeBadge(id)
+    +     '<span class="pt-badge" title="꾸미기 상점 포인트 · 아이템 1개 = 💎 1P">💎 ' + pointsOf(id) + 'P</span>'
     +     (tabDone(id, currentTab(id)) ? '<span class="hfi">🙌</span>' : '') + '</div>'
     +   '<div class="prof-sub"><span class="pms' + (mD ? ' on' : '') + '">☀️ ' + mc.done + '/' + mc.total + (mD ? '🙌' : '') + '</span>'
     +     '<span class="pms' + (eD ? ' on' : '') + '">🌙 ' + ec.done + '/' + ec.total + (eD ? '🙌' : '') + '</span></div>'
@@ -2268,7 +2620,7 @@ function kidProfileHtml(id){
     + '<div class="kdots">' + kidDotsHtml(id) + '</div>'
     + '<div class="prof-foot">'
     +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
-    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '">꾸미러 가기 ›</button>'
+    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '">🛍️ 꾸미기·상점 ›</button>'
     + '</div>';
 }
 function renderKidDetail(){
@@ -2953,7 +3305,7 @@ function renderAll(){
   if (!state) return;
   renderClock(); renderWeather(); setSync(syncKind);
   renderKids(); renderClean(); renderReward(); renderWeek();
-  renderWant(); renderFood(); renderStudy(); renderReading(); renderCal();
+  renderWant(); renderFood(); renderStudy(); renderReading(); renderCal(); renderMeal();
   setText('#appTitle', CFG.appTitle);
   var fs = $('#footStore');
   if (fs) fs.textContent = DB.isRemote()
@@ -3075,49 +3427,59 @@ function openAvatarSheet(id){
   if (!id) return;
   avatarDraft = { kid: id, av: avRec(id) };
   avatarTab = 'preset';
-  setText('#sheetTitle', ((FAMILY[id] || {}).name || '') + ' 캐릭터 꾸미기');
+  setText('#sheetTitle', ((FAMILY[id] || {}).name || '') + ' 꾸미기 · 상점');
   renderAvatarSheet();
   var sh = $('#sheet'); if (sh) sh.hidden = false;
-  var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '캐릭터 꾸미기');
+  var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '캐릭터 꾸미기와 상점');
 }
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
+  var pts = pointsOf(kid), nm = (FAMILY[kid] || {}).name || '';
   var tabs = [ ['preset', '🧒 캐릭터'], ['bg', '🎨 배경 색'], ['deco', '✨ 꾸미기'] ];
   var pane = '';
   if (avatarTab === 'bg'){
-    pane = '<div class="av-sec"><div class="av-lab">배경 색을 골라요</div>'
-      + '<div class="av-bgs">' + AV_BGS.map(function(bx){
-          var on = av.bg === bx.k;
-          return '<button class="av-bgchip' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="bg" data-v="' + bx.k
-            + '" style="background:' + bx.c + '" aria-label="' + bx.n + '">' + (on ? '✓' : '') + '</button>';
+    pane = '<div class="av-sec"><div class="av-lab">배경 색을 골라요 <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + '<div class="av-bggrid">' + AV_BGS.map(function(bx){
+          return avShopCard('bg', bx.k, bx.n,
+            '<span class="av-card-img"><span class="av-bgdot" style="background:' + bx.c + '"></span></span>', kid, av);
         }).join('') + '</div></div>';
   } else if (avatarTab === 'deco'){
-    pane = '<div class="av-sec"><div class="av-lab">반짝이 꾸미기를 골라요</div>'
-      + '<div class="av-opts">' + AV_DECOS.map(function(d){
-          var on = av.deco === d.k;
-          return '<button class="avopt' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="deco" data-v="' + d.k + '">' + d.n + '</button>';
+    pane = '<div class="av-sec"><div class="av-lab">꾸미기를 골라요 <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + '<div class="av-grid">' + AV_DECOS.map(function(d){
+          var ico = (d.k === 'none') ? '—' : (d.n.split(' ')[0] || '✨');
+          var lab = (d.k === 'none') ? '없음' : d.n.replace(/^\S+\s*/, '');
+          return avShopCard('deco', d.k, lab, '<span class="av-card-img av-card-emoji">' + ico + '</span>', kid, av);
         }).join('') + '</div></div>';
   } else {
-    pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · 12종</div>'
+    pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · 12종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
       + '<div class="av-grid">' + AV_PRESETS.map(function(p){
-          var on = av.preset === p.k;
-          return '<button class="av-card' + (on ? ' on' : '') + '" type="button" data-act="av-pick" data-k="preset" data-v="' + p.k + '">'
-            + '<span class="av-card-img"><img src="' + avImgSrc(p.k) + '" alt="" draggable="false"></span>'
-            + '<span class="av-card-n">' + p.n + '</span></button>';
+          return avShopCard('preset', p.k, p.n,
+            '<span class="av-card-img"><img src="' + avImgSrc(p.k) + '" alt="" draggable="false"></span>', kid, av);
         }).join('') + '</div></div>';
   }
+  var lockedNow = ['preset','bg','deco'].filter(function(k){ return !avUnlocked(kid, k, av[k]); }).length;
   body.innerHTML =
       '<div class="av-top">'
     +   avatarView(av)
-    +   '<div class="av-txt"><b>' + esc((FAMILY[kid] || {}).name || '') + gradeBadge(kid) + ' 캐릭터</b>'
-    +     '<small>마이홈 친구들을 골라 꾸며요</small>'
+    +   '<div class="av-txt"><b>' + esc(nm) + gradeBadge(kid) + ' 캐릭터</b>'
+    +     '<small>상점에서 새 옷·배경·꾸미기를 골라요</small>'
     +     '<span class="av-tip">고른 모습이 바로 보여요</span></div>'
+    + '</div>'
+    + '<div class="av-ptbar">'
+    +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
+    +   '<span class="av-ptunit">1개 = 💎 1P</span>'
+    +   '<span class="av-ptadj">'
+    +     '<button type="button" data-act="pt-bonus" data-d="1" title="부모님 확인 후 포인트 선물">＋1P</button>'
+    +     '<button type="button" data-act="pt-bonus" data-d="-1" title="부모님 확인 후 포인트 조정">－1P</button>'
+    +   '</span>'
+    +   '<span class="av-ptnote">일주일(월~일) 공부 7일을 모두 ✓ 하면 +1P씩 쌓여요 · 아이템은 1개당 💎 1P</span>'
     + '</div>'
     + '<div class="av-tabs">' + tabs.map(function(t){
         return '<button class="avtab' + (avatarTab === t[0] ? ' on' : '') + '" type="button" data-act="av-tab" data-tab="' + t[0] + '">' + t[1] + '</button>';
       }).join('') + '</div>'
     + pane
+    + (lockedNow ? '<div class="av-note-lock">고른 아이템 중 ' + lockedNow + '개는 아직 상점 아이템이에요 · 1P로 구매하거나 보유한 아이템을 골라 주세요</div>' : '')
     + '<div class="av-foot">'
     +   '<button class="av-save" type="button" data-act="av-save">저장</button>'
     +   '<button class="av-cancel" type="button" data-act="sheet-close">취소</button>'
@@ -3156,12 +3518,90 @@ document.addEventListener('click', function(ev){
     return;
   }
   if (act === 'av-tab'){ avatarTab = el.dataset.tab; renderAvatarSheet(); return; }
+  if (act === 'av-buy'){
+    if (!avatarDraft) return;
+    var bKid = avatarDraft.kid, bKind = el.dataset.k, bKey = el.dataset.v;
+    if (avUnlocked(bKid, bKind, bKey)){ toast('이미 가지고 있는 아이템이에요'); return; }
+    if (pointsOf(bKid) < ITEM_PRICE){
+      toast('💎 포인트가 부족해요 · 일주일 공부 7일을 모두 ✓ 하면 +1P', 2800);
+      return;
+    }
+    mutate(function(s){
+      s.shop = s.shop || {};
+      s.shop.unlocked = s.shop.unlocked || {};
+      s.shop.spent = s.shop.spent || {};
+      var arr = (s.shop.unlocked[bKid] || []).slice();
+      var uk = bKind + ':' + bKey;
+      if (arr.indexOf(uk) < 0) arr.push(uk);
+      s.shop.unlocked[bKid] = arr;
+      s.shop.spent[bKid] = (Number(s.shop.spent[bKid]) || 0) + ITEM_PRICE;
+    });
+    avatarDraft.av[bKind] = bKey;
+    renderAvatarSheet(); renderKids();
+    if (typeof confetti === 'function') confetti(18);
+    toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
+    return;
+  }
+  if (act === 'pt-bonus'){
+    if (!avatarDraft) return;
+    var dKid = avatarDraft.kid, delta = Number(el.dataset.d) || 0;
+    if (!delta) return;
+    var dName = (FAMILY[dKid] || {}).name || '';
+    if (delta > 0){
+      if (!confirm(dName + '에게 💎 1P를 선물할까요?\n(부모님 확인용 버튼이에요)')) return;
+      mutate(function(s){
+        s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
+        s.shop.bonus[dKid] = (Number(s.shop.bonus[dKid]) || 0) + 1;
+      });
+      toast('💎 ' + dName + '에게 +1P 선물했어요', 2000);
+    } else {
+      if (!confirm(dName + ' 포인트를 1P 줄일까요?\n(부모님 확인용 버튼이에요)')) return;
+      mutate(function(s){
+        s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
+        s.shop.bonus[dKid] = (Number(s.shop.bonus[dKid]) || 0) - 1;
+      });
+      toast('💎 ' + dName + ' 포인트를 1P 줄였어요', 2000);
+    }
+    renderAvatarSheet(); renderKids();
+    return;
+  }
   if (act === 'av-save'){
     if (!avatarDraft) return;
-    var avKid = avatarDraft.kid, avNew = { preset: avatarDraft.av.preset, bg: avatarDraft.av.bg, deco: avatarDraft.av.deco };
+    var avKid = avatarDraft.kid, unowned = ['preset','bg','deco'].filter(function(k){ return !avUnlocked(avKid, k, avatarDraft.av[k]); });
+    if (unowned.length){
+      toast('아직 구매하지 않은 아이템이에요! 먼저 1P로 구매하거나 보유한 아이템을 골라 주세요', 3000);
+      return;
+    }
+    var avNew = { preset: avatarDraft.av.preset, bg: avatarDraft.av.bg, deco: avatarDraft.av.deco };
     mutate(function(s){ s.avatars = s.avatars || {}; s.avatars[avKid] = avNew; });
     avatarDraft = null; closeCommuteSheet(); renderKids();
     toast('✨ ' + ((FAMILY[avKid] || {}).name || '') + ' 캐릭터를 저장했어요', 2000);
+    return;
+  }
+  /* 학교 급식 */
+  if (act === 'meal-prev'){ mealShift(-1); return; }
+  if (act === 'meal-next'){ mealShift(1); return; }
+  if (act === 'meal-today'){ mealSel = ''; renderMeal(); return; }
+  if (act === 'meal-mon'){
+    var md = ymdParse(mealSelKey());
+    var ddlt = (8 - md.getDay()) % 7; if (!ddlt) ddlt = 7;
+    mealSel = ymd(addDays(md, ddlt)); renderMeal(); return;
+  }
+  if (act === 'meal-school'){
+    mealSearchOpen = !mealSearchOpen;
+    if (!mealSearchOpen){ mealSearchQ = ''; mealSearchRes = null; mealSearchErr = ''; }
+    renderMeal();
+    if (mealSearchOpen) setTimeout(function(){ var i = $('#mealSchoolIn'); if (i) i.focus(); }, 120);
+    return;
+  }
+  if (act === 'meal-search'){ mealSearchRun(); return; }
+  if (act === 'meal-pick'){
+    var sc = { atpt: el.dataset.atpt, code: el.dataset.code, name: el.dataset.name, addr: el.dataset.addr || '' };
+    if (!sc.atpt || !sc.code || !sc.name) return;
+    mutate(function(s){ s.mealSchool = sc; });
+    mealSel = ''; mealSearchOpen = false; mealSearchQ = ''; mealSearchRes = null; mealSearchErr = '';
+    renderMeal();
+    toast('🏫 ' + sc.name + ' 급식을 보여 드릴게요', 2200);
     return;
   }
   if (act === 'cal-jump'){
