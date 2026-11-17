@@ -3239,7 +3239,7 @@ function applyPointBonus(kid, delta){
 }
 function avShopCard(kind, key, label, inner, kid, av){
   var on = (av[kind] === key), has = avUnlocked(kid, kind, key);
-  var paid = avPaid(kid, kind, key);      /* 실제로 1P 주고 산 아이템만 취소할 수 있다 */
+  var paid = avPaid(kid, kind, key) && !avIsFree(kind, key);   /* 1P 주고 산 아이템만 취소 가능 */
   return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
     + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? ' (보유)' : ' · 💎 1P') + '">'
     + (has ? '' : '<span class="av-card-pr">💎 1P</span>')
@@ -3264,7 +3264,7 @@ function avItemLabel(kind, key){
 /* ↩ 구매 취소(삭제) — 1P 환불 + 착용·놀이터 배치까지 함께 정리 (호출 전 부모 PIN 통과 필요) */
 function avRefund(kid, kind, key){
   if (!state) return false;
-  if (!avPaid(kid, kind, key)){ toast('이미 보유하지 않은 아이템이에요'); return false; }
+  if (avIsFree(kind, key) || !avPaid(kid, kind, key)){ toast('이미 보유하지 않은 아이템이에요'); return false; }
   var uk = kind + ':' + key;
   var pgCleaned = 0;
   mutate(function(s){
@@ -4720,7 +4720,7 @@ document.addEventListener('click', function(ev){
   if (act === 'av-refund'){
     if (!avatarDraft) return;
     var rKid = avatarDraft.kid, rKind = el.dataset.k, rKey = el.dataset.v;
-    if (!avPaid(rKid, rKind, rKey)){ toast('이미 보유하지 않은 아이템이에요'); return; }
+    if (avIsFree(rKind, rKey) || !avPaid(rKid, rKind, rKey)){ toast('이미 보유하지 않은 아이템이에요'); return; }
     var rMsg = '「' + avItemLabel(rKind, rKey) + '」 구매를 취소하고 1P를 돌려줄까요?'
              + (rKind === 'preset' ? '\n(놀이터에 나와 있는 캐릭터도 함께 정리돼요)' : '');
     /* 엄마·아빠 PIN을 통과해야만 — 3분 유지 중이라도 실수 방지를 위해 한 번 더 묻는다 */
