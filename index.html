@@ -3814,8 +3814,10 @@ document.addEventListener('click', function(ev){
   }
   if (act === 'pt-parent'){
     if (!avatarDraft) return;
-    /* 부모 PIN이 있으면 먼저 인증해야 바꿀 수 있음 */
-    requireParentPin(function(){ ppinOpen('setup', null); });
+    /* 첫 설정이면 바로 정하기, 이미 있으면 인증한 뒤에만 바꾸기 */
+    if (!parentPinRec) ppinOpen('setup', null);
+    else if (parentAuthed()) ppinOpen('setup', null);
+    else ppinOpen('unlock', function(){ ppinOpen('setup', null); });
     return;
   }
   if (act === 'av-save'){
