@@ -6743,7 +6743,7 @@ async function finishBoot(){
             ly += Math.sin(t * 1.4 + c.ph) * 0.012;
           }
         }
-        PG.vec.set(lx, ly, lz).applyMatrix4(L.g.matrixWorld);
+        PG.vec.set(lx, ly, lz).applyMatrix4(L.matrixWorld);
         c.sp.position.set(PG.vec.x, PG.vec.y + hop, PG.vec.z);
         c.sh.position.set(PG.vec.x, 0.035, PG.vec.z);
         c.sh.scale.set(0.75, 0.75, 1);
