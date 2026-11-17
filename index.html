@@ -559,7 +559,7 @@ button{font:inherit;color:inherit}
 /* ---------- 토스트 · 축하 ---------- */
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:rgba(70,60,52,.94);color:#fff;
   font-size:13.5px;font-weight:700;padding:9px 15px;border-radius:999px;opacity:0;pointer-events:none;transition:all .25s ease;
-  z-index:90;max-width:88%;text-align:center}
+  z-index:97;max-width:88%;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:85;overflow:hidden}
 .cf{position:absolute;top:-14px;width:8px;height:11px;border-radius:2px;opacity:.95;animation:fall 2.2s linear forwards}
@@ -940,6 +940,50 @@ button.st{padding:0}
 .pt-badge{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:900;color:#6D57A8;
   background:#F3EEFF;border:1px solid #E3D8F8;border-radius:999px;padding:0 6px;white-space:nowrap;line-height:1.6}
 .prof-edit .pe-s{display:none}
+/* ---------- 보유 아이템 없음 표시 ---------- */
+.prof-ava.none{display:flex;flex-direction:column;justify-content:center;gap:2px;
+  background:linear-gradient(150deg,#F7F2FF,#F1FAF4);border:1.5px dashed #DED3F2}
+.pa-none{display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1}
+.pa-none b{font-size:18px;font-weight:900;color:#8C7DA8;letter-spacing:-.5px}
+.pa-none small{font-size:7.5px;font-weight:900;color:#A99EB8;letter-spacing:-.4px}
+.kd-ava.none{background:linear-gradient(150deg,#F7F2FF,#F1FAF4);border:1px dashed #DED3F2;border-radius:8px}
+.kd-ava .kd-ini{font-size:12px;font-weight:900;color:#8C7DA8}
+.rb-ico .rb-emo{font-size:16px;line-height:1}
+.av-nopv{width:100%;border:1.5px dashed #E6DAF5;background:linear-gradient(120deg,#FBF7FF,#F7FCFF);
+  border-radius:18px;padding:15px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  text-align:center;margin-bottom:6px}
+.av-nopv b{font-size:13px;font-weight:900;color:#8A7CA6;letter-spacing:-.3px}
+.av-nopv small{font-size:11px;font-weight:800;color:#A99FBE;line-height:1.45}
+.av-ptown{font-size:9.5px;font-weight:900;color:#7B6B95;background:#fff;border:1px dashed #DCD0F0;
+  border-radius:999px;padding:1px 7px;white-space:nowrap}
+.av-ptlock{font-size:9.5px;font-weight:900;color:#B06A5E;background:#FFF3EF;border:1px solid #F6D9D0;
+  border-radius:999px;padding:1px 6px;white-space:nowrap}
+.av-ptfoot{flex:1 1 100%;display:flex;justify-content:flex-end;margin-top:-2px}
+.av-plink{border:0;background:transparent;font-size:9.5px;font-weight:900;color:#8A72C0;cursor:pointer;padding:0}
+.av-tip.try{background:#FBF2FF;border-color:#EBD9F7;color:#8A5FB0}
+/* ---------- 🔒 엄마·아빠 전용 PIN 모달 ---------- */
+.ppin{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:18px}
+.ppin[hidden]{display:none!important}
+.ppin-bd{position:absolute;inset:0;background:rgba(60,50,42,.42)}
+.ppin-card{position:relative;width:100%;max-width:306px;background:#FFFDFA;border:1px solid var(--line);
+  border-radius:24px;padding:15px 15px 12px;box-shadow:0 14px 40px rgba(90,70,50,.28);text-align:center;
+  max-height:92vh;overflow:auto}
+.ppin-emoji{width:44px;height:44px;margin:0 auto;display:grid;place-items:center;border-radius:16px;
+  background:#F4EEFB;font-size:21px}
+.ppin-title{display:block;font-size:15px;font-weight:900;letter-spacing:-.5px;margin-top:8px;color:var(--ink)}
+.ppin-sub{font-size:11.5px;color:var(--sub);font-weight:800;margin-top:3px;line-height:1.5}
+.ppin-dots{display:flex;gap:10px;justify-content:center;margin:12px 0 2px}
+.pdot{width:13px;height:13px;border-radius:50%;background:#F1E7F6;border:1.5px solid #E2D6EE}
+.pdot.on{background:#B79BE0;border-color:#9E7ED0;transform:scale(1.1)}
+.ppin-msg{font-size:11px;font-weight:800;color:#C1604A;min-height:14px}
+.ppin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:5px 0 8px}
+.ppin-pad button{height:44px;border:1px solid #EFE4D3;background:#FFFCF5;border-radius:13px;
+  font-size:18px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit}
+.ppin-pad button:active{transform:scale(.96);background:#FBF3E6}
+.ppin-pad button.fn{font-size:12px;color:#8B7A63;background:#F8F2E7}
+.ppin-foot{display:flex}
+.ppin-foot button{flex:1;height:34px;border-radius:11px;border:1px solid #E7DCCB;background:#FBF7F0;
+  font-size:12px;font-weight:900;color:#8B7A63;cursor:pointer;font-family:inherit}
 
 @media (min-width:1024px){
   .ml-top{gap:4px;margin-bottom:4px}
@@ -1088,6 +1132,35 @@ button.st{padding:0}
 </div>
 <div id="toast"></div>
 <div id="confetti"></div>
+
+<!-- ============================================================
+     🔒 엄마·아빠 전용 PIN (＋1P · －1P) — 아이들 폰으로 못 누르게
+     ============================================================ -->
+<div class="ppin" id="ppin" hidden>
+  <div class="ppin-bd" id="ppinBd"></div>
+  <div class="ppin-card" id="ppinCard" role="dialog" aria-modal="true" aria-label="엄마·아빠 전용 PIN">
+    <div class="ppin-emoji" id="ppinEmoji">🔒</div>
+    <b class="ppin-title" id="ppinTitle">엄마·아빠 전용 PIN</b>
+    <p class="ppin-sub" id="ppinSub">4자리를 눌러 주세요</p>
+    <div class="ppin-dots" id="ppinDots"></div>
+    <div class="ppin-msg" id="ppinMsg"></div>
+    <div class="ppin-pad" id="ppinPad">
+      <button type="button" data-pk="1">1</button>
+      <button type="button" data-pk="2">2</button>
+      <button type="button" data-pk="3">3</button>
+      <button type="button" data-pk="4">4</button>
+      <button type="button" data-pk="5">5</button>
+      <button type="button" data-pk="6">6</button>
+      <button type="button" data-pk="7">7</button>
+      <button type="button" data-pk="8">8</button>
+      <button type="button" data-pk="9">9</button>
+      <button class="fn" type="button" data-pk="del">⌫</button>
+      <button type="button" data-pk="0">0</button>
+      <button class="fn" type="button" data-pk="clr">지움</button>
+    </div>
+    <div class="ppin-foot"><button type="button" id="ppinCancel">취소</button></div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -2447,9 +2520,9 @@ document.addEventListener('keydown', function(ev){
 var POINTS_START_MONDAY = '2026-11-16';      /* 이번 주 월요일부터 집계 */
 var ITEM_PRICE = 1;                           /* 모든 아이템 1개 = 💎 1P */
 var AV_FREE = {
-  preset: ['fox_sailor','bun_ribbon','pony_star','mint_hood'],
-  bg: ['cream','pink'],
-  deco: ['none','sparkle']
+  preset: [],                                 /* 캐릭터 12종 전부 상점 아이템(💎 1P) */
+  bg: [],                                     /* 배경 6종 전부 상점 아이템(💎 1P) */
+  deco: ['none']                              /* '꾸미기 안 함'만 기본 선택값(판매 품목 아님) */
 };
 function shopRaw(){ return (state && state.shop) || {}; }
 /* 월~일 7일을 모두 ✓ 한 주마다 +1P (중복·누락 없는 결정적 계산) */
@@ -2472,11 +2545,152 @@ function pointsRaw(kid){
 }
 function pointsOf(kid){ var p = pointsRaw(kid); return p > 0 ? p : 0; }
 function avIsFree(kind, key){ return (AV_FREE[kind] || []).indexOf(key) > -1; }
+/* 보유 판정은 오직 shop.unlocked(실제 구매) + 무료 기본값만 — 예전에 착용해 둔 값은 보유로 치지 않는다 */
 function avUnlocked(kid, kind, key){
   if (avIsFree(kind, key)) return true;
-  if (((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1) return true;
-  var worn = (state && state.avatars && state.avatars[kid]) || {};   /* 이미 착용 중이면 보유로 간주 */
-  return worn[kind] === key;
+  return ((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1;
+}
+/* 실제로 구매해 둔 아이템 개수 (deco:none 은 '꾸미기 안 함'이라 품목이 아님) */
+function avOwnedCount(kid){
+  return ((shopRaw().unlocked || {})[kid] || []).filter(function(k){ return k !== 'deco:none'; }).length;
+}
+/* 지금 착용 중인 캐릭터를 실제로 가지고 있는지 (없으면 '보유 없음' 표시) */
+function avHasPreset(kid){ return avUnlocked(kid, 'preset', avRec(kid).preset); }
+function avInitial(kid){ var f = FAMILY[kid] || {}; return String(f.name || kid).slice(0, 1); }
+/* ============================================================
+   12-0c. 🔒 엄마·아빠 전용 PIN — ＋1P · －1P 잠금
+     · 가족 입장 PIN(auth/pinHash)과 별도인 4자리
+     · 평문은 저장하지 않고 auth/parentPinHash · parentSalt 만 저장
+   ============================================================ */
+var PARENT_SESSION_MS = 3 * 60 * 1000;    /* 한 번 통과하면 3분 · 시트를 닫으면 다시 잠금 */
+var parentPinRec = null;                  /* { hash, salt } — auth/parentPinHash */
+var parentAuthedUntil = 0;
+var ppinState = { mode:'unlock', entry:'', first:'', after:null };
+
+function resolveParentPin(root){
+  var a = (root && root.auth) || {};
+  if (a.parentPinHash) return { hash: String(a.parentPinHash), salt: String(a.parentSalt || '') };
+  return null;
+}
+function parentAuthed(){ return parentAuthedUntil > Date.now(); }
+function resetParentAuth(){ parentAuthedUntil = 0; }
+function ppinEls(){
+  return { box:$('#ppin'), dots:$('#ppinDots'), msg:$('#ppinMsg'), sub:$('#ppinSub'),
+           title:$('#ppinTitle'), emoji:$('#ppinEmoji'), card:$('#ppinCard') };
+}
+function ppinPaint(){
+  var e = ppinEls(); if (!e.dots) return;
+  var h = '';
+  for (var i=0;i<4;i++) h += '<i class="pdot' + (i < ppinState.entry.length ? ' on' : '') + '"></i>';
+  e.dots.innerHTML = h;
+}
+function ppinText(){
+  var e = ppinEls();
+  if (!e.title) return;
+  var t;
+  if (ppinState.mode === 'setup'){
+    t = { emoji:'🔒', title:'엄마·아빠 전용 PIN 정하기',
+          sub:'＋1P · －1P는 엄마·아빠만 눌러요<br>4자리를 정해 주세요 (가족 PIN과 다르게!)' };
+  } else if (ppinState.mode === 'setup2'){
+    t = { emoji:'🔒', title:'엄마·아빠 전용 PIN 확인', sub:'확인을 위해 한 번 더 눌러 주세요' };
+  } else {
+    t = { emoji:'🔒', title:'엄마·아빠 전용 PIN', sub:'4자리를 눌러 주세요 · 아이들은 못 눌러요' };
+  }
+  e.emoji.textContent = t.emoji;
+  e.title.textContent = t.title;
+  e.sub.innerHTML = t.sub;
+}
+function ppinOpen(mode, after){
+  ppinState = { mode: mode, entry:'', first:'', after: after || null };
+  var e = ppinEls(); if (!e.box) return;
+  e.box.hidden = false;
+  if (e.msg) e.msg.textContent = '';
+  ppinText(); ppinPaint();
+}
+function ppinClose(){
+  var e = ppinEls(); if (e.box) e.box.hidden = true;
+  ppinState = { mode:'unlock', entry:'', first:'', after:null };
+}
+function ppinShake(){
+  var c = $('#ppinCard'); if (!c) return;
+  c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+  if (navigator.vibrate){ try { navigator.vibrate(60); } catch(e){} }
+}
+function ppinWrong(msg){
+  ppinState.entry = ''; ppinPaint(); ppinShake();
+  var e = ppinEls(); if (e.msg) e.msg.textContent = msg || 'PIN이 맞지 않아요';
+}
+function ppinKey(k){
+  var e = ppinEls(); if (!e.box || e.box.hidden) return;
+  if (k === 'del'){ ppinState.entry = ppinState.entry.slice(0, -1); ppinPaint(); return; }
+  if (k === 'clr'){ ppinState.entry = ''; ppinPaint(); if (e.msg) e.msg.textContent = ''; return; }
+  if (!/^[0-9]$/.test(k)) return;
+  if (ppinState.entry.length >= 4) return;
+  ppinState.entry += k;
+  if (e.msg) e.msg.textContent = '';
+  ppinPaint();
+  if (ppinState.entry.length === 4) setTimeout(ppinSubmit, 90);
+}
+async function ppinSubmit(){
+  var pin = ppinState.entry;
+  if (pin.length !== 4) return;
+  if (ppinState.mode === 'unlock'){
+    var dig = await pinDigest(pin, parentPinRec ? parentPinRec.salt : '');
+    if (parentPinRec && dig === parentPinRec.hash){
+      parentAuthedUntil = Date.now() + PARENT_SESSION_MS;
+      var run = ppinState.after;
+      ppinClose();
+      if (run) run();
+      return;
+    }
+    ppinWrong('PIN이 맞지 않아요 · 엄마·아빠에게 물어봐요');
+    return;
+  }
+  if (ppinState.mode === 'setup'){
+    ppinState.first = pin; ppinState.entry = ''; ppinState.mode = 'setup2';
+    ppinPaint(); ppinText();
+    var e1 = ppinEls(); if (e1.msg) e1.msg.textContent = '';
+    return;
+  }
+  if (ppinState.mode === 'setup2'){
+    if (pin === ppinState.first){ await ppinSave(pin); return; }
+    ppinState.first = ''; ppinState.entry = ''; ppinState.mode = 'setup';
+    ppinPaint(); ppinText();
+    ppinWrong('두 번 입력한 PIN이 달라요 · 처음부터 다시');
+    return;
+  }
+}
+async function ppinSave(pin){
+  var salt = randomHex(8);
+  var hash = await pinDigest(pin, salt);
+  parentPinRec = { hash: hash, salt: salt };
+  parentAuthedUntil = Date.now() + PARENT_SESSION_MS;
+  var run = ppinState.after;
+  ppinClose();
+  try {
+    await DB.patch({ 'auth/parentPinHash': hash, 'auth/parentSalt': salt, 'auth/parentUpdatedAt': Date.now() });
+    toast('🔒 엄마·아빠 전용 PIN을 정했어요', 2600);
+  } catch(e){
+    console.warn('[dashboard] 부모 PIN 저장 실패:', e && e.message);
+    toast('부모 PIN을 서버에 저장하지 못했어요 · 연결을 확인해 주세요', 3000);
+  }
+  if (run) run();
+}
+/* 부모 인증이 필요한 동작 앞에 세운다 — 처음이면 정하기, 아니면 입력 */
+function requireParentPin(run){
+  if (!parentPinRec){ ppinOpen('setup', run); return; }
+  if (parentAuthed()){ run(); return; }
+  ppinOpen('unlock', run);
+}
+/* 부모 PIN을 통과한 뒤 실제 포인트 조정 */
+function applyPointBonus(kid, delta){
+  var nm = (FAMILY[kid] || {}).name || '';
+  mutate(function(s){
+    s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
+    s.shop.bonus[kid] = (Number(s.shop.bonus[kid]) || 0) + delta;
+  });
+  toast(delta > 0 ? ('💎 ' + nm + '에게 +1P 선물했어요') : ('💎 ' + nm + ' 포인트를 1P 줄였어요'), 2000);
+  renderAvatarSheet(); renderKids();
 }
 function avShopCard(kind, key, label, inner, kid, av){
   var on = (av[kind] === key), has = avUnlocked(kid, kind, key);
@@ -2567,7 +2781,7 @@ function avatarFace(idOrAv){
 function remainBoxHtml(remain, total, kid){
   var id = kid || activeKid();
   var done = total > 0 && remain <= 0;
-  var ico = done ? '💖' : avatarFace(id);
+  var ico = done ? '💖' : (avHasPreset(id) ? avatarFace(id) : '<span class="rb-emo">🌟</span>');
   var big, small;
   if (total === 0){ big = '0개 등록됨'; small = '하나씩 추가해 볼까요?'; }
   else if (done){ big = '모두 완료했어요!'; small = '다 했어요 🙌'; }
@@ -2629,8 +2843,12 @@ function kidProfileHtml(id){
   var mc = cnt(id,'morning'), ec = cnt(id,'evening');
   var mD = tabDone(id,'morning'), eD = tabDone(id,'evening');
   var wk = weekDone(id), st = streakOf(id);
+  var hasP = avHasPreset(id);
   return '<div class="prof-top">'
-    + '<div class="prof-ava">' + avatarFace(id) + '</div>'
+    + '<div class="prof-ava' + (hasP ? '' : ' none') + '">'
+    +   (hasP ? avatarFace(id)
+              : '<span class="pa-none"><b>' + esc(avInitial(id)) + '</b><small>옷 없음</small></span>')
+    + '</div>'
     + '<div class="prof-id">'
     +   '<div class="prof-name">' + esc(fam.name || id) + gradeBadge(id)
     +     '<span class="pt-badge" title="꾸미기 상점 포인트 · 아이템 1개 = 💎 1P">💎 ' + pointsOf(id) + 'P</span>'
@@ -2642,7 +2860,7 @@ function kidProfileHtml(id){
     + '<div class="kdots">' + kidDotsHtml(id) + '</div>'
     + '<div class="prof-foot">'
     +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
-    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '"><span class="pe-l">🛍️ 꾸미기·상점 ›</span><span class="pe-s">🛍️ 상점 ›</span></button>'
+    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '"><span class="pe-l">' + (hasP ? '🛍️ 꾸미기·상점' : '🛍️ 상점 · 옷 없음') + ' ›</span><span class="pe-s">🛍️ 상점 ›</span></button>'
     + '</div>';
 }
 function renderKidDetail(){
@@ -2651,9 +2869,12 @@ function renderKidDetail(){
   if (!prefs.kidOpen){ el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
   var hf = (tabDone(id,'morning') ? '☀️🙌 ' : '') + (tabDone(id,'evening') ? '🌙🙌' : '');
+  var hasPk = avHasPreset(id);
   el.innerHTML =
       '<div class="kd-top">'
-    +   '<span class="kd-ava">' + avatarFace(id) + '</span>'
+    +   '<span class="kd-ava' + (hasPk ? '' : ' none') + '">'
+    +     (hasPk ? avatarFace(id) : '<b class="kd-ini">' + esc(avInitial(id)) + '</b>')
+    +   '</span>'
     +   '<span class="kd-title">' + esc(fam.name || id) + gradeBadge(id) + ' 오늘의 기록</span>'
     +   (hf ? '<span class="kd-hf">' + hf + '</span>' : '')
     +   '<button class="kd-fold" type="button" data-act="kid-fold">접기 ▴</button>'
@@ -3440,14 +3661,14 @@ function openCommuteSheet(){
   }
   var sh = $('#sheet'); if (sh) sh.hidden = false;
 }
-function closeCommuteSheet(){ var s = $('#sheet'); if (s) s.hidden = true; avatarDraft = null; }
+function closeCommuteSheet(){ var s = $('#sheet'); if (s) s.hidden = true; avatarDraft = null; resetParentAuth(); ppinClose(); }
 
 /* ---------- 캐릭터 꾸미기 시트 ---------- */
 var avatarDraft = null;          // { kid, av:{preset,bg,deco} }
 var avatarTab = 'preset';
 function openAvatarSheet(id){
   if (!id) return;
-  avatarDraft = { kid: id, av: avRec(id) };
+  avatarDraft = { kid: id, av: avRec(id), pick: false };
   avatarTab = 'preset';
   setText('#sheetTitle', ((FAMILY[id] || {}).name || '') + ' 꾸미기 · 상점');
   renderAvatarSheet();
@@ -3481,21 +3702,36 @@ function renderAvatarSheet(){
         }).join('') + '</div></div>';
   }
   var lockedNow = ['preset','bg','deco'].filter(function(k){ return !avUnlocked(kid, k, av[k]); }).length;
+  var ownCount = avOwnedCount(kid);
+  var ownPreset = avUnlocked(kid, 'preset', av.preset);
+  var showAv = ownPreset || !!avatarDraft.pick;      /* 보유 캐릭터가 없으면 입혀보기 전까지는 빈 카드 */
+  var tryBadge = (!ownPreset || !avUnlocked(kid,'bg', av.bg) || !avUnlocked(kid,'deco', av.deco))
+    ? '<span class="av-tip try">미보유 · 입혀보기 중 (💎 1P로 구매 가능)</span>'
+    : '<span class="av-tip">고른 모습이 바로 보여요</span>';
+  var topHtml = showAv
+    ? '<div class="av-top">'
+      + avatarView(av)
+      + '<div class="av-txt"><b>' + esc(nm) + gradeBadge(kid) + ' 캐릭터</b>'
+      +   '<small>' + (ownCount ? '상점에서 새 옷·배경·꾸미기를 골라요' : '지금은 보유한 아이템이 없어요') + '</small>'
+      +   tryBadge + '</div>'
+      + '</div>'
+    : '<div class="av-nopv">'
+      + '<b>👗 보유한 옷이 없어요</b>'
+      + '<small>아래 상점에서 입혀보고 💎 1P로 데려와 보세요 · 카드를 누르면 위에서 바로 보여요</small>'
+      + '</div>';
   body.innerHTML =
-      '<div class="av-top">'
-    +   avatarView(av)
-    +   '<div class="av-txt"><b>' + esc(nm) + gradeBadge(kid) + ' 캐릭터</b>'
-    +     '<small>상점에서 새 옷·배경·꾸미기를 골라요</small>'
-    +     '<span class="av-tip">고른 모습이 바로 보여요</span></div>'
-    + '</div>'
+      topHtml
     + '<div class="av-ptbar">'
     +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
     +   '<span class="av-ptunit">1개 = 💎 1P</span>'
+    +   '<span class="av-ptown">👗 보유한 아이템: ' + (ownCount ? ownCount + '개' : '없음') + '</span>'
+    +   '<span class="av-ptlock">🔒 엄마·아빠 전용</span>'
     +   '<span class="av-ptadj">'
-    +     '<button type="button" data-act="pt-bonus" data-d="1" title="부모님 확인 후 포인트 선물">＋1P</button>'
-    +     '<button type="button" data-act="pt-bonus" data-d="-1" title="부모님 확인 후 포인트 조정">－1P</button>'
+    +     '<button type="button" data-act="pt-bonus" data-d="1" title="엄마·아빠 PIN을 눌러야 선물할 수 있어요">＋1P</button>'
+    +     '<button type="button" data-act="pt-bonus" data-d="-1" title="엄마·아빠 PIN을 눌러야 조정할 수 있어요">－1P</button>'
     +   '</span>'
     +   '<span class="av-ptnote">일주일(월~일) 공부 7일을 모두 ✓ 하면 +1P씩 쌓여요 · 아이템은 1개당 💎 1P</span>'
+    +   '<span class="av-ptfoot"><button type="button" class="av-plink" data-act="pt-parent">🔒 부모 PIN 변경</button></span>'
     + '</div>'
     + '<div class="av-tabs">' + tabs.map(function(t){
         return '<button class="avtab' + (avatarTab === t[0] ? ' on' : '') + '" type="button" data-act="av-tab" data-tab="' + t[0] + '">' + t[1] + '</button>';
@@ -3536,7 +3772,11 @@ document.addEventListener('click', function(ev){
   if (act === 'read-next'){ readingShift(1); return; }
   if (act === 'read-now'){ readingMon = ''; readingEditId = null; renderReading(); return; }
   if (act === 'av-pick'){
-    if (avatarDraft){ avatarDraft.av[el.dataset.k] = el.dataset.v; renderAvatarSheet(); }
+    if (avatarDraft){
+      avatarDraft.av[el.dataset.k] = el.dataset.v;
+      avatarDraft.pick = true;                 /* 미보유 아이템도 위에서 입혀 보기 */
+      renderAvatarSheet();
+    }
     return;
   }
   if (act === 'av-tab'){ avatarTab = el.dataset.tab; renderAvatarSheet(); return; }
@@ -3568,30 +3808,23 @@ document.addEventListener('click', function(ev){
     if (!avatarDraft) return;
     var dKid = avatarDraft.kid, delta = Number(el.dataset.d) || 0;
     if (!delta) return;
-    var dName = (FAMILY[dKid] || {}).name || '';
-    if (delta > 0){
-      if (!confirm(dName + '에게 💎 1P를 선물할까요?\n(부모님 확인용 버튼이에요)')) return;
-      mutate(function(s){
-        s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
-        s.shop.bonus[dKid] = (Number(s.shop.bonus[dKid]) || 0) + 1;
-      });
-      toast('💎 ' + dName + '에게 +1P 선물했어요', 2000);
-    } else {
-      if (!confirm(dName + ' 포인트를 1P 줄일까요?\n(부모님 확인용 버튼이에요)')) return;
-      mutate(function(s){
-        s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
-        s.shop.bonus[dKid] = (Number(s.shop.bonus[dKid]) || 0) - 1;
-      });
-      toast('💎 ' + dName + ' 포인트를 1P 줄였어요', 2000);
-    }
-    renderAvatarSheet(); renderKids();
+    /* ＋1P · －1P 는 엄마·아빠 전용 PIN을 통과해야만 실행된다 */
+    requireParentPin(function(){ applyPointBonus(dKid, delta); });
+    return;
+  }
+  if (act === 'pt-parent'){
+    if (!avatarDraft) return;
+    /* 부모 PIN이 있으면 먼저 인증해야 바꿀 수 있음 */
+    requireParentPin(function(){ ppinOpen('setup', null); });
     return;
   }
   if (act === 'av-save'){
     if (!avatarDraft) return;
     var avKid = avatarDraft.kid, unowned = ['preset','bg','deco'].filter(function(k){ return !avUnlocked(avKid, k, avatarDraft.av[k]); });
     if (unowned.length){
-      toast('아직 구매하지 않은 아이템이에요! 먼저 1P로 구매하거나 보유한 아이템을 골라 주세요', 3000);
+      toast(avOwnedCount(avKid)
+        ? '아직 구매하지 않은 아이템이에요! 먼저 1P로 구매하거나 보유한 아이템을 골라 주세요'
+        : '보유한 아이템이 없어요 · 💎 1P로 구매한 아이템만 저장할 수 있어요', 3000);
       return;
     }
     var avNew = { preset: avatarDraft.av.preset, bg: avatarDraft.av.bg, deco: avatarDraft.av.deco };
@@ -4194,6 +4427,8 @@ function clearToken(){ try { localStorage.removeItem(CONFIG.TOKEN_KEY); } catch(
 function lockNow(){
   clearToken();
   unlocked = false;
+  resetParentAuth();
+  ppinClose();
   var app = $('#app'); if (app) app.hidden = true;
   var lk = $('#lock'); if (lk) lk.hidden = false;
   setLockMode('unlock');
@@ -4270,6 +4505,8 @@ async function unlockApp(afterPinSetup){
   applyConfig(root.config || DEMO_CONFIG);
   prefs = normalizePrefs(readPrefsRaw());
   state = root.state ? normalizeState(root.state) : initialState({ samples: !DB.isRemote() });
+  var prRoot = resolveParentPin(root);
+  if (prRoot) parentPinRec = prRoot;
   var isNew = !root.state;
 
   ensureDay();
@@ -4287,6 +4524,8 @@ async function unlockApp(afterPinSetup){
 }
 function onRemoteRoot(root){
   if (!unlocked || !root) return;
+  var prRec = resolveParentPin(root);        /* 부모 PIN은 다른 기기에서 정해도 바로 반영 */
+  if (prRec) parentPinRec = prRec;
   var first = !remoteSeen;
   remoteSeen = true;
   var remote = root.state ? normalizeState(root.state) : null;
@@ -4383,7 +4622,29 @@ async function loadWeather(){
   var rm = $('#lockRemember');
   if (rm) rm.addEventListener('click', function(e){ e.stopPropagation(); });
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') closeCommuteSheet();
+    if (ev.key === 'Escape'){
+      var pb = $('#ppin');
+      if (pb && !pb.hidden){ ppinClose(); return; }
+      closeCommuteSheet();
+    }
+  });
+})();
+
+(function bindParentPin(){
+  var pad = $('#ppinPad');
+  if (pad) pad.addEventListener('click', function(ev){
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-pk]') : null;
+    if (b) ppinKey(b.getAttribute('data-pk'));
+  });
+  var cancel = $('#ppinCancel');
+  if (cancel) cancel.addEventListener('click', ppinClose);
+  var bd = $('#ppinBd');
+  if (bd) bd.addEventListener('click', ppinClose);
+  document.addEventListener('keydown', function(ev){
+    var box = $('#ppin');
+    if (!box || box.hidden) return;
+    if (/^[0-9]$/.test(ev.key)) ppinKey(ev.key);
+    else if (ev.key === 'Backspace'){ ev.preventDefault(); ppinKey('del'); }
   });
 })();
 
@@ -4439,6 +4700,8 @@ async function finishBoot(){
   prefs = normalizePrefs(readPrefsRaw());
 
   pinRec = resolvePin(lastRoot);
+  parentPinRec = resolveParentPin(lastRoot);
+  resetParentAuth();
   var lockSyncEl = $('#lockSync');
   if (lockSyncEl) lockSyncEl.textContent = DB.isRemote()
     ? '🟡 가족 DB 연결 · PIN을 확인하는 중'
