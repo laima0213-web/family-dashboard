@@ -939,6 +939,7 @@ button.st{padding:0}
 /* 프로필 카드 포인트 배지 */
 .pt-badge{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:900;color:#6D57A8;
   background:#F3EEFF;border:1px solid #E3D8F8;border-radius:999px;padding:0 6px;white-space:nowrap;line-height:1.6}
+.prof-edit .pe-s{display:none}
 
 @media (min-width:1024px){
   .ml-top{gap:4px;margin-bottom:4px}
@@ -977,7 +978,9 @@ button.st{padding:0}
   .prof .prof-foot{flex-wrap:wrap;gap:2px 4px}
   .prof-meta{font-size:9px}
   .prof-edit{font-size:9.5px;padding:2px 6px}
-  .pt-badge{font-size:9.5px;padding:0 5px}
+  .prof-edit .pe-l{display:none}
+  .prof-edit .pe-s{display:inline}
+  .prof .pt-badge{position:absolute;top:5px;right:6px;font-size:9px;padding:0 5px;line-height:1.7}
 }
 </style>
 </head>
@@ -2638,7 +2641,7 @@ function kidProfileHtml(id){
     + '<div class="kdots">' + kidDotsHtml(id) + '</div>'
     + '<div class="prof-foot">'
     +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
-    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '">🛍️ 꾸미기·상점 ›</button>'
+    +   '<button class="prof-edit" type="button" data-act="avatar-open" data-m="' + id + '"><span class="pe-l">🛍️ 꾸미기·상점 ›</span><span class="pe-s">🛍️ 상점 ›</span></button>'
     + '</div>';
 }
 function renderKidDetail(){
