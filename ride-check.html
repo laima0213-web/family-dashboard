@@ -3,7 +3,13 @@
 <head>
 <script>
 /* 🧪 테스트 전용 — 실제 가족 DB는 절대 건드리지 않는다 */
+window.__errs = [];
+window.addEventListener('error', function(e){ window.__errs.push('error: ' + (e.message || '') + ' @' + (e.filename||'') + ':' + (e.lineno||'')); });
+window.addEventListener('unhandledrejection', function(e){ window.__errs.push('reject: ' + ((e.reason && (e.reason.message || e.reason)) || '')); });
 (function(){
+  var ce = console.error, cw = console.warn;
+  console.error = function(){ window.__errs.push('console.error: ' + Array.prototype.join.call(arguments, ' ')); ce.apply(console, arguments); };
+  console.warn = function(){ window.__errs.push('console.warn: ' + Array.prototype.join.call(arguments, ' ')); cw.apply(console, arguments); };
   var preset = ['panda_hood','fox_sailor','hanbok_pastel','angel_wing'];
   var state = {
     playground: {
