@@ -8819,7 +8819,7 @@ async function finishBoot(){
   /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
   var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
   /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
-  var PG_MOUNT_OFF = { carousel:0.38, horse:0.3 };
+  var PG_MOUNT_OFF = { carousel:0.24, horse:0.2 };
   function pgSitOff(k){
     var L = pgLegOf(k);
     return (L.by - L.ly) / 400 * 1.75 * 0.9;
