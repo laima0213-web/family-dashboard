@@ -8876,44 +8876,44 @@ async function finishBoot(){
       ph = i / N * Math.PI * 2; s = Math.sin(ph); u = N > 1 ? i / (N - 1) : 0;
       bob = 0; brot = 0;
       if (mode === 'kick'){
-        /* 왼발·오른발 번갈아 앞으로 차기 — 발 끝이 살짝 들어 올려진다 */
+        /* 왼발·오른발 번갈아 앞으로 차기 — 발 끝이 확실히 보이게 크게 */
         for (j = 0; j < 2; j++){
           var lp = ph + (j ? Math.PI : 0);
           var kick = 0.5 - 0.5 * Math.cos(lp);
-          pgStampLeg(c, ly, j, (j ? -1 : 1) * (0.07 + 0.15 * kick), 1 - 0.44 * kick, 0, -0.09 * kick * legLen);
+          pgStampLeg(c, ly, j, (j ? -1 : 1) * (0.10 + 0.28 * kick), 1 - 0.5 * kick, (j ? -1 : 1) * 2 * kick, -0.06 * kick * legLen);
         }
-        bob = -Math.abs(s) * 4;
-        brot = s * 0.026;
+        bob = -Math.abs(s) * 5;
+        brot = s * 0.03;
       } else if (mode === 'swing'){
         /* 0% 뒤로 굽힘 → 50% 축 늘어짐 → 100% 앞으로 쭉 뻗기 */
-        if (u < 0.5){ w = u / 0.5; f = 0.64 + 0.36 * w; ang = -0.15 * (1 - w); dy = (1 - w) * 0.05 * legLen; }
-        else { w = (u - 0.5) / 0.5; f = 1 - 0.5 * w; ang = 0.19 * w; dy = -0.075 * w * legLen; }
+        if (u < 0.5){ w = u / 0.5; f = 0.54 + 0.46 * w; ang = -0.22 * (1 - w); dy = (1 - w) * 0.05 * legLen; }
+        else { w = (u - 0.5) / 0.5; f = 1 - 0.58 * w; ang = 0.26 * w; dy = -0.07 * w * legLen; }
         pgStampLeg(c, ly, 0, ang, f, 0, dy);
-        pgStampLeg(c, ly, 1, ang * 1.1, f * 0.98, 0, dy * 0.92);
-        bob = Math.sin(u * Math.PI) * 3;
+        pgStampLeg(c, ly, 1, ang * 1.12, f * 0.96, 0, dy * 0.9);
+        bob = Math.sin(u * Math.PI) * 4;
         brot = Math.sin(u * Math.PI) * 0.05;
       } else if (mode === 'climb'){
         /* 다리를 번갈아 크게 들어 올리며 오르기 */
         for (j = 0; j < 2; j++){
           var ls = j ? -s : s;
-          pgStampLeg(c, ly, j, ls * 0.46, 1 - Math.max(0, ls) * 0.2, ls * 5, -Math.max(0, ls) * 0.1 * legLen);
+          pgStampLeg(c, ly, j, ls * 0.6, 1 - Math.max(0, ls) * 0.36, ls * 7, -Math.max(0, ls) * 0.14 * legLen);
         }
-        bob = -Math.abs(s) * 5;
-        brot = s * 0.03;
+        bob = -Math.abs(s) * 6;
+        brot = s * 0.035;
       } else if (mode === 'slide'){
         /* 두 다리 앞으로 쭉 — 살짝 파닥이는 정도 */
-        var fl = Math.sin(u * Math.PI * 2) * 0.05;
-        pgStampLeg(c, ly, 0, 0.25 + fl, 0.86, 3, -0.02 * legLen);
-        pgStampLeg(c, ly, 1, 0.2 - fl, 0.84, -3, -0.02 * legLen);
-        bob = Math.sin(u * Math.PI * 2) * 2;
-        brot = -0.035;
+        var fl = Math.sin(u * Math.PI * 2) * 0.09;
+        pgStampLeg(c, ly, 0, 0.32 + fl, 0.78, 4, -0.03 * legLen);
+        pgStampLeg(c, ly, 1, 0.26 - fl, 0.76, -4, -0.03 * legLen);
+        bob = Math.sin(u * Math.PI * 2) * 3;
+        brot = -0.04;
       } else {
-        /* jump — 다리를 벌렸다 접었다 */
+        /* jump — 다리를 활짝 벌렸다 접었다 */
         var sp = Math.sin(u * Math.PI * 2);
-        pgStampLeg(c, ly, 0, 0.28 + 0.18 * sp, 0.84 + 0.14 * sp, 4, -0.05 * legLen * (0.5 + 0.5 * sp));
-        pgStampLeg(c, ly, 1, -(0.28 + 0.18 * sp), 0.84 + 0.14 * sp, -4, -0.05 * legLen * (0.5 + 0.5 * sp));
-        bob = -Math.abs(sp) * 4;
-        brot = sp * 0.02;
+        pgStampLeg(c, ly, 0, 0.34 + 0.26 * sp, 0.78 + 0.2 * sp, 5, -0.08 * legLen * (0.5 + 0.5 * sp));
+        pgStampLeg(c, ly, 1, -(0.34 + 0.26 * sp), 0.78 + 0.2 * sp, -5, -0.08 * legLen * (0.5 + 0.5 * sp));
+        bob = -Math.abs(sp) * 5;
+        brot = sp * 0.025;
       }
       c.save();
       c.translate(W / 2, hip + 12); c.rotate(brot); c.translate(-W / 2, -(hip + 12));
