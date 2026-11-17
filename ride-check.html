@@ -8818,6 +8818,8 @@ async function finishBoot(){
   };
   /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
   var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
+  /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
+  var PG_MOUNT_OFF = { carousel:0.38, horse:0.3 };
   function pgSitOff(k){
     var L = pgLegOf(k);
     return (L.by - L.ly) / 400 * 1.75 * 0.9;
@@ -9515,6 +9517,13 @@ async function finishBoot(){
           pgCharStill(c);               /* 그림이 아직 안 실렸을 때만 정지 그림 */
         }
         PG.vec.set(lx, ly, lz).applyMatrix4(L.matrixWorld);
+        /* 목마에 앉으면 꽁무니·다리가 말 몸에 가리지 않게 카메라 쪽으로 살짝 */
+        var mo = PG_MOUNT_OFF[d.ride] || 0;
+        if (mo && PG.camera){
+          var cdx = PG.camera.position.x - PG.vec.x, cdz = PG.camera.position.z - PG.vec.z;
+          var cdl = Math.sqrt(cdx * cdx + cdz * cdz) || 1;
+          PG.vec.x += cdx / cdl * mo; PG.vec.z += cdz / cdl * mo;
+        }
         c.sp.position.set(PG.vec.x, PG.vec.y + hop, PG.vec.z);
         c.sh.position.set(PG.vec.x, 0.035, PG.vec.z);
         c.sh.scale.set(0.75, 0.75, 1);
