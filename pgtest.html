@@ -6569,6 +6569,7 @@ async function finishBoot(){
   function pgBuildGarden(sc){
     var yard = new THREE.Group();
     sc.add(yard);
+    PG.yard = yard;
 
     /* 1) 섬 — 잔디 원판 + 흙 받침 (디오라마) */
     pgAt(yard, pgMesh(new THREE.CylinderGeometry(ISLAND_R, ISLAND_R + 0.06, 0.55, 96), C.grass, 0, -0.28, 0));
@@ -6817,6 +6818,68 @@ async function finishBoot(){
       g.rotation.y = Math.atan2(-x, -z);
       g.updateMatrixWorld(true);
     });
+  /* ---------- 잔디 위 꽃 · 풀 포기 (빈草地 채우기) ---------- */
+  function pgScatterFlowers(){
+    var yard = PG.yard || PG.scene;
+    var avenues = [18, 90, 162, 234, 306];
+    var entr = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
+    var ridePos = PG.rideList.map(function(k){
+      var g = PG.rides[k].g;
+      return [g.position.x, g.position.z, (g.userData.radius || 2) + 0.45];
+    });
+    var bld = [[12.1, 0, 2.4], [-12.1, 0, 2.4]];
+    var cols = [C.pink, C.lemon, C.white, C.lav, C.coral, C.sky, C.mint];
+    var made = 0, tries = 0;
+    while (made < 110 && tries < 900){
+      tries++;
+      var r = 4.9 + Math.random() * 9.3;
+      var a = Math.random() * Math.PI * 2;
+      var x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (Math.abs(r - ROAD.prom) < 0.62) continue;
+      var ok = true, i;
+      for (i = 0; i < avenues.length && ok; i++){
+        var d1 = Math.abs(((a * 180 / Math.PI - avenues[i]) % 360 + 540) % 360 - 180);
+        if (r < 9.4 && r > 3.9 && (d1 < 180 && Math.sin(d1 * Math.PI / 180) * r < 0.5)) ok = false;
+      }
+      for (i = 0; i < entr.length && ok; i++){
+        var d2 = Math.abs(((a * 180 / Math.PI - entr[i]) % 360 + 540) % 360 - 180);
+        if (r > 9.0 && r < 10.7 && Math.sin(d2 * Math.PI / 180) * r < 0.45) ok = false;
+      }
+      for (i = 0; i < ridePos.length && ok; i++){
+        if (Math.hypot(x - ridePos[i][0], z - ridePos[i][1]) < ridePos[i][2]) ok = false;
+      }
+      for (i = 0; i < bld.length && ok; i++){
+        if (Math.hypot(x - bld[i][0], z - bld[i][1]) < bld[i][2]) ok = false;
+      }
+      if (!ok) continue;
+      made++;
+      var grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      if (made % 3 === 0){
+        /* 풀 포기 */
+        for (var q = 0; q < 3; q++){
+          var tf = pgCone(0.07, 0.26, C.leafG2, (Math.random() - 0.5) * 0.3, 0.13, (Math.random() - 0.5) * 0.3, 5);
+          tf.rotation.z = (Math.random() - 0.5) * 0.4;
+          grp.add(tf);
+        }
+        grp.add(pgSph(0.07, cols[made % cols.length], 0, 0.24, 0, 6));
+      } else {
+        grp.add(pgCyl(0.014, 0.016, 0.28, C.leafG2, 0, 0.14, 0, 5));
+        var pet = pgSph(0.075, cols[made % cols.length], 0, 0.31, 0, 7);
+        pet.scale.set(1, 0.66, 1);
+        grp.add(pet);
+        if (made % 4 === 0){
+          [-0.16, 0.16].forEach(function(dx){
+            grp.add(pgCyl(0.012, 0.014, 0.22, C.leafG2, dx, 0.11, 0.05, 5));
+            grp.add(pgSph(0.06, cols[(made + 2) % cols.length], dx, 0.25, 0.05, 6));
+          });
+        }
+      }
+      yard.add(grp);
+    }
+    return made;
+  }
+
     /* 벤치 — 산책로 옆 그늘 */
     pgBuildOne('bench');
     var b = PG.rides.bench.g;
@@ -6824,6 +6887,8 @@ async function finishBoot(){
     b.position.set(Math.cos(ba) * br, 0, Math.sin(ba) * br);
     b.rotation.y = Math.atan2(-Math.cos(ba), -Math.sin(ba)) + Math.PI;
     b.updateMatrixWorld(true);
+    /* 빈 잔디에 꽃 · 풀 포기 */
+    try { pgScatterFlowers(); } catch(e){ console.warn('[playground] scatter:', e && e.message); }
   }
   function pgBuildOne(k){
     if (k === 'slide') return pgRide('slide', '🛝 미끄럼틀', pgSlide);
@@ -7130,158 +7195,184 @@ async function finishBoot(){
   /* ============================================================
      🎡 놀이공원 대형 기구 8종
      ============================================================ */
+  function pgPad(g, r, col, rim){
+    g.add(pgCyl(r, r + 0.1, 0.18, col || '#FFF3E2', 0, 0.09, 0, 28));
+    var rg = pgTor(r + 0.05, 0.11, rim || C.pink, 0, 0.2, 0);
+    rg.rotation.x = Math.PI / 2;
+    g.add(rg);
+    return g;
+  }
+
   function pgFerris(g){
-    var H = 4.25, R = 2.5;
+    var H = 4.9, R = 2.85;
     var rimCols = [C.pink, C.peach, C.lemon, C.mint, C.sky, C.lav, C.coral, C.teal];
-    g.add(pgCyl(1.55, 1.75, 0.16, C.stone2, 0, 0.08, 0, 20));
-    [-0.62, 0.62].forEach(function(sz){
-      [-1.95, 1.95].forEach(function(sx){
-        g.add(pgBeam([sx, 0.05, sz], [sx * 0.06, H + 0.06, sz * 0.88], 0.085, '#7ECBC4', 7));
+    pgPad(g, 1.5, '#FFF3E2', C.mint);
+    /* A자 지지대 (앞뒤 두 겹) */
+    [-0.72, 0.72].forEach(function(sz){
+      [-2.25, 2.25].forEach(function(sx){
+        g.add(pgBeam([sx, 0.06, sz], [sx * 0.07, H + 0.05, sz * 0.86], 0.1, '#7ECBC4', 7));
       });
-      g.add(pgBeam([-1.35, 1.85, sz], [1.35, 1.85, sz], 0.05, '#FFFDF6', 6));
+      g.add(pgBeam([-1.7, 2.0, sz], [1.7, 2.0, sz], 0.055, '#FFFDF6', 6));
+      g.add(pgBeam([-1.15, 3.4, sz], [1.15, 3.4, sz], 0.045, '#FFFDF6', 6));
     });
-    var axle = pgCyl(0.11, 0.11, 1.5, C.iron, 0, H, 0, 12);
+    var axle = pgCyl(0.12, 0.12, 1.7, C.iron, 0, H, 0, 12);
     axle.rotation.x = Math.PI / 2; g.add(axle);
     var wheel = new THREE.Group();
     wheel.position.set(0, H, 0);
     g.add(wheel);
+    var arc = Math.PI * 2 / 8;
     for (var s = 0; s < 8; s++){
-      var arc = Math.PI * 2 / 8;
-      var ring = new THREE.Mesh(new THREE.TorusGeometry(R, 0.075, 6, 10, arc), pgM(rimCols[s]));
-      ring.rotation.z = s * arc;
-      wheel.add(ring);
-      var a0 = s * arc + arc / 2;
-      var sp = pgBox(0.05, R - 0.05, 0.05, '#FFF8EC', 0, 0, 0);
-      sp.position.set(Math.cos(a0) * R * 0.49, Math.sin(a0) * R * 0.49, 0);
-      sp.rotation.z = a0 - Math.PI / 2;
-      wheel.add(sp);
+      [-0.3, 0.3].forEach(function(zz){
+        var ring = new THREE.Mesh(new THREE.TorusGeometry(R, 0.085, 6, 10, arc), pgM(rimCols[s]));
+        ring.rotation.z = s * arc;
+        ring.position.z = zz;
+        wheel.add(ring);
+      });
     }
-    var hub = pgCyl(0.22, 0.22, 0.3, C.lemon, 0, 0, 0, 14);
+    for (var k = 0; k < 16; k++){
+      var a0 = k * Math.PI / 8;
+      [-0.3, 0.3].forEach(function(zz){
+        var sp = pgBox(0.055, R - 0.06, 0.055, '#FFF8EC', 0, 0, 0);
+        sp.position.set(Math.cos(a0) * R * 0.49, Math.sin(a0) * R * 0.49, zz);
+        sp.rotation.z = a0 - Math.PI / 2;
+        wheel.add(sp);
+      });
+    }
+    var hub = pgCyl(0.26, 0.26, 0.72, C.lemon, 0, 0, 0, 16);
     hub.rotation.x = Math.PI / 2; wheel.add(hub);
     var gond = [];
-    for (var k = 0; k < 8; k++){
+    for (var gd = 0; gd < 8; gd++){
       var gg = new THREE.Group();
-      var a = k * Math.PI / 4;
+      var a = gd * Math.PI / 4;
       gg.position.set(Math.cos(a) * R, Math.sin(a) * R, 0);
-      gg.add(pgCyl(0.028, 0.028, 0.26, C.iron, 0, -0.13, 0, 6));
-      gg.add(pgBox(0.58, 0.4, 0.44, rimCols[(k + 3) % 8], 0, -0.44, 0));
-      gg.add(pgBox(0.64, 0.07, 0.5, '#FFF8EC', 0, -0.23, 0));
-      gg.add(pgBox(0.4, 0.17, 0.47, '#F0FBFF', 0, -0.38, 0.01));
-      gg.add(pgSph(0.05, C.lemon, 0, -0.2, 0, 6));
+      gg.add(pgCyl(0.03, 0.03, 0.24, C.iron, 0, -0.11, 0, 6));
+      gg.add(pgBox(0.66, 0.44, 0.5, rimCols[(gd + 3) % 8], 0, -0.46, 0));
+      gg.add(pgBox(0.72, 0.08, 0.56, '#FFF8EC', 0, -0.23, 0));
+      gg.add(pgBox(0.46, 0.2, 0.52, '#F0FBFF', 0, -0.4, 0.01));
+      gg.add(pgSph(0.055, C.lemon, 0, -0.18, 0, 6));
       wheel.add(gg);
       gond.push(gg);
     }
     PG.dyn.push(function(t){
-      var th = t * 0.28;
+      var th = t * 0.26;
       wheel.rotation.z = th;
       for (var i = 0; i < gond.length; i++) gond[i].rotation.z = -th;
     });
     g.userData.pose = function(idx, t){
-      var a = t * 0.28 + idx * Math.PI / 4;
-      return { x: Math.cos(a) * R, y: H + Math.sin(a) * R - 0.3, z: 0 };
+      var a = t * 0.26 + idx * Math.PI / 4;
+      return { x: Math.cos(a) * R, y: H + Math.sin(a) * R - 0.32, z: 0 };
     };
-    g.userData.labelY = H + R + 0.62;
-    g.userData.radius = 2.45;
+    g.userData.labelY = H + R + 0.7;
+    g.userData.radius = 2.7;
     g.userData.spots = [{ x:0, y:0, z:0 }];
   }
 
   function pgCarousel(g){
-    g.add(pgCyl(2.05, 2.2, 0.18, '#FFF1DF', 0, 0.09, 0, 26));
-    var rim = pgTor(2.1, 0.09, C.pink, 0, 0.2, 0); rim.rotation.x = Math.PI / 2; g.add(rim);
-    var deck = pgMesh(new THREE.CircleGeometry(2.0, 30), '#FFE7CF', 0, 0.2, 0);
+    pgPad(g, 2.2, '#FFF1DF', C.pink);
+    g.add(pgCyl(2.05, 2.2, 0.2, '#FFE7CF', 0, 0.2, 0, 30));
+    var deck = pgMesh(new THREE.CircleGeometry(2.0, 32), '#FFF0DC', 0, 0.31, 0);
     deck.rotation.x = -Math.PI / 2; g.add(deck);
-    g.add(pgCyl(0.2, 0.26, 2.55, '#FFEBCB', 0, 1.5, 0, 14));
-    [0.6, 1.2, 1.8, 2.3].forEach(function(y, i){
-      var t2 = pgTor(0.27, 0.05, i % 2 ? C.mint : C.lemon, 0, y, 0);
-      t2.rotation.x = Math.PI / 2; g.add(t2);
-    });
-    for (var i = 0; i < 12; i++){
-      var geo = new THREE.CylinderGeometry(0.14, 2.1, 1.0, 2, 1, true, i * Math.PI / 6, Math.PI / 6);
-      var mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(i % 2 ? '#FFB6CB' : '#FFFDF6'), side: THREE.DoubleSide });
-      var seg = new THREE.Mesh(geo, mat);
-      seg.position.set(0, 2.85, 0);
-      g.add(seg);
-      var a2 = i * Math.PI / 6 + Math.PI / 12;
-      g.add(pgSph(0.11, i % 2 ? '#FFD9E6' : '#FFFFFF', Math.cos(a2) * 2.06, 2.3, Math.sin(a2) * 2.06, 8));
-    }
-    g.add(pgCone(0.19, 0.42, C.lemon, 0, 3.56, 0, 10));
-    g.add(pgSph(0.12, C.coral, 0, 3.82, 0, 8));
     var spin = new THREE.Group();
-    spin.position.set(0, 0.2, 0);
+    spin.position.set(0, 0.31, 0);
     g.add(spin);
     var horses = [];
     for (var h = 0; h < 6; h++){
       var a = h * Math.PI / 3;
       var hx = Math.cos(a) * 1.5, hz = Math.sin(a) * 1.5;
-      spin.add(pgCyl(0.032, 0.032, 1.95, '#E0CDA8', hx, 1.0, hz, 6));
+      spin.add(pgCyl(0.035, 0.035, 2.35, '#EAD7B2', hx, 1.2, hz, 6));
       var hg = new THREE.Group();
       hg.position.set(hx, 0, hz);
       hg.rotation.y = -a;
-      var body = pgSph(0.2, '#FFD9E4', 0, 0.72, 0, 10);
-      body.scale.set(0.85, 0.9, 1.45); hg.add(body);
-      hg.add(pgCyl(0.085, 0.11, 0.26, '#FFD9E4', 0, 0.9, 0.2, 8));
-      hg.add(pgSph(0.12, '#FFD9E4', 0, 1.0, 0.3, 9));
-      hg.add(pgSph(0.075, '#FFF3F7', 0, 0.97, 0.4, 7));
-      [-0.06, 0.06].forEach(function(x){
-        hg.add(pgCone(0.033, 0.09, '#FFB6CB', x, 1.1, 0.24, 6));
+      var body = pgSph(0.21, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.78, 0, 10);
+      body.scale.set(0.9, 0.92, 1.5); hg.add(body);
+      hg.add(pgCyl(0.09, 0.12, 0.28, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.98, 0.22, 8));
+      hg.add(pgSph(0.13, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 1.1, 0.33, 9));
+      hg.add(pgSph(0.08, '#FFF3F7', 0, 1.06, 0.44, 7));
+      [-0.065, 0.065].forEach(function(x){
+        hg.add(pgCone(0.035, 0.1, '#FFB6CB', x, 1.21, 0.26, 6));
       });
-      hg.add(pgBox(0.26, 0.06, 0.24, '#FFFFFF', 0, 0.87, -0.02));
-      hg.add(pgCone(0.055, 0.24, '#F49CBC', 0, 0.78, -0.34, 6));
-      [[-0.09, 0.13], [0.09, 0.13], [-0.09, -0.15], [0.09, -0.15]].forEach(function(p){
-        hg.add(pgCyl(0.032, 0.032, 0.3, '#FFD9E4', p[0], 0.55, p[1], 6));
+      hg.add(pgBox(0.28, 0.07, 0.26, '#FFFFFF', 0, 0.95, -0.02));
+      hg.add(pgCone(0.06, 0.26, '#F49CBC', 0, 0.86, -0.36, 6));
+      [[-0.1, 0.14], [0.1, 0.14], [-0.1, -0.16], [0.1, -0.16]].forEach(function(p){
+        hg.add(pgCyl(0.034, 0.034, 0.32, h % 2 ? '#FFD9E4' : '#DCEFF7', p[0], 0.6, p[1], 6));
       });
       spin.add(hg);
       horses.push(hg);
     }
-    var bob = [];
+    /* 중앙 기둥 + 천막 */
+    g.add(pgCyl(0.22, 0.28, 2.9, '#FFEBCB', 0, 1.7, 0, 16));
+    [0.7, 1.35, 2.0, 2.45].forEach(function(y, i){
+      var t2 = pgTor(0.29, 0.055, i % 2 ? C.mint : C.lemon, 0, y, 0);
+      t2.rotation.x = Math.PI / 2; g.add(t2);
+    });
+    for (var i = 0; i < 12; i++){
+      var geo = new THREE.CylinderGeometry(0.16, 2.35, 1.15, 2, 1, true, i * Math.PI / 6, Math.PI / 6);
+      var mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(i % 2 ? '#FFB6CB' : '#FFFDF6'), side: THREE.DoubleSide });
+      var seg = new THREE.Mesh(geo, mat);
+      seg.position.set(0, 3.15, 0);
+      g.add(seg);
+      var a2 = i * Math.PI / 6 + Math.PI / 12;
+      g.add(pgSph(0.12, i % 2 ? '#FFD9E6' : '#FFFFFF', Math.cos(a2) * 2.3, 2.58, Math.sin(a2) * 2.3, 8));
+    }
+    g.add(pgCone(0.22, 0.5, C.lemon, 0, 3.95, 0, 12));
+    g.add(pgSph(0.14, C.coral, 0, 4.26, 0, 9));
     PG.dyn.push(function(t){
       spin.rotation.y = t * 0.55;
       for (var i = 0; i < horses.length; i++){
-        var b = Math.sin(t * 2.4 + i * 1.0) * 0.16;
-        horses[i].position.y = b;
-        bob[i] = b;
+        horses[i].position.y = Math.sin(t * 2.4 + i * 1.0) * 0.17;
       }
     });
     g.userData.pose = function(idx, t){
       var a = t * 0.55 + idx * Math.PI / 3;
-      var b = Math.sin(t * 2.4 + (idx % 6) * 1.0) * 0.16;
-      return { x: Math.cos(a) * 1.5, y: 0.2 + 0.93 + b, z: Math.sin(a) * 1.5 };
+      var b = Math.sin(t * 2.4 + (idx % 6) * 1.0) * 0.17;
+      return { x: Math.cos(a) * 1.5, y: 0.31 + 0.99 + b, z: Math.sin(a) * 1.5 };
     };
-    g.userData.labelY = 4.0;
-    g.userData.radius = 2.2;
-    g.userData.spots = [{ x:0, y:1.0, z:0 }];
+    g.userData.labelY = 4.4;
+    g.userData.radius = 2.5;
+    g.userData.spots = [{ x:0, y:1.1, z:0 }];
   }
 
   function pgCoaster(g){
-    var pts = [], N = 16;
+    var pts = [], N = 18;
     for (var i = 0; i < N; i++){
       var a = i / N * Math.PI * 2;
-      var rr = 2.05 + Math.sin(a * 2 + 0.3) * 0.3;
-      var yy = 0.7 + Math.max(0, Math.sin(a * 2 + 0.9)) * 1.0;
-      pts.push(new THREE.Vector3(Math.cos(a) * rr * 1.08, yy, Math.sin(a) * rr * 0.92));
+      var rr = 2.2 + Math.sin(a * 2 + 0.3) * 0.28;
+      var hill = Math.max(0, Math.sin(a * 2 + 0.75));
+      var yy = 0.62 + Math.pow(hill, 1.1) * 1.55;
+      pts.push(new THREE.Vector3(Math.cos(a) * rr * 1.05, yy, Math.sin(a) * rr * 0.9));
     }
     var curve = new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0.5);
-    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 150, 0.062, 6, true), pgM('#FF8FA3')));
-    var rail2 = new THREE.Mesh(new THREE.TubeGeometry(curve, 150, 0.028, 5, true), pgM('#FFF6E8'));
-    rail2.position.y = 0.085; g.add(rail2);
-    for (var p = 0; p < 20; p++){
-      var pt = curve.getPointAt((p / 20) % 1);
-      if (pt.y > 0.45){
-        g.add(pgBeam([pt.x, 0.04, pt.z], [pt.x, pt.y, pt.z], 0.032, '#EFDDC4', 5));
-        g.add(pgCyl(0.09, 0.11, 0.1, C.stone, pt.x, 0.05, pt.z, 7));
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 180, 0.07, 6, true), pgM('#FF8FA3')));
+    var rail2 = new THREE.Mesh(new THREE.TubeGeometry(curve, 180, 0.032, 5, true), pgM('#FFF6E8'));
+    rail2.position.y = 0.09; g.add(rail2);
+    /* 침목 · 지지대 */
+    for (var p = 0; p < 36; p++){
+      var pt = curve.getPointAt(p / 36);
+      var tg = curve.getTangentAt(p / 36);
+      var tie = pgBox(0.34, 0.05, 0.1, '#FFE0E8', pt.x, pt.y - 0.02, pt.z);
+      tie.rotation.y = -Math.atan2(tg.x, tg.z);
+      g.add(tie);
+    }
+    for (var q = 0; q < 22; q++){
+      var pq = curve.getPointAt((q / 22) % 1);
+      if (pq.y > 0.5){
+        g.add(pgBeam([pq.x, 0.04, pq.z], [pq.x, pq.y, pq.z], 0.035, '#EFDDC4', 5));
       }
     }
-    g.add(pgCyl(0.3, 0.4, 0.12, C.mint, 0, 0.06, 0, 12));
+    /* 승강장 */
+    g.add(pgBox(1.0, 0.12, 0.8, '#FFF1DF', 0, 0.06, 2.0));
+    g.add(pgBox(0.9, 0.4, 0.08, C.mint, 0, 0.26, 2.34));
     var cars = [];
     for (var c = 0; c < 2; c++){
       var cg = new THREE.Group();
       var col = c ? C.lemon : C.sky;
-      cg.add(pgBox(0.5, 0.26, 0.6, col, 0, 0.08, 0));
-      cg.add(pgBox(0.54, 0.08, 0.46, '#FFFDF6', 0, 0.23, -0.03));
-      cg.add(pgSph(0.09, '#FFFFFF', 0, 0.12, 0.3, 7));
-      cg.add(pgCyl(0.02, 0.02, 0.16, C.iron, 0, 0.34, 0.12, 5));
-      [[-0.2, 0.18], [0.2, 0.18], [-0.2, -0.18], [0.2, -0.18]].forEach(function(w){
-        var wh = pgCyl(0.075, 0.075, 0.05, C.dark, w[0], 0.02, w[1], 8);
+      cg.add(pgBox(0.56, 0.3, 0.68, col, 0, 0.1, 0));
+      cg.add(pgBox(0.6, 0.09, 0.5, '#FFFDF6', 0, 0.27, -0.02));
+      cg.add(pgSph(0.1, '#FFFFFF', 0, 0.14, 0.34, 7));
+      cg.add(pgCyl(0.022, 0.022, 0.18, C.iron, 0, 0.36, 0.16, 5));
+      cg.add(pgSph(0.045, C.coral, 0, 0.45, 0.16, 6));
+      [[-0.22, 0.2], [0.22, 0.2], [-0.22, -0.2], [0.22, -0.2]].forEach(function(w){
+        var wh = pgCyl(0.08, 0.08, 0.05, C.dark, w[0], 0.02, w[1], 8);
         wh.rotation.z = Math.PI / 2; cg.add(wh);
       });
       g.add(cg); cars.push(cg);
@@ -7289,60 +7380,63 @@ async function finishBoot(){
     var upV = new THREE.Vector3(0, 0, 1);
     function place(t){
       for (var k = 0; k < 2; k++){
-        var u = (t * 0.075 + k * 0.026) % 1;
+        var u = (t * 0.075 + k * 0.024) % 1;
         var pp = curve.getPointAt(u);
-        var tg = curve.getTangentAt(u).normalize();
+        var tg2 = curve.getTangentAt(u).normalize();
         cars[k].position.set(pp.x, pp.y + 0.02, pp.z);
-        cars[k].quaternion.setFromUnitVectors(upV, tg);
+        cars[k].quaternion.setFromUnitVectors(upV, tg2);
       }
     }
     PG.dyn.push(place);
     g.userData.pose = function(idx, t){
-      var u = (t * 0.075 + (idx % 2) * 0.026) % 1;
+      var u = (t * 0.075 + (idx % 2) * 0.024) % 1;
       var pp = curve.getPointAt(u);
-      return { x: pp.x, y: pp.y + 0.22, z: pp.z };
+      return { x: pp.x, y: pp.y + 0.24, z: pp.z };
     };
-    g.userData.labelY = 2.55;
-    g.userData.radius = 2.5;
+    g.userData.labelY = 3.0;
+    g.userData.radius = 2.7;
     g.userData.spots = [{ x:0, y:0.25, z:0 }];
   }
 
   function pgViking(g){
-    var H = 3.15;
-    g.add(pgBox(2.8, 0.14, 1.9, C.stone2, 0, 0.07, 0));
-    [-0.66, 0.66].forEach(function(sz){
-      [-1.85, 1.85].forEach(function(sx){
-        g.add(pgBeam([sx, 0.05, sz], [sx * 0.1, H + 0.04, sz * 0.86], 0.085, '#7ECBC4', 7));
+    var H = 3.6;
+    pgPad(g, 1.85, '#FFF3E2', C.sky);
+    [-0.72, 0.72].forEach(function(sz){
+      [-2.15, 2.15].forEach(function(sx){
+        g.add(pgBeam([sx, 0.05, sz], [sx * 0.08, H + 0.05, sz * 0.86], 0.095, '#7ECBC4', 7));
       });
-      g.add(pgBeam([-1.5, 1.6, sz], [1.5, 1.6, sz], 0.05, '#FFFDF6', 6));
+      g.add(pgBeam([-1.7, 1.85, sz], [1.7, 1.85, sz], 0.055, '#FFFDF6', 6));
     });
-    g.add(pgBeam([0, H, -0.62], [0, H, 0.62], 0.1, C.iron, 8));
+    g.add(pgBeam([0, H, -0.7], [0, H, 0.7], 0.11, C.iron, 9));
     var ship = new THREE.Group();
     ship.position.set(0, H, 0);
     g.add(ship);
-    ship.add(pgBox(1.95, 0.6, 2.5, '#FFD9A8', 0, -1.95, 0));
-    ship.add(pgBox(1.72, 0.26, 2.2, '#F2BE84', 0, -1.62, 0));
-    ship.add(pgBox(1.82, 0.07, 2.3, '#E9B87C', 0, -1.55, 0));
-    var prow1 = pgCone(0.4, 0.62, '#F0A45C', 0, -1.92, 1.42, 8);
+    ship.add(pgBox(2.15, 0.62, 2.7, '#FFD9A8', 0, -2.1, 0));
+    ship.add(pgBox(1.9, 0.28, 2.4, '#F2BE84', 0, -1.72, 0));
+    ship.add(pgBox(2.0, 0.08, 2.5, '#E9B87C', 0, -1.64, 0));
+    var prow1 = pgCone(0.44, 0.7, '#F0A45C', 0, -2.05, 1.52, 8);
     prow1.rotation.x = Math.PI / 2; ship.add(prow1);
-    var prow2 = pgCone(0.4, 0.62, '#F0A45C', 0, -1.92, -1.42, 8);
+    var prow2 = pgCone(0.44, 0.7, '#F0A45C', 0, -2.05, -1.52, 8);
     prow2.rotation.x = -Math.PI / 2; ship.add(prow2);
+    /* 난간 */
+    ship.add(pgBox(2.1, 0.06, 0.06, '#E0B98A', 0, -1.5, 1.22));
+    ship.add(pgBox(2.1, 0.06, 0.06, '#E0B98A', 0, -1.5, -1.22));
     /* 돛대 · 돛 · 깃발 */
-    ship.add(pgCyl(0.055, 0.07, 2.55, C.woodD, 0, -0.35, 0, 8));
-    var sail = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 1.15), new THREE.MeshLambertMaterial({
+    ship.add(pgCyl(0.055, 0.075, 2.9, C.woodD, 0, -0.25, 0, 8));
+    var sail = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 1.35), new THREE.MeshLambertMaterial({
       color: 0xFFFDF6, side: THREE.DoubleSide
     }));
-    sail.position.set(0, -0.5, 0.04); ship.add(sail);
-    var stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.18), new THREE.MeshLambertMaterial({
+    sail.position.set(0, -0.48, 0.04); ship.add(sail);
+    var stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 0.2), new THREE.MeshLambertMaterial({
       color: new THREE.Color(C.pink), side: THREE.DoubleSide
     }));
-    stripe.position.set(0, -0.62, 0.05); ship.add(stripe);
-    var flag = pgFlag(C.coral, 0.34, 0.28);
-    flag.position.set(0, 0.9, 0); ship.add(flag);
+    stripe.position.set(0, -0.66, 0.05); ship.add(stripe);
+    var flag = pgFlag(C.coral, 0.38, 0.3);
+    flag.position.set(0, 1.15, 0); ship.add(flag);
     /* 좌석 */
-    [-0.9, -0.3, 0.3, 0.9].forEach(function(z){
-      ship.add(pgBox(1.5, 0.08, 0.26, '#FFE7C8', 0, -1.5, z));
-      ship.add(pgBox(1.5, 0.03, 0.06, '#E0C39B', 0, -1.32, z - 0.16));
+    [-0.95, -0.32, 0.32, 0.95].forEach(function(z){
+      ship.add(pgBox(1.7, 0.08, 0.3, '#FFE7C8', 0, -1.58, z));
+      ship.add(pgBox(1.7, 0.04, 0.06, '#E0C39B', 0, -1.38, z - 0.18));
     });
     PG.dyn.push(function(t){
       ship.rotation.x = Math.sin(t * 0.85) * 0.82;
@@ -7351,9 +7445,9 @@ async function finishBoot(){
     g.userData.pose = function(idx, t){
       var ph = Math.sin(t * 0.85) * 0.82;
       var row = idx % 4, side = idx % 2;
-      var px = side ? 0.48 : -0.48;
-      var pz = -0.9 + row * 0.6;
-      var py = -1.44;
+      var px = side ? 0.55 : -0.55;
+      var pz = -0.95 + row * 0.64;
+      var py = -1.52;
       return {
         x: px,
         y: H + (py * Math.cos(ph) - pz * Math.sin(ph)),
@@ -7361,120 +7455,123 @@ async function finishBoot(){
         tilt: Math.sin(ph) * 0.12
       };
     };
-    g.userData.labelY = H + 1.95;
-    g.userData.radius = 2.3;
-    g.userData.spots = [{ x:0, y:-1.4, z:0 }];
+    g.userData.labelY = H + 2.15;
+    g.userData.radius = 2.5;
+    g.userData.spots = [{ x:0, y:-1.5, z:0 }];
   }
 
   function pgTeacup(g){
-    g.add(pgCyl(1.95, 2.05, 0.15, '#FFF1E4', 0, 0.075, 0, 28));
-    var rim = pgTor(1.98, 0.1, C.lav, 0, 0.17, 0); rim.rotation.x = Math.PI / 2; g.add(rim);
+    pgPad(g, 2.1, '#FFF1E4', C.lav);
+    g.add(pgCyl(2.0, 2.1, 0.16, '#FFF6EA', 0, 0.17, 0, 30));
     var spin = new THREE.Group();
-    spin.position.set(0, 0.15, 0);
+    spin.position.set(0, 0.25, 0);
     g.add(spin);
     var cups = [];
     for (var k = 0; k < 4; k++){
       var a = k * Math.PI / 2;
       var cg = new THREE.Group();
-      cg.position.set(Math.cos(a) * 1.1, 0, Math.sin(a) * 1.1);
+      cg.position.set(Math.cos(a) * 1.15, 0, Math.sin(a) * 1.15);
       var col = [C.pink, C.lemon, C.mint, C.sky][k];
-      cg.add(pgCyl(0.44, 0.34, 0.11, '#FFFFFF', 0, 0.055, 0, 18));
-      cg.add(pgCyl(0.36, 0.3, 0.52, col, 0, 0.38, 0, 18));
-      cg.add(pgCyl(0.31, 0.31, 0.05, '#FFF7EE', 0, 0.63, 0, 18));
-      var hd = pgTor(0.15, 0.042, col, 0.4, 0.4, 0, Math.PI * 1.25);
+      cg.add(pgCyl(0.5, 0.38, 0.12, '#FFFFFF', 0, 0.06, 0, 20));
+      cg.add(pgCyl(0.4, 0.33, 0.58, col, 0, 0.42, 0, 20));
+      cg.add(pgCyl(0.35, 0.35, 0.05, '#FFF7EE', 0, 0.71, 0, 20));
+      var hd = pgTor(0.17, 0.045, col, 0.45, 0.44, 0, Math.PI * 1.25);
       hd.rotation.y = Math.PI / 2; cg.add(hd);
-      cg.add(pgSph(0.05, '#FFFFFF', 0.06, 0.66, 0.08, 6));
+      cg.add(pgSph(0.055, '#FFFFFF', 0.07, 0.74, 0.09, 6));
       spin.add(cg); cups.push(cg);
     }
     PG.dyn.push(function(t){
       spin.rotation.y = t * 0.5;
       for (var i = 0; i < cups.length; i++){
         cups[i].rotation.y = t * 1.7 + i;
-        cups[i].position.y = Math.sin(t * 2 + i) * 0.02;
+        cups[i].position.y = Math.sin(t * 2 + i) * 0.025;
       }
     });
     g.userData.pose = function(idx, t){
       var a = t * 0.5 + idx * Math.PI / 2;
-      return { x: Math.cos(a) * 1.1, y: 0.15 + 0.7, z: Math.sin(a) * 1.1 };
+      return { x: Math.cos(a) * 1.15, y: 0.25 + 0.76, z: Math.sin(a) * 1.15 };
     };
-    g.userData.labelY = 2.3;
-    g.userData.radius = 2.2;
-    g.userData.spots = [{ x:0, y:0.7, z:0 }];
+    g.userData.labelY = 2.6;
+    g.userData.radius = 2.4;
+    g.userData.spots = [{ x:0, y:0.76, z:0 }];
   }
 
   function pgGyroDrop(g){
-    g.add(pgCyl(1.25, 1.4, 0.15, C.stone2, 0, 0.075, 0, 22));
+    pgPad(g, 1.3, '#FFF3E2', C.pink);
     var cols = [C.mint, C.lemon, C.sky, C.pink, C.lav];
-    for (var i = 0; i < 10; i++){
-      g.add(pgCyl(0.4, 0.4, 0.46, cols[i % cols.length], 0, 0.2 + i * 0.46, 0, 14));
+    for (var i = 0; i < 11; i++){
+      g.add(pgCyl(0.42, 0.42, 0.5, cols[i % cols.length], 0, 0.25 + i * 0.5, 0, 16));
     }
-    g.add(pgCyl(0.62, 0.5, 0.22, C.lemon, 0, 4.86, 0, 16));
+    g.add(pgCyl(0.66, 0.52, 0.24, C.lemon, 0, 5.36, 0, 18));
     for (var k = 0; k < 6; k++){
       var a = k * Math.PI / 3;
-      g.add(pgCone(0.1, 0.34, C.coral, Math.cos(a) * 0.5, 5.12, Math.sin(a) * 0.5, 6));
+      g.add(pgCone(0.11, 0.38, C.coral, Math.cos(a) * 0.54, 5.66, Math.sin(a) * 0.54, 6));
     }
-    g.add(pgSph(0.16, C.pink, 0, 5.1, 0, 10));
+    g.add(pgSph(0.17, C.pink, 0, 5.62, 0, 10));
     var ringG = new THREE.Group();
     g.add(ringG);
-    var ring = pgTor(1.0, 0.12, '#FFB3C7', 0, 0, 0);
+    var ring = pgTor(1.1, 0.13, '#FFB3C7', 0, 0, 0);
     ring.rotation.x = Math.PI / 2; ringG.add(ring);
+    var ring2 = pgTor(1.1, 0.06, '#FFF1F5', 0, 0.16, 0);
+    ring2.rotation.x = Math.PI / 2; ringG.add(ring2);
     for (var s2 = 0; s2 < 8; s2++){
       var aa = s2 * Math.PI / 4;
-      ringG.add(pgBox(0.3, 0.06, 0.24, '#FFE3EC', Math.cos(aa) * 0.95, 0.06, Math.sin(aa) * 0.95));
-      ringG.add(pgCyl(0.018, 0.018, 0.32, C.iron, Math.cos(aa) * 0.95, -0.14, Math.sin(aa) * 0.95, 5));
+      ringG.add(pgBox(0.34, 0.07, 0.28, '#FFE3EC', Math.cos(aa) * 1.05, 0.07, Math.sin(aa) * 1.05));
+      ringG.add(pgCyl(0.018, 0.018, 0.34, C.iron, Math.cos(aa) * 1.05, -0.15, Math.sin(aa) * 1.05, 5));
     }
-    ringG.add(pgCyl(0.32, 0.32, 0.16, '#FFF3F7', 0, 0.02, 0, 14));
-    var ry = 0.9;
+    ringG.add(pgCyl(0.36, 0.36, 0.18, '#FFF3F7', 0, 0.02, 0, 14));
+    var ry = 1.0;
     PG.dyn.push(function(t){
       var u = (t % 7.6) / 7.6, y;
-      if (u < 0.56) y = 0.9 + 3.45 * (1 - Math.pow(1 - u / 0.56, 2));
-      else if (u < 0.68) y = 4.35 + Math.sin((u - 0.56) * 44) * 0.02;
-      else if (u < 0.78){ var k2 = (u - 0.68) / 0.1; y = 4.35 - 3.4 * (k2 * k2); }
-      else y = 0.95 + Math.abs(Math.sin((u - 0.78) * 30)) * 0.2 * (1 - (u - 0.78) / 0.22);
+      if (u < 0.56) y = 1.0 + 3.8 * (1 - Math.pow(1 - u / 0.56, 2));
+      else if (u < 0.68) y = 4.8 + Math.sin((u - 0.56) * 44) * 0.02;
+      else if (u < 0.78){ var k2 = (u - 0.68) / 0.1; y = 4.8 - 3.75 * (k2 * k2); }
+      else y = 1.05 + Math.abs(Math.sin((u - 0.78) * 30)) * 0.22 * (1 - (u - 0.78) / 0.22);
       ry = y;
       ringG.position.y = y;
     });
     g.userData.pose = function(idx, t){
       var a = idx * Math.PI / 4;
-      return { x: Math.cos(a) * 0.95, y: ry + 0.12, z: Math.sin(a) * 0.95 };
+      return { x: Math.cos(a) * 1.05, y: ry + 0.13, z: Math.sin(a) * 1.05 };
     };
-    g.userData.labelY = 6.15;
-    g.userData.radius = 1.9;
-    g.userData.spots = [{ x:0, y:0.9, z:0 }];
+    g.userData.labelY = 6.6;
+    g.userData.radius = 2.0;
+    g.userData.spots = [{ x:0, y:1.0, z:0 }];
   }
 
   function pgBalloon(g){
+    pgPad(g, 1.5, '#FFF3E2', C.lemon);
     var floatG = new THREE.Group();
     g.add(floatG);
     var cols = [C.pink, C.lemon, C.mint, C.sky, C.lav, C.coral];
     var env = new THREE.Group();
-    env.position.set(0, 3.25, 0);
+    env.position.set(0, 3.6, 0);
     floatG.add(env);
     for (var i = 0; i < 6; i++){
-      var geo = new THREE.SphereGeometry(1.15, 12, 14, i * Math.PI / 3, Math.PI / 3);
+      var geo = new THREE.SphereGeometry(1.3, 12, 14, i * Math.PI / 3, Math.PI / 3);
       var m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({
         color: new THREE.Color(cols[i]), side: THREE.DoubleSide
       }));
       m.scale.set(1, 1.16, 1);
       env.add(m);
     }
-    env.add(pgCyl(0.42, 0.16, 0.42, '#FFE7C8', 0, -1.24, 0, 12));
+    env.add(pgCyl(0.46, 0.18, 0.46, '#FFE7C8', 0, -1.4, 0, 12));
     var basket = new THREE.Group();
-    basket.position.set(0, 1.5, 0);
+    basket.position.set(0, 1.6, 0);
     floatG.add(basket);
-    basket.add(pgBox(0.8, 0.6, 0.8, '#D8A873', 0, 0, 0));
-    basket.add(pgBox(0.86, 0.1, 0.86, '#C99B6B', 0, 0.32, 0));
-    basket.add(pgBox(0.72, 0.06, 0.72, '#F0D9BE', 0, 0.3, 0));
-    [-0.3, 0.3].forEach(function(x){
-      [-0.3, 0.3].forEach(function(z){
-        basket.add(pgBeam([x * 0.95, 0.34, z * 0.95], [x * 0.5, 1.05, z * 0.5], 0.014, '#8E7A5E', 4));
+    basket.add(pgBox(0.9, 0.68, 0.9, '#D8A873', 0, 0, 0));
+    basket.add(pgBox(0.96, 0.1, 0.96, '#C99B6B', 0, 0.36, 0));
+    basket.add(pgBox(0.8, 0.06, 0.8, '#F0D9BE', 0, 0.34, 0));
+    [-0.32, 0.32].forEach(function(x){
+      [-0.32, 0.32].forEach(function(z){
+        basket.add(pgBeam([x * 0.95, 0.38, z * 0.95], [x * 0.5, 1.15, z * 0.5], 0.016, '#8E7A5E', 4));
       });
     });
-    var flame = pgCone(0.15, 0.32, '#FFC46B', 0, 0.86, 0, 8);
+    var flame = pgCone(0.16, 0.36, '#FFC46B', 0, 0.94, 0, 8);
     flame.material = new THREE.MeshBasicMaterial({ color: 0xFFD27A, transparent: true, opacity: 0.85 });
     basket.add(flame);
     PG.dyn.push(function(t){
-      floatG.position.y = Math.sin(t * 0.55) * 0.34;
+      floatG.position.y = Math.sin(t * 0.55) * 0.36;
       floatG.rotation.y = Math.sin(t * 0.18) * 0.25;
       flame.scale.y = 0.8 + Math.sin(t * 6) * 0.22;
       env.scale.set(1 + Math.sin(t * 0.9) * 0.008, 1 + Math.sin(t * 0.7) * 0.01, 1);
@@ -7482,41 +7579,42 @@ async function finishBoot(){
     g.userData.pose = function(idx, t){
       var off = (idx % 4);
       return {
-        x: (off === 0 || off === 2) ? -0.16 : 0.16,
-        y: 1.5 + 0.08 + Math.sin(t * 0.55) * 0.34,
-        z: (off < 2) ? -0.16 : 0.16
+        x: (off === 0 || off === 2) ? -0.18 : 0.18,
+        y: 1.6 + 0.1 + Math.sin(t * 0.55) * 0.36,
+        z: (off < 2) ? -0.18 : 0.18
       };
     };
-    g.userData.labelY = 5.35;
-    g.userData.radius = 1.9;
-    g.userData.spots = [{ x:0, y:1.5, z:0 }];
+    g.userData.labelY = 6.0;
+    g.userData.radius = 2.1;
+    g.userData.spots = [{ x:0, y:1.6, z:0 }];
   }
 
   function pgBumper(g){
-    var floorM = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.12, 32), pgTileMat(5, 5));
-    floorM.position.y = 0.06; g.add(floorM);
-    var wall = pgTor(2.02, 0.12, C.pink, 0, 0.26, 0); wall.rotation.x = Math.PI / 2; g.add(wall);
-    for (var i = 0; i < 18; i++){
-      var a = i * Math.PI * 2 / 18;
-      g.add(pgSph(0.1, i % 2 ? C.lemon : C.mint, Math.cos(a) * 2.02, 0.28, Math.sin(a) * 2.02, 7));
+    pgPad(g, 2.3, '#FFEFF4', C.pink);
+    var floorM = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.12, 36), pgTileMat(6, 6));
+    floorM.position.y = 0.24; g.add(floorM);
+    var wall = pgTor(2.16, 0.13, C.pink, 0, 0.44, 0); wall.rotation.x = Math.PI / 2; g.add(wall);
+    for (var i = 0; i < 20; i++){
+      var a = i * Math.PI * 2 / 20;
+      g.add(pgSph(0.105, i % 2 ? C.lemon : C.mint, Math.cos(a) * 2.16, 0.46, Math.sin(a) * 2.16, 7));
     }
-    g.add(pgCyl(0.18, 0.22, 1.75, C.iron, 0, 0.88, 0, 10));
-    var cap = pgTor(0.75, 0.045, C.iron, 0, 1.72, 0); cap.rotation.x = Math.PI / 2; g.add(cap);
-    g.add(pgSph(0.16, C.coral, 0, 1.78, 0, 9));
+    g.add(pgCyl(0.18, 0.22, 1.85, C.iron, 0, 1.1, 0, 10));
+    var cap = pgTor(0.8, 0.05, C.iron, 0, 1.98, 0); cap.rotation.x = Math.PI / 2; g.add(cap);
+    g.add(pgSph(0.17, C.coral, 0, 2.04, 0, 9));
     var cars = [];
     for (var k = 0; k < 4; k++){
       var cg = new THREE.Group();
       var col = [C.sky, C.pink, C.lemon, C.mint][k];
-      cg.add(pgBox(0.62, 0.3, 0.46, col, 0, 0.4, 0));
-      cg.add(pgBox(0.58, 0.2, 0.42, '#FFF7EE', 0, 0.6, -0.04));
-      cg.add(pgBox(0.66, 0.06, 0.5, '#FFFFFF', 0, 0.26, 0));
-      [-0.18, 0.18].forEach(function(x){
-        cg.add(pgSph(0.055, C.lemon, x, 0.48, 0.22, 6));
+      cg.add(pgBox(0.68, 0.32, 0.5, col, 0, 0.58, 0));
+      cg.add(pgBox(0.62, 0.22, 0.46, '#FFF7EE', 0, 0.8, -0.04));
+      cg.add(pgBox(0.72, 0.06, 0.54, '#FFFFFF', 0, 0.43, 0));
+      [-0.19, 0.19].forEach(function(x){
+        cg.add(pgSph(0.06, C.lemon, x, 0.66, 0.24, 6));
       });
-      cg.add(pgCyl(0.04, 0.04, 0.2, C.iron, 0, 0.82, -0.02, 6));
-      cg.add(pgSph(0.07, C.coral, 0, 0.93, -0.02, 7));
-      [[-0.22, 0.15], [0.22, 0.15], [-0.22, -0.15], [0.22, -0.15]].forEach(function(w){
-        var wh = pgCyl(0.07, 0.07, 0.06, C.dark, w[0], 0.3, w[1], 8);
+      cg.add(pgCyl(0.04, 0.04, 0.22, C.iron, 0, 1.04, -0.02, 6));
+      cg.add(pgSph(0.075, C.coral, 0, 1.16, -0.02, 7));
+      [[-0.24, 0.16], [0.24, 0.16], [-0.24, -0.16], [0.24, -0.16]].forEach(function(w){
+        var wh = pgCyl(0.075, 0.075, 0.06, C.dark, w[0], 0.46, w[1], 8);
         wh.rotation.z = Math.PI / 2; cg.add(wh);
       });
       g.add(cg); cars.push(cg);
@@ -7524,24 +7622,24 @@ async function finishBoot(){
     function carAt(idx, t){
       var k = idx % 4;
       var a = t * 0.62 + k * Math.PI / 2 + Math.sin(t * 0.5 + k) * 0.3;
-      var rr = 1.12 + Math.sin(t * 1.1 + k * 1.7) * 0.1;
+      var rr = 1.2 + Math.sin(t * 1.1 + k * 1.7) * 0.1;
       return { a: a, x: Math.cos(a) * rr, z: Math.sin(a) * rr, k: k };
     }
     PG.dyn.push(function(t){
       for (var k = 0; k < 4; k++){
         var c = carAt(k, t);
-        cars[k].position.set(c.x, 0, c.z);
+        cars[k].position.set(c.x, 0.24, c.z);
         cars[k].rotation.y = -c.a + Math.PI / 2;
         cars[k].rotation.z = Math.sin(t * 7 + k) * 0.025;
       }
     });
     g.userData.pose = function(idx, t){
       var c = carAt(idx, t);
-      return { x: c.x, y: 0.6, z: c.z };
+      return { x: c.x, y: 0.86, z: c.z };
     };
-    g.userData.labelY = 2.05;
-    g.userData.radius = 2.4;
-    g.userData.spots = [{ x:0, y:0.6, z:0 }];
+    g.userData.labelY = 2.5;
+    g.userData.radius = 2.6;
+    g.userData.spots = [{ x:0, y:0.86, z:0 }];
   }
 
   /* ---------- 이름표 ---------- */
