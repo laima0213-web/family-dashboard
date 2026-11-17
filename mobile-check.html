@@ -12,13 +12,13 @@
 <body>
 <div class="wrap"><iframe id="f" src="about:blank"></iframe></div>
 <script>
-  var p = new URLSearchParams(location.search);
-  var f = document.getElementById('f');
-  var h = Number(p.get('h') || 0);
-  if (h) f.style.height = h + 'px';
-  var top = Number(p.get('top') || 0);
-  if (top) f.style.marginTop = (-top) + 'px';
-  f.src = './index.html?t=' + Date.now();
+  var q = new URLSearchParams(location.search);
+  var fr = document.getElementById('f');
+  var hpx = Number(q.get('h') || 0);
+  if (hpx) fr.style.height = hpx + 'px';
+  var skips = Number(q.get('top') || 0);
+  if (skips) fr.style.marginTop = (-skips) + 'px';
+  fr.src = './index.html?t=' + Date.now();
 </script>
 </body>
 </html>
