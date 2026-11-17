@@ -8103,22 +8103,22 @@ async function finishBoot(){
   }
 
   /* 🌿 그네 — 파스텔 A자 틀에 두 좌석이 서로 다른 박자로 앞뒤로 흔들린다 */
-  var PG_SWING = { topY: 2.26, len: 1.42, maxA: 0.74, dx: 0.85 };
+  var PG_SWING = { topY: 2.72, len: 1.56, maxA: 0.74, dx: 0.9 };
   function pgSwingAng(i, t){
     return Math.sin(t * 1.12 + (i ? 2.4 : 0)) * PG_SWING.maxA;
   }
   function pgSwing(g){
     var topY = PG_SWING.topY, L = PG_SWING.len, dx = PG_SWING.dx;
     /* A자 지지대 두 벌 */
-    [-1.36, 1.36].forEach(function(x, i){
-      g.add(pgBeam([x, 0.04, 0.7], [x, topY - 0.02, 0], 0.072, i ? C.lemon : C.mint, 7));
-      g.add(pgBeam([x, 0.04, -0.7], [x, topY - 0.02, 0], 0.072, i ? C.lemon : C.mint, 7));
-      g.add(pgSph(0.085, C.woodL, x, 0.06, 0.7, 7));
-      g.add(pgSph(0.085, C.woodL, x, 0.06, -0.7, 7));
+    [-1.5, 1.5].forEach(function(x, i){
+      g.add(pgBeam([x, 0.04, 0.78], [x, topY - 0.02, 0], 0.075, i ? C.lemon : C.mint, 7));
+      g.add(pgBeam([x, 0.04, -0.78], [x, topY - 0.02, 0], 0.075, i ? C.lemon : C.mint, 7));
+      g.add(pgSph(0.09, C.woodL, x, 0.06, 0.78, 7));
+      g.add(pgSph(0.09, C.woodL, x, 0.06, -0.78, 7));
     });
-    var bar = pgCyl(0.062, 0.062, 2.92, C.peach, 0, topY, 0, 10);
+    var bar = pgCyl(0.065, 0.065, 3.36, C.peach, 0, topY, 0, 10);
     bar.rotation.z = Math.PI / 2; g.add(bar);
-    [-1.46, 1.46].forEach(function(x){ g.add(pgSph(0.075, C.coral, x, topY, 0, 8)); });
+    [-1.66, 1.66].forEach(function(x){ g.add(pgSph(0.08, C.coral, x, topY, 0, 8)); });
     /* 두 좌석 — 흔들리는 피벗 그룹 */
     var swings = [];
     [-1, 1].forEach(function(side, i){
@@ -8146,8 +8146,8 @@ async function finishBoot(){
         tilt: Math.sin(a) * 0.13
       };
     };
-    g.userData.labelY = topY + 0.6;
-    g.userData.radius = 1.95;
+    g.userData.labelY = topY + 0.55;
+    g.userData.radius = 2.15;
     g.userData.spots = [{ x:-dx, y:0, z:0 }, { x:dx, y:0, z:0 }];
   }
 
