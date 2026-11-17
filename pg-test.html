@@ -128,65 +128,46 @@
     ev(w, 'pointerup', 195 + 12 * 26, 300, 7);
     await sleep(150);
     var az1 = S.azim;
-    ev(w, 'pointerdown', 195, 300, 8);
-    for (var k2 = 1; k2 <= 5; k2++) ev(w, 'pointermove', 195, 300 - k2 * 20, 8);
-    ev(w, 'pointerup', 195, 300 - 5 * 20, 8);
-    await sleep(150);
-    L('회전: azimuth ' + az0.toFixed(2) + ' → ' + az1.toFixed(2) + ' rad (' + ((az1 - az0) * 180 / Math.PI).toFixed(0) + '도) · polar ' + po0.toFixed(2) + ' → ' + S.polar.toFixed(2));
-    await sleep(300);
+    L('회전: azimuth ' + az0.toFixed(2) + ' → ' + az1.toFixed(2) + ' rad (' + ((az1 - az0) * 180 / Math.PI).toFixed(0) + '도)');
+    w.eval('__pg.state.azim=0.62; __pg.state.polar=1.0;');
+    await sleep(400);
 
-    /* 캐릭터 → 방방이 드래그 */
-    var id0 = S.charOrder[1];
-    var from = screenOf(w, S.chars[id0].sp.position.clone().add(new w.THREE.Vector3(0, 0.7, 0)));
-    var to = screenOf(w, S.rides.tramp.g.position.clone().add(new w.THREE.Vector3(0, 0.35, 0)));
-    dragTo(w, from, to, 11);
+    function grab(id){ return screenOf(w, S.chars[id].sp.position.clone().add(new w.THREE.Vector3(0, 0.7, 0))); }
+    function drop(x, y, z){ return screenOf(w, new w.THREE.Vector3(x, y, z)); }
+    function recOf(id){ return pgArr(w).filter(function(x){ return x.id === id; })[0]; }
+
+    /* 1) 아무 기구 없는 잔디에 내려놓기 */
+    var idG = S.charOrder[0];
+    dragTo(w, grab(idG), drop(0.6, 0.1, 0.6), 9);
     await sleep(500);
-    var rec0 = pgArr(w).filter(function(x){ return x.id === id0; })[0];
-    L('방방이 드롭: ride=' + (rec0 && rec0.ride) + ' · 높이 y=' + S.chars[id0].sp.position.y.toFixed(2));
+    var rG = recOf(idG);
+    L('풀밭 드롭: ride=' + (rG && rG.ride ? rG.ride : '(없음)') + ' · 좌표 ' + (rG ? rG.x + ',' + rG.z : '-'));
 
-    /* 캐릭터 → 시소 드래그 */
-    var id1 = S.charOrder[2];
-    var from2 = screenOf(w, S.chars[id1].sp.position.clone().add(new w.THREE.Vector3(0, 0.7, 0)));
-    var to2 = screenOf(w, S.rides.seesaw.g.position.clone().add(new w.THREE.Vector3(0, 0.35, 0)));
-    dragTo(w, from2, to2, 12);
-    await sleep(500);
-    var rec1 = pgArr(w).filter(function(x){ return x.id === id1; })[0];
-    L('시소 드롭: ride=' + (rec1 && rec1.ride) + ' · 높이 y=' + S.chars[id1].sp.position.y.toFixed(2));
+    /* 2) 방방이에 올리기 */
+    var idT = S.charOrder[1];
+    dragTo(w, grab(idT), drop(S.rides.tramp.g.position.x, 0.3, S.rides.tramp.g.position.z), 11);
+    await sleep(600);
+    var rT = recOf(idT);
+    L('방방이 드롭: ride=' + (rT && rT.ride) + ' · 높이 y=' + S.chars[idT].sp.position.y.toFixed(2));
 
-    /* 캐릭터 → 잔디로 내려놓기 */
-    var from3 = screenOf(w, S.chars[id0].sp.position.clone().add(new w.THREE.Vector3(0, 0.6, 0)));
-    var to3 = screenOf(w, new w.THREE.Vector3(1.6, 0.1, 1.4));
-    dragTo(w, from3, to3, 13);
-    await sleep(500);
-    var rec2 = pgArr(w).filter(function(x){ return x.id === id0; })[0];
-    L('풀밭 드롭: ride=' + (rec2 && rec2.ride ? rec2.ride : '(없음)') + ' · 저장좌표 ' + (rec2 ? rec2.x + ',' + rec2.z : '-'));
+    /* 3) 시소에 올리기 */
+    var idS = S.charOrder[2];
+    dragTo(w, grab(idS), drop(S.rides.seesaw.g.position.x, 0.3, S.rides.seesaw.g.position.z), 12);
+    await sleep(600);
+    var rS = recOf(idS);
+    L('시소 드롭: ride=' + (rS && rS.ride) + ' · 높이 y=' + S.chars[idS].sp.position.y.toFixed(2));
 
-    /* 확대 버튼 */
-    var dg = S.distGoal;
-    d.getElementById('pgZoomIn').click(); await sleep(200);
-    var dg2 = S.distGoal;
-    d.getElementById('pgZoomOut').click();
-    L('줌 버튼: ' + dg.toFixed(1) + ' → ' + dg2.toFixed(1));
-
-    /* 이름표 토글 */
-    var lb = d.getElementById('pgLabels');
-    d.getElementById('pgLblBtn').click();
-    L('이름표 토글: off=' + lb.classList.contains('off'));
-    d.getElementById('pgLblBtn').click();
-
-    /* 꾸미기에서 빼기 */
+    /* 4) 꾸미기 빼기 */
     var before = S.charOrder.length;
-    d.querySelector('[data-pgdel]').click();
-    await sleep(300);
-    L('빼기: ' + before + '명 → ' + S.charOrder.length + '명 · 저장 ' + pgArr(w).length + '개');
+    if (S.charOrder.length > 3) { d.querySelector('[data-pgdel]').click(); await sleep(300); }
+    L('꾸미기: ' + before + '명 → ' + S.charOrder.length + '명 · 저장 ' + pgArr(w).length + '개');
 
-    L('DB.patch 호출 ' + (w.__writes || 0) + '회 · 콘솔오류 ' + JSON.stringify(w.__errs || []));
-
-    /* 최종 화면: 꾸미기 닫고 캐릭터 보이게 */
+    /* 5) 최종 장면 */
+    w.eval('__pg.state.azim=0.62; __pg.state.polar=1.0; __pg.state.dist=19.5; __pg.state.distGoal=19.5;');
     d.getElementById('pgDeco').hidden = true;
-    await sleep(1200);
-    L('최종 캐릭터 ' + S.charOrder.length + '명 · 이름표 ' + (d.getElementById('pgLabels').className || 'on'));
-    document.getElementById('state').textContent = '테스트 끝 · ' + new Date().toISOString();
+    L('DB.patch 호출 ' + (w.__writes || 0) + '회 · 콘솔오류 ' + JSON.stringify(w.__errs || []));
+    await sleep(1400);
+    L('최종 캐릭터 ' + S.charOrder.length + '명 · 회전 ' + S.azim.toFixed(2) + ' · 저장값 ' + JSON.stringify(pgArr(w).map(function(x){ return [x.preset, x.ride || '-']; })));
   }
 })();
 </script>
