@@ -6446,7 +6446,8 @@ async function finishBoot(){
     [-0.11, 0.11].forEach(function(x){
       horse.add(pgCyl(0.018, 0.018, 0.24, C.woodD, x, 0.53, 0.28, 6));
     });
-    horse.add(pgCyl(0.02, 0.02, 0.26, C.woodD, 0, 0.64, 0.28, 6)).rotation.z = Math.PI / 2;
+    var hbar = pgCyl(0.02, 0.02, 0.26, C.woodD, 0, 0.64, 0.28, 6);
+    hbar.rotation.z = Math.PI / 2; horse.add(hbar);
     g.userData.parts.horse = horse;
     g.userData.labelY = 1.8;
     g.userData.radius = 1.6;
