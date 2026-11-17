@@ -1786,9 +1786,12 @@ function normalizeState(raw){
   out.reading = normalizeReading(r.reading);
   var avs = {};
   KIDS.forEach(function(id){
-    var base = avatarDefaults(id), saved = (r.avatars && r.avatars[id]) || {};
-    Object.keys(base).forEach(function(k){ if (typeof saved[k] === 'string' && avValid(k, saved[k])) base[k] = saved[k]; });
-    avs[id] = base;
+    var saved = (r.avatars && r.avatars[id]) || {};
+    avs[id] = {
+      preset: (saved && typeof saved.preset === 'string' && AV_PRESETS.some(function(p){ return p.k === saved.preset; })) ? saved.preset : avPresetOf(id),
+      bg: (saved && AV_BGS.some(function(b){ return b.k === saved.bg; })) ? saved.bg : 'cream',
+      deco: (saved && AV_DECOS.some(function(d){ return d.k === saved.deco; })) ? saved.deco : 'none'
+    };
   });
   out.avatars = avs;
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
