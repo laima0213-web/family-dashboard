@@ -1348,6 +1348,45 @@ body.pg-open{overflow:hidden!important}
 .pgd-empty button{margin-top:2px;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;border-radius:999px;
   height:30px;padding:0 14px;font-size:11.5px;font-weight:900;font-family:inherit;cursor:pointer}
 
+/* ---------- 🏡 꾸미기 탭 (캐릭터 / 집·건물) ---------- */
+.pgd-tabs{display:flex;gap:5px;padding:7px 0 0}
+.pgd-tabs button{flex:1;height:28px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
+  font-family:inherit;font-size:11px;font-weight:900;color:#9A8B76;cursor:pointer;letter-spacing:-.3px}
+.pgd-tabs button.on{background:linear-gradient(120deg,#EFFAF2,#F7F0FF);border-color:#CFE7D9;color:#3F7A5C;
+  box-shadow:0 2px 7px rgba(95,169,122,.14)}
+.pgd-grid.bld{grid-template-columns:repeat(3,1fr)}
+.pgd-thumb svg{width:100%;height:100%;display:block}
+.pgd-tip{font-size:9.5px;font-weight:800;color:#A79882;line-height:1.5;margin-top:6px;text-align:center}
+.pgd-brow{display:flex;align-items:center;gap:5px;margin-left:auto;flex:0 0 auto}
+.pgd-bbtn{border:1px solid #D9E9F5;background:#F4FAFF;color:#41708F;border-radius:999px;height:22px;
+  padding:0 8px;font-size:9.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}
+.pgd-bbtn.del{border-color:#F3C9C1;background:#FFF6F3;color:#C4553F}
+.pgd-bbtn:active{transform:scale(.95)}
+
+/* ---------- 🏡 건물 조작 플로팅 바 ---------- */
+.pg-bbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  z-index:9;display:flex;align-items:center;gap:5px;max-width:94vw;
+  background:rgba(255,253,247,.98);border:1.5px solid #EADFCB;border-radius:999px;
+  padding:5px 6px 5px 12px;box-shadow:0 8px 26px rgba(70,90,60,.26)}
+.pg-bbar[hidden]{display:none!important}
+.pg-bbar .pgb-name{font-size:11px;font-weight:900;color:#5C5040;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:34vw;letter-spacing:-.3px}
+.pg-bbar button{flex:0 0 auto;border:1px solid #CFE7D9;background:#EFFAF2;color:#3F7A5C;border-radius:999px;
+  height:28px;padding:0 10px;font-size:10.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}
+.pg-bbar button.del{border-color:#F3C9C1;background:#FFF6F3;color:#C4553F}
+.pg-bbar button.x{width:28px;padding:0;border-color:#EADFCB;background:#FFF8EA;color:#8B7A63}
+.pg-bbar button:active{transform:scale(.95)}
+
+/* ---------- 상점 🏡 집·마을 탭 ---------- */
+.av-card-svg{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.av-card-svg svg{width:100%;height:100%;display:block}
+.av-bnote{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;padding:9px 11px;
+  background:linear-gradient(120deg,#F7FCF8,#FBF7FF);border:1px dashed #DDEBD9;border-radius:14px}
+.av-bnote small{flex:1 1 190px;font-size:10.5px;font-weight:800;color:#7C8A79;line-height:1.5}
+.av-bnote button{flex:0 0 auto;border:1px solid #CFEBDA;background:#EFFAF2;color:#357A50;border-radius:999px;
+  height:28px;padding:0 12px;font-size:11px;font-weight:900;font-family:inherit;cursor:pointer}
+.av-bnote button:active{transform:scale(.97)}
+
 /* ---------- 프로필 카드: 🛍️ 상점 / 🌳 놀이터 두 버튼 ---------- */
 .prof-btns{margin-left:auto;display:flex;gap:4px}
 .prof-btns .prof-edit{margin-left:0}
@@ -1369,8 +1408,12 @@ body.pg-open{overflow:hidden!important}
   .pg-zoom button{width:40px;height:40px;font-size:17px;border-radius:12px}
   .pg-lbl{font-size:8.5px;padding:0 5px}
   .pgd-grid{grid-template-columns:repeat(4,1fr);gap:5px}
+  .pgd-grid.bld{grid-template-columns:repeat(3,1fr)}
   .pgd-thumb{height:38px}
   .pgd-nm{font-size:9px}
+  .pg-bbar{gap:4px;padding:4px 5px 4px 10px}
+  .pg-bbar button{height:26px;padding:0 8px;font-size:10px}
+  .pg-bbar .pgb-name{max-width:28vw;font-size:10.5px}
   .pgd-card{padding:4px 2px 3px;border-radius:12px}
   .prof .prof-meta{flex:1 1 100%}
   .prof-btns{width:100%;margin-left:0;gap:3px}
@@ -1525,10 +1568,14 @@ body.pg-open{overflow:hidden!important}
   <div class="pg-deco" id="pgDeco" hidden>
     <div class="pgd-h">
       <b>🎨 꾸미기</b>
-      <span class="pgd-note">산 캐릭터를 놀이터에 데려와요</span>
+      <span class="pgd-note">놀이터에 캐릭터와 집을 놓아요</span>
       <button type="button" id="pgdClose" aria-label="닫기">✕</button>
     </div>
-    <div class="pgd-body">
+    <div class="pgd-tabs" id="pgdTabs">
+      <button type="button" data-pgdt="char" class="on">🧒 캐릭터</button>
+      <button type="button" data-pgdt="build">🏡 집·건물</button>
+    </div>
+    <div class="pgd-body" id="pgdBodyChar">
       <div class="pgd-sec">
         <div class="pgd-lab">🛍️ 상점에서 산 캐릭터 <span id="pgdOwnCnt">0개</span></div>
         <div class="pgd-grid" id="pgdOwned"></div>
@@ -1543,6 +1590,30 @@ body.pg-open{overflow:hidden!important}
         <div class="pgd-now" id="pgdNow"></div>
       </div>
     </div>
+    <div class="pgd-body" id="pgdBodyBuild" hidden>
+      <div class="pgd-sec">
+        <div class="pgd-lab">🛍️ 상점에서 산 집·건물 <span id="pgdBldOwnCnt">0개</span></div>
+        <div class="pgd-grid bld" id="pgdBldOwned"></div>
+        <div class="pgd-empty" id="pgdBldEmpty" hidden>
+          <b>아직 산 집이 없어요</b>
+          <small>상점에서 집·카페·분수를 💎 1P로 데려올 수 있어요!</small>
+          <button type="button" id="pgdBldShop">🛍️ 상점 열기</button>
+        </div>
+        <div class="pgd-tip">＋ 짓기를 누르면 빈 자리에 뿅! · 손가락으로 끌어 옮기고, 콕 누르면 돌리거나 뺄 수 있어요</div>
+      </div>
+      <div class="pgd-sec">
+        <div class="pgd-lab">🏡 지금 지은 집 <span id="pgdBldNowCnt">0채</span></div>
+        <div class="pgd-now" id="pgdBldNow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏡 지은 건물을 콕 눌렀을 때 — 돌리기 · 빼기 (엄지 닿는 아래쪽) -->
+  <div class="pg-bbar" id="pgBuildBar" hidden>
+    <span class="pgb-name" id="pgbName">🏡 집</span>
+    <button type="button" data-pgb="rot">↻ 45° 돌리기</button>
+    <button type="button" data-pgb="del" class="del">🗑 빼기</button>
+    <button type="button" data-pgb="close" class="x" aria-label="닫기">✕</button>
   </div>
 </div>
 
@@ -2382,6 +2453,7 @@ function defaultState(){
     mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
     shop: { bonus:{}, spent:{}, unlocked:{} },
     playground: {},                              /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 */
+    pgBuilds: {},                                /* 🏡 놀이터에 직접 지은 집·건물 */
     sched: { date: t, items: [] },
     cal: {},
     mission: { idx: randInt(CFG.missions.length), done: false, date: t },
@@ -2557,6 +2629,36 @@ function normalizeState(raw){
     if (list.length) pgOut[id] = list;
   });
   out.playground = pgOut;
+  /* 🏡 놀이터에 지은 집·건물 — 아이별 [{ id, kind, x, z, rot }] (최대 16채, 섬 반경 13.6) */
+  var bldRaw = (r.pgBuilds && typeof r.pgBuilds === 'object') ? r.pgBuilds : {};
+  var bldOut = {};
+  KIDS.forEach(function(id){
+    var arrB = Array.isArray(bldRaw[id]) ? bldRaw[id] : null;
+    if (!arrB || !arrB.length) return;
+    var listB = [];
+    arrB.forEach(function(x, i){
+      if (!x || typeof x !== 'object') return;
+      if (typeof x.kind !== 'string' || !AV_BUILDS.some(function(b){ return b.k === x.kind; })) return;
+      if (listB.length >= PG_BUILD_MAX) return;
+      var bx = Number(x.x), bz = Number(x.z);
+      if (!isFinite(bx)) bx = 0;
+      if (!isFinite(bz)) bz = 0;
+      var br = Math.sqrt(bx * bx + bz * bz);
+      if (br > 13.6){ bx = bx / br * 13.6; bz = bz / br * 13.6; }
+      var br2 = Number(x.rot);
+      if (!isFinite(br2)) br2 = 0;
+      br2 = ((br2 % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      listB.push({
+        id: (typeof x.id === 'string' && x.id) ? x.id.slice(0, 24) : (id + '-bld' + i),
+        kind: x.kind,
+        x: Math.round(bx * 100) / 100,
+        z: Math.round(bz * 100) / 100,
+        rot: Math.round(br2 * 1000) / 1000
+      });
+    });
+    if (listB.length) bldOut[id] = listB;
+  });
+  out.pgBuilds = bldOut;
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
   if (sc && sc.date === todayKey()){
     out.sched = { date: sc.date, items: normalizeList(sc.items, [], 's') };
@@ -3095,7 +3197,7 @@ function avUnlocked(kid, kind, key){
   if (avIsFree(kind, key)) return true;
   return ((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1;
 }
-/* 실제로 구매해 둔 아이템 개수 (deco:none 은 '꾸미기 안 함'이라 품목이 아님) */
+/* 실제로 구매해 둔 아이템 개수 (deco:none 은 '꾸미기 안 함'이라 품목이 아님) — 캐릭터·배경·꾸미기·집·건물 모두 포함 */
 function avOwnedCount(kid){
   return ((shopRaw().unlocked || {})[kid] || []).filter(function(k){ return k !== 'deco:none'; }).length;
 }
@@ -3256,10 +3358,12 @@ function avPaid(kid, kind, key){
   return ((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1;
 }
 function avItemLabel(kind, key){
-  var list = (kind === 'preset') ? AV_PRESETS : (kind === 'bg') ? AV_BGS : AV_DECOS;
+  var list = (kind === 'preset') ? AV_PRESETS : (kind === 'bg') ? AV_BGS : (kind === 'build') ? AV_BUILDS : AV_DECOS;
   var hit = (list || []).filter(function(x){ return x.k === key; })[0];
   if (!hit) return key;
-  return (kind === 'deco') ? (String(hit.n).replace(/^\S+\s*/, '') || hit.n) : hit.n;
+  if (kind === 'deco') return (String(hit.n).replace(/^\S+\s*/, '') || hit.n);
+  if (kind === 'build') return avBuildFull(key);
+  return hit.n;
 }
 /* ↩ 구매 취소(삭제) — 1P 환불 + 착용·놀이터 배치까지 함께 정리 (호출 전 부모 PIN 통과 필요) */
 function avRefund(kid, kind, key){
@@ -3295,6 +3399,12 @@ function avRefund(kid, kind, key){
       var kept = s.playground[kid].filter(function(r){ return !(r && r.preset === key); });
       pgCleaned = s.playground[kid].length - kept.length;
       if (pgCleaned > 0) s.playground[kid] = kept;
+    }
+    /* 5) 🏡 놀이터에 지어 둔 그 건물도 함께 철무 (소유권만 취소되므로 재구매 후 다시 지을 수 있음) */
+    if (kind === 'build' && s.pgBuilds && Array.isArray(s.pgBuilds[kid])){
+      var keptB = s.pgBuilds[kid].filter(function(r){ return !(r && r.kind === key); });
+      pgCleaned += s.pgBuilds[kid].length - keptB.length;
+      if (keptB.length) s.pgBuilds[kid] = keptB; else delete s.pgBuilds[kid];
     }
   });
   /* 열려 있는 꾸미기 시트의 미리보기도 같은 종류만 맞춰 준다 */
@@ -3373,6 +3483,151 @@ var AV_DECOS = [
   { k:'starfall',  n:'🌟 별무리' },
   { k:'paw',       n:'🐾 발자국' }
 ];
+/* v17 — 🏡 집·마을 : 상점에서 💎 1P로 사서 놀이터에 직접 짓는 12종 */
+var AV_BUILDS = [
+  { k:'cottage_pink',   e:'🏡', n:'딸기크림 오두막' },
+  { k:'cottage_mint',   e:'🏠', n:'민트 통나무집' },
+  { k:'treehouse',      e:'🌳', n:'나무 위 비밀집' },
+  { k:'cafe_dessert',   e:'🧁', n:'디저트 카페' },
+  { k:'bakery_bread',   e:'🥐', n:'고소한 빵집' },
+  { k:'flower_shop',    e:'💐', n:'플라워 꽃가게' },
+  { k:'library_mini',   e:'📚', n:'숲속 도서관' },
+  { k:'camp_tent',      e:'⛺', n:'별빛 글램핑' },
+  { k:'fountain_heart', e:'⛲', n:'하트 꽃 분수' },
+  { k:'gazebo_tea',     e:'⛩️', n:'정원 쉼터' },
+  { k:'cherry_arch',    e:'🌸', n:'벚꽃 아치 벤치' },
+  { k:'pond_duck',      e:'🦆', n:'오리 미니연못' }
+];
+var PG_BUILD_MAX = 16;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
+function avBuildOf(k){ return (typeof AV_BUILDS === 'undefined' ? [] : AV_BUILDS).filter(function(b){ return b.k === k; })[0] || null; }
+function avBuildName(k){ var b = avBuildOf(k); return b ? b.n : k; }
+function avBuildIcon(k){ var b = avBuildOf(k); return b ? (b.e || '🏡') : '🏡'; }
+function avBuildFull(k){ return avBuildIcon(k) + ' ' + avBuildName(k); }
+/* 상점 카드용 — 인라인 파스텔 SVG 일러스트 12종 (외부 이미지 파일 없이) */
+function avBuildSvg(k){
+  var S = '<svg viewBox="8 3 48 55" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="32" cy="56" rx="19" ry="3" fill="#E9E1D0" opacity=".5"/>';
+  if (k === 'cottage_pink'){
+    S += '<rect x="16" y="31" width="32" height="23" rx="3" fill="#FFF3E6"/>'
+      + '<path d="M12 32 L32 13 L52 32 Z" fill="#F7B3C6"/>'
+      + '<path d="M12 32 L32 13 L52 32" fill="none" stroke="#EF9EB6" stroke-width="1.4"/>'
+      + '<rect x="42" y="17" width="5" height="9" rx="1.4" fill="#E7A2B7"/>'
+      + '<circle cx="46" cy="14" r="2.4" fill="#FFF" opacity=".85"/><circle cx="49" cy="10.5" r="1.7" fill="#FFF" opacity=".62"/>'
+      + '<rect x="27" y="38" width="10" height="16" rx="2" fill="#D9A877"/><circle cx="35" cy="46" r="1.2" fill="#FFE9A8"/>'
+      + '<rect x="18.5" y="35" width="7" height="7" rx="1.6" fill="#FFF6C9" stroke="#F3E2C9" stroke-width="1"/>'
+      + '<rect x="38.5" y="35" width="7" height="7" rx="1.6" fill="#FFF6C9" stroke="#F3E2C9" stroke-width="1"/>'
+      + '<rect x="17.4" y="43.4" width="9.2" height="3" rx="1.4" fill="#B98A5E"/><rect x="37.4" y="43.4" width="9.2" height="3" rx="1.4" fill="#B98A5E"/>'
+      + '<circle cx="20" cy="42" r="1.2" fill="#FF9FB8"/><circle cx="22.5" cy="42" r="1.2" fill="#FFE08A"/><circle cx="24.6" cy="42" r="1.2" fill="#FF9FB8"/>'
+      + '<circle cx="40" cy="42" r="1.2" fill="#FFE08A"/><circle cx="42.5" cy="42" r="1.2" fill="#FF9FB8"/><circle cx="44.6" cy="42" r="1.2" fill="#FFE08A"/>'
+      + '<rect x="16" y="52.4" width="32" height="3" rx="1.4" fill="#EFE3D2"/>';
+  } else if (k === 'cottage_mint'){
+    S += '<rect x="15" y="27" width="34" height="27" rx="2.5" fill="#F6E7CE"/>'
+      + '<g stroke="#E3CDA9" stroke-width="1.1"><line x1="15" y1="33" x2="49" y2="33"/><line x1="15" y1="39" x2="49" y2="39"/><line x1="15" y1="45" x2="49" y2="45"/><line x1="15" y1="51" x2="49" y2="51"/></g>'
+      + '<path d="M11 28 L32 12 L53 28 Z" fill="#9FE0C6"/>'
+      + '<path d="M11 28 L32 12 L53 28" fill="none" stroke="#7ACDAE" stroke-width="1.3"/>'
+      + '<rect x="40" y="19" width="4.6" height="8" rx="1.2" fill="#BFE8D8"/><circle cx="45" cy="16" r="2" fill="#FFF" opacity=".78"/>'
+      + '<rect x="28" y="36" width="9" height="18" rx="2" fill="#C99B6B"/><circle cx="34.6" cy="45" r="1.1" fill="#FFE9A8"/>'
+      + '<rect x="18" y="34.6" width="7" height="7" rx="1.6" fill="#FFF6C9" stroke="#E7D3B4"/><rect x="39" y="34.6" width="7" height="7" rx="1.6" fill="#FFF6C9" stroke="#E7D3B4"/>'
+      + '<g stroke="#B98A5E" stroke-width="1.5"><line x1="16.5" y1="48" x2="16.5" y2="54"/><line x1="24" y1="48" x2="24" y2="54"/><line x1="40" y1="48" x2="40" y2="54"/><line x1="47.5" y1="48" x2="47.5" y2="54"/></g>'
+      + '<rect x="14" y="46.2" width="36" height="1.6" rx=".8" fill="#C9A47C"/>'
+      + '<circle cx="32" cy="31" r="1.9" fill="#FFF0B8"/>';
+  } else if (k === 'treehouse'){
+    S += '<rect x="29" y="30" width="6" height="26" rx="2.4" fill="#B6875C"/>'
+      + '<path d="M32 38 L44 32" stroke="#B6875C" stroke-width="3" stroke-linecap="round"/>'
+      + '<circle cx="20" cy="25" r="9" fill="#8FD077"/><circle cx="45" cy="23" r="8" fill="#A5DB8C"/><circle cx="32" cy="16" r="9.5" fill="#98D57E"/>'
+      + '<rect x="22" y="24" width="20" height="12" rx="2.2" fill="#E4C69E"/>'
+      + '<path d="M19 24 L32 13 L45 24 Z" fill="#F9C6D3"/>'
+      + '<rect x="29.5" y="28" width="5" height="8" rx="1.2" fill="#C99B6B"/><circle cx="37" cy="29" r="2.2" fill="#FFF6C9"/>'
+      + '<g stroke="#D9B98C" stroke-width="1.1"><line x1="27" y1="36" x2="24" y2="54"/><line x1="31" y1="36" x2="28" y2="54"/></g>'
+      + '<g stroke="#C79A6A" stroke-width="1.6"><line x1="25.2" y1="41" x2="29.2" y2="41"/><line x1="24.6" y1="45" x2="28.6" y2="45"/><line x1="24" y1="49" x2="28" y2="49"/></g>'
+      + '<line x1="40" y1="14" x2="40" y2="6" stroke="#B6875C" stroke-width="1.4"/><path d="M40 7 L47 9.4 L40 11.8 Z" fill="#FF9FB8"/>';
+  } else if (k === 'cafe_dessert'){
+    S += '<rect x="15" y="30" width="34" height="24" rx="3" fill="#FFEFE2"/>'
+      + '<rect x="14" y="28.6" width="36" height="3.6" rx="1.8" fill="#FFD8C6"/>'
+      + '<path d="M26.5 29.4 L37.5 29.4 L33.2 17.5 L30.8 17.5 Z" fill="#E8B87A"/>'
+      + '<circle cx="29.6" cy="16" r="3.4" fill="#FFC9DA"/><circle cx="35.2" cy="15" r="3" fill="#FFF3CF"/><circle cx="32.6" cy="11.4" r="2.6" fill="#E8D2F6"/><circle cx="32.8" cy="8.6" r="1.4" fill="#FF9F8C"/>'
+      + '<g><rect x="16" y="34" width="4.6" height="4.4" fill="#FF9FB8"/><rect x="20.6" y="34" width="4.6" height="4.4" fill="#FFF"/><rect x="25.2" y="34" width="4.6" height="4.4" fill="#FF9FB8"/><rect x="29.8" y="34" width="4.6" height="4.4" fill="#FFF"/><rect x="34.4" y="34" width="4.6" height="4.4" fill="#FF9FB8"/><rect x="39" y="34" width="4.6" height="4.4" fill="#FFF"/></g>'
+      + '<rect x="16" y="33.6" width="29.6" height="1.2" fill="#FFC9DA"/>'
+      + '<rect x="18" y="41.6" width="14" height="9" rx="1.6" fill="#FFF6C9" stroke="#F3D9B6"/>'
+      + '<rect x="21" y="46" width="8.4" height="3.8" rx="1" fill="#FFC9DA"/><rect x="22" y="44" width="6.4" height="3" rx="1" fill="#FFF3CF"/>'
+      + '<rect x="35.6" y="40.6" width="8" height="13.4" rx="2.4" fill="#E7C39A"/><circle cx="42" cy="47.6" r="1" fill="#FFE9A8"/>'
+      + '<rect x="47" y="47.6" width="8.4" height="1.8" rx=".9" fill="#FFF"/><line x1="51.2" y1="49.4" x2="51.2" y2="54" stroke="#C9A47C" stroke-width="1.6"/>';
+  } else if (k === 'bakery_bread'){
+    S += '<rect x="14" y="31" width="36" height="23" rx="2.5" fill="#FFF1DC"/>'
+      + '<path d="M10 32 L32 18 L54 32 Z" fill="#D9885F"/>'
+      + '<rect x="43" y="20" width="5" height="10" rx="1.2" fill="#C9A57A"/><circle cx="47" cy="16.5" r="2.1" fill="#FFF" opacity=".7"/>'
+      + '<rect x="16" y="35.6" width="32" height="3.4" rx="1.5" fill="#F0D3B4"/>'
+      + '<g stroke="#C98E4F" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M24 33 q-3.4-6.4 3.6-6.4 q4.8 0 4.8 5"/><path d="M38 32 q3-5 4.6-1"/></g>'
+      + '<rect x="18" y="41" width="16" height="9" rx="1.6" fill="#FFF6C9" stroke="#EFD8BB"/>'
+      + '<g fill="#E8B87A"><ellipse cx="22" cy="47" rx="2.6" ry="2"/><ellipse cx="27" cy="47" rx="3" ry="2.1"/><ellipse cx="32" cy="47" rx="2.4" ry="1.9"/></g>'
+      + '<rect x="37" y="41" width="9" height="13" rx="2" fill="#C99B6B"/><circle cx="43.6" cy="48" r="1" fill="#FFE9A8"/>'
+      + '<rect x="14" y="52.4" width="36" height="2.6" rx="1.2" fill="#E9D3B4"/>';
+  } else if (k === 'flower_shop'){
+    S += '<rect x="13" y="29" width="38" height="25" rx="3" fill="#EAF8F5" stroke="#A9E0D2" stroke-width="1.4"/>'
+      + '<path d="M13 29 L32 15 L51 29" fill="#DDF3F7" stroke="#A9E0D2" stroke-width="1.4"/>'
+      + '<g stroke="#C4EDE3" stroke-width="1"><line x1="32" y1="16" x2="32" y2="54"/><line x1="22" y1="29" x2="22" y2="54"/><line x1="42" y1="29" x2="42" y2="54"/></g>'
+      + '<g fill="#96E2C3"><rect x="16" y="46" width="7" height="6" rx="1.6"/><rect x="26" y="48" width="6" height="4.6" rx="1.3"/><rect x="35" y="46.6" width="7" height="5.4" rx="1.5"/><rect x="45" y="48.6" width="5.4" height="4" rx="1.2"/></g>'
+      + '<g><circle cx="19.5" cy="43" r="3.2" fill="#FFB6CB"/><circle cx="29" cy="45" r="2.6" fill="#FFE39B"/><circle cx="38.5" cy="43.6" r="3" fill="#C9B6F0"/><circle cx="47.7" cy="45.6" r="2.2" fill="#FFC9DA"/></g>'
+      + '<g fill="#FFF6C9"><circle cx="19.5" cy="43" r="1.2"/><circle cx="38.5" cy="43.6" r="1.1"/></g>'
+      + '<path d="M26 54 q0-13 6-13 q6 0 6 13" fill="none" stroke="#9FE0C6" stroke-width="2"/>'
+      + '<g fill="#FFB6CB"><circle cx="26.4" cy="44" r="1.8"/><circle cx="30" cy="39.4" r="1.6"/><circle cx="34" cy="39.4" r="1.6"/><circle cx="37.6" cy="44" r="1.8"/></g>';
+  } else if (k === 'library_mini'){
+    S += '<rect x="16" y="30" width="32" height="24" rx="3" fill="#E6DDF6"/>'
+      + '<path d="M12 31 L32 15 L52 31 Z" fill="#B9A6E8"/>'
+      + '<path d="M32 19.5 l1.5 3.4 3.7.4 -2.8 2.6 .9 3.7 -3.3-2 -3.3 2 .9-3.7 -2.8-2.6 3.7-.4z" fill="#FFE39B"/>'
+      + '<rect x="19" y="34" width="12" height="3" rx="1" fill="#FFB6CB"/><rect x="19" y="37.4" width="10" height="3" rx="1" fill="#96E2C3"/><rect x="19" y="40.8" width="11" height="3" rx="1" fill="#FFE39B"/>'
+      + '<circle cx="41" cy="37" r="4" fill="#FFF6C9" stroke="#F3E2C9" stroke-width="1.2"/><line x1="41" y1="33" x2="41" y2="41" stroke="#F3E2C9" stroke-width=".9"/>'
+      + '<path d="M28.6 51 v-6.4 a3.4 3.4 0 0 1 6.8 0 v6.4z" fill="#C9B6F0"/><circle cx="34.2" cy="47.4" r=".9" fill="#FFF"/>'
+      + '<rect x="16" y="52.4" width="32" height="2.6" rx="1.2" fill="#DCD2F0"/>';
+  } else if (k === 'camp_tent'){
+    S += '<path d="M32 13 L46 52 L18 52 Z" fill="#FFDCE6"/>'
+      + '<path d="M32 13 L37.6 52 L26.4 52 Z" fill="#FFC9DA"/>'
+      + '<path d="M32 52 L28 38 L36 38 Z" fill="#C98FA8" opacity=".5"/>'
+      + '<g stroke="#C99B6B" stroke-width="1.5"><line x1="32" y1="13" x2="32" y2="7"/><line x1="32" y1="10" x2="24" y2="4.5"/><line x1="32" y1="10" x2="40" y2="4.5"/></g>'
+      + '<path d="M22 30 q10 6.4 20 0" fill="none" stroke="#FFF" stroke-width="1" stroke-dasharray="2 2"/>'
+      + '<g fill="#FFE39B"><circle cx="26" cy="32" r="1.3"/><circle cx="32" cy="33.6" r="1.3"/><circle cx="38" cy="32" r="1.3"/></g>'
+      + '<g stroke="#B6875C" stroke-width="2.4" stroke-linecap="round"><line x1="43" y1="53" x2="50" y2="50.4"/><line x1="43" y1="50.4" x2="50" y2="53"/></g>'
+      + '<path d="M46.5 47 q2.6-3.6 0-6 q-2.6 2.4 0 6z" fill="#FFB46B"/><circle cx="46.5" cy="49.4" r="1.7" fill="#FFDF8E" opacity=".85"/>';
+  } else if (k === 'fountain_heart'){
+    S += '<ellipse cx="32" cy="52" rx="15" ry="3.2" fill="#F6EDE2"/><rect x="19" y="43.6" width="26" height="4.6" rx="2" fill="#F6EDE2"/>'
+      + '<ellipse cx="32" cy="43.4" rx="13" ry="4" fill="#FBF4EA" stroke="#EDE0CE"/><ellipse cx="32" cy="43.4" rx="10.4" ry="2.9" fill="#8FD6F0"/>'
+      + '<rect x="30.8" y="34.4" width="2.6" height="9" rx="1.3" fill="#FBF4EA"/>'
+      + '<ellipse cx="32" cy="33.6" rx="6.8" ry="2.6" fill="#FBF4EA" stroke="#EDE0CE"/><ellipse cx="32" cy="33.4" rx="5.2" ry="1.8" fill="#8FD6F0"/>'
+      + '<g><circle cx="29" cy="24.6" r="3.4" fill="#FF9FB8"/><circle cx="35" cy="24.6" r="3.4" fill="#FF9FB8"/><path d="M25.6 26.6 L32 33 L38.4 26.6 Z" fill="#FF9FB8"/></g>'
+      + '<path d="M25.4 40.4 q-3-6 0-8" stroke="#BFE9FA" stroke-width="1.6" fill="none"/>'
+      + '<path d="M38.6 40.4 q3-6 0-8" stroke="#BFE9FA" stroke-width="1.6" fill="none"/>'
+      + '<g fill="#CFF0FC"><circle cx="24" cy="29" r="1"/><circle cx="40" cy="27.6" r="1"/><circle cx="32" cy="15" r="1.2"/></g>'
+      + '<g fill="#FFC9DA"><circle cx="12.6" cy="52.6" r="1.9"/><circle cx="19" cy="54.6" r="1.6"/><circle cx="45" cy="54.6" r="1.6"/><circle cx="51.4" cy="52.6" r="1.9"/></g>';
+  } else if (k === 'gazebo_tea'){
+    S += '<rect x="17" y="49.6" width="30" height="4.4" rx="2" fill="#FBEAD4"/>'
+      + '<g stroke="#FFF" stroke-width="2.4"><line x1="20" y1="33" x2="20" y2="51"/><line x1="44" y1="33" x2="44" y2="51"/><line x1="32" y1="29" x2="32" y2="51"/></g>'
+      + '<path d="M12 35 L32 17 L52 35 Z" fill="#F9C9D6"/>'
+      + '<path d="M12 35 q20 6.4 40 0" fill="none" stroke="#F3B3C6" stroke-width="2"/>'
+      + '<circle cx="32" cy="15" r="2.4" fill="#FFE39B"/>'
+      + '<line x1="18" y1="45.4" x2="46" y2="45.4" stroke="#FFF" stroke-width="1.5"/>'
+      + '<ellipse cx="32.5" cy="42" rx="5" ry="1.9" fill="#FFF"/><line x1="32.5" y1="43.6" x2="32.5" y2="49.4" stroke="#D9BF95" stroke-width="1.6"/>'
+      + '<circle cx="29.4" cy="40.4" r="1.7" fill="#FFF"/><path d="M31 40.4 q1.8 1 0 2" fill="none" stroke="#E7C39A" stroke-width=".8"/>'
+      + '<ellipse cx="24" cy="48.6" rx="3" ry="1.7" fill="#A9DCC8"/><ellipse cx="41" cy="48.6" rx="3" ry="1.7" fill="#FFC9DA"/>';
+  } else if (k === 'cherry_arch'){
+    S += '<g stroke="#B6875C" stroke-width="2.6"><line x1="21" y1="54" x2="21" y2="28"/><line x1="43" y1="54" x2="43" y2="28"/></g>'
+      + '<path d="M21 28 q11-14 22 0" fill="none" stroke="#B6875C" stroke-width="2.4"/>'
+      + '<g fill="#FFC9DA"><circle cx="21" cy="26" r="3"/><circle cx="27" cy="19" r="3.4"/><circle cx="33" cy="16" r="3.6"/><circle cx="39" cy="19" r="3.4"/><circle cx="43" cy="26" r="3"/><circle cx="32" cy="22" r="2.4" fill="#FFD9E6"/><circle cx="24" cy="22" r="2.2" fill="#FFD9E6"/><circle cx="40" cy="22" r="2.2" fill="#FFD9E6"/></g>'
+      + '<rect x="20" y="43.6" width="24" height="2.4" rx="1.2" fill="#8FD5B8"/>'
+      + '<rect x="20" y="37.4" width="24" height="2" rx="1" fill="#8FD5B8"/><rect x="20" y="39.8" width="24" height="3.2" rx="1.2" fill="#CFF0E2"/>'
+      + '<g stroke="#C99B6B" stroke-width="1.8"><line x1="22" y1="46" x2="22" y2="53"/><line x1="42" y1="46" x2="42" y2="53"/></g>'
+      + '<circle cx="14" cy="49" r="1.4" fill="#FFD9E6"/><circle cx="51" cy="43" r="1.4" fill="#FFD9E6"/>';
+  } else {
+    S += '<ellipse cx="32" cy="46" rx="19" ry="8.2" fill="#CDEBF6" stroke="#A7D9EC" stroke-width="1.2"/>'
+      + '<ellipse cx="32" cy="46" rx="15.4" ry="6.2" fill="#9FDBF2"/>'
+      + '<g fill="#96E2C3"><ellipse cx="23" cy="43.6" rx="3.6" ry="2"/><ellipse cx="40" cy="48.4" rx="3" ry="1.7"/></g>'
+      + '<circle cx="24.6" cy="42.2" r="1.3" fill="#FFB6CB"/><circle cx="41.4" cy="47" r="1.1" fill="#FFC9DA"/>'
+      + '<ellipse cx="33.4" cy="45" rx="4.2" ry="3" fill="#FFE39B"/><circle cx="36.8" cy="41.6" r="2.4" fill="#FFE9A8"/><path d="M39.2 41.6 l2.4 1 -2.4 1z" fill="#FFA45C"/><circle cx="37" cy="40.9" r=".5" fill="#6E5A3A"/>'
+      + '<ellipse cx="24" cy="49.4" rx="3" ry="2.2" fill="#FFEFC0"/><circle cx="26.4" cy="47" r="1.8" fill="#FFF3CF"/><path d="M28.2 47 l1.8 .8 -1.8 .8z" fill="#FFA45C"/><circle cx="26.6" cy="46.4" r=".4" fill="#6E5A3A"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.4"><line x1="47" y1="50.4" x2="47" y2="41.6"/><line x1="50" y1="50.4" x2="50.6" y2="43"/></g>'
+      + '<circle cx="47" cy="40.8" r="1.4" fill="#C9B6F0"/>';
+  }
+  return S + '</svg>';
+}
 var AV_DEFAULT_PRESET = { k1:'fox_sailor', k2:'bun_ribbon' };   /* 옛 SVG 저장값 호환 기본값 */
 function avPresetOf(id){
   var saved = (state && state.avatars && state.avatars[id]) || {};
@@ -4591,7 +4846,7 @@ function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
   var pts = pointsOf(kid), nm = (FAMILY[kid] || {}).name || '';
-  var tabs = [ ['preset', '🧒 캐릭터'], ['bg', '🎨 배경 색'], ['deco', '✨ 꾸미기'] ];
+  var tabs = [ ['preset', '🧒 캐릭터'], ['bg', '🎨 배경 색'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'] ];
   var pane = '';
   if (avatarTab === 'bg'){
     pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + AV_BGS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
@@ -4606,6 +4861,14 @@ function renderAvatarSheet(){
           var lab = (d.k === 'none') ? '없음' : d.n.replace(/^\S+\s*/, '');
           return avShopCard('deco', d.k, lab, '<span class="av-card-img av-card-emoji">' + ico + '</span>', kid, av);
         }).join('') + '</div></div>';
+  } else if (avatarTab === 'build'){
+    pane = '<div class="av-sec"><div class="av-lab">집·마을을 골라요 · ' + AV_BUILDS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + '<div class="av-grid">' + AV_BUILDS.map(function(bd){
+          return avShopCard('build', bd.k, bd.n,
+            '<span class="av-card-img"><span class="av-card-svg">' + avBuildSvg(bd.k) + '</span></span>', kid, av);
+        }).join('') + '</div></div>'
+      + '<div class="av-bnote"><small>구매한 집·건물은 🌳 자연 놀이터 ›🎨 꾸미기 ›🏡 집·건물에서 원하는 곳에 직접 지을 수 있어요</small>'
+      +   '<button type="button" data-act="pg-from-shop" data-m="' + kid + '">🌳 자연 놀이터 가기 ›</button></div>';
   } else {
     pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · ' + AV_PRESETS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
       + '<div class="av-grid">' + AV_PRESETS.map(function(p){
@@ -4712,6 +4975,7 @@ document.addEventListener('click', function(ev){
       s.shop.spent[bKid] = (Number(s.shop.spent[bKid]) || 0) + ITEM_PRICE;
     });
     avatarDraft.av[bKind] = bKey;
+    if (bKind === 'build') delete avatarDraft.av.build;   /* 집은 착용 개념이 없음 — 구매만 */
     renderAvatarSheet(); renderKids();
     if (typeof confetti === 'function') confetti(18);
     toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
@@ -4722,7 +4986,8 @@ document.addEventListener('click', function(ev){
     var rKid = avatarDraft.kid, rKind = el.dataset.k, rKey = el.dataset.v;
     if (avIsFree(rKind, rKey) || !avPaid(rKid, rKind, rKey)){ toast('이미 보유하지 않은 아이템이에요'); return; }
     var rMsg = '「' + avItemLabel(rKind, rKey) + '」 구매를 취소하고 1P를 돌려줄까요?'
-             + (rKind === 'preset' ? '\n(놀이터에 나와 있는 캐릭터도 함께 정리돼요)' : '');
+             + (rKind === 'preset' ? '\n(놀이터에 나와 있는 캐릭터도 함께 정리돼요)' : '')
+             + (rKind === 'build' ? '\n(놀이터에 지어 둔 그 건물도 함께 빼야 해요)' : '');
     /* 엄마·아빠 PIN을 통과해야만 — 3분 유지 중이라도 실수 방지를 위해 한 번 더 묻는다 */
     requireParentPin(function(){
       if (!window.confirm(rMsg)) return;
@@ -5880,8 +6145,9 @@ async function finishBoot(){
     ray:null, ndc:null, vec:null, plane:null,
     rides:{}, rideList:[], labels:[], dyn:[],
     chars:{}, charOrder:[], tex:{}, mats:{},
+    builds:{}, buildOrder:[], buildDrag:null, buildSel:'', buildBarAt:0, buildFoot:{},
     mode:'', ptrs:{}, orbit:null, drag:null, pinch:null,
-    time:0, lastT:0, decoOpen:false, lastSig:'', hintTimer:0
+    time:0, lastT:0, decoOpen:false, decoTab:'char', lastSig:'', hintTimer:0
   };
   var CDN = [
     'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
@@ -5890,6 +6156,8 @@ async function finishBoot(){
   var RIDES = ['slide','seesaw','jungle','ladder','bars','rope','horse','sand','zip','tramp','bench',
                'ferris','carousel','coaster','viking','teacup','drop','balloon','bumper'];
   var ISLAND_R = 15.0, CHAR_R = 14.35;
+  var BUILD_R = 13.6;                    /* 🏡 집을 짓고 옮길 수 있는 섬 반경 (물에 잠기지 않는 안쪽) */
+  var PG_BUILD_SCALE = 0.9;              /* 공원 기구와 나란히 놓였을 때 딱 좋은 크기 */
   /* ---------- 🤸 자율 행동(혼자 걷고 기구 타기) ----------
      · 위치는 화면 메모리(c.wx·c.wz·c.curRide)에서만 움직인다 — DB 저장 없음! */
   var AI_R = 13.7;                      /* 섬 반경 15.0 안쪽 — 물에 빠지지 않는 산책 반경 */
@@ -5959,6 +6227,26 @@ async function finishBoot(){
     return hit ? hit.n : k;
   }
   function pgUid(){ return 'pg' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+  /* ============================================================
+     🏡 내가 지은 집·건물 — state.pgBuilds[kid] = [{ id, kind, x, z, rot }]
+     ============================================================ */
+  function pgBuildRecords(kid){
+    var b = (state && state.pgBuilds && state.pgBuilds[kid]) || [];
+    return Array.isArray(b) ? b : [];
+  }
+  function pgBuildRec(kid, id){
+    return pgBuildRecords(kid).filter(function(r){ return r && r.id === id; })[0] || null;
+  }
+  function pgBuildOwned(kid){
+    var out = [];
+    (typeof AV_BUILDS === 'undefined' ? [] : AV_BUILDS).forEach(function(b){
+      if (avUnlocked(kid, 'build', b.k)) out.push(b);
+    });
+    return out;
+  }
+  function pgBuildName(k){ return (typeof avBuildName === 'function') ? avBuildName(k) : k; }
+  function pgBuildIcon(k){ return (typeof avBuildIcon === 'function') ? avBuildIcon(k) : '🏡'; }
+  function pgBuildUid(){ return 'pb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
 
   /* ============================================================
      열기 / 닫기
@@ -5981,7 +6269,7 @@ async function finishBoot(){
     if (hint){ hint.classList.add('on'); clearTimeout(PG.hintTimer); PG.hintTimer = setTimeout(function(){ hint.classList.remove('on'); }, 6000); }
     if (PG.ready){
       pgResize(); pgRefreshChars(); pgStart();
-      if (!PG.charOrder.length) pgDeco(true);
+      if (!PG.charOrder.length) pgAutoDeco();
       return;
     }
     if (PG.loading) return;
@@ -5993,7 +6281,7 @@ async function finishBoot(){
       PG.ready = true; PG.loading = false;
       pgShowLoad(null);
       pgResize(); pgRefreshChars(); pgStart();
-      if (!PG.charOrder.length) pgDeco(true);
+      if (!PG.charOrder.length) pgAutoDeco();
     }).catch(function(e){
       PG.loading = false; PG.failed = true;
       console.warn('[playground] three.js load failed:', e && e.message);
@@ -6019,6 +6307,11 @@ async function finishBoot(){
       s.onerror = function(){ try { s.remove(); } catch(e){} pgLoadLib(i + 1).then(res, rej); };
       document.head.appendChild(s);
     });
+  }
+  /* 캐릭터가 없으면 꾸미기를 바로 열어 준다 — 지은 집이 있으면 🏡 탭부터 */
+  function pgAutoDeco(){
+    PG.decoTab = PG.buildOrder.length ? 'build' : 'char';
+    pgDeco(true);
   }
   function pgTitle(){
     var t = document.getElementById('pgTitle');
@@ -6578,6 +6871,574 @@ async function finishBoot(){
     });
     g.add(pgCyl(0.11, 0.09, 0.16, C.white, 1.9, 0.84, 0.55, 10));
     pgGarland(g, [-1.3, 2.2, 1.28], [1.3, 2.2, 1.28], [C.pink, C.white, C.lemon, C.mint], 7, 0.16);
+    return g;
+  }
+
+  /* ============================================================
+     🏡 내가 지은 집·건물 — 파스텔 로우폴리 모델 12종
+     · 모두 앞면이 +z를 향하게 짓는다 (rot = atan2(-x,-z) 이면 광장을 바라봄)
+     · g.userData.tick(t) 이 있으면 매 프레임 불린다 (연기·물줄기·오리·모닥불)
+     ============================================================ */
+  function pgbWindow(g, x, y, z, w, h, glow){
+    g.add(pgBox(w, h, 0.07, '#FFFDF8', x, y, z));
+    var pane = pgBox(w - 0.11, h - 0.11, 0.05, '#FFE9A8', x, y, z + 0.035);
+    pane.material = new THREE.MeshLambertMaterial({
+      color: 0xFFF0C8, emissive: new THREE.Color(glow || 0xFFCE63),
+      emissiveIntensity: 0.55, transparent: true, opacity: 0.96
+    });
+    g.add(pane);
+    g.add(pgBox(w, 0.045, 0.09, '#FFFFFF', x, y, z + 0.05));
+    g.add(pgBox(0.04, h, 0.09, '#FFFFFF', x, y, z + 0.05));
+    return pane;
+  }
+  function pgbFlowerBox(g, x, y, z, w){
+    g.add(pgBox(w, 0.15, 0.17, '#B98A5E', x, y, z));
+    var cols = [C.pink, C.lemon, C.coral, C.white, C.lav];
+    for (var i = 0; i < 4; i++){
+      var fx = x - w * 0.34 + (w * 0.68 / 3) * i;
+      g.add(pgCyl(0.014, 0.016, 0.1, C.leafG2, fx, y + 0.11, z, 5));
+      g.add(pgSph(0.055, cols[i % cols.length], fx, y + 0.17, z, 6));
+    }
+  }
+  function pgbSmoke(g, x, y, z, n){
+    var puffs = [];
+    for (var s = 0; s < (n || 3); s++){
+      var p = pgSph(0.11, '#FFFFFF', x, y, z, 7);
+      p.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
+      g.add(p); puffs.push(p);
+    }
+    var prev = g.userData.tick;
+    g.userData.tick = function(t){
+      if (prev) prev(t);
+      puffs.forEach(function(p, k){
+        var u = (t * 0.23 + k * (1 / puffs.length)) % 1;
+        p.position.set(x + Math.sin(u * 5 + k) * 0.11, y + u * 0.85, z + Math.cos(u * 4 + k) * 0.07);
+        p.scale.setScalar(0.65 + u * 1.15);
+        p.material.opacity = 0.4 * (1 - u);
+      });
+    };
+  }
+
+  /* 1. 🏡 딸기크림 오두막 */
+  function pgbCottagePink(g){
+    g.add(pgBox(2.7, 0.18, 2.3, '#EFE6D8', 0, 0.09, 0));
+    g.add(pgBox(2.3, 1.5, 1.9, '#FFF3E4', 0, 0.86, 0));
+    [-1.11, 1.11].forEach(function(sx){
+      [-0.91, 0.91].forEach(function(sz){ g.add(pgCyl(0.05, 0.055, 1.5, '#EAD3B8', sx, 0.86, sz, 6)); });
+    });
+    g.add(pgBox(2.4, 0.1, 2.0, '#F7DFE6', 0, 1.63, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.88, 1.0, 4), pgM('#F7B3C6'));
+    roof.position.set(0, 2.2, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.72, 0.08, 2.36, '#FFE3EC', 0, 1.7, 0));
+    for (var i = 0; i < 8; i++){
+      var a = i * Math.PI / 4 + Math.PI / 4;
+      g.add(pgSph(0.065, '#FFF7FB', Math.cos(a) * 1.28, 1.74, Math.sin(a) * 1.28, 7));
+    }
+    g.add(pgBox(0.28, 0.7, 0.28, '#EFA9BC', 0.72, 2.05, -0.42));
+    g.add(pgBox(0.38, 0.09, 0.38, '#DE8CA6', 0.72, 2.42, -0.42));
+    pgbSmoke(g, 0.72, 2.52, -0.42, 3);
+    g.add(pgBox(0.54, 0.92, 0.09, '#D9A877', 0, 0.48, 0.96));
+    g.add(pgSph(0.035, '#FFE9A8', 0.18, 0.54, 1.01, 6));
+    var aw = pgCyl(0.27, 0.27, 0.06, '#E7B98C', 0, 0.94, 0.96, 12);
+    aw.rotation.x = Math.PI / 2; g.add(aw);
+    pgbWindow(g, -0.74, 0.96, 0.96, 0.5, 0.5);
+    pgbWindow(g, 0.74, 0.96, 0.96, 0.5, 0.5);
+    pgbFlowerBox(g, -0.74, 0.62, 1.03, 0.6);
+    pgbFlowerBox(g, 0.74, 0.62, 1.03, 0.6);
+    g.add(pgBox(1.1, 0.09, 0.5, '#E4C69E', 0, 0.08, 1.2));
+    g.add(pgBox(0.9, 0.07, 0.32, '#D9B98C', 0, 0.035, 1.55));
+    var dk = pgCyl(0.2, 0.2, 0.06, '#FFF0C8', 0, 1.86, 0.62, 12);
+    dk.rotation.x = Math.PI / 2; g.add(dk);
+    [-1.52, 1.52].forEach(function(sx){
+      g.add(pgBox(0.08, 0.4, 0.9, C.woodL, sx, 0.2, 1.1));
+      g.add(pgSph(0.08, C.pink, sx, 0.44, 1.1, 6));
+    });
+  }
+
+  /* 2. 🏠 민트 통나무집 */
+  function pgbCottageMint(g){
+    g.add(pgBox(2.75, 0.16, 2.35, C.stone2, 0, 0.08, 0));
+    for (var r = 0; r < 5; r++){
+      var y = 0.34 + r * 0.3;
+      [0.86, -0.86].forEach(function(sz){
+        var lg = pgCyl(0.15, 0.15, 2.3, r % 2 ? '#F3E0C2' : '#F7E8CF', 0, y, sz, 8);
+        lg.rotation.z = Math.PI / 2; g.add(lg);
+      });
+      [-1.04, 1.04].forEach(function(sx){
+        var lg3 = pgCyl(0.14, 0.14, 1.75, r % 2 ? '#EFDABA' : '#F5E5CB', sx, y, 0, 8);
+        lg3.rotation.x = Math.PI / 2; g.add(lg3);
+      });
+    }
+    [-1, 1].forEach(function(sg){
+      var slab = pgBox(2.95, 0.13, 1.36, '#9FE0C6', 0, 2.02, sg * 0.63);
+      slab.rotation.x = sg * 0.62; g.add(slab);
+    });
+    g.add(pgBox(2.99, 0.1, 0.3, '#7ACDAE', 0, 2.42, 0));
+    var gab = pgMesh(new THREE.ConeGeometry(0.86, 0.5, 3), '#A8E6D0', 0, 2.14, 0.95);
+    gab.rotation.y = Math.PI / 2; g.add(gab);
+    g.add(pgBox(0.3, 0.62, 0.3, '#BFE8D8', 0.8, 2.15, -0.5));
+    pgbSmoke(g, 0.8, 2.52, -0.5, 2);
+    g.add(pgBox(0.58, 0.95, 0.1, '#C99B6B', 0, 0.5, 0.9));
+    g.add(pgSph(0.035, '#FFE9A8', 0.18, 0.56, 0.96, 6));
+    pgbWindow(g, -0.72, 0.95, 0.9, 0.46, 0.46, 0xFFC98A);
+    pgbWindow(g, 0.72, 0.95, 0.9, 0.46, 0.46, 0xFFC98A);
+    g.add(pgBox(2.9, 0.1, 0.75, C.woodL, 0, 0.2, 1.28));
+    [-1.3, -0.55, 0.55, 1.3].forEach(function(sx){ g.add(pgCyl(0.045, 0.045, 0.42, C.wood, sx, 0.44, 1.58, 6)); });
+    g.add(pgBox(2.75, 0.06, 0.07, C.wood, 0, 0.64, 1.58));
+    g.add(pgBox(2.75, 0.05, 0.06, C.woodL, 0, 0.48, 1.58));
+    g.add(pgBox(0.9, 0.08, 0.36, C.woodL, 0, 0.04, 1.78));
+    var lamp = pgSph(0.09, '#FFF3CE', 0.42, 1.72, 0.94, 8);
+    lamp.material = new THREE.MeshLambertMaterial({ color: 0xFFF3CE, emissive: new THREE.Color(0xFFD863), emissiveIntensity: 0.7 });
+    g.add(lamp);
+    g.add(pgCyl(0.012, 0.012, 0.22, '#8B7A63', 0.42, 1.87, 0.94, 4));
+    g.userData.tick = function(t){ lamp.material.emissiveIntensity = 0.6 + 0.16 * Math.sin(t * 2.4); };
+  }
+
+  /* 3. 🌳 나무 위 비밀집 */
+  function pgbTreehouse(g){
+    g.add(pgCyl(0.34, 0.48, 2.3, '#B6875C', 0, 1.15, 0, 9));
+    [0.5, 1.1, 1.7].forEach(function(y){ g.add(pgCyl(0.4, 0.42, 0.05, '#A97B52', 0, y, 0, 9)); });
+    g.add(pgBeam([0, 1.5, 0], [1.0, 2.2, 0.4], 0.08, '#B6875C', 6));
+    g.add(pgBeam([0, 1.9, 0], [-0.9, 2.4, -0.3], 0.07, '#B6875C', 6));
+    g.add(pgCyl(1.15, 1.15, 0.14, C.woodL, 0, 2.28, 0, 14));
+    g.add(pgCyl(0.95, 0.98, 1.02, '#E4C69E', 0, 2.84, 0, 14));
+    g.add(pgCyl(0.99, 0.99, 0.08, '#D9B98C', 0, 3.36, 0, 14));
+    g.add(pgBox(0.5, 0.72, 0.1, '#C99B6B', 0, 2.66, 0.88));
+    g.add(pgSph(0.03, '#FFE9A8', 0.16, 2.72, 0.94, 6));
+    pgbWindow(g, -0.52, 2.9, 0.76, 0.34, 0.34, 0xFFC98A);
+    pgbWindow(g, 0.52, 2.9, 0.76, 0.34, 0.34, 0xFFC98A);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.32, 0.72, 10), pgM('#F9C6D3'));
+    roof.position.set(0, 3.74, 0); g.add(roof);
+    g.add(pgSph(0.13, C.coral, 0, 4.14, 0, 9));
+    var lad = new THREE.Group(); lad.position.set(0.42, 0, 1.02); g.add(lad);
+    [-0.16, 0.16].forEach(function(dx){ lad.add(pgCyl(0.018, 0.018, 2.15, '#D9B98C', dx, 1.12, 0, 4)); });
+    for (var r2 = 0; r2 < 7; r2++) lad.add(pgBox(0.36, 0.035, 0.035, '#C79A6A', 0, 0.3 + r2 * 0.29, 0));
+    [[0, 4.5, 0, 0.95], [0.95, 4.1, 0.35, 0.62], [-0.9, 4.2, -0.3, 0.6], [0.3, 3.95, -0.85, 0.5], [-0.35, 4.0, 0.85, 0.52]].forEach(function(p, i){
+      g.add(pgSph(p[3], i % 2 ? C.leafG : C.leafG2, p[0], p[1], p[2], 10));
+    });
+    g.add(pgCyl(0.02, 0.02, 0.75, '#B6875C', 0.5, 4.55, 0, 4));
+    var flag = pgFlag(C.pink, 0.36, 0.28);
+    flag.position.set(0.5, 4.9, 0); g.add(flag);
+    g.userData.tick = function(t){
+      lad.rotation.z = Math.sin(t * 1.1) * 0.045;
+      flag.rotation.y = Math.sin(t * 2.1) * 0.28;
+    };
+  }
+
+  /* 4. 🧁 디저트 카페 */
+  function pgbCafeDessert(g){
+    g.add(pgBox(3.0, 0.18, 2.5, C.stone2, 0, 0.09, 0));
+    g.add(pgBox(2.5, 1.6, 2.05, '#FFEFE2', 0, 0.97, 0));
+    g.add(pgBox(2.56, 0.12, 2.1, '#FFD8C6', 0, 1.8, 0));
+    var cone = pgMesh(new THREE.ConeGeometry(0.58, 1.0, 10), '#E8B87A', 0, 2.34, 0);
+    cone.rotation.x = Math.PI; g.add(cone);
+    [[0, 2.94, 0, 0.42, '#FFC9DA'], [0.34, 2.82, 0.06, 0.3, '#FFF3CF'], [-0.32, 2.8, -0.04, 0.29, '#C9E8C8'], [0.04, 3.16, 0, 0.26, '#E8D2F6']].forEach(function(p){
+      g.add(pgSph(p[3], p[4], p[0], p[1], p[2], 10));
+    });
+    g.add(pgSph(0.09, C.coral, 0.04, 3.44, 0, 8));
+    for (var i = 0; i < 5; i++){
+      var aw2 = pgBox(0.5, 0.09, 0.85, i % 2 ? '#FFFFFF' : C.pink, -1.0 + i * 0.5, 1.72, 1.26);
+      aw2.rotation.x = -0.3; g.add(aw2);
+    }
+    g.add(pgBox(2.56, 0.1, 0.12, '#F3A8BE', 0, 1.84, 0.92));
+    g.add(pgBox(1.5, 1.0, 0.08, '#FFFDF8', -0.45, 1.06, 1.02));
+    var glass = pgBox(1.34, 0.86, 0.05, '#FFE9D2', -0.45, 1.06, 1.06);
+    glass.material = new THREE.MeshLambertMaterial({ color: 0xFFE9D2, emissive: new THREE.Color(0xFFCED8), emissiveIntensity: 0.34, transparent: true, opacity: 0.9 });
+    g.add(glass);
+    g.add(pgCyl(0.3, 0.32, 0.16, '#FFC9DA', -0.45, 0.74, 1.0, 12));
+    g.add(pgCyl(0.22, 0.24, 0.14, '#FFF3CF', -0.45, 0.9, 1.0, 12));
+    g.add(pgCyl(0.13, 0.15, 0.12, '#E8D2F6', -0.45, 1.04, 1.0, 12));
+    g.add(pgSph(0.05, C.coral, -0.45, 1.13, 1.0, 7));
+    g.add(pgBox(0.66, 1.08, 0.09, '#E7C39A', 0.85, 0.72, 1.0));
+    g.add(pgSph(0.035, '#FFE9A8', 1.06, 0.68, 1.06, 6));
+    var t2 = new THREE.Group(); t2.position.set(1.95, 0, 0.62); g.add(t2);
+    t2.add(pgCyl(0.34, 0.34, 0.07, '#FFFFFF', 0, 0.7, 0, 14));
+    t2.add(pgCyl(0.055, 0.055, 0.68, C.iron, 0, 0.35, 0, 8));
+    t2.add(pgCyl(0.2, 0.2, 0.05, C.iron, 0, 0.03, 0, 10));
+    [[-0.6, '#A9DCC8'], [0.6, '#FFC9DA']].forEach(function(cc){
+      t2.add(pgBox(0.3, 0.05, 0.3, cc[1], cc[0], 0.4, 0));
+      t2.add(pgBox(0.3, 0.28, 0.05, cc[1], cc[0], 0.56, cc[0] > 0 ? 0.14 : -0.14));
+      [-0.12, 0.12].forEach(function(dz){ t2.add(pgCyl(0.02, 0.02, 0.4, C.iron, cc[0] + dz, 0.2, dz, 5)); });
+    });
+    t2.add(pgSph(0.09, '#FFF3CF', 0, 0.8, 0, 8));
+    g.add(pgSph(0.07, C.pink, -1.2, 2.0, 1.28, 7));
+    g.add(pgSph(0.07, C.pink, 1.2, 2.0, 1.28, 7));
+  }
+
+  /* 5. 🥐 고소한 빵집 */
+  function pgbBakeryBread(g){
+    g.add(pgBox(2.8, 0.18, 2.35, '#E7D6C0', 0, 0.09, 0));
+    g.add(pgBox(2.4, 1.55, 1.95, '#FFF1DC', 0, 0.94, 0));
+    [-1, 1].forEach(function(sg){
+      var slab = pgBox(2.95, 0.14, 1.4, '#D9885F', 0, 1.95, sg * 0.62);
+      slab.rotation.x = sg * 0.6; g.add(slab);
+    });
+    g.add(pgBox(2.6, 0.1, 0.26, '#C4744B', 0, 2.42, 0));
+    g.add(pgBox(0.4, 0.86, 0.4, '#C9A57A', 0.76, 2.3, -0.44));
+    g.add(pgBox(0.46, 0.1, 0.46, '#B08A61', 0.76, 2.76, -0.44));
+    g.add(pgBox(0.22, 0.24, 0.06, '#8C6A48', 0.76, 2.1, -0.24));
+    pgbSmoke(g, 0.76, 2.86, -0.44, 3);
+    g.add(pgBox(0.9, 0.42, 0.08, '#FFF7E4', 0.62, 2.02, 1.0));
+    var cr = pgTor(0.13, 0.045, '#C98E4F', 0.62, 2.02, 1.06, Math.PI * 1.3);
+    cr.rotation.z = Math.PI / 2; g.add(cr);
+    var cr2 = pgTor(0.09, 0.04, '#D9A05B', 0.45, 2.02, 1.06, Math.PI * 1.2);
+    cr2.rotation.z = Math.PI / 2; g.add(cr2);
+    g.add(pgCyl(0.01, 0.01, 0.2, '#B98A5E', 0.4, 2.28, 1.0, 4));
+    g.add(pgCyl(0.01, 0.01, 0.2, '#B98A5E', 0.85, 2.28, 1.0, 4));
+    g.add(pgBox(1.3, 0.86, 0.08, '#FFFDF8', -0.55, 1.06, 0.98));
+    var gl = pgBox(1.16, 0.72, 0.05, '#FFE9C8', -0.55, 1.06, 1.02);
+    gl.material = new THREE.MeshLambertMaterial({ color: 0xFFE9C8, emissive: new THREE.Color(0xFFC98A), emissiveIntensity: 0.32, transparent: true, opacity: 0.88 });
+    g.add(gl);
+    [[-0.85, '#E8B87A'], [-0.55, '#DFA870'], [-0.25, '#EBC08F']].forEach(function(p){
+      var bd = pgSph(0.13, p[1], p[0], 1.02, 1.0, 9);
+      bd.scale.set(1.35, 0.85, 0.9); g.add(bd);
+    });
+    g.add(pgBox(1.24, 0.06, 0.1, '#E7C39A', -0.55, 0.74, 1.04));
+    for (var i = 0; i < 5; i++){
+      var aw3 = pgBox(0.5, 0.08, 0.7, i % 2 ? '#FFF7E4' : '#D9885F', -1.0 + i * 0.5, 1.6, 1.2);
+      aw3.rotation.x = -0.26; g.add(aw3);
+    }
+    g.add(pgBox(0.62, 1.1, 0.09, '#C99B6B', 0.82, 0.7, 0.98));
+    g.add(pgSph(0.09, '#FFE9C8', 0.82, 0.94, 1.04, 8));
+    g.add(pgSph(0.035, '#FFE9A8', 1.02, 0.62, 1.04, 6));
+    g.add(pgCyl(0.16, 0.13, 0.3, '#C9A57A', -1.28, 0.15, 1.02, 10));
+    [-0.06, 0.06].forEach(function(dx){
+      var bg2 = pgCyl(0.045, 0.045, 0.5, '#E8C08A', -1.28 + dx, 0.5, 1.02, 7);
+      bg2.rotation.z = dx > 0 ? 0.16 : -0.16; g.add(bg2);
+    });
+  }
+
+  /* 6. 💐 플라워 꽃가게 */
+  function pgbFlowerShop(g){
+    g.add(pgBox(2.6, 0.16, 2.2, '#EFE6D8', 0, 0.08, 0));
+    var glassMat = new THREE.MeshLambertMaterial({ color: 0xE4F7F5, transparent: true, opacity: 0.62 });
+    var wall = new THREE.Mesh(new THREE.BoxGeometry(2.3, 1.65, 1.95), glassMat);
+    wall.position.set(0, 0.98, 0); g.add(wall);
+    [-1.14, 1.14].forEach(function(sx){
+      [-0.96, 0.96].forEach(function(sz){ g.add(pgBox(0.08, 1.65, 0.08, '#A9E0D2', sx, 0.98, sz)); });
+    });
+    g.add(pgBox(2.32, 0.08, 0.08, '#A9E0D2', 0, 1.8, 0.96));
+    g.add(pgBox(2.32, 0.08, 0.08, '#A9E0D2', 0, 1.8, -0.96));
+    g.add(pgBox(0.08, 0.08, 1.96, '#A9E0D2', -1.14, 1.8, 0));
+    g.add(pgBox(0.08, 0.08, 1.96, '#A9E0D2', 1.14, 1.8, 0));
+    [-1, 1].forEach(function(sg){
+      var rp = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.05, 1.2), glassMat);
+      rp.position.set(0, 2.16, sg * 0.5); rp.rotation.x = sg * 0.62; g.add(rp);
+      g.add(pgBox(2.42, 0.07, 0.07, '#A9E0D2', 0, 2.19, sg * 1.02));
+    });
+    g.add(pgBox(2.42, 0.07, 0.07, '#BFEBE0', 0, 2.48, 0));
+    g.add(pgSph(0.09, C.pink, 0, 2.56, 0, 8));
+    [[-0.62, 0.4, C.pink], [-0.2, -0.35, C.lemon], [0.5, 0.3, C.lav], [0.62, -0.5, C.coral]].forEach(function(p){
+      g.add(pgCyl(0.16, 0.13, 0.2, '#D9B98C', p[0], 0.26, p[1], 9));
+      g.add(pgSph(0.19, C.leafG2, p[0], 0.46, p[1], 8));
+      g.add(pgSph(0.11, p[2], p[0], 0.62, p[1], 7));
+    });
+    g.add(pgBox(2.1, 0.07, 0.42, C.woodL, 0, 0.42, 1.28));
+    g.add(pgBox(2.1, 0.07, 0.38, C.woodL, 0, 0.78, 1.24));
+    [-0.95, -0.4, 0.4, 0.95].forEach(function(sx){ g.add(pgCyl(0.035, 0.035, 0.9, C.woodD, sx, 0.45, 1.28, 5)); });
+    var cols = [C.pink, C.lemon, C.lav, C.coral, C.white, C.mint];
+    for (var i = 0; i < 8; i++){
+      var sx2 = -0.9 + (i % 4) * 0.6, sy2 = i < 4 ? 0.52 : 0.88, sz2 = 1.3;
+      g.add(pgCyl(0.09, 0.075, 0.13, '#D9B98C', sx2, sy2, sz2, 8));
+      g.add(pgSph(0.1, cols[i % cols.length], sx2, sy2 + 0.15, sz2, 7));
+    }
+    [-0.5, 0.5].forEach(function(sx){ g.add(pgCyl(0.06, 0.07, 1.2, '#9FE0C6', sx, 0.6, 1.6, 7)); });
+    g.add(pgTor(0.52, 0.06, '#9FE0C6', 0, 1.2, 1.6, Math.PI));
+    [[-0.5, 1.2], [-0.32, 1.55], [0, 1.72], [0.32, 1.55], [0.5, 1.2]].forEach(function(p, i){
+      g.add(pgSph(0.1, [C.pink, C.white, C.lemon, C.white, C.pink][i], p[0], p[1], 1.6, 7));
+    });
+    g.add(pgBox(0.7, 0.3, 0.06, '#FFF8EA', 0, 1.5, 0.98));
+  }
+
+  /* 7. 📚 숲속 도서관 */
+  function pgbLibraryMini(g){
+    g.add(pgBox(2.6, 0.18, 2.2, '#E7DFF2', 0, 0.09, 0));
+    g.add(pgBox(2.3, 1.7, 1.95, '#E6DDF6', 0, 0.99, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.86, 1.05, 4), pgM('#B9A6E8'));
+    roof.position.set(0, 2.37, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.66, 0.08, 2.26, '#CDBEF0', 0, 1.84, 0));
+    function star(x, y, z, s, col){
+      var st = new THREE.Group(); st.position.set(x, y, z);
+      for (var k = 0; k < 2; k++){
+        var tri = new THREE.Mesh(new THREE.ConeGeometry(0.16 * s, 0.3 * s, 3), pgM(col));
+        tri.rotation.y = k * Math.PI / 3; st.add(tri);
+      }
+      g.add(st);
+      return st;
+    }
+    star(0, 3.02, 0, 1.5, '#FFE39B');
+    star(0.9, 1.9, 0.85, 0.9, '#FFF3CF');
+    star(-0.9, 1.9, -0.85, 0.8, '#FFF3CF');
+    [[-0.62, 1.0, 0.98], [0.62, 1.0, 0.98]].forEach(function(p){
+      g.add(pgTor(0.24, 0.05, '#FFFDF8', p[0], p[1], p[2]));
+      g.add(pgCyl(0.22, 0.22, 0.05, '#FFF0C8', p[0], p[1], p[2] - 0.01, 14));
+    });
+    g.add(pgBox(0.8, 1.1, 0.1, '#C9B6F0', 0, 0.62, 0.96));
+    var arch = pgCyl(0.4, 0.4, 0.1, '#C9B6F0', 0, 1.16, 0.96, 16);
+    arch.rotation.x = Math.PI / 2; g.add(arch);
+    g.add(pgSph(0.04, '#FFE9A8', 0.26, 0.6, 1.02, 6));
+    g.add(pgBox(1.15, 0.1, 0.3, C.woodL, 0, 1.5, 1.2));
+    ['#FFB6CB', '#96E2C3', '#FFE39B', '#C9B6F0'].forEach(function(col, i){
+      g.add(pgBox(0.16, 0.36, 0.24, col, -0.42 + i * 0.28, 1.72, 1.2));
+    });
+    [[-1.15, 0.2, 1.05, 0.16], [-1.15, 0.36, 1.05, -0.1], [-1.15, 0.5, 1.05, 0.24]].forEach(function(p, i){
+      var bk = pgBox(0.52, 0.15, 0.36, ['#FFB6CB', '#96E2C3', '#FFE39B'][i], p[0], p[1], p[2]);
+      bk.rotation.y = p[3]; g.add(bk);
+    });
+  }
+
+  /* 8. ⛺ 별빛 글램핑 */
+  function pgbCampTent(g){
+    var tee = new THREE.Mesh(new THREE.ConeGeometry(1.15, 2.1, 8), pgM('#FFDCE6'));
+    tee.position.set(0, 1.05, 0); g.add(tee);
+    var tee2 = new THREE.Mesh(new THREE.ConeGeometry(0.62, 1.5, 8), pgM('#FFC9DA'));
+    tee2.position.set(0, 0.85, 0); g.add(tee2);
+    var door = pgFlag('#C98FA8', 0.66, 1.15);
+    door.position.set(0, 1.15, 0.72); door.rotation.x = -0.2; g.add(door);
+    [[0, 2.1, 0], [0.2, 1.95, 0.16], [-0.2, 1.95, -0.16]].forEach(function(p, i){
+      var pole = pgCyl(0.03, 0.03, 0.9, '#C99B6B', p[0], p[1] + 0.3, p[2], 5);
+      pole.rotation.z = (i - 1) * 0.16; g.add(pole);
+    });
+    pgGarland(g, [-1.0, 1.2, 0.5], [1.0, 1.2, 0.5], [C.pink, C.lemon, C.mint, C.white], 7, 0.32);
+    pgGarland(g, [0, 2.1, 0], [1.4, 0.6, 0.4], [C.pink, C.lemon, C.white], 5, 0.2);
+    for (var st = 0; st < 8; st++){
+      var sa = st / 8 * Math.PI * 2;
+      g.add(pgSph(0.12, st % 2 ? C.stone : C.stone2, Math.cos(sa) * 0.5, 0.06, 1.15 + Math.sin(sa) * 0.5, 7));
+    }
+    var logs = new THREE.Group(); logs.position.set(0, 0, 1.15); g.add(logs);
+    [0, 1.1, 2.2].forEach(function(ry){
+      var lg = pgCyl(0.06, 0.07, 0.6, '#A87B4F', 0, 0.1, 0, 6);
+      lg.rotation.z = Math.PI / 2; lg.rotation.y = ry; logs.add(lg);
+    });
+    var flame = pgCone(0.2, 0.5, '#FFC46B', 0, 0.32, 1.15, 7);
+    flame.material = new THREE.MeshBasicMaterial({ color: 0xFFD27A, transparent: true, opacity: 0.9 });
+    g.add(flame);
+    var flame2 = pgCone(0.11, 0.3, '#FF9F8C', 0, 0.26, 1.15, 6);
+    flame2.material = new THREE.MeshBasicMaterial({ color: 0xFF9F8C, transparent: true, opacity: 0.85 });
+    g.add(flame2);
+    var glow = pgSph(0.34, '#FFD27A', 0, 0.28, 1.15, 10);
+    glow.material = new THREE.MeshBasicMaterial({ color: 0xFFE7A8, transparent: true, opacity: 0.22 });
+    g.add(glow);
+    [[-1.05, 1.5], [1.05, 1.0]].forEach(function(p){
+      var sto = pgCyl(0.18, 0.18, 0.4, '#B98A5E', p[0], 0.2, p[1], 9);
+      sto.rotation.x = Math.PI / 2; g.add(sto);
+    });
+    g.userData.tick = function(t){
+      var f = 0.82 + Math.sin(t * 7.1) * 0.14 + Math.sin(t * 3.3) * 0.06;
+      flame.scale.set(0.9 + Math.sin(t * 5) * 0.1, f, 0.9 + Math.cos(t * 4.4) * 0.1);
+      flame2.scale.set(0.9, 0.86 + Math.sin(t * 9) * 0.16, 0.9);
+      glow.material.opacity = 0.18 + 0.08 * Math.sin(t * 6.2);
+      flame.material.opacity = 0.72 + 0.2 * Math.sin(t * 8.3);
+    };
+  }
+
+  /* 9. ⛲ 하트 꽃 분수 */
+  function pgbFountainHeart(g){
+    g.add(pgCyl(1.28, 1.36, 0.26, '#F6EDE2', 0, 0.13, 0, 24));
+    g.add(pgTor(1.28, 0.08, '#EDE0CE', 0, 0.27, 0));
+    var pool = pgMesh(new THREE.CircleGeometry(1.12, 32), C.water, 0, 0.28, 0);
+    pool.rotation.x = -Math.PI / 2;
+    pool.material = new THREE.MeshLambertMaterial({ color: new THREE.Color(C.water), transparent: true, opacity: 0.9 });
+    g.add(pool);
+    g.add(pgCyl(0.17, 0.22, 0.72, '#FFFDF8', 0, 0.65, 0, 12));
+    g.add(pgCyl(0.6, 0.4, 0.13, '#FFFDF8', 0, 1.0, 0, 20));
+    g.add(pgTor(0.44, 0.05, '#F7D9E2', 0, 1.06, 0));
+    var up = pgMesh(new THREE.CircleGeometry(0.4, 24), C.water, 0, 1.04, 0);
+    up.rotation.x = -Math.PI / 2;
+    up.material = new THREE.MeshLambertMaterial({ color: new THREE.Color(C.water), transparent: true, opacity: 0.9 });
+    g.add(up);
+    [-0.19, 0.19].forEach(function(dx){ g.add(pgSph(0.22, '#FFAFC6', dx, 1.35, 0, 12)); });
+    var tip = pgCone(0.28, 0.42, '#FFAFC6', 0, 1.16, 0, 12);
+    tip.rotation.x = Math.PI; g.add(tip);
+    var jet = pgCyl(0.045, 0.02, 1.1, '#E6FAFF', 0, 1.9, 0, 8);
+    jet.material = new THREE.MeshLambertMaterial({ color: 0xE6FAFF, transparent: true, opacity: 0.82 });
+    g.add(jet);
+    var jets = [];
+    [[0.78, 0.36], [-0.78, 0.36], [0.34, -0.78], [-0.34, -0.78]].forEach(function(p, i){
+      var j = pgCyl(0.028, 0.014, 0.52, '#E6FAFF', p[0], 1.15, p[1], 6);
+      j.rotation.z = -p[0] * 0.4; j.rotation.x = p[1] * 0.4;
+      j.material = new THREE.MeshLambertMaterial({ color: 0xE6FAFF, transparent: true, opacity: 0.8 });
+      g.add(j); jets.push(j);
+    });
+    var sparks = [];
+    for (var i = 0; i < 7; i++){
+      var sp = pgSph(0.035, '#FFFFFF', 0, 1, 0, 6);
+      sp.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.7 });
+      g.add(sp); sparks.push(sp);
+    }
+    for (var k = 0; k < 14; k++){
+      var a = k / 14 * Math.PI * 2;
+      g.add(pgSph(0.09, [C.pink, C.white, C.lemon, C.lav][k % 4], Math.cos(a) * 1.32, 0.3, Math.sin(a) * 1.32, 7));
+    }
+    g.userData.tick = function(t){
+      jet.scale.y = 0.82 + Math.sin(t * 3.4) * 0.16;
+      jet.material.opacity = 0.6 + 0.22 * Math.sin(t * 4.2);
+      jets.forEach(function(j, k){
+        var sc = 0.85 + Math.sin(t * 3.1 + k * 1.7) * 0.18;
+        j.scale.y = sc; j.material.opacity = 0.5 + 0.28 * (0.5 + 0.5 * Math.sin(t * 4 + k));
+      });
+      sparks.forEach(function(sp2, k){
+        var u = (t * 0.5 + k / sparks.length) % 1;
+        var aa = k * 0.9;
+        sp2.position.set(Math.cos(aa) * (0.12 + u * 0.62), 1.5 + u * 1.0 - u * u * 0.7, Math.sin(aa) * (0.12 + u * 0.62));
+        sp2.material.opacity = 0.65 * (1 - u);
+      });
+    };
+  }
+
+  /* 10. ⛩️ 정원 쉼터 */
+  function pgbGazeboTea(g){
+    g.add(pgMesh(new THREE.CylinderGeometry(1.24, 1.3, 0.16, 6), '#FBEAD4', 0, 0.16, 0));
+    g.add(pgMesh(new THREE.CylinderGeometry(1.34, 1.34, 0.06, 6), '#F3DFC2', 0, 0.05, 0));
+    for (var i = 0; i < 6; i++){
+      var a = i / 6 * Math.PI * 2 + Math.PI / 6;
+      var px = Math.cos(a) * 1.0, pz = Math.sin(a) * 1.0;
+      g.add(pgCyl(0.075, 0.085, 1.5, '#FFFDF6', px, 0.98, pz, 8));
+      var hd = pgBox(0.1, 0.1, 0.5, '#F7D9E2', px * 1.02, 1.66, pz * 1.02);
+      hd.rotation.y = -a; g.add(hd);
+    }
+    for (var j = 0; j < 6; j++){
+      if (j === 1) continue;
+      var a1 = j / 6 * Math.PI * 2 + Math.PI / 6, a2 = (j + 1) / 6 * Math.PI * 2 + Math.PI / 6;
+      var mx = (Math.cos(a1) + Math.cos(a2)) * 0.5, mz = (Math.sin(a1) + Math.sin(a2)) * 0.5;
+      var len = Math.hypot(Math.cos(a1) - Math.cos(a2), Math.sin(a1) - Math.sin(a2));
+      var rail = pgBox(0.05, 0.06, len, '#FFFDF6', mx, 0.62, mz);
+      rail.rotation.y = -Math.atan2(Math.cos(a2) - Math.cos(a1), Math.sin(a2) - Math.sin(a1));
+      g.add(rail);
+    }
+    var roof = pgMesh(new THREE.ConeGeometry(1.6, 0.88, 6), '#F9C9D6', 0, 2.22, 0);
+    g.add(roof);
+    g.add(pgMesh(new THREE.CylinderGeometry(1.62, 1.56, 0.12, 6), '#F3B3C6', 0, 1.84, 0));
+    g.add(pgSph(0.16, '#FFE39B', 0, 2.72, 0, 10));
+    for (var e = 0; e < 6; e++){
+      var ea = e / 6 * Math.PI * 2;
+      g.add(pgSph(0.08, C.white, Math.cos(ea) * 1.5, 1.9, Math.sin(ea) * 1.5, 7));
+    }
+    g.add(pgCyl(0.32, 0.3, 0.07, '#FFFFFF', 0, 0.62, 0, 16));
+    g.add(pgCyl(0.06, 0.06, 0.44, '#D9BF95', 0, 0.4, 0, 8));
+    var pot = pgSph(0.12, '#FFFDF6', 0, 0.72, 0, 9);
+    pot.scale.set(1, 0.85, 1); g.add(pot);
+    var spout = pgCyl(0.012, 0.012, 0.11, '#FFFDF6', 0.16, 0.72, 0, 5);
+    spout.rotation.z = -0.5; g.add(spout);
+    g.add(pgSph(0.035, '#FFD27A', 0, 0.64, 0.1, 6));
+    [[0.52, 0.3, C.mint], [-0.5, -0.28, C.pink], [-0.36, 0.52, '#C9B6F0']].forEach(function(p){
+      g.add(pgBox(0.34, 0.1, 0.3, p[2], p[0], 0.29, p[1]));
+    });
+    pgGarland(g, [-1.0, 1.7, 0.55], [1.0, 1.7, 0.55], [C.pink, C.lemon, C.mint, C.white], 8, 0.3);
+    var lamp = pgSph(0.1, '#FFF3CE', 0, 1.6, 0.9, 8);
+    lamp.material = new THREE.MeshLambertMaterial({ color: 0xFFF3CE, emissive: new THREE.Color(0xFFD863), emissiveIntensity: 0.7 });
+    g.add(lamp);
+    g.add(pgCyl(0.01, 0.01, 0.24, '#C9A47C', 0, 1.72, 0.9, 4));
+    g.userData.tick = function(t){ lamp.material.emissiveIntensity = 0.62 + 0.16 * Math.sin(t * 2.1); };
+  }
+
+  /* 11. 🌸 벚꽃 아치 벤치 */
+  function pgbCherryArch(g){
+    [-0.95, 0.95].forEach(function(sx){
+      g.add(pgCyl(0.11, 0.14, 2.0, '#B6875C', sx, 1.0, 0, 8));
+      g.add(pgCyl(0.16, 0.16, 0.08, '#A97B52', sx, 0.04, 0, 9));
+    });
+    g.add(pgTor(0.98, 0.12, '#B6875C', 0, 2.0, 0, Math.PI));
+    for (var i = 0; i < 16; i++){
+      var a = Math.PI * (i / 15);
+      var bx = Math.cos(a) * 0.98, by = 2.0 + Math.sin(a) * 0.98;
+      g.add(pgSph(0.15 + (i % 3) * 0.03, i % 3 ? '#FFC9DA' : '#FFD9E6', bx, by + (i % 2) * 0.08, (i % 2 ? 0.06 : -0.06), 7));
+      if (i % 2 === 0) g.add(pgSph(0.09, '#FFF0F5', bx + 0.1, by - 0.06, 0.12, 6));
+    }
+    g.add(pgBox(2.0, 0.1, 0.52, '#A9DCC8', 0, 0.5, 0));
+    g.add(pgBox(2.0, 0.08, 0.1, '#8FD5B8', 0, 0.62, -0.2));
+    g.add(pgBox(2.0, 0.12, 0.42, '#CFF0E2', 0, 0.76, -0.24));
+    [-0.78, 0.78].forEach(function(sx){
+      g.add(pgBox(0.1, 0.44, 0.44, '#B98A5E', sx, 0.24, 0));
+      g.add(pgBox(0.08, 0.42, 0.1, '#B98A5E', sx, 0.62, -0.22));
+    });
+    g.add(pgBox(0.42, 0.06, 0.3, '#FFE9F0', -0.35, 0.56, 0.02));
+    g.add(pgBox(0.42, 0.06, 0.3, '#DDEFFF', 0.35, 0.56, 0.02));
+    var petals = [];
+    for (var p2 = 0; p2 < 6; p2++){
+      var pt = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.1), new THREE.MeshLambertMaterial({
+        color: new THREE.Color('#FFC9DA'), side: THREE.DoubleSide, transparent: true, opacity: 0.9
+      }));
+      pt.position.set((p2 - 3) * 0.35, 1.6 + p2 * 0.12, 0.2);
+      g.add(pt); petals.push(pt);
+    }
+    g.userData.tick = function(t){
+      petals.forEach(function(pt2, k){
+        var u = (t * 0.18 + k * 0.17) % 1;
+        pt2.position.set(Math.sin(t * 0.7 + k) * 1.2, 2.4 - u * 2.3, 0.1 + Math.cos(t * 0.9 + k) * 0.5);
+        pt2.rotation.z = t * 1.4 + k;
+        pt2.material.opacity = 0.85 * (1 - u * 0.5);
+      });
+    };
+  }
+
+  /* 12. 🦆 오리 미니연못 */
+  function pgbPondDuck(g){
+    var water = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.24, 0.16, 28), new THREE.MeshLambertMaterial({
+      color: new THREE.Color(C.water), transparent: true, opacity: 0.9
+    }));
+    water.position.set(0, 0.08, 0); g.add(water);
+    for (var i = 0; i < 18; i++){
+      var a = i / 18 * Math.PI * 2;
+      var st = pgSph(0.14 + (i % 3) * 0.04, i % 2 ? C.stone : C.stone2, Math.cos(a) * 1.36, 0.07, Math.sin(a) * 1.36, 7);
+      st.scale.y = 0.72; g.add(st);
+    }
+    [[0.5, 0.45], [-0.55, 0.35], [0.1, -0.6]].forEach(function(p){
+      g.add(pgCyl(0.22, 0.22, 0.035, C.leafG, p[0], 0.18, p[1], 14));
+      g.add(pgSph(0.07, C.pink, p[0] + 0.08, 0.23, p[1], 7));
+    });
+    [[1.05, -0.6], [-1.0, -0.75], [-1.12, 0.55]].forEach(function(p){
+      [[0, 0], [0.1, 0.06], [-0.1, -0.05]].forEach(function(d){
+        g.add(pgCyl(0.012, 0.016, 0.55, '#7FBF6A', p[0] + d[0], 0.28, p[1] + d[1], 5));
+      });
+    });
+    var ducks = [];
+    [0, 1].forEach(function(k){
+      var dk = new THREE.Group(); g.add(dk);
+      var body = pgSph(0.19, '#FFE39B', 0, 0, 0, 10);
+      body.scale.set(1.25, 0.9, 1); dk.add(body);
+      dk.add(pgSph(0.12, '#FFE9A8', 0.19, 0.13, 0, 9));
+      var beak = pgCone(0.05, 0.12, '#FFA45C', 0.29, 0.13, 0, 6);
+      beak.rotation.z = -Math.PI / 2; dk.add(beak);
+      dk.add(pgSph(0.02, '#6E5A3A', 0.21, 0.17, 0.06, 5));
+      var tail = pgCone(0.07, 0.13, '#FFD27A', -0.22, 0.06, 0, 6);
+      tail.rotation.z = Math.PI / 2; dk.add(tail);
+      dk.userData.ph = k * 2.6;
+      dk.userData.r = k ? 0.72 : 0.48;
+      ducks.push(dk);
+    });
+    var ring = pgTor(0.9, 0.012, '#FFFFFF', 0, 0.17, 0);
+    ring.rotation.x = -Math.PI / 2;
+    ring.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.45 });
+    g.add(ring);
+    g.userData.tick = function(t){
+      ducks.forEach(function(dk, k){
+        var a = t * (k ? -0.42 : 0.55) + dk.userData.ph;
+        dk.position.set(Math.cos(a) * dk.userData.r, 0.17 + Math.sin(t * 2.4 + k) * 0.025, Math.sin(a) * dk.userData.r);
+        dk.rotation.y = -a + (k ? Math.PI : 0);
+      });
+      var s = 0.92 + Math.sin(t * 0.9) * 0.07;
+      ring.scale.set(s, s, 1);
+      ring.material.opacity = 0.28 + 0.18 * (0.5 + 0.5 * Math.sin(t * 1.3));
+    };
+  }
+
+  function pgBuildItemMesh(kind){
+    var g = new THREE.Group();
+    g.userData.buildKind = kind;
+    g.scale.setScalar(PG_BUILD_SCALE);
+    if (kind === 'cottage_mint') pgbCottageMint(g);
+    else if (kind === 'treehouse') pgbTreehouse(g);
+    else if (kind === 'cafe_dessert') pgbCafeDessert(g);
+    else if (kind === 'bakery_bread') pgbBakeryBread(g);
+    else if (kind === 'flower_shop') pgbFlowerShop(g);
+    else if (kind === 'library_mini') pgbLibraryMini(g);
+    else if (kind === 'camp_tent') pgbCampTent(g);
+    else if (kind === 'fountain_heart') pgbFountainHeart(g);
+    else if (kind === 'gazebo_tea') pgbGazeboTea(g);
+    else if (kind === 'cherry_arch') pgbCherryArch(g);
+    else if (kind === 'pond_duck') pgbPondDuck(g);
+    else pgbCottagePink(g);
     return g;
   }
 
@@ -7729,7 +8590,7 @@ async function finishBoot(){
       sp: sp, sh: sh, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false,
       /* 자율 행동 — aiMode: 'walk' | 'play' | 'idle' (메모리 전용) */
       aiMode: 'idle', aiTimer: 0, wx: Number(rec.x) || 0, wz: Number(rec.z) || 0,
-      tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1
+      tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1, aiHome: false
     };
     if (rec.ride && PG.rides[rec.ride]){
       /* 기구에 놓여 있던 캐릭터 — 열자마자 신나게 놀고 있음 */
@@ -7753,6 +8614,7 @@ async function finishBoot(){
   function pgRefreshChars(){
     PG.charOrder.slice().forEach(pgRemoveCharObj);
     pgPlaced(PG.kid).forEach(function(rec){ pgAddChar(rec); });
+    pgRefreshBuilds();
     pgCountRides();
     PG.lastSig = pgSig();
     pgRenderDeco();
@@ -7761,7 +8623,7 @@ async function finishBoot(){
   function pgHintEmpty(){
     var e = document.getElementById('pgEmpty');
     if (!e) return;
-    e.hidden = !(PG.ready && !PG.charOrder.length);
+    e.hidden = !(PG.ready && !PG.charOrder.length && !PG.buildOrder.length);
   }
   function pgCountRides(){
     var n = {};
@@ -7786,7 +8648,249 @@ async function finishBoot(){
     }
     return 0;
   }
-  function pgSig(){ return JSON.stringify(pgPlaced(PG.kid)); }
+  /* ============================================================
+     🏡 지은 집·건물 — 자리 찾기 · 생성 · 저장 · 선택
+     ============================================================ */
+  function pgBuildFootprint(kind){
+    if (PG.buildFoot[kind]) return PG.buildFoot[kind];
+    var tmp = pgBuildItemMesh(kind);
+    var box = new THREE.Box3().setFromObject(tmp);
+    var r = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) * 0.5;
+    if (!isFinite(r) || r < 0.7) r = 0.7;
+    if (r > 2.1) r = 2.1;
+    PG.buildFoot[kind] = Math.round(r * 0.92 * 100) / 100;
+    return PG.buildFoot[kind];
+  }
+  /* 공원의 고정 구조물 자리 (한 번만 계산)
+     · 기구·연못·분수·기본 오두막/카페·큰나무만 '진짜 벽'으로 본다
+     · 수레·벤치·가로등·덤불 같은 작은 소품은 마당에 같이 있어도 자연스러우니 비켜 디딜 필요 없다 */
+  function pgStaticObstacles(){
+    if (PG.staticObs) return PG.staticObs;
+    var obs = [];
+    PG.rideList.forEach(function(k){
+      var g = PG.rides[k].g;
+      obs.push([g.position.x, g.position.z, Math.max(1.5, (g.userData.radius || 2.0) * 0.66)]);
+    });
+    obs.push([POND.x, POND.z, 1.9]);                              /* 광장 연못 + 나무다리 */
+    obs.push([1.8, -0.15, 1.25]);                                 /* 광장 분수 */
+    obs.push([0, 12.15, 1.95], [0, -12.15, 1.95]);                /* 기본 오두막·카페 */
+    obs.push([-6.9, 6.2, 1.25]);                                  /* 소풍 돗자리 (그루터기 의자) */
+    obs.push([0, 4.72, 1.0]);                                     /* 입구 아치 기둥 */
+    [[45, 13.95], [135, 13.95], [225, 13.95], [315, 13.95]].forEach(function(t){ var a = t[0] * Math.PI / 180; obs.push([Math.cos(a) * t[1], Math.sin(a) * t[1], 0.55]); });
+    [[0, 13.9], [180, 13.9]].forEach(function(t){ var a = t[0] * Math.PI / 180; obs.push([Math.cos(a) * t[1], Math.sin(a) * t[1], 0.5]); });
+    PG.staticObs = obs;
+    return obs;
+  }
+  function pgSpotFree(x, z, R){
+    var rr = Math.sqrt(x * x + z * z);
+    if (rr > BUILD_R) return false;
+    if (rr < 4.9) return false;                                   /* 중앙 광장은 비워 둔다 */
+    if (Math.abs(rr - 9.3) < 0.72) return false;                  /* 순환 산책로 위에는 세우지 않기 */
+    var obs = pgStaticObstacles();
+    for (var i = 0; i < obs.length; i++){
+      var dx = x - obs[i][0], dz = z - obs[i][1];
+      if (Math.sqrt(dx * dx + dz * dz) < R + obs[i][2] + 0.1) return false;
+    }
+    for (var k = 0; k < PG.buildOrder.length; k++){
+      var b = PG.builds[PG.buildOrder[k]];
+      if (!b) continue;
+      var d2 = Math.sqrt(Math.pow(x - b.rec.x, 2) + Math.pow(z - b.rec.z, 2));
+      if (d2 < R + (b.foot || 1.2) + 0.38) return false;
+    }
+    return true;
+  }
+  /* ＋ 짓기 — 기존 기구·연못·이미 지은 집과 겹치지 않는 빈 자리를 자동으로 찾는다 */
+  function pgBuildFreeSpot(kind){
+    var R = pgBuildFootprint(kind);
+    var radii = [10.3, 10.7, 11.1, 11.5, 11.9, 12.3, 9.9, 12.7, 13.1];
+    var angles = [42];
+    for (var d = 3; d <= 180; d += 3) angles.push(42 + d, 42 - d);
+    for (var ai = 0; ai < angles.length; ai++){
+      var a = angles[ai] * Math.PI / 180;
+      for (var ri = 0; ri < radii.length; ri++){
+        var x = Math.cos(a) * radii[ri], z = Math.sin(a) * radii[ri];
+        if (pgSpotFree(x, z, R)) return { x: x, z: z, rot: Math.atan2(x, z) };   /* 앞면은 바깥(카메라 쪽)을 바라봄 */
+      }
+    }
+    return null;
+  }
+  function pgAddBuild(rec, pop){
+    if (!rec || !rec.id || PG.builds[rec.id] || !PG.scene) return null;
+    var g = pgBuildItemMesh(rec.kind);
+    g.position.set(Number(rec.x) || 0, 0, Number(rec.z) || 0);
+    g.rotation.y = Number(rec.rot) || 0;
+    g.userData.__pgTag = { type:'build', id: rec.id };
+    PG.scene.add(g);
+    var b = { id: rec.id, rec: rec, g: g, held: false, lift: 0,
+              popAt: pop ? PG.time : -9, foot: pgBuildFootprint(rec.kind) };
+    PG.builds[rec.id] = b;
+    PG.buildOrder.push(rec.id);
+    return b;
+  }
+  function pgRemoveBuildObj(id){
+    var b = PG.builds[id];
+    if (!b) return;
+    try { PG.scene.remove(b.g); } catch(e){}
+    try { b.g.traverse(function(o){ if (o.geometry && o.geometry.dispose) o.geometry.dispose(); }); } catch(e){}
+    delete PG.builds[id];
+    PG.buildOrder = PG.buildOrder.filter(function(x){ return x !== id; });
+    if (PG.buildSel === id){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
+  }
+  function pgRefreshBuilds(){
+    PG.buildOrder.slice().forEach(pgRemoveBuildObj);
+    pgBuildRecords(PG.kid).forEach(function(rec){ pgAddBuild(rec, false); });
+  }
+  /* DB 저장 — 위치 · 회전 · 철무 */
+  function pgBuildSavePos(b){
+    var kid = PG.kid, id = b.id;
+    var x = Math.round(b.rec.x * 100) / 100, z = Math.round(b.rec.z * 100) / 100;
+    b.rec.x = x; b.rec.z = z;
+    mutate(function(s){
+      s.pgBuilds = s.pgBuilds || {};
+      var arr = (s.pgBuilds[kid] || []).slice();
+      if (!arr.length){ arr.push({ id: id, kind: b.rec.kind, x: x, z: z, rot: Number(b.rec.rot) || 0 }); }
+      else arr = arr.map(function(r){ return (r && r.id === id) ? Object.assign({}, r, { x: x, z: z }) : r; });
+      s.pgBuilds[kid] = arr;
+    });
+    PG.lastSig = pgSig();
+    pgRenderDeco();
+  }
+  function pgBuildSaveRot(b){
+    var kid = PG.kid, id = b.id;
+    var rot = ((Number(b.rec.rot) || 0) + Math.PI / 4) % (Math.PI * 2);
+    b.rec.rot = Math.round(rot * 1000) / 1000;
+    b.g.rotation.y = b.rec.rot;
+    mutate(function(s){
+      s.pgBuilds = s.pgBuilds || {};
+      var arr = (s.pgBuilds[kid] || []).map(function(r){
+        return (r && r.id === id) ? Object.assign({}, r, { rot: b.rec.rot }) : r;
+      });
+      if (!arr.length) arr.push({ id: id, kind: b.rec.kind, x: b.rec.x, z: b.rec.z, rot: b.rec.rot });
+      s.pgBuilds[kid] = arr;
+    });
+    PG.lastSig = pgSig();
+    b.popAt = PG.time;
+    pgRenderDeco();
+    toast('↻ 45° 돌렸어요', 1200);
+  }
+  function pgBuildDelete(id){
+    var b = PG.builds[id];
+    if (!b) return;
+    var kid = PG.kid;
+    var nm = pgBuildIcon(b.rec.kind) + ' ' + pgBuildName(b.rec.kind);
+    mutate(function(s){
+      if (!s.pgBuilds || !Array.isArray(s.pgBuilds[kid])) return;
+      var arr = s.pgBuilds[kid].filter(function(r){ return !(r && r.id === id); });
+      if (arr.length) s.pgBuilds[kid] = arr; else delete s.pgBuilds[kid];
+    });
+    pgRemoveBuildObj(id);
+    PG.lastSig = pgSig();
+    pgRenderDeco(); pgHintEmpty();
+    toast('🗑 ' + nm + '을(를) 놀이터에서 뺐어요 · 상점 소유는 그대로예요', 2400);
+  }
+  function pgRing(){
+    if (PG.selRing) return PG.selRing;
+    var m = new THREE.Mesh(new THREE.RingGeometry(0.82, 1.06, 40),
+      new THREE.MeshBasicMaterial({ color: 0x7FD6A8, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2; m.position.y = 0.05; m.visible = false; m.renderOrder = 3;
+    PG.scene.add(m);
+    PG.selRing = m;
+    return m;
+  }
+  function pgBuildRingShow(x, z, r){
+    if (!PG.scene) return;
+    var ring = pgRing();
+    if (x === null || x === undefined){ ring.visible = false; return; }
+    var s = Math.max(0.55, r || 1.2);
+    ring.scale.set(s, s, 1);
+    ring.position.set(x, 0.05, z);
+    ring.visible = true;
+  }
+  function pgBuildBarShow(b){
+    var el = document.getElementById('pgBuildBar');
+    if (!el) return;
+    var nm = document.getElementById('pgbName');
+    if (nm) nm.textContent = pgBuildIcon(b.rec.kind) + ' ' + pgBuildName(b.rec.kind);
+    el.hidden = false;
+    PG.buildSel = b.id;
+    pgBuildRingShow(b.rec.x, b.rec.z, b.foot);
+  }
+  function pgHideBuildBar(){
+    var el = document.getElementById('pgBuildBar');
+    if (el) el.hidden = true;
+  }
+  /* ＋ 짓기 */
+  function pgBuildAdd(kind){
+    if (!PG.kid) return;
+    if (!PG.ready || !PG.scene || typeof THREE === 'undefined'){ toast('놀이터를 준비하는 중이에요 · 잠시 뒤 다시', 2000); return; }
+    if (!avUnlocked(PG.kid, 'build', kind)){ toast('상점에서 산 집만 지을 수 있어요', 2400); return; }
+    if (pgBuildRecords(PG.kid).length >= PG_BUILD_MAX){ toast('집은 ' + PG_BUILD_MAX + '채까지 지을 수 있어요', 2400); return; }
+    var spot = pgBuildFreeSpot(kind);
+    if (!spot){ toast('놀이터에 빈자리가 없어요 · 몇 채를 빼고 다시 지어 볼까요?', 2600); return; }
+    var rec = { id: pgBuildUid(), kind: kind,
+                x: Math.round(spot.x * 100) / 100, z: Math.round(spot.z * 100) / 100,
+                rot: Math.round(spot.rot * 1000) / 1000 };
+    mutate(function(s){
+      s.pgBuilds = s.pgBuilds || {};
+      var arr = (s.pgBuilds[PG.kid] || []).slice();
+      arr.push(rec);
+      s.pgBuilds[PG.kid] = arr;
+    });
+    pgAddBuild(rec, true);
+    PG.lastSig = pgSig();
+    pgRenderDeco(); pgHintEmpty();
+    if (typeof confetti === 'function') confetti(12);
+    toast('🏡 ' + pgBuildIcon(kind) + ' ' + pgBuildName(kind) + ' 지었어요!', 2000);
+  }
+  /* ＋ 짓기 — 원하는 자리에 바로 (내부·검증용) */
+  function pgBuildPlaceAt(kind, x, z, rot){
+    if (!PG.kid || !PG.scene) return '';
+    var rec = { id: pgBuildUid(), kind: kind,
+                x: Math.round((Number(x) || 0) * 100) / 100,
+                z: Math.round((Number(z) || 0) * 100) / 100,
+                rot: Math.round((Number(rot) || 0) * 1000) / 1000 };
+    mutate(function(s){
+      s.pgBuilds = s.pgBuilds || {};
+      var arr = (s.pgBuilds[PG.kid] || []).slice();
+      arr.push(rec);
+      s.pgBuilds[PG.kid] = arr;
+    });
+    var b = pgAddBuild(rec, true);
+    PG.lastSig = pgSig();
+    pgRenderDeco(); pgHintEmpty();
+    return b ? b.id : '';
+  }
+  /* 매 프레임 — 둥실 떠오름 · 뿅 나타나기 · 건물 애니메이션 */
+  function pgBuildPose(dt){
+    PG.buildOrder.forEach(function(id){
+      var b = PG.builds[id];
+      if (!b || !b.g) return;
+      var goal = b.held ? 0.45 : 0;
+      b.lift += (goal - b.lift) * Math.min(1, (dt || 0.016) * 9);
+      var pop = 0;
+      if (b.popAt > 0 && PG.time - b.popAt < 0.62){
+        var u = (PG.time - b.popAt) / 0.62;
+        pop = Math.sin(u * Math.PI) * 0.32;
+        var sc = PG_BUILD_SCALE * (0.86 + 0.14 * Math.min(1, u * 3));
+        b.g.scale.set(sc, sc, sc);
+      } else if (Math.abs(b.g.scale.x - PG_BUILD_SCALE) > 0.001){
+        b.g.scale.set(PG_BUILD_SCALE, PG_BUILD_SCALE, PG_BUILD_SCALE);
+      }
+      b.g.position.set(b.rec.x, b.lift + pop, b.rec.z);
+      b.g.rotation.y = Number(b.rec.rot) || 0;
+      if (b.g.userData.tick){ try { b.g.userData.tick(PG.time); } catch(e){} }
+    });
+    var sel = PG.buildSel ? PG.builds[PG.buildSel] : null;
+    if (sel) pgBuildRingShow(sel.rec.x, sel.rec.z, sel.foot);
+    else if (PG.selRing) PG.selRing.visible = false;
+  }
+
+  function pgSig(){
+    return JSON.stringify([
+      pgPlaced(PG.kid),
+      pgBuildRecords(PG.kid).map(function(r){ return [r.id, r.kind, r.x, r.z, r.rot]; })
+    ]);
+  }
 
   function pgSave(){
     if (!state) return;
@@ -7804,7 +8908,7 @@ async function finishBoot(){
       s.playground = s.playground || {};
       s.playground[kid] = arr;
     });
-    PG.lastSig = JSON.stringify(arr);
+    PG.lastSig = pgSig();
   }
 
   /* ---------- 🤸 자율 행동 — 혼자 걷고, 기구를 타고, 쉬고 ----------
@@ -7817,6 +8921,18 @@ async function finishBoot(){
       if (pd < 1e-4){ dx = 1; dz = 0; pd = 1; }
       x = POND.x + dx / pd * POND.r;
       z = POND.z + dz / pd * POND.r;
+    }
+    /* 🏡 내가 지은 집은 빙 둘러 걷는다 (벽을 뚫고 지나가지 않게) */
+    for (var i = 0; i < PG.buildOrder.length; i++){
+      var b = PG.builds[PG.buildOrder[i]];
+      if (!b) continue;
+      var rad = (b.foot || 1.2) + 0.2;
+      var bx = x - b.rec.x, bz = z - b.rec.z, bl = Math.sqrt(bx * bx + bz * bz);
+      if (bl < rad){
+        if (bl < 1e-4){ bx = 1; bz = 0; bl = 1; }
+        x = b.rec.x + bx / bl * rad;
+        z = b.rec.z + bz / bl * rad;
+      }
     }
     var r = Math.sqrt(x * x + z * z);
     if (r > AI_R){ x = x / r * AI_R; z = z / r * AI_R; }
@@ -7832,6 +8948,18 @@ async function finishBoot(){
   }
   function pgAIPickTarget(c){
     var keys = PG.rideList.filter(function(k){ return !!PG.rides[k]; });
+    /* 25% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 */
+    if (PG.buildOrder.length && Math.random() < 0.25){
+      var bb = PG.builds[PG.buildOrder[Math.floor(Math.random() * PG.buildOrder.length)]];
+      if (bb){
+        var rotB = Number(bb.rec.rot) || 0;
+        var yardR = (bb.foot || 1.2) + 0.8;
+        var pY = pgAIClamp(bb.rec.x + Math.sin(rotB) * yardR, bb.rec.z + Math.cos(rotB) * yardR);
+        c.tx = pY[0]; c.tz = pY[1]; c.aiAim = ''; c.aiHome = true;
+        return;
+      }
+    }
+    c.aiHome = false;
     /* 70% — 다른 기구로 걸어가서 타기 */
     if (keys.length && Math.random() < 0.7){
       var pool = keys.filter(function(k){ return k !== c.curRide; });
@@ -7856,7 +8984,9 @@ async function finishBoot(){
     c.tx = c.wx; c.tz = c.wz;
   }
   function pgAIArrive(c){
-    if (c.aiAim){ var k = c.aiAim; c.aiAim = ''; pgAIStartPlay(c, k, pgAIrand(8, 14)); return; }
+    if (c.aiAim){ var k = c.aiAim; c.aiAim = ''; c.aiHome = false; pgAIStartPlay(c, k, pgAIrand(8, 14)); return; }
+    /* 🏡 집 앞마당에 도착했으면 조금 더 오래 쉰다 */
+    if (c.aiHome){ c.aiHome = false; c.aiMode = 'idle'; c.aiTimer = pgAIrand(4, 7); return; }
     c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3.5);   /* 두리번두리번 잠깐 쉬기 */
   }
   function pgAIFinishPlay(c){
@@ -8046,7 +9176,10 @@ async function finishBoot(){
     if (PG.raf) cancelAnimationFrame(PG.raf);
     PG.raf = 0;
     PG.mode = ''; PG.ptrs = {}; PG.drag = null; PG.orbit = null; PG.pinch = null;
+    PG.buildDrag = null; PG.buildSel = '';
+    pgHideBuildBar();
     Object.keys(PG.chars).forEach(function(id){ if (PG.chars[id]) PG.chars[id].held = false; });
+    Object.keys(PG.builds).forEach(function(id){ if (PG.builds[id]) PG.builds[id].held = false; });
   }
   function pgLoop(ts){
     if (!PG.on){ PG.raf = 0; return; }
@@ -8060,6 +9193,7 @@ async function finishBoot(){
     pgCamera();
     pgAI(dt);
     pgPose(PG.time);
+    pgBuildPose(dt);
     PG.dyn.forEach(function(fn){ try { fn(PG.time); } catch(e){} });
     /* 기구 움직임 */
     var ss = PG.rides.seesaw;
@@ -8069,7 +9203,7 @@ async function finishBoot(){
     if (PG.frames % 2 === 0) pgUpdateLabels();
     if (PG.labelsDirty){ PG.labelsDirty = false; pgBuildLabels(); }
     /* 다른 기기에서 바뀐 배치 반영 */
-    if (PG.frames % 45 === 0 && !PG.drag){
+    if (PG.frames % 45 === 0 && !PG.drag && !PG.buildDrag){
       var sig = pgSig();
       if (sig !== PG.lastSig){ pgRefreshChars(); }
     }
@@ -8096,16 +9230,32 @@ async function finishBoot(){
   }
   function pgPick(e){
     pgNDC(e);
-    var list = [];
-    PG.charOrder.forEach(function(id){ if (PG.chars[id]) list.push(PG.chars[id].sp); });
-    if (!list.length) return null;
-    var hits = PG.ray.intersectObjects(list, false);
-    if (!hits.length) return null;
-    for (var i = 0; i < PG.charOrder.length; i++){
-      var c = PG.chars[PG.charOrder[i]];
-      if (c && c.sp === hits[0].object) return c;
+    var best = null, bestD = 1e9;
+    var sprites = [];
+    PG.charOrder.forEach(function(id){ if (PG.chars[id]) sprites.push(PG.chars[id].sp); });
+    if (sprites.length){
+      var hs = PG.ray.intersectObjects(sprites, false);
+      if (hs.length && hs[0].distance < bestD){
+        for (var i = 0; i < PG.charOrder.length; i++){
+          var c = PG.chars[PG.charOrder[i]];
+          if (c && c.sp === hs[0].object){ bestD = hs[0].distance; best = { type:'char', c: c }; break; }
+        }
+      }
     }
-    return null;
+    if (PG.buildOrder.length){
+      var groups = [];
+      PG.buildOrder.forEach(function(id){ if (PG.builds[id]) groups.push(PG.builds[id].g); });
+      var hb = PG.ray.intersectObjects(groups, true);
+      if (hb.length && hb[0].distance < bestD){
+        var o = hb[0].object;
+        while (o && !(o.userData && o.userData.__pgTag)) o = o.parent;
+        if (o && o.userData && o.userData.__pgTag){
+          var bb = PG.builds[o.userData.__pgTag.id];
+          if (bb) best = { type:'build', b: bb };
+        }
+      }
+    }
+    return best;
   }
   function pgDown(e){
     if (!PG.on || !PG.ready) return;
@@ -8118,22 +9268,34 @@ async function finishBoot(){
     }
     var hit = pgPick(e);
     var el = PG.renderer.domElement;
-    if (hit){
+    if (hit && hit.type === 'build'){
+      /* 🏡 지은 건물을 집어 든다 — 살짝 떠오르고 바닥 링이 켜진다 */
+      var bd = hit.b;
+      bd.held = true;
+      bd.popAt = -9;
+      pgBuildBarShow(bd);
+      var gb = pgGround(e, 0.6);
+      PG.buildDrag = { id: bd.id, ox: bd.rec.x, oz: bd.rec.z,
+                       offx: gb ? bd.rec.x - gb.x : 0, offz: gb ? bd.rec.z - gb.z : 0,
+                       sx: e.clientX, sy: e.clientY, moved: 0 };
+      PG.mode = 'bdrag';
+    } else if (hit && hit.type === 'char'){
+      var ch = hit.c;
       /* 집어 들기 — 기구 위에 있었으면 그 자리에서 떼어 낸다 (자율 이동도 잠시 정지) */
-      hit.data.x = hit.sp.position.x;
-      hit.data.z = hit.sp.position.z;
-      hit.data.ride = '';
-      hit.curRide = '';
-      hit.aiAim = '';
-      hit.aiMode = 'idle'; hit.aiTimer = 999;
-      hit.wx = hit.data.x; hit.wz = hit.data.z;
-      hit.held = true;
-      hit.hopAt = -9;
+      ch.data.x = ch.sp.position.x;
+      ch.data.z = ch.sp.position.z;
+      ch.data.ride = '';
+      ch.curRide = '';
+      ch.aiAim = '';
+      ch.aiMode = 'idle'; ch.aiTimer = 999;
+      ch.wx = ch.data.x; ch.wz = ch.data.z;
+      ch.held = true;
+      ch.hopAt = -9;
       var g = pgGround(e, 0.6);
       PG.drag = {
-        id: hit.data.id,
-        offx: g ? hit.data.x - g.x : 0,
-        offz: g ? hit.data.z - g.z : 0,
+        id: ch.data.id,
+        offx: g ? ch.data.x - g.x : 0,
+        offz: g ? ch.data.z - g.z : 0,
         sx: e.clientX, sy: e.clientY, moved: 0
       };
       PG.mode = 'drag';
@@ -8141,6 +9303,7 @@ async function finishBoot(){
     } else {
       PG.mode = 'orbit';
       PG.orbit = { x: e.clientX, y: e.clientY };
+      if (PG.buildSel){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
     }
     try { el.setPointerCapture(e.pointerId); } catch(err){}
     e.preventDefault();
@@ -8149,6 +9312,22 @@ async function finishBoot(){
     if (!PG.on || !PG.ready) return;
     if (PG.ptrs[e.pointerId]){ PG.ptrs[e.pointerId].x = e.clientX; PG.ptrs[e.pointerId].y = e.clientY; }
     if (PG.mode === 'pinch'){ pgPinchMove(); e.preventDefault(); return; }
+    if (PG.mode === 'bdrag' && PG.buildDrag){
+      var bd2 = PG.builds[PG.buildDrag.id];
+      if (!bd2){ PG.mode = ''; PG.buildDrag = null; return; }
+      var g3 = pgGround(e, 0.6);
+      if (g3){
+        var bx2 = g3.x + PG.buildDrag.offx, bz2 = g3.z + PG.buildDrag.offz;
+        var br2 = Math.sqrt(bx2 * bx2 + bz2 * bz2);
+        if (br2 > BUILD_R){ bx2 = bx2 / br2 * BUILD_R; bz2 = bz2 / br2 * BUILD_R; }
+        bd2.rec.x = bx2; bd2.rec.z = bz2;
+        bd2.g.position.x = bx2; bd2.g.position.z = bz2;
+        pgBuildRingShow(bx2, bz2, bd2.foot);
+      }
+      PG.buildDrag.moved = Math.max(PG.buildDrag.moved, Math.abs(e.clientX - PG.buildDrag.sx) + Math.abs(e.clientY - PG.buildDrag.sy));
+      e.preventDefault();
+      return;
+    }
     if (PG.mode === 'drag' && PG.drag){
       var c = PG.chars[PG.drag.id];
       if (!c) return;
@@ -8177,6 +9356,29 @@ async function finishBoot(){
     var mode = PG.mode;
     if (mode === 'pinch'){
       if (Object.keys(PG.ptrs).length < 2) PG.mode = '';
+      return;
+    }
+    if (mode === 'bdrag' && PG.buildDrag){
+      var bb2 = PG.builds[PG.buildDrag.id];
+      var mv = PG.buildDrag.moved;
+      if (bb2){
+        bb2.held = false;
+        if (mv < 10){
+          /* 콕 눌렀을 때 — 제자리로 돌아가 통통 튀고, 아래에 조작 바가 나타난다 */
+          bb2.rec.x = PG.buildDrag.ox; bb2.rec.z = PG.buildDrag.oz;
+          bb2.g.position.set(bb2.rec.x, 0, bb2.rec.z);
+          bb2.popAt = PG.time;
+          pgBuildBarShow(bb2);
+        } else {
+          /* 드래그로 옮겼으면 바로 저장 */
+          pgBuildSavePos(bb2);
+          PG.buildSel = '';
+          pgHideBuildBar();
+          pgBuildRingShow(null);
+        }
+      }
+      PG.buildDrag = null;
+      PG.mode = '';
       return;
     }
     if (mode === 'drag' && PG.drag){
@@ -8245,6 +9447,11 @@ async function finishBoot(){
       if (c){ c.held = false; c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3); }
       PG.drag = null;
     }
+    if (PG.buildDrag){ /* 끌던 건물도 제자리에 */
+      var bb = PG.builds[PG.buildDrag.id];
+      if (bb){ bb.held = false; bb.rec.x = PG.buildDrag.ox; bb.rec.z = PG.buildDrag.oz; bb.g.position.set(bb.rec.x, 0, bb.rec.z); }
+      PG.buildDrag = null;
+    }
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     PG.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, goal: PG.distGoal };
     PG.mode = 'pinch';
@@ -8274,38 +9481,95 @@ async function finishBoot(){
     if (open === undefined) open = p.hidden;
     PG.decoOpen = !!open;
     p.hidden = !open;
-    if (open) pgRenderDeco();
+    if (open){
+      /* 패널을 열면 건물 조작 바·선택 링은 잠시 숨긴다 */
+      PG.buildSel = '';
+      pgHideBuildBar();
+      if (PG.selRing) PG.selRing.visible = false;
+      pgRenderDeco();
+    }
+  }
+  function pgDecoTab(t){
+    if (t) PG.decoTab = t;
+    var bc = document.getElementById('pgdBodyChar'), bb = document.getElementById('pgdBodyBuild');
+    var tc = document.querySelector('#pgdTabs [data-pgdt="char"]');
+    var tb = document.querySelector('#pgdTabs [data-pgdt="build"]');
+    if (bc) bc.hidden = PG.decoTab !== 'char';
+    if (bb) bb.hidden = PG.decoTab !== 'build';
+    if (tc) tc.classList.toggle('on', PG.decoTab === 'char');
+    if (tb) tb.classList.toggle('on', PG.decoTab === 'build');
   }
   function pgRenderDeco(){
+    if (!PG.kid) return;
+    /* ---------- 🧒 캐릭터 탭 ---------- */
     var ownedBox = document.getElementById('pgdOwned');
     var nowBox = document.getElementById('pgdNow');
     var cntOwn = document.getElementById('pgdOwnCnt');
     var cntNow = document.getElementById('pgdNowCnt');
-    if (!ownedBox || !nowBox || !PG.kid) return;
     var owned = pgOwned(PG.kid);
     var empty = document.getElementById('pgdEmpty');
     if (empty) empty.hidden = !!owned.length;
     if (cntOwn) cntOwn.textContent = owned.length + '개';
     if (cntNow) cntNow.textContent = PG.charOrder.length + '명';
-    ownedBox.innerHTML = owned.length
-      ? owned.map(function(p){
-          return '<button class="pgd-card" type="button" data-pgadd="' + esc(p.k) + '">'
-            + '<span class="pgd-thumb"><img src="' + avImgSrc(p.k, true) + '" alt="" draggable="false"></span>'
-            + '<span class="pgd-nm">' + esc(p.n) + '</span>'
-            + '<span class="pgd-act">＋ 넣기</span></button>';
-        }).join('')
-      : '';
-    nowBox.innerHTML = PG.charOrder.length
-      ? PG.charOrder.map(function(id){
-          var c = PG.chars[id];
-          if (!c) return '';
-          return '<div class="pgd-nowrow">'
-            + '<span class="pgd-thumb sm"><img src="' + avImgSrc(c.data.preset, true) + '" alt="" draggable="false"></span>'
-            + '<span class="pgd-nm">' + esc(pgPresetName(c.data.preset)) + '</span>'
-            + '<button class="pgd-del" type="button" data-pgdel="' + esc(id) + '">✕ 빼기</button>'
-            + '</div>';
-        }).join('')
-      : '<div class="pgd-none">아직 놀이터에 나온 캐릭터가 없어요 · 위에서 ＋ 넣기</div>';
+    if (ownedBox){
+      ownedBox.innerHTML = owned.length
+        ? owned.map(function(p){
+            return '<button class="pgd-card" type="button" data-pgadd="' + esc(p.k) + '">'
+              + '<span class="pgd-thumb"><img src="' + avImgSrc(p.k, true) + '" alt="" draggable="false"></span>'
+              + '<span class="pgd-nm">' + esc(p.n) + '</span>'
+              + '<span class="pgd-act">＋ 넣기</span></button>';
+          }).join('')
+        : '';
+    }
+    if (nowBox){
+      nowBox.innerHTML = PG.charOrder.length
+        ? PG.charOrder.map(function(id){
+            var c = PG.chars[id];
+            if (!c) return '';
+            return '<div class="pgd-nowrow">'
+              + '<span class="pgd-thumb sm"><img src="' + avImgSrc(c.data.preset, true) + '" alt="" draggable="false"></span>'
+              + '<span class="pgd-nm">' + esc(pgPresetName(c.data.preset)) + '</span>'
+              + '<button class="pgd-del" type="button" data-pgdel="' + esc(id) + '">✕ 빼기</button>'
+              + '</div>';
+          }).join('')
+        : '<div class="pgd-none">아직 놀이터에 나온 캐릭터가 없어요 · 위에서 ＋ 넣기</div>';
+    }
+    /* ---------- 🏡 집·건물 탭 ---------- */
+    var ownedB = pgBuildOwned(PG.kid);
+    var cntBOwn = document.getElementById('pgdBldOwnCnt');
+    if (cntBOwn) cntBOwn.textContent = ownedB.length + '개';
+    var bEmpty = document.getElementById('pgdBldEmpty');
+    if (bEmpty) bEmpty.hidden = !!ownedB.length;
+    var bOwned = document.getElementById('pgdBldOwned');
+    if (bOwned){
+      bOwned.innerHTML = ownedB.length
+        ? ownedB.map(function(b){
+            return '<button class="pgd-card" type="button" data-pgbadd="' + esc(b.k) + '">'
+              + '<span class="pgd-thumb">' + avBuildSvg(b.k) + '</span>'
+              + '<span class="pgd-nm">' + esc(b.n) + '</span>'
+              + '<span class="pgd-act">＋ 짓기</span></button>';
+          }).join('')
+        : '';
+    }
+    var listB = [];
+    PG.buildOrder.forEach(function(id){ if (PG.builds[id]) listB.push(PG.builds[id]); });
+    var cntBNow = document.getElementById('pgdBldNowCnt');
+    if (cntBNow) cntBNow.textContent = listB.length + '채';
+    var nowB = document.getElementById('pgdBldNow');
+    if (nowB){
+      nowB.innerHTML = listB.length
+        ? listB.map(function(b){
+            return '<div class="pgd-nowrow">'
+              + '<span class="pgd-thumb sm">' + avBuildSvg(b.rec.kind) + '</span>'
+              + '<span class="pgd-nm">' + esc(pgBuildIcon(b.rec.kind) + ' ' + pgBuildName(b.rec.kind)) + '</span>'
+              + '<span class="pgd-brow">'
+              +   '<button class="pgd-bbtn" type="button" data-pgbrot="' + esc(b.id) + '">↺ 돌리기</button>'
+              +   '<button class="pgd-bbtn del" type="button" data-pgbdel="' + esc(b.id) + '">✕ 빼기</button>'
+              + '</span></div>';
+          }).join('')
+        : '<div class="pgd-none">아직 지은 집이 없어요 · 위에서 ＋ 짓기를 눌러 보세요</div>';
+    }
+    pgDecoTab();
   }
   function pgAdd(k){
     if (!PG.kid) return;
@@ -8373,6 +9637,31 @@ async function finishBoot(){
     if (add){ pgAdd(add.getAttribute('data-pgadd')); return; }
     var del = t.closest('[data-pgdel]');
     if (del){ pgDel(del.getAttribute('data-pgdel')); return; }
+    /* ---------- 🏡 집·건물 ---------- */
+    var btab = t.closest('[data-pgdt]');
+    if (btab){ pgDecoTab(btab.getAttribute('data-pgdt')); return; }
+    var badd = t.closest('[data-pgbadd]');
+    if (badd){ pgBuildAdd(badd.getAttribute('data-pgbadd')); return; }
+    var brot = t.closest('[data-pgbrot]');
+    if (brot){ var bRt = PG.builds[brot.getAttribute('data-pgbrot')]; if (bRt) pgBuildSaveRot(bRt); return; }
+    var bdel2 = t.closest('[data-pgbdel]');
+    if (bdel2){ pgBuildDelete(bdel2.getAttribute('data-pgbdel')); return; }
+    var bbar = t.closest('#pgBuildBar [data-pgb]');
+    if (bbar){
+      var bAct = bbar.getAttribute('data-pgb');
+      var selB = PG.buildSel ? PG.builds[PG.buildSel] : null;
+      if (bAct === 'rot' && selB) pgBuildSaveRot(selB);
+      else if (bAct === 'del' && selB) pgBuildDelete(selB.id);
+      else if (bAct === 'close'){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
+      return;
+    }
+    var bshop = t.closest('#pgdBldShop');
+    if (bshop){
+      var kidB = PG.kid;
+      pgClose();
+      try { openAvatarSheet(kidB); avatarTab = 'build'; renderAvatarSheet(); } catch(e){}
+      return;
+    }
     var shop = t.closest('#pgdShop');
     if (shop){
       var kid = PG.kid;
@@ -8405,6 +9694,9 @@ async function finishBoot(){
 
   /* 검증·디버그용 (화면에는 영향 없음) */
   window.__pg = { state: PG, open: pgOpen, close: pgClose, refresh: pgRefreshChars, save: pgSave, deco: pgDeco, ai: pgAI, drop: pgDrop,
+    buildAdd: pgBuildAdd, buildDel: pgBuildDelete, buildRot: pgBuildSaveRot, buildSave: pgBuildSavePos,
+    buildPlace: pgBuildPlaceAt, buildSel: function(id){ var b = PG.builds[id]; if (b) pgBuildBarShow(b); return !!b; },
+    buildFree: pgBuildFreeSpot, buildMesh: pgBuildItemMesh, decoTab: pgDecoTab,
     app: function(){ return state; } };
 })();
 
