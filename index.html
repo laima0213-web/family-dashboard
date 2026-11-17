@@ -8702,9 +8702,12 @@ async function finishBoot(){
   /* ＋ 짓기 — 기존 기구·연못·이미 지은 집과 겹치지 않는 빈 자리를 자동으로 찾는다 */
   function pgBuildFreeSpot(kind){
     var R = pgBuildFootprint(kind);
-    var radii = [10.3, 10.7, 11.1, 11.5, 11.9, 12.3, 9.9, 12.7, 13.1];
+    /* 바깥 둘레 → 안쪽 잔디 순으로 촘촘하게 훑어 빈틈을 찾는다 */
+    var radii = [];
+    for (var rr = 10.2; rr <= 13.35; rr += 0.25) radii.push(rr);
+    for (var ri2 = 5.0; ri2 <= 8.6; ri2 += 0.4) radii.push(ri2);
     var angles = [42];
-    for (var d = 3; d <= 180; d += 3) angles.push(42 + d, 42 - d);
+    for (var d = 2; d <= 180; d += 2) angles.push(42 + d, 42 - d);
     for (var ai = 0; ai < angles.length; ai++){
       var a = angles[ai] * Math.PI / 180;
       for (var ri = 0; ri < radii.length; ri++){
