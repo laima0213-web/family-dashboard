@@ -8846,6 +8846,14 @@ async function finishBoot(){
     c.restore();
   }
   function pgRideTexCount(){ var n = 0; for (var q in PG.rideTex) if (PG.rideTex[q]) n++; return n; }
+  function pgRideTexUsed(key){
+    var pk = String(key).split('|')[0];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (c && c.data.ride && c.data.preset === pk) return true;   /* 지금 타고 있는 캐릭터의 그림은 남긴다 */
+    }
+    return false;
+  }
   function pgDropRideTex(key){
     if (!PG.rideTex[key]) return;
     PG.rideTex[key].forEach(function(tx){ try { tx.dispose(); } catch(e){} });
@@ -8915,9 +8923,11 @@ async function finishBoot(){
     PG.rideTex[key] = out;
     PG.rideOrder = PG.rideOrder.filter(function(x){ return x !== key; });
     PG.rideOrder.push(key);
-    if (pgRideTexCount() > PG_RIDE.MAX){        /* 캐릭터가 많아도 메모리가 넘치지 않게 */
-      pgDropRideTex(PG.rideOrder[0]);
-      PG.rideOrder.shift();
+    if (pgRideTexCount() > PG_RIDE.MAX){
+      for (var q = 0; q < PG.rideOrder.length; q++){
+        var old = PG.rideOrder[q];
+        if (old !== key && !pgRideTexUsed(old)){ pgDropRideTex(old); break; }
+      }
     }
     return out;
   }
