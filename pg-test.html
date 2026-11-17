@@ -41,6 +41,7 @@
     var p = v.clone().project(cam);
     return { x: r.left + (p.x * 0.5 + 0.5) * r.width, y: r.top + (-p.y * 0.5 + 0.5) * r.height };
   }
+  function pgArr(w){ try { return JSON.parse(w.eval("JSON.stringify((state.playground||{}).k1||[])")); } catch(e){ return []; } }
   function dragTo(w, from, to, id){
     ev(w, 'pointerdown', from.x, from.y, id);
     for (var i = 1; i <= 12; i++) ev(w, 'pointermove', from.x + (to.x - from.x) * i / 12, from.y + (to.y - from.y) * i / 12, id);
@@ -117,7 +118,7 @@
       await sleep(160);
     }
     await sleep(400);
-    L('캐릭터 ' + S.charOrder.length + '명 · 저장값 ' + JSON.stringify(w.state.playground.k1.map(function(x){ return [x.preset, x.x, x.z, x.ride]; })));
+    L('캐릭터 ' + S.charOrder.length + '명 · 저장값 ' + JSON.stringify(pgArr(w).map(function(x){ return [x.preset, x.x, x.z, x.ride]; })));
 
     /* 360도 회전 */
     var az0 = S.azim, po0 = S.polar;
@@ -139,7 +140,7 @@
     var to = screenOf(w, S.rides.tramp.g.position.clone().add(new w.THREE.Vector3(0, 0.35, 0)));
     dragTo(w, from, to, 11);
     await sleep(500);
-    var rec0 = w.state.playground.k1.filter(function(x){ return x.id === id0; })[0];
+    var rec0 = pgArr(w).filter(function(x){ return x.id === id0; })[0];
     L('방방이 드롭: ride=' + (rec0 && rec0.ride) + ' · 높이 y=' + S.chars[id0].sp.position.y.toFixed(2));
 
     /* 캐릭터 → 시소 드래그 */
@@ -148,7 +149,7 @@
     var to2 = screenOf(w, S.rides.seesaw.g.position.clone().add(new w.THREE.Vector3(0, 0.35, 0)));
     dragTo(w, from2, to2, 12);
     await sleep(500);
-    var rec1 = w.state.playground.k1.filter(function(x){ return x.id === id1; })[0];
+    var rec1 = pgArr(w).filter(function(x){ return x.id === id1; })[0];
     L('시소 드롭: ride=' + (rec1 && rec1.ride) + ' · 높이 y=' + S.chars[id1].sp.position.y.toFixed(2));
 
     /* 캐릭터 → 잔디로 내려놓기 */
@@ -156,7 +157,7 @@
     var to3 = screenOf(w, new w.THREE.Vector3(1.6, 0.1, 1.4));
     dragTo(w, from3, to3, 13);
     await sleep(500);
-    var rec2 = w.state.playground.k1.filter(function(x){ return x.id === id0; })[0];
+    var rec2 = pgArr(w).filter(function(x){ return x.id === id0; })[0];
     L('풀밭 드롭: ride=' + (rec2 && rec2.ride ? rec2.ride : '(없음)') + ' · 저장좌표 ' + (rec2 ? rec2.x + ',' + rec2.z : '-'));
 
     /* 확대 버튼 */
@@ -176,7 +177,7 @@
     var before = S.charOrder.length;
     d.querySelector('[data-pgdel]').click();
     await sleep(300);
-    L('빼기: ' + before + '명 → ' + S.charOrder.length + '명 · 저장 ' + (w.state.playground.k1 || []).length + '개');
+    L('빼기: ' + before + '명 → ' + S.charOrder.length + '명 · 저장 ' + pgArr(w).length + '개');
 
     L('DB.patch 호출 ' + (w.__writes || 0) + '회 · 콘솔오류 ' + JSON.stringify(w.__errs || []));
 
