@@ -15,8 +15,23 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <title>우리집 대시보드</title>
 <style>
+/* ============================================================
+   글씨체 — Aa디셈버 느낌의 무료 손글씨 웹폰트 (상업용 무료 · 프로젝트 눈누)
+   1지망 온글잎 콘콘체 → 2지망 KOTRA 희망체(한글 완성형 11,172자) → 기본 고딕
+   ============================================================ */
+@font-face{
+  font-family:'Ownglyph_corncorn-Rg';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2') format('woff2');
+  font-weight:normal;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'KOTRAHOPE';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2110@1.0/KOTRAHOPE.woff2') format('woff2');
+  font-weight:normal;font-style:normal;font-display:swap;
+}
 /* ============================================================
    우리집 대시보드 v3 — 디자인 토큰
    ============================================================ */
@@ -31,8 +46,9 @@
 html{-webkit-text-size-adjust:100%;scrollbar-width:none}
 html::-webkit-scrollbar{display:none}
 body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,sans-serif;
+  font-family:"Ownglyph_corncorn-Rg","KOTRAHOPE","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,sans-serif;
   font-size:var(--fs);line-height:1.45;letter-spacing:-.2px}
+input,textarea,select{font-family:inherit;letter-spacing:inherit}
 h1,h2,h3,p,ul,li{margin:0;padding:0}
 ul{list-style:none}
 button{font:inherit;color:inherit}
