@@ -8809,7 +8809,7 @@ async function finishBoot(){
          slide — 미끄러져 내려올 때 두 다리 앞으로 쭉
          jump  — 공중에서 다리를 벌리거나 접었다 펴기
      ============================================================ */
-  var PG_RIDE = { N:10, MAX:8 };
+  var PG_RIDE = { N:10, MAX:6 };
   var PG_RIDE_MODE = {
     swing:'swing', carousel:'kick', horse:'kick', ferris:'kick', viking:'kick', coaster:'kick',
     teacup:'kick', drop:'kick', balloon:'kick', bumper:'kick', seesaw:'kick', bench:'kick',
@@ -8819,7 +8819,7 @@ async function finishBoot(){
   /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
   var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
   /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
-  var PG_MOUNT_OFF = { carousel:0.24, horse:0.2 };
+  var PG_MOUNT_OFF = { carousel:0.3, horse:0.24 };
   function pgSitOff(k){
     var L = pgLegOf(k);
     return (L.by - L.ly) / 400 * 1.75 * 0.9;
@@ -8880,7 +8880,7 @@ async function finishBoot(){
         for (j = 0; j < 2; j++){
           var lp = ph + (j ? Math.PI : 0);
           var kick = 0.5 - 0.5 * Math.cos(lp);
-          pgStampLeg(c, ly, j, (j ? -1 : 1) * (0.10 + 0.28 * kick), 1 - 0.5 * kick, (j ? -1 : 1) * 2 * kick, -0.06 * kick * legLen);
+          pgStampLeg(c, ly, j, (j ? -1 : 1) * (0.14 + 0.34 * kick), 1 - 0.5 * kick, (j ? -1 : 1) * 3 * kick, -0.06 * kick * legLen);
         }
         bob = -Math.abs(s) * 5;
         brot = s * 0.03;
