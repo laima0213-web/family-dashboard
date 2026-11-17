@@ -661,6 +661,7 @@ button{font:inherit;color:inherit}
   .kd-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start}
   .kd-col + .kd-col{margin-top:0}
   .kd-grid > .kd-full{grid-column:1 / -1}
+  .kd-grid > .kd-full .rd-list,.kd-grid > .kd-full .rd-add{max-width:620px}
   .cal-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:8px;align-items:start}
   .cal-r{margin-top:0}
   .upitem{padding:4px 6px;gap:5px}
@@ -2909,7 +2910,7 @@ function renderReading(){
     +   '<button class="cnav" type="button" data-act="read-next" aria-label="다음 달"' + (isNow ? ' disabled' : '') + '>▶</button>'
     +   (isNow ? '' : '<button class="cnow" type="button" data-act="read-now">이번 달</button>')
     + '</div>'
-    + '<div class="rd-list">' + (rows || '<div class="rd-empty">📚 이번 달 읽은 책을 기록해 볼까요?</div>') + '</div>'
+    + '<div class="rd-list">' + (rows || '<div class="rd-empty">📚 ' + (isNow ? '이번 달' : monNum + '월에') + ' 읽은 책을 기록해 볼까요?</div>') + '</div>'
     + '<div class="rd-add">'
     +   '<input id="readTitle" placeholder="책 제목" aria-label="책 제목">'
     +   '<input id="readAuthor" placeholder="글쓴이" aria-label="글쓴이">'
