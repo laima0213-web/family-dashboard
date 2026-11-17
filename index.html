@@ -6213,6 +6213,7 @@ async function finishBoot(){
   }
 
   function pgTree(x, z, s, col, col2){
+    s = s * 0.84;
     var g = new THREE.Group();
     g.position.set(x, 0, z);
     g.rotation.y = Math.random() * Math.PI;
@@ -6341,7 +6342,7 @@ async function finishBoot(){
       var bar = pgCyl(0.04, 0.04, 1.6, C.lav, 0, 0.35 + r * 0.38, 0.95, 6);
       bar.rotation.z = Math.PI / 2; g.add(bar);
     }
-    var roof = pgCone(1.05, 0.6, C.coral, 0, 2.35, 0, 4);
+    var roof = pgCone(1.02, 0.95, C.coral, 0, 2.52, 0, 4);
     roof.rotation.y = Math.PI / 4; g.add(roof);
     g.userData.labelY = 3.0;
     g.userData.radius = 2.0;
@@ -6404,42 +6405,52 @@ async function finishBoot(){
     PG.dyn.push(function(t){ rope.rotation.y = Math.sin(t * 1.15) * 0.75; });
   }
   function pgHorse(g){
-    g.add(pgCyl(0.26, 0.32, 0.08, C.woodD, 0, 0.04, 0, 10));
-    for (var i = 0; i < 3; i++){
-      var sp = pgTor(0.11, 0.035, C.iron, 0, 0.13 + i * 0.11, 0);
+    g.add(pgCyl(0.28, 0.34, 0.07, C.woodD, 0, 0.035, 0, 12));
+    for (var i = 0; i < 4; i++){
+      var sp = pgTor(0.15, 0.045, C.iron, 0, 0.11 + i * 0.125, 0);
       sp.rotation.x = Math.PI / 2; g.add(sp);
     }
     var horse = new THREE.Group();
     horse.position.set(0, 0.62, 0);
     g.add(horse);
-    var body = pgSph(0.32, C.white, 0, 0.16, 0, 12);
-    body.scale.set(1.55, 0.95, 0.92); horse.add(body);
-    var neck = pgCyl(0.11, 0.15, 0.3, C.white, 0, 0.36, 0.34, 8);
-    neck.rotation.x = 0.35; horse.add(neck);
-    var head = pgSph(0.18, C.white, 0, 0.52, 0.44, 10);
-    head.scale.set(0.95, 1, 1.15); horse.add(head);
-    horse.add(pgSph(0.09, C.peach, 0, 0.47, 0.6, 8));
-    [-0.08, 0.08].forEach(function(x){
-      var ear = pgCone(0.05, 0.14, C.pink, x, 0.67, 0.38, 6);
-      ear.rotation.x = -0.2; horse.add(ear);
-      horse.add(pgCyl(0.028, 0.028, 0.4, C.lav, x * 3.4, 0.34, 0.3, 6));
+    /* 몸통 · 목 · 머리 — 파스텔 목마 */
+    var body = pgSph(0.31, '#FFD9E4', 0, 0.2, 0, 12);
+    body.scale.set(1.5, 0.92, 0.86); horse.add(body);
+    var rump = pgSph(0.22, '#FFF3F7', 0.32, 0.24, 0, 10); horse.add(rump);
+    var neck = pgCyl(0.13, 0.17, 0.34, '#FFD9E4', 0, 0.42, 0.3, 9);
+    neck.rotation.x = 0.45; horse.add(neck);
+    var head = pgSph(0.185, '#FFD9E4', 0, 0.6, 0.44, 11);
+    head.scale.set(0.95, 1.05, 1.15); horse.add(head);
+    var snout = pgSph(0.11, '#FFF3F7', 0, 0.55, 0.6, 9);
+    snout.scale.set(1, 0.85, 1.05); horse.add(snout);
+    [-0.07, 0.07].forEach(function(x){
+      horse.add(pgSph(0.026, '#5A4A42', x, 0.65, 0.58, 7));
+      var ear = pgCone(0.05, 0.13, '#FFB6CB', x * 1.5, 0.75, 0.36, 7);
+      ear.rotation.x = -0.15; horse.add(ear);
     });
-    [-0.19, 0.19].forEach(function(x){
-      [-0.2, 0.2].forEach(function(z){
-        horse.add(pgCyl(0.045, 0.045, 0.34, C.woodL, x, -0.05, z, 6));
-      });
-    });
-    var saddle = pgBox(0.34, 0.09, 0.3, C.pink, 0, 0.3, -0.02); horse.add(saddle);
-    var tail = pgCone(0.11, 0.4, C.lav, 0, 0.2, -0.55, 7);
-    tail.rotation.x = 2.5; horse.add(tail);
-    /* 갈기 */
-    for (var m = 0; m < 4; m++){
-      horse.add(pgSph(0.07, C.lav, 0, 0.44 + m * 0.06, 0.28 - m * 0.04, 6));
+    /* 갈기 · 꼬리 */
+    for (var m = 0; m < 5; m++){
+      var mf = pgSph(0.075, '#F49CBC', 0, 0.52 + m * 0.055, 0.3 - m * 0.05, 7);
+      horse.add(mf);
     }
+    var tail = pgCone(0.11, 0.42, '#F49CBC', 0, 0.26, -0.5, 7);
+    tail.rotation.x = 2.6; horse.add(tail);
+    /* 다리 · 발굽 */
+    [[-0.2, 0.19], [0.2, 0.19], [-0.2, -0.2], [0.2, -0.2]].forEach(function(p){
+      horse.add(pgCyl(0.05, 0.05, 0.36, '#FFD9E4', p[0], 0.0, p[1], 7));
+      horse.add(pgCyl(0.06, 0.06, 0.06, '#E7A9BF', p[0], -0.17, p[1], 7));
+    });
+    var saddle = pgBox(0.34, 0.08, 0.32, '#FFFFFF', 0, 0.42, -0.02); horse.add(saddle);
+    var saddle2 = pgBox(0.2, 0.06, 0.22, '#B7E3F0', 0, 0.47, -0.02); horse.add(saddle2);
+    /* 손잡이 */
+    [-0.11, 0.11].forEach(function(x){
+      horse.add(pgCyl(0.018, 0.018, 0.24, C.woodD, x, 0.53, 0.28, 6));
+    });
+    horse.add(pgCyl(0.02, 0.02, 0.26, C.woodD, 0, 0.64, 0.28, 6)).rotation.z = Math.PI / 2;
     g.userData.parts.horse = horse;
-    g.userData.labelY = 1.65;
+    g.userData.labelY = 1.8;
     g.userData.radius = 1.6;
-    g.userData.spots = [{ x:0, y:0.95, z:0 }];
+    g.userData.spots = [{ x:0, y:1.04, z:-0.02 }];
     PG.dyn.push(function(t){
       horse.rotation.z = Math.sin(t * 1.9) * 0.1;
       horse.position.y = 0.62 + Math.sin(t * 1.9 + 0.4) * 0.05;
