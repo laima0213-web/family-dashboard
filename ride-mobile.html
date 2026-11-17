@@ -10,12 +10,13 @@
 <script>
 var f = document.getElementById('f');
 f.addEventListener('load', function(){
-  var w = f.contentWindow, tries = 0;
+  var w = f.contentWindow, tries = 0, opened = false;
   var q = new URLSearchParams(location.search);
   var t = Number(q.get('t') || 4.0), ride = q.get('ride') || 'swing';
   var iv = setInterval(function(){
     tries++;
     var pg = w.__pg;
+    if (pg && !opened){ opened = true; try { pg.open('k1'); } catch(e){} }
     if (pg && pg.state.ready && pg.countRides()){
       clearInterval(iv);
       pg.look(ride, Math.PI * 0.92, 1.12, 6.2, 1.25);
@@ -23,7 +24,7 @@ f.addEventListener('load', function(){
       pg.frame(t);
       w.__shotReady = true;
     }
-    if (tries > 100) clearInterval(iv);
+    if (tries > 120) clearInterval(iv);
   }, 250);
 });
 </script></body></html>
