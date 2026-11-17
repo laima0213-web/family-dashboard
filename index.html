@@ -19,12 +19,12 @@
 <title>우리집 대시보드</title>
 <style>
 /* ============================================================
-   글씨체 — Aa디셈버 느낌의 무료 손글씨 웹폰트 (상업용 무료 · 프로젝트 눈누)
-   1지망 온글잎 콘콘체 → 2지망 KOTRA 희망체(한글 완성형 11,172자) → 기본 고딕
+   글씨체 — 동글동글한 무료 손글씨 웹폰트 (상업용 무료 · 프로젝트 눈누)
+   1지망 그리운 몽토리체 → 2지망 KOTRA 희망체(한글 완성형 11,172자) → 기본 고딕
    ============================================================ */
 @font-face{
-  font-family:'Ownglyph_corncorn-Rg';
-  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2') format('woff2');
+  font-family:'Griun_Mongtori-Rg';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Mongtori-Rg.woff2') format('woff2');
   font-weight:normal;font-style:normal;font-display:swap;
 }
 @font-face{
@@ -46,9 +46,9 @@
 html{-webkit-text-size-adjust:100%;scrollbar-width:none}
 html::-webkit-scrollbar{display:none}
 body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:"Ownglyph_corncorn-Rg","KOTRAHOPE","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,sans-serif;
+  font-family:'Griun_Mongtori-Rg','KOTRAHOPE',"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,sans-serif;
   font-size:var(--fs);line-height:1.45;letter-spacing:-.2px}
-input,textarea,select{font-family:inherit;letter-spacing:inherit}
+button,input,textarea,select{font-family:inherit;letter-spacing:inherit}
 h1,h2,h3,p,ul,li{margin:0;padding:0}
 ul{list-style:none}
 button{font:inherit;color:inherit}
@@ -332,6 +332,40 @@ button{font:inherit;color:inherit}
   border-radius:10px;padding:0 11px;font-size:12.5px;font-weight:900;cursor:pointer;
   box-shadow:0 3px 8px rgba(95,169,122,.24)}
 .st-plus:active{transform:scale(.97)}
+/* ---------- 요일별 자동 반복(월~일) ---------- */
+.st-tabs{display:flex;gap:4px;margin:0 0 7px}
+.st-tab{flex:1 1 0;min-width:0;height:25px;border:1px solid #E7DCCB;background:#FFF9EE;border-radius:999px;
+  font-size:11.5px;font-weight:900;color:#8B7A63;cursor:pointer;padding:0 3px;letter-spacing:0;
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+.st-tab i{font-style:normal;font-size:9.5px;font-weight:900;color:#A99A86;background:#F1E8D9;
+  border-radius:999px;padding:0 4px;line-height:1.5}
+.st-tab.on{background:#5FA97A;border-color:#5FA97A;color:#fff}
+.st-tab.on i{color:#3F7A57;background:#EAF7EC}
+.wk-subrow{display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin:0 0 6px}
+.wk-who{flex:0 0 auto;font-size:10.5px;font-weight:900;color:#A99A86;white-space:nowrap;margin:0 2px 0 0}
+.wk-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin:0 0 6px}
+.wk-day{height:29px;min-width:0;padding:0;border:1px solid #E7DCCB;background:#fff;border-radius:9px;line-height:1;
+  font-size:12px;font-weight:900;color:#8B7A63;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:1px}
+.wk-day i{font-style:normal;font-size:8.5px;font-weight:900;color:#B48FCF;align-self:flex-start;margin-top:3px;line-height:1}
+.wk-day.tod{background:#F4FBF5;border-color:#CFE4D5;color:#4E8F63}
+.wk-day.on{background:#F1E7FB;border-color:#DBC4F2;color:#6B4A94;box-shadow:0 2px 6px rgba(123,90,166,.12)}
+.wk-day.on i{color:#7B5AA6}
+.wk-list{display:flex;flex-direction:column;gap:4px}
+.wk-row{display:flex;align-items:center;gap:6px;min-height:var(--rt-h);background:#FFFDF6;border:1px solid #F1E7D6;
+  border-radius:11px;padding:3px 7px}
+.wk-row .rtt{flex:1 1 auto;min-width:0;font-size:12.5px;font-weight:800;letter-spacing:-.3px;color:#5B4E42;overflow-wrap:anywhere}
+.wk-row .rtx{margin-left:0;flex:0 0 auto}
+.wk-row.editing{gap:4px}
+.wk-row.editing .rt-in{flex:1 1 auto;min-width:0;height:calc(var(--rt-h) - 6px)}
+.wk-empty{font-size:12px;font-weight:800;color:var(--faint);text-align:center;padding:9px 6px;
+  background:#FFFCF6;border:1px dashed #EFE3D2;border-radius:12px}
+.wk-picks{display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin:6px 0 0}
+.wk-p{flex:0 0 auto;height:22px;border:1px solid #E7DCCB;background:#fff;border-radius:999px;padding:0 8px;
+  font-size:11px;font-weight:800;color:#8B7A63;cursor:pointer;white-space:nowrap}
+.wk-p.on{background:#EAF2FB;border-color:#CFE0F3;color:#4C7FA8}
+.wk-p.wk-pw{border-style:dashed;padding:0 7px}
+.wk-hint{margin-left:auto;font-size:10px;font-weight:900;color:#A99A86;white-space:nowrap}
 /* ---------- 윤·봄 프로필 카드 ---------- */
 .kids2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .prof{padding:9px 9px 8px;cursor:pointer;transition:box-shadow .15s,transform .12s}
@@ -716,6 +750,21 @@ button{font:inherit;color:inherit}
   .st-add{margin-top:4px}
   .st-add input{font-size:10.5px}
   .st-plus{font-size:10.5px;padding:0 8px}
+  /* 요일별 자동 반복 — 한 화면에 들어가게 축소 */
+  .st-tabs{gap:3px;margin-bottom:4px}
+  .st-tab{height:17px;font-size:9.5px;gap:2px}
+  .st-tab i{font-size:8px;padding:0 3px}
+  .wk-subrow{gap:2px;margin-bottom:4px}
+  .wk-days{gap:2px;margin-bottom:4px}
+  .wk-day{height:19px;font-size:10px;border-radius:7px}
+  .wk-day i{font-size:7.5px;margin-top:2px}
+  .wk-list{gap:3px}
+  .wk-row{padding:1px 6px;gap:5px;border-radius:9px}
+  .wk-row .rtt{font-size:11px}
+  .wk-empty{font-size:10.5px;padding:7px 6px}
+  .wk-picks{gap:2px;margin-top:4px}
+  .wk-p{height:16px;font-size:9.5px;padding:0 6px}
+  .wk-hint{font-size:8.5px}
   /* 프로필·상세·달력·꾸미기 — 좁은 높이에 맞춰 축소 */
   .kids2{display:contents}
   .prof{padding:7px 11px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -1055,6 +1104,20 @@ button.st{padding:0}
   .prof-edit .pe-l{display:none}
   .prof-edit .pe-s{display:inline}
   .prof .pt-badge{position:absolute;top:5px;right:6px;font-size:9px;padding:0 5px;line-height:1.7}
+  /* 요일별 자동 반복 — 390px에서 월~일 7칸이 한 줄에 들어가게 */
+  .st-tabs{gap:3px;margin-bottom:5px}
+  .st-tab{height:23px;font-size:11px;padding:0 2px;gap:2px}
+  .st-tab i{font-size:9px;padding:0 3px}
+  .wk-subrow{gap:2px;margin-bottom:5px}
+  .wk-days{gap:2px;margin-bottom:5px}
+  .wk-day{height:27px;font-size:11.5px;border-radius:8px}
+  .wk-day i{font-size:8px;margin-top:2px}
+  .wk-row{padding:2px 6px;gap:5px}
+  .wk-row .rtt{font-size:12px}
+  .wk-empty{font-size:11.5px;padding:8px 5px}
+  .wk-picks{gap:2px}
+  .wk-p{height:21px;font-size:10.5px;padding:0 7px}
+  .wk-hint{font-size:9.5px}
 }
 </style>
 </head>
@@ -1847,11 +1910,15 @@ function defaultStudySubjects(){
   return [ { id:'s1', name:'수학' }, { id:'s2', name:'국어' }, { id:'s3', name:'영어' }, { id:'s4', name:'그 외' } ];
 }
 function defaultStudy(){
-  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {} };
+  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '' };
 }
+/* 요일 키 — String(new Date().getDay()) 기준 (일=0 · 토=6). 화면은 월~일 순서 */
+var DOW_KEYS = ['1','2','3','4','5','6','0'];
+var DOW_NAME = { '1':'월','2':'화','3':'수','4':'목','5':'금','6':'토','0':'일' };
+function dowKey(d){ return String((d || new Date()).getDay()); }
 function normalizeStudy(raw){
   var s = (raw && typeof raw === 'object') ? raw : {};
-  var out = { date: todayKey(), subjects: [], presets: {}, items: {} };
+  var out = { date: todayKey(), subjects: [], presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '' };
   var subs = Array.isArray(s.subjects) ? s.subjects : [];
   subs.forEach(function(x){
     if (!x || typeof x.name !== 'string' || !x.name.trim()) return;
@@ -1870,15 +1937,46 @@ function normalizeStudy(raw){
     });
     if (Object.keys(perKid).length) out.presets[id] = perKid;
     var its = (s.items && s.items[id]) || [];
+    var seenW = {};
     var items = (Array.isArray(its) ? its : []).filter(function(x){ return x && typeof x.text === 'string' && x.text.trim(); })
       .map(function(x){
-        return { id: (typeof x.id === 'string' && x.id) ? x.id : uid('st'),
-                 subjectName: typeof x.subjectName === 'string' ? x.subjectName : '',
-                 text: x.text.trim(), done: !!x.done };
+        var o = { id: (typeof x.id === 'string' && x.id) ? x.id : uid('st'),
+                  subjectName: typeof x.subjectName === 'string' ? x.subjectName : '',
+                  text: x.text.trim(), done: !!x.done };
+        if (typeof x.fromWeeklyId === 'string' && x.fromWeeklyId) o.fromWeeklyId = x.fromWeeklyId;
+        return o;
+      })
+      /* 기기 두 대가 같은 날 동시에 요일 계획을 넣어도 같은 항목이 한 번만 남게 */
+      .filter(function(x){
+        if (!x.fromWeeklyId) return true;
+        if (seenW[x.fromWeeklyId]) return false;
+        seenW[x.fromWeeklyId] = 1; return true;
       });
     if (items.length) out.items[id] = items;
+    /* 요일별 자동 반복 — weekly[아이][요일] = [{ id, subjectName, text }] */
+    var wk = (s.weekly && typeof s.weekly === 'object' && s.weekly[id] && typeof s.weekly[id] === 'object') ? s.weekly[id] : {};
+    var wkOut = {};
+    DOW_KEYS.forEach(function(d){
+      var wr = wk[d];
+      if (!Array.isArray(wr)) return;
+      var seen = {}, wl = [];
+      wr.forEach(function(x){
+        if (!x || typeof x.text !== 'string' || !x.text.trim()) return;
+        var sn = (typeof x.subjectName === 'string') ? x.subjectName : '';
+        var t = x.text.trim();
+        var kk = sn + '\u0001' + t;
+        if (seen[kk]) return;
+        seen[kk] = 1;
+        wl.push({ id: (typeof x.id === 'string' && x.id) ? x.id : uid('sw'), subjectName: sn, text: t });
+      });
+      if (wl.length) wkOut[d] = wl;
+    });
+    if (Object.keys(wkOut).length) out.weekly[id] = wkOut;
   });
-  if (typeof s.date === 'string' && s.date !== todayKey()){ out.date = todayKey(); out.items = {}; }   // 다른 날 기록은 비우고 새 날로
+  if (typeof s.weeklyAppliedDate === 'string') out.weeklyAppliedDate = s.weeklyAppliedDate;
+  if (typeof s.date === 'string' && s.date !== todayKey()){
+    out.date = todayKey(); out.items = {}; out.weeklyAppliedDate = '';   // 다른 날 기록은 비우고 새 날로
+  }
   return out;
 }
 function defaultState(){
@@ -2246,6 +2344,8 @@ function ensureDay(){
     s.study = s.study || defaultStudy();
     s.study.date = k;
     s.study.items = {};
+    s.study.weeklyAppliedDate = '';
+    studyWeeklyApplyTo(s);          /* 오늘 요일의 반복 계획을 새 날 목록에 채운다 */
     s.date = k;
     var carry = (s.sched.items || []).map(function(i){ return { id:i.id, text:i.text, done:false }; });
     var planned = ((s.cal || {})[k] || []).map(function(i){ return { id:i.id, text:i.text, done:false }; });
@@ -3220,8 +3320,87 @@ function studyEnsure(s){
   if (!Array.isArray(st.subjects) || !st.subjects.length) st.subjects = defaultStudySubjects();
   if (!st.items || typeof st.items !== 'object') st.items = {};
   if (!st.presets || typeof st.presets !== 'object') st.presets = {};
+  if (!st.weekly || typeof st.weekly !== 'object') st.weekly = {};
   st.date = todayKey();
   return st;
+}
+/* ============================================================
+   17-2-b. 요일별 자동 반복 — state.study.weekly[아이][요일]
+   ============================================================ */
+var studyView = 'today';          // 기기별 화면: 'today' | 'week'
+var studyWeekSel = dowKey();      // 요일별 반복에서 보고 있는 요일
+var studyWeekPick = null;         // 저장할 요일 여러 개 고르기 (null이면 보고 있는 요일 하나)
+var wkEditId = null;              // 반복 항목 인라인 수정
+function studyWeekMap(kid){
+  var w = (state && state.study && state.study.weekly) || {};
+  return (w[kid] && typeof w[kid] === 'object') ? w[kid] : {};
+}
+function studyWeekList(kid, dow){
+  var m = studyWeekMap(kid);
+  return Array.isArray(m[dow]) ? m[dow] : [];
+}
+function studyWeekTodayCount(kid){ return studyWeekList(kid, dowKey()).length; }
+function dowView(){ return (DOW_KEYS.indexOf(studyWeekSel) > -1) ? studyWeekSel : dowKey(); }
+function studyWeekPicked(){
+  var out = DOW_KEYS.filter(function(k){ return studyWeekPick && studyWeekPick[k]; });
+  return out.length ? out : [dowView()];
+}
+/* 오늘 요일 계획을 오늘 목록에 자동으로 채운다 — 하루에 한 번만 채워서
+   오늘 지운 항목이 새로고침·동기화 때 다시 살아나지 않게 한다 */
+function studyWeeklyApplyTo(s){
+  if (!s || !s.study) return 0;
+  var st = s.study;
+  var k = todayKey();
+  if (st.weeklyAppliedDate === k) return 0;
+  var dow = dowKey(), added = 0, anyToday = false;
+  KIDS.forEach(function(kid){
+    var list = (((st.weekly || {})[kid] || {})[dow]) || [];
+    if (!Array.isArray(list) || !list.length) return;
+    anyToday = true;
+    var cur = (st.items[kid] || []).slice();
+    list.forEach(function(w){
+      var dup = cur.some(function(x){ return (x.subjectName || '') === (w.subjectName || '') && x.text === w.text; });
+      if (dup) return;
+      cur.push({ id: uid('st'), subjectName: w.subjectName || '', text: w.text, done: false, fromWeeklyId: w.id });
+      added++;
+    });
+    st.items[kid] = cur;
+  });
+  if (anyToday) st.weeklyAppliedDate = k;
+  return added;
+}
+/* 앱을 켜거나 날이 바뀔 때 한 번 돌린다 */
+function studyWeeklyAuto(){
+  if (!state || !state.study) return false;
+  if (state.study.weeklyAppliedDate === todayKey()) return false;
+  mutate(function(s){ studyWeeklyApplyTo(s); });
+  return true;
+}
+/* 요일별 반복 저장 — 오늘 요일이면 오늘 목록에도 바로 넣는다 */
+function studyWeekAdd(subjectName, text, days, kid){
+  text = String(text || '').trim();
+  if (!text || !days || !days.length) return 0;
+  var k = todayKey(), dow = dowKey(), added = 0;
+  mutate(function(s){
+    var st = studyEnsure(s);
+    if (!st.weekly[kid] || typeof st.weekly[kid] !== 'object') st.weekly[kid] = {};
+    days.forEach(function(d){
+      var list = (st.weekly[kid][d] || []).slice();
+      if (list.some(function(x){ return (x.subjectName || '') === subjectName && x.text === text; })) return;
+      list.push({ id: uid('sw'), subjectName: subjectName, text: text });
+      st.weekly[kid][d] = list;
+      added++;
+      if (d === dow){
+        var cur = (st.items[kid] || []).slice();
+        if (!cur.some(function(x){ return (x.subjectName || '') === subjectName && x.text === text; })){
+          cur.push({ id: uid('st'), subjectName: subjectName, text: text, done: false });
+          st.items[kid] = cur;
+        }
+      }
+    });
+    st.weeklyAppliedDate = k;
+  });
+  return added;
 }
 function studyAdd(name, subjectName){
   var kid = studyKidId();
@@ -3253,6 +3432,63 @@ function studyChip(kind, id, name, on, actRename, actDel){
   }
   return '<button class="pchip" type="button" data-act="preset-use" data-id="' + esc(id) + '">' + esc(name) + '</button>';
 }
+/* 요일별 자동 반복 패널 */
+function studyWeekHtml(kid, sub){
+  var sel = dowView(), dow = dowKey();
+  var famName = (FAMILY[kid] || {}).name || '';
+  var counts = {};
+  DOW_KEYS.forEach(function(k){ counts[k] = studyWeekList(kid, k).length; });
+  var dayTabs = DOW_KEYS.map(function(k){
+    return '<button class="wk-day' + (sel === k ? ' on' : '') + (dow === k ? ' tod' : '') + '" type="button"'
+      + ' data-act="wk-day" data-d="' + k + '" aria-pressed="' + (sel === k ? 'true' : 'false') + '"'
+      + ' aria-label="' + DOW_NAME[k] + '요일 반복' + (counts[k] ? ' ' + counts[k] + '개' : '') + '">'
+      + '<b>' + DOW_NAME[k] + '</b>' + (counts[k] ? '<i>' + counts[k] + '</i>' : '') + '</button>';
+  }).join('');
+  var list = studyWeekList(kid, sel);
+  var rows = list.map(function(w){
+    if (wkEditId === w.id){
+      return '<div class="wk-row editing">'
+        + '<span class="st-sub">' + esc(w.subjectName || '공부') + '</span>'
+        + '<input class="sx-in rt-in" data-wkin="' + esc(w.id) + '" value="' + esc(w.text) + '" aria-label="반복 공부 내용">'
+        + '<button class="sx-ok" type="button" data-act="wk-save" data-id="' + esc(w.id) + '" aria-label="저장">✓</button>'
+        + '<button class="sx-no" type="button" data-act="wk-cancel" aria-label="취소">✕</button>'
+        + '</div>';
+    }
+    return '<div class="wk-row">'
+      + '<span class="st-sub">' + esc(w.subjectName || '공부') + '</span>'
+      + '<span class="rtt">' + esc(w.text) + '</span>'
+      + '<button class="rtx ed" type="button" data-act="wk-edit" data-id="' + esc(w.id) + '" aria-label="수정">✎</button>'
+      + '<button class="rtx" type="button" data-act="wk-del" data-id="' + esc(w.id) + '" aria-label="삭제">✕</button>'
+      + '</div>';
+  }).join('');
+  var subChips = studySubjects().map(function(s){
+    return '<button class="chip' + (sub && sub.id === s.id ? ' on' : '') + '" type="button" data-act="study-sub" data-id="' + esc(s.id) + '">' + esc(s.name) + '</button>';
+  }).join('');
+  var presets = sub ? studyPresets(kid, sub.id) : [];
+  var presetChips = presets.map(function(p){
+    return '<button class="pchip" type="button" data-act="wk-preset" data-id="' + esc(p.id) + '">' + esc(p.name) + '</button>';
+  }).join('');
+  var picked = studyWeekPicked();
+  var wAll = ['1','2','3','4','5'].every(function(k){ return picked.indexOf(k) > -1; });
+  var pickChips = DOW_KEYS.map(function(k){
+    return '<button class="wk-p' + (picked.indexOf(k) > -1 ? ' on' : '') + '" type="button" data-act="wk-pick" data-d="' + k + '"'
+      + ' aria-pressed="' + (picked.indexOf(k) > -1 ? 'true' : 'false') + '">' + DOW_NAME[k] + '</button>';
+  }).join('')
+    + '<button class="wk-p wk-pw' + (wAll ? ' on' : '') + '" type="button" data-act="wk-pick-week" aria-pressed="' + (wAll ? 'true' : 'false') + '">평일</button>';
+  var hint = picked.map(function(k){ return DOW_NAME[k]; }).join('·') + ' 저장';
+  return '<div class="st-body wk-body">'
+    +   '<div class="wk-subrow">' + (famName ? '<span class="wk-who">' + esc(famName) + '</span>' : '') + subChips + '</div>'
+    +   '<div class="wk-days">' + dayTabs + '</div>'
+    +   (rows ? '<div class="wk-list">' + rows + '</div>'
+             : '<div class="wk-empty">이 요일에 저장된 반복 공부가 없어요</div>')
+    +   (presetChips
+        ? '<div class="presets"><span class="lab">' + esc(sub ? sub.name : '과목') + ' 문제집</span>' + presetChips + '</div>'
+        : '')
+    +   '<div class="wk-picks">' + pickChips + '<span class="wk-hint">' + esc(hint) + '</span></div>'
+    +   '<div class="st-add"><input id="wkInput" placeholder="이 요일마다 반복할 공부" aria-label="반복할 공부 내용">'
+    +     '<button class="st-plus" type="button" data-act="wk-add">+ 요일 저장</button></div>'
+    + '</div>';
+}
 function renderStudy(){
   var el = $('#study'); if (!el || !state || !prefs) return;
   var kid = studyKidId(), sub = studySubject();
@@ -3282,6 +3518,12 @@ function renderStudy(){
   var presetChips = presets.map(function(p){
     return studyChip('pre', p.id, p.name, false, 'preset-rename', 'preset-del');
   }).join('');
+  var weekToday = studyWeekTodayCount(kid);
+  var tabs =
+      '<div class="st-tabs">'
+    +   '<button class="st-tab' + (studyView === 'week' ? '' : ' on') + '" type="button" data-act="st-view" data-v="today">📖 오늘<i>' + items.length + '</i></button>'
+    +   '<button class="st-tab' + (studyView === 'week' ? ' on' : '') + '" type="button" data-act="st-view" data-v="week">📅 요일별 반복' + (weekToday ? '<i>' + weekToday + '</i>' : '') + '</button>'
+    + '</div>';
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
     +   '<span class="st-kids">' + kidChips + '</span>'
@@ -3289,7 +3531,9 @@ function renderStudy(){
     +   studyLockHtml()
     + '</div>'
     + '<div class="st-prog"><i style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></i></div>'
-    + '<div class="st-body">'
+    + tabs
+    + (studyView === 'week' ? studyWeekHtml(kid, sub) :
+      '<div class="st-body">'
     +   '<div class="st-main">'
     +     (rows ? '<div class="st-list">' + rows + '</div>'
               : '<div class="st-empty">📚 오늘 공부할 내용을 적어 볼까요?</div>')
@@ -3312,7 +3556,7 @@ function renderStudy(){
     +     '<div class="st-add"><input id="studyInput" placeholder="공부할 내용을 적어 주세요" aria-label="공부할 내용">'
     +       '<button class="st-plus" type="button" data-act="study-add">+ 추가</button></div>'
     +   '</div>'
-    + '</div>'
+    + '</div>')
     + remainBoxHtml(items.length - done, items.length, kid);
 }
 /* ============================================================
@@ -4189,6 +4433,106 @@ document.addEventListener('click', function(ev){
     return;
   }
 
+  /* 요일별 자동 반복 — 열어 보는 건 누구나, 추가·수정·삭제는 엄빠 전용(PIN) */
+  if (act === 'st-view'){
+    var vw = el.dataset.v === 'week' ? 'week' : 'today';
+    if (vw !== studyView){ studyView = vw; wkEditId = null; }
+    renderStudy(); return;
+  }
+  if (act === 'wk-day'){
+    var dd = el.dataset.d;
+    if (DOW_KEYS.indexOf(dd) < 0) return;
+    studyWeekSel = dd; studyWeekPick = null; wkEditId = null;
+    renderStudy(); return;
+  }
+  if (act === 'wk-pick'){
+    var pd = el.dataset.d;
+    if (DOW_KEYS.indexOf(pd) < 0) return;
+    var curPick = studyWeekPicked(), wasOn = curPick.indexOf(pd) > -1;
+    studyWeekPick = {};
+    curPick.forEach(function(k){ if (k !== pd) studyWeekPick[k] = 1; });
+    if (!wasOn) studyWeekPick[pd] = 1;
+    renderStudy(); return;
+  }
+  if (act === 'wk-pick-week'){
+    var allW = ['1','2','3','4','5'], curW = studyWeekPicked();
+    var onW = allW.every(function(k){ return curW.indexOf(k) > -1; });
+    studyWeekPick = {};
+    if (!onW) allW.forEach(function(k){ studyWeekPick[k] = 1; });
+    renderStudy(); return;
+  }
+  if (act === 'wk-add'){
+    var wkSub = studySubject();
+    var wkIn = $('#wkInput');
+    var wkText = ((wkIn && wkIn.value) || '').trim();    /* PIN 입력 중 다시 그려져도 입력값이 살아 있게 미리 잡아 둔다 */
+    var wkDays = studyWeekPicked().slice();
+    var wkKid = studyKidId(), wkSubName = wkSub ? wkSub.name : '';
+    studyParentOnly(function(){
+      if (!wkText){ var wi = $('#wkInput'); if (wi) wi.focus(); return; }
+      var n = studyWeekAdd(wkSubName, wkText, wkDays, wkKid);
+      renderStudy();
+      if (!n) toast('이미 저장된 반복 공부예요');
+      else toast('📅 ' + wkDays.map(function(k){ return DOW_NAME[k]; }).join('·') + '요일 반복에 넣었어요', 1800);
+    });
+    return;
+  }
+  if (act === 'wk-preset'){
+    var wkSub2 = studySubject(); if (!wkSub2) return;
+    var wkPid = el.dataset.id, wkKid2 = studyKidId();
+    var wkPre = studyPresets(wkKid2, wkSub2.id).filter(function(x){ return x.id === wkPid; })[0];
+    if (!wkPre) return;
+    var wkDays2 = studyWeekPicked().slice(), wkSubName2 = wkSub2.name, wkPreText = wkPre.name;
+    studyParentOnly(function(){
+      var n2 = studyWeekAdd(wkSubName2, wkPreText, wkDays2, wkKid2);
+      renderStudy();
+      toast(n2 ? ('📅 ' + wkDays2.map(function(k){ return DOW_NAME[k]; }).join('·') + '요일에 ' + wkPreText + ' 넣었어요')
+               : '이미 저장된 반복 공부예요', 1800);
+    });
+    return;
+  }
+  if (act === 'wk-edit'){
+    var wkEid = el.dataset.id;
+    studyParentOnly(function(){ wkEditId = wkEid; renderStudy(); focusEditInput('[data-wkin]'); });
+    return;
+  }
+  if (act === 'wk-cancel'){ wkEditId = null; renderStudy(); return; }
+  if (act === 'wk-save'){
+    var wkRowS = el.closest ? el.closest('.wk-row') : null;
+    var wkInpS = wkRowS ? wkRowS.querySelector('[data-wkin]') : null;
+    var wkV = ((wkInpS && wkInpS.value) || '').trim();
+    if (!wkV){ toast('반복할 공부 내용을 넣어 주세요'); if (wkInpS) wkInpS.focus(); return; }
+    var wkSid = el.dataset.id, wkSKid = studyKidId(), wkSDow = dowView();
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        if (!st.weekly[wkSKid] || typeof st.weekly[wkSKid] !== 'object') st.weekly[wkSKid] = {};
+        st.weekly[wkSKid][wkSDow] = (st.weekly[wkSKid][wkSDow] || []).map(function(x){
+          return x.id === wkSid ? { id: x.id, subjectName: x.subjectName, text: wkV } : x;
+        });
+        /* 오늘 목록에 같은 항목이 아직 안 끝났으면 같이 바꾼다 */
+        st.items[wkSKid] = (st.items[wkSKid] || []).map(function(x){
+          return (x.fromWeeklyId === wkSid && !x.done)
+            ? { id: x.id, subjectName: x.subjectName, text: wkV, done: false, fromWeeklyId: x.fromWeeklyId } : x;
+        });
+      });
+      wkEditId = null; renderStudy(); toast('✎ 반복 공부를 바꿨어요');
+    });
+    return;
+  }
+  if (act === 'wk-del'){
+    var wkDid = el.dataset.id, wkDKid = studyKidId(), wkDDow = dowView();
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        if (st.weekly[wkDKid] && st.weekly[wkDKid][wkDDow]){
+          st.weekly[wkDKid][wkDDow] = st.weekly[wkDKid][wkDDow].filter(function(x){ return x.id !== wkDid; });
+        }
+      });
+      wkEditId = null; renderStudy(); toast('반복 공부를 지웠어요');
+    });
+    return;
+  }
+
   /* 이거 사주세요 */
   if (act === 'want-who'){ prefs.wantWho = el.dataset.w; savePrefs(); renderWant(); return; }
   if (act === 'want-add'){
@@ -4328,6 +4672,7 @@ document.addEventListener('keydown', function(ev){
   else if (t.id === 'wantItem' || t.id === 'wantMemo'){ var b5 = $('[data-act="want-add"]'); if (b5) b5.click(); }
   else if (t.id === 'foodInput'){ var bf = $('[data-act="food-custom"]'); if (bf) bf.click(); }
   else if (t.id === 'studyInput'){ var bs1 = $('[data-act="study-add"]'); if (bs1) bs1.click(); }
+  else if (t.id === 'wkInput'){ var bwk = $('[data-act="wk-add"]'); if (bwk) bwk.click(); }
   else if (t.id === 'readTitle' || t.id === 'readAuthor'){ var brd = $('[data-act="read-add"]'); if (brd) brd.click(); }
   else if (t.id === 'presetInput'){ var bs2 = $('[data-act="preset-add"]'); if (bs2) bs2.click(); }
   else if (t.id === 'studySubInput'){ var bs3 = $('[data-act="study-sub-add"]'); if (bs3) bs3.click(); }
@@ -4345,6 +4690,18 @@ document.addEventListener('keydown', function(ev){
   if (!t || !t.getAttribute || !t.getAttribute('data-srename')) return;
   if (ev.key === 'Enter'){ ev.preventDefault(); studyRenameSave(); }
   else if (ev.key === 'Escape'){ ev.preventDefault(); studyRename = null; renderStudy(); }
+});
+
+/* ---------- 요일별 반복 수정: Enter 저장 · Esc 취소 ---------- */
+document.addEventListener('keydown', function(ev){
+  var t = ev.target;
+  if (!t || !t.getAttribute || !t.getAttribute('data-wkin')) return;
+  if (ev.key === 'Enter'){
+    ev.preventDefault();
+    var b = document.querySelector('[data-act="wk-save"]'); if (b) b.click();
+  } else if (ev.key === 'Escape'){
+    ev.preventDefault(); wkEditId = null; renderStudy();
+  }
 });
 
 /* ---------- 독서리스트 수정: Enter 저장 · Esc 취소 ---------- */
@@ -4627,6 +4984,7 @@ async function unlockApp(afterPinSetup){
   var isNew = !root.state;
 
   ensureDay();
+  studyWeeklyAuto();          /* 오늘 요일의 반복 공부를 목록에 채운다 */
   renderAll();
 
   setInterval(renderClock, 1000);
@@ -4656,6 +5014,7 @@ function onRemoteRoot(root){
   if (same) return;
   if (remote) state = remote;
   if (ensureDay()) { /* 날짜가 바뀌었으면 여기서 정리됨 */ }
+  studyWeeklyAuto();          /* 다른 기기가 아직 안 채웠으면 여기서 채운다 */
   renderAll();
   if (!first && Date.now() - lastLocalWriteAt > 1800) toast('다른 기기에서 업데이트됐어요', 1700);
 }
