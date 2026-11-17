@@ -4425,7 +4425,8 @@ document.addEventListener('click', function(ev){
     /* 버튼 자체가 엄빠 전용 — 빈칸이어도 먼저 PIN을 묻고, 통과한 뒤 칸에 포커스 */
     studyParentOnly(function(){
       if (!sgV){ var sgNow = $('#studyInput'); if (sgNow) sgNow.focus(); return; }
-      studyAdd(sgV, '');   /* 📖 오늘 탭 — 과목 뱃지 없이 문제집 이름만 */
+      var okAdd = studyAdd(sgV, '');   /* 📖 오늘 탭 — 과목 뱃지 없이 문제집 이름만 */
+      if (okAdd){ var sgNext = $('#studyInput'); if (sgNext) sgNext.focus(); }   /* 여러 권 연속으로 적기 편하게 */
     });
     return;
   }
@@ -4470,6 +4471,7 @@ document.addEventListener('click', function(ev){
       renderStudy();
       if (!n) toast('이미 저장된 반복 공부예요');
       else toast('📅 ' + wkDays.map(function(k){ return DOW_NAME[k]; }).join('·') + '요일 반복에 넣었어요', 1800);
+      var wkNext = $('#wkInput'); if (wkNext) wkNext.focus();
     });
     return;
   }
@@ -4687,6 +4689,18 @@ document.addEventListener('keydown', function(ev){
   if (!t || !t.getAttribute || !t.getAttribute('data-srename')) return;
   if (ev.key === 'Enter'){ ev.preventDefault(); studyRenameSave(); }
   else if (ev.key === 'Escape'){ ev.preventDefault(); studyRename = null; renderStudy(); }
+});
+
+/* ---------- 오늘 공부 인라인 수정: Enter 저장 · Esc 취소 ---------- */
+document.addEventListener('keydown', function(ev){
+  var t = ev.target;
+  if (!t || !t.getAttribute || t.getAttribute('data-stin') === null) return;
+  if (ev.key === 'Enter'){
+    ev.preventDefault();
+    var b = document.querySelector('[data-act="study-save"]'); if (b) b.click();
+  } else if (ev.key === 'Escape'){
+    ev.preventDefault(); studyEditId = null; renderStudy();
+  }
 });
 
 /* ---------- 요일별 반복 수정: Enter 저장 · Esc 취소 ---------- */
