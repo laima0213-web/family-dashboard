@@ -2676,9 +2676,9 @@ document.addEventListener('keydown', function(ev){
 var POINTS_START_MONDAY = '2026-11-16';      /* 이번 주 월요일부터 집계 */
 var ITEM_PRICE = 1;                           /* 모든 아이템 1개 = 💎 1P */
 var AV_FREE = {
-  preset: [],                                 /* 캐릭터 12종 전부 상점 아이템(💎 1P) */
-  bg: [],                                     /* 배경 6종 전부 상점 아이템(💎 1P) */
-  deco: ['none']                              /* '꾸미기 안 함'만 기본 선택값(판매 품목 아님) */
+  preset: [],                                 /* 캐릭터 24종 전부 상점 아이템(💎 1P) */
+  bg: [],                                     /* 배경 12종 전부 상점 아이템(💎 1P) */
+  deco: ['none']                              /* '꾸미기 안 함'만 기본 선택값(판매 품목 아님) — 꾸미기 12종은 상점 아이템 */
 };
 function shopRaw(){ return (state && state.shop) || {}; }
 /* 월~일 7일을 모두 ✓ 한 주마다 +1P (중복·누락 없는 결정적 계산) */
