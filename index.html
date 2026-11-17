@@ -235,6 +235,13 @@ button{font:inherit;color:inherit}
 .st-badge{margin-left:2px;font-size:11px;font-weight:900;color:#7B5AA6;background:#F5ECFB;
   border:1px solid #E9D9F6;border-radius:999px;padding:2px 8px;white-space:nowrap;letter-spacing:0}
 .st-kids{display:flex;gap:3px;margin-left:auto}
+/* 공부 추가·수정·삭제 잠금 배지 */
+.st-lock{margin-left:2px;display:inline-flex;align-items:center;border:1px solid #E7DCCB;background:#FFF9EE;
+  border-radius:999px;height:20px;padding:0 8px;font-size:10px;font-weight:900;color:#8B7A63;cursor:pointer;
+  white-space:nowrap;letter-spacing:0;flex:0 0 auto}
+.st-lock.on{background:#EAF7EF;border-color:#CBE7D6;color:#3F7A57}
+.st-lock:active{transform:scale(.96)}
+.st-lock .lks{display:none}
 .skk{height:22px;border:1px solid #E7DCCB;background:#fff;border-radius:999px;padding:0 10px;
   font-size:12px;font-weight:900;color:#8B7A63;cursor:pointer}
 .skk.on{background:#5FA97A;border-color:#5FA97A;color:#fff;box-shadow:0 3px 8px rgba(95,169,122,.25)}
@@ -667,6 +674,9 @@ button{font:inherit;color:inherit}
   .fb-reset{height:16px;font-size:10px;padding:0 6px}
   /* 오늘의 공부 체크리스트 — 넓은 화면은 목록·도구 두 칸 */
   .st-badge{font-size:9.5px;padding:1px 6px}
+  .st-lock{height:17px;font-size:9.5px;padding:0 6px}
+  .st-lock .lkl{display:none}
+  .st-lock .lks{display:inline}
   .skk{height:16px;font-size:10px;padding:0 7px}
   .st-prog{height:3px;margin-bottom:4px}
   .st-body{display:block}
@@ -3151,6 +3161,31 @@ function foodAddFromInput(){
 var studyEditMode = false;      // 기기별: 과목·문제집 이름 편집 모드
 var studyRename = null;         // { kind:'sub'|'pre', id }
 var studyEditId = null;         // 체크리스트 항목 인라인 수정
+/* ── 공부 추가·수정·삭제는 엄마·아빠 전용 (기존 auth/parentPinHash 사용) ── */
+function studyLockHtml(){
+  var on = parentAuthed();
+  return '<button class="st-lock' + (on ? ' on' : '') + '" type="button" id="studyLock" data-act="study-lock"'
+    + ' data-st="' + (on ? '1' : '0') + '"'
+    + ' aria-label="' + (on ? '엄빠 인증 중 · 눌러서 다시 잠그기' : '공부 추가·수정·삭제는 엄마·아빠만 · 눌러서 PIN 입력') + '">'
+    + (on ? '🔓 <span class="lkl">엄빠 인증 중 · 잠그기</span><span class="lks">엄빠 인증 · 잠그기</span>'
+          : '🔒 <span class="lkl">추가·삭제 엄빠 전용</span><span class="lks">엄빠 전용</span>')
+    + '</button>';
+}
+/* 배지만 다시 칠한다 — 카드 전체를 다시 그려 포커스를 잃지 않게 */
+function studyLockRefresh(){
+  var b = $('#studyLock'); if (!b) return;
+  var on = parentAuthed();
+  if (b.getAttribute('data-st') === (on ? '1' : '0')) return;
+  b.setAttribute('data-st', on ? '1' : '0');
+  b.className = 'st-lock' + (on ? ' on' : '');
+  b.setAttribute('aria-label', on ? '엄빠 인증 중 · 눌러서 다시 잠그기' : '공부 추가·수정·삭제는 엄마·아빠만 · 눌러서 PIN 입력');
+  b.innerHTML = on ? '🔓 <span class="lkl">엄빠 인증 중 · 잠그기</span><span class="lks">엄빠 인증 · 잠그기</span>'
+                   : '🔒 <span class="lkl">추가·삭제 엄빠 전용</span><span class="lks">엄빠 전용</span>';
+}
+/* PIN을 통과한 뒤에만 실행 — 통과 직후 잠금 배지를 바로 바꾼다 */
+function studyParentOnly(run){
+  requireParentPin(function(){ run(); studyLockRefresh(); });
+}
 function studyKidId(){ return activeKid(); }
 function studySubjects(){ return (state && state.study && state.study.subjects) || []; }
 function studySubject(){
@@ -3232,6 +3267,7 @@ function renderStudy(){
       '<div class="h2">📖 오늘의 공부 체크리스트'
     +   '<span class="st-kids">' + kidChips + '</span>'
     +   '<span class="st-badge">' + done + ' / ' + items.length + ' 완료</span>'
+    +   studyLockHtml()
     + '</div>'
     + '<div class="st-prog"><i style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></i></div>'
     + '<div class="st-body">'
@@ -3383,9 +3419,14 @@ function studyRenameSave(){
   var r = studyRename; if (!r) return false;
   var inp = document.querySelector('[data-srename]');
   var v = ((inp && inp.value) || '').trim();
-  studyRename = null;
-  if (!v){ renderStudy(); return false; }
+  if (!v){ studyRename = null; renderStudy(); return false; }
+  /* 이름 바꾸기도 엄빠 전용 — PIN 통과 뒤 저장 */
+  studyParentOnly(function(){ studyRenameApply(r, v); });
+  return true;
+}
+function studyRenameApply(r, v){
   var kid = studyKidId();
+  studyRename = null;
   if (r.kind === 'sub'){
     if (studySubjects().some(function(s){ return s.id !== r.id && s.name === v; })){
       toast('같은 이름의 과목이 있어요'); renderStudy(); return false;
@@ -3976,31 +4017,57 @@ document.addEventListener('click', function(ev){
     return;
   }
 
-  /* 오늘의 공부 체크리스트 */
+  /* 오늘의 공부 체크리스트 — 체크·과목 보기는 아이들도, 추가·수정·삭제는 엄빠 전용(PIN) */
+  if (act === 'study-lock'){
+    if (parentAuthed()){
+      resetParentAuth();
+      studyEditMode = false; studyEditId = null; studyRename = null;
+      renderStudy();
+      toast('🔒 공부 편집을 다시 잠갔어요');
+    } else {
+      requireParentPin(function(){
+        renderStudy();
+        toast('🔓 엄빠 인증됐어요 · 이제 추가·수정·삭제할 수 있어요', 2400);
+      });
+    }
+    return;
+  }
   if (act === 'study-sub'){ if (!studyEditMode){ prefs.studySubject = el.dataset.id; savePrefs(); renderStudy(); } return; }
-  if (act === 'study-editbtn'){ studyEditMode = !studyEditMode; studyRename = null; renderStudy(); return; }
-  if (act === 'study-sub-rename'){ studyRename = { kind:'sub', id: el.dataset.id }; renderStudy(); focusEditInput('[data-srename]'); return; }
+  if (act === 'study-editbtn'){
+    if (studyEditMode){ studyEditMode = false; studyRename = null; renderStudy(); return; }   /* 끌 때는 PIN 없이 */
+    studyParentOnly(function(){ studyEditMode = true; studyRename = null; renderStudy(); });
+    return;
+  }
+  if (act === 'study-sub-rename'){
+    var srid = el.dataset.id;
+    studyParentOnly(function(){ studyRename = { kind:'sub', id: srid }; renderStudy(); focusEditInput('[data-srename]'); });
+    return;
+  }
   if (act === 'study-sub-del'){
     var sid = el.dataset.id;
     if (studySubjects().length < 2){ toast('과목은 하나 이상 있어야 해요'); return; }
-    mutate(function(s){
-      var st = studyEnsure(s);
-      st.subjects = st.subjects.filter(function(x){ return x.id !== sid; });
-      Object.keys(st.presets).forEach(function(k){ if (st.presets[k] && st.presets[k][sid]) delete st.presets[k][sid]; });
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        st.subjects = st.subjects.filter(function(x){ return x.id !== sid; });
+        Object.keys(st.presets).forEach(function(k){ if (st.presets[k] && st.presets[k][sid]) delete st.presets[k][sid]; });
+      });
+      if (prefs.studySubject === sid){ prefs.studySubject = ''; savePrefs(); }
+      renderStudy(); toast('과목을 지웠어요');
     });
-    if (prefs.studySubject === sid){ prefs.studySubject = ''; savePrefs(); }
-    renderStudy(); toast('과목을 지웠어요');
     return;
   }
   if (act === 'study-sub-add'){
     var si = $('#studySubInput');
-    var sv = ((si && si.value) || '').trim();
+    var sv = ((si && si.value) || '').trim();          /* PIN 입력 중 화면이 다시 그려져도 값이 살아 있게 미리 잡아 둔다 */
     if (!sv){ if (si) si.focus(); return; }
-    if (studySubjects().some(function(x){ return x.name === sv; })){ toast('이미 있는 과목이에요'); return; }
-    var nid = uid('sb');
-    mutate(function(s){ var st = studyEnsure(s); st.subjects = st.subjects.concat([{ id: nid, name: sv }]); });
-    prefs.studySubject = nid; savePrefs();
-    renderStudy(); toast('과목을 추가했어요');
+    studyParentOnly(function(){
+      if (studySubjects().some(function(x){ return x.name === sv; })){ toast('이미 있는 과목이에요'); return; }
+      var nid = uid('sb');
+      mutate(function(s){ var st = studyEnsure(s); st.subjects = st.subjects.concat([{ id: nid, name: sv }]); });
+      prefs.studySubject = nid; savePrefs();
+      renderStudy(); toast('과목을 추가했어요');
+    });
     return;
   }
   if (act === 'preset-add'){
@@ -4009,33 +4076,44 @@ document.addEventListener('click', function(ev){
     var pi = $('#presetInput');
     var pv = ((pi && pi.value) || '').trim();
     if (!pv){ if (pi) pi.focus(); return; }
-    var kidP = studyKidId();
-    if (studyPresets(kidP, subP.id).some(function(x){ return x.name === pv; })){ toast('이미 있는 문제집이에요'); return; }
-    mutate(function(s){
-      var st = studyEnsure(s);
-      st.presets[kidP] = st.presets[kidP] || {};
-      st.presets[kidP][subP.id] = (st.presets[kidP][subP.id] || []).concat([{ id: uid('pb'), name: pv }]);
+    var kidP = studyKidId(), subPId = subP.id;
+    studyParentOnly(function(){
+      if (studyPresets(kidP, subPId).some(function(x){ return x.name === pv; })){ toast('이미 있는 문제집이에요'); return; }
+      mutate(function(s){
+        var st = studyEnsure(s);
+        st.presets[kidP] = st.presets[kidP] || {};
+        st.presets[kidP][subPId] = (st.presets[kidP][subPId] || []).concat([{ id: uid('pb'), name: pv }]);
+      });
+      renderStudy(); toast('📚 ' + pv + ' 등록했어요', 1600);
     });
-    renderStudy(); toast('📚 ' + pv + ' 등록했어요', 1600);
     return;
   }
   if (act === 'preset-use'){
     var subU = studySubject(); if (!subU) return;
-    var preU = studyPresets(studyKidId(), subU.id).filter(function(x){ return x.id === el.dataset.id; })[0];
-    if (preU) studyAdd(preU.name, subU.name);
+    var useId = el.dataset.id, useKid = studyKidId(), useSubName = subU.name;
+    var preU = studyPresets(useKid, subU.id).filter(function(x){ return x.id === useId; })[0];
+    if (!preU) return;
+    studyParentOnly(function(){ studyAdd(preU.name, useSubName); });   /* 문제집 누르기 = 공부 항목 추가 */
     return;
   }
-  if (act === 'preset-rename'){ studyRename = { kind:'pre', id: el.dataset.id }; renderStudy(); focusEditInput('[data-srename]'); return; }
+  if (act === 'preset-rename'){
+    var prid = el.dataset.id;
+    studyParentOnly(function(){ studyRename = { kind:'pre', id: prid }; renderStudy(); focusEditInput('[data-srename]'); });
+    return;
+  }
   if (act === 'preset-del'){
     var subD = studySubject(); if (!subD) return;
-    var pidD = el.dataset.id, kidD = studyKidId();
-    mutate(function(s){
-      var st = studyEnsure(s);
-      if (st.presets[kidD] && st.presets[kidD][subD.id]){
-        st.presets[kidD][subD.id] = st.presets[kidD][subD.id].filter(function(x){ return x.id !== pidD; });
-      }
+    var pidD = el.dataset.id, kidD = studyKidId(), subDId = subD.id;
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        if (st.presets[kidD] && st.presets[kidD][subDId]){
+          st.presets[kidD][subDId] = st.presets[kidD][subDId].filter(function(x){ return x.id !== pidD; });
+        }
+      });
+      renderStudy();
     });
-    renderStudy(); return;
+    return;
   }
   if (act === 'study-toggle'){
     var tgId = el.dataset.id, kidT = studyKidId();
@@ -4047,7 +4125,11 @@ document.addEventListener('click', function(ev){
     });
     renderStudy(); return;
   }
-  if (act === 'study-edit'){ studyEditId = el.dataset.id; renderStudy(); focusEditInput('[data-stin]'); return; }
+  if (act === 'study-edit'){
+    var editRowId = el.dataset.id;
+    studyParentOnly(function(){ studyEditId = editRowId; renderStudy(); focusEditInput('[data-stin]'); });
+    return;
+  }
   if (act === 'study-cancel'){ studyEditId = null; renderStudy(); return; }
   if (act === 'study-save'){
     var rowS = el.closest ? el.closest('.rt') : null;
@@ -4055,24 +4137,35 @@ document.addEventListener('click', function(ev){
     var vS = ((inpS && inpS.value) || '').trim();
     if (!vS){ toast('공부할 내용을 넣어 주세요'); if (inpS) inpS.focus(); return; }
     var edId = el.dataset.id, kidE = studyKidId();
-    mutate(function(s){
-      var st = studyEnsure(s);
-      st.items[kidE] = (st.items[kidE] || []).map(function(x){
-        return x.id === edId ? { id:x.id, subjectName:x.subjectName, text:vS, done:x.done } : x;
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        st.items[kidE] = (st.items[kidE] || []).map(function(x){
+          return x.id === edId ? { id:x.id, subjectName:x.subjectName, text:vS, done:x.done } : x;
+        });
       });
+      studyEditId = null; renderStudy(); toast('✎ 공부 내용을 바꿨어요');
     });
-    studyEditId = null; renderStudy(); toast('✎ 공부 내용을 바꿨어요');
     return;
   }
   if (act === 'study-del'){
     var dlId = el.dataset.id, kidL = studyKidId();
-    mutate(function(s){
-      var st = studyEnsure(s);
-      st.items[kidL] = (st.items[kidL] || []).filter(function(x){ return x.id !== dlId; });
+    studyParentOnly(function(){
+      mutate(function(s){
+        var st = studyEnsure(s);
+        st.items[kidL] = (st.items[kidL] || []).filter(function(x){ return x.id !== dlId; });
+      });
+      renderStudy();
     });
-    renderStudy(); return;
+    return;
   }
-  if (act === 'study-add'){ var sgIn = $('#studyInput'); studyAdd(sgIn ? sgIn.value : ''); return; }
+  if (act === 'study-add'){
+    var sgIn = $('#studyInput');
+    var sgV = ((sgIn && sgIn.value) || '').trim();
+    if (!sgV){ if (sgIn) sgIn.focus(); return; }
+    studyParentOnly(function(){ studyAdd(sgV); });
+    return;
+  }
 
   /* 이거 사주세요 */
   if (act === 'want-who'){ prefs.wantWho = el.dataset.w; savePrefs(); renderWant(); return; }
@@ -4515,6 +4608,7 @@ async function unlockApp(afterPinSetup){
   renderAll();
 
   setInterval(renderClock, 1000);
+  setInterval(studyLockRefresh, 20000);   /* 3분 인증이 끝나면 공부 잠금 배지도 제자리로 */
   ensureWeather();
   DB.subscribe(onRemoteRoot);
 
