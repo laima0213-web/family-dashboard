@@ -6186,8 +6186,7 @@ async function finishBoot(){
             Math.max(0.05, u.y0 * (1 - fall)),
             Math.sin(u.a + t * 0.15) * (u.r + Math.cos(t * 0.5 + u.ph) * 0.4)
           );
-          lf2.rotation.x = t * 0.9 + u.ph;
-          lf2.rotation.y = t * 0.7;
+          lf2.lookAt(PG.camera.position);
         });
       })(leaf);
     }
