@@ -371,6 +371,91 @@ button{font:inherit;color:inherit}
 .wk-plab{flex:0 0 auto;font-size:10px;font-weight:900;color:#A99A86;margin-right:2px;white-space:nowrap}
 .wk-addrow{margin-top:0}
 .wk-addrow .st-plus{font-size:11.5px;padding:0 9px}
+/* ---------- 📅 월간 공부 기록 — 진입 칩 ---------- */
+.st-mbtn{margin-left:2px;display:inline-flex;align-items:center;border:1px solid #E2CFF2;background:#FBF6FF;
+  border-radius:999px;height:20px;padding:0 8px;font-size:10px;font-weight:900;color:#7B5AA6;cursor:pointer;
+  white-space:nowrap;letter-spacing:0;flex:0 0 auto;font-family:inherit}
+.st-mbtn:active{transform:scale(.96)}
+.st-mbtn .lks{display:none}
+@media (max-width:430px){
+  .st-mbtn{height:17px;font-size:9.5px;padding:0 6px}
+  .st-mbtn .lkl{display:none}
+  .st-mbtn .lks{display:inline}
+}
+/* ---------- 📅 월간 공부 기록 모달 ---------- */
+.sm{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:14px}
+.sm[hidden]{display:none!important}
+.sm-bd{position:absolute;inset:0;background:rgba(60,50,42,.4)}
+.sm-card{position:relative;width:100%;max-width:376px;max-height:min(90vh,700px);overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;background:#FFFDFA;border:1px solid #F0E4D3;border-radius:22px;
+  box-shadow:0 18px 50px rgba(84,62,40,.26);padding:14px 13px 12px}
+.sm-h{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
+.sm-h b{display:block;font-size:15px;font-weight:900;letter-spacing:-.5px;color:#4A3D31}
+.sm-h p{margin:2px 0 0;font-size:10.5px;font-weight:700;color:#A99A86;letter-spacing:-.2px;line-height:1.4}
+.sm-x{margin-left:auto;flex:0 0 auto;width:26px;height:26px;border:0;border-radius:50%;background:#F2F0FA;color:#7B7186;
+  font-size:11.5px;font-weight:900;cursor:pointer;line-height:1}
+.sm-kids{display:flex;gap:5px;margin-bottom:8px}
+.sm-kid{flex:1 1 0;min-width:0;height:28px;border:1px solid #E7DCCB;background:#FFF9EE;border-radius:999px;
+  font-size:12px;font-weight:900;color:#8B7A63;cursor:pointer;white-space:nowrap;font-family:inherit}
+.sm-kid:active{transform:scale(.98)}
+.sm-kid.on{background:#5FA97A;border-color:#5FA97A;color:#fff;box-shadow:0 3px 9px rgba(95,169,122,.26)}
+.sm-nav{display:flex;align-items:center;gap:6px;background:#F7F3FB;border-radius:999px;padding:3px;margin-bottom:8px}
+.sm-nav b{flex:1 1 auto;text-align:center;font-size:12.5px;font-weight:900;color:#5B4E70;letter-spacing:-.3px}
+.sm-nav button{flex:0 0 auto;width:26px;height:26px;border:1px solid #E7DCCB;background:#fff;border-radius:50%;
+  font-size:13px;font-weight:900;color:#8B7A63;cursor:pointer;line-height:1;font-family:inherit}
+.sm-nav button:active{transform:scale(.94)}
+.sm-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:4px}
+.sm-dow span{text-align:center;font-size:10px;font-weight:900;color:#A99A86}
+.sm-dow span.sun{color:#D9748C}
+.sm-dow span.sat{color:#5E86B5}
+.sm-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.sm-d{position:relative;height:33px;min-width:0;border:1px solid transparent;background:#FFFDF7;border-radius:9px;
+  font-size:11.5px;font-weight:800;color:#6D6053;cursor:pointer;font-family:inherit;line-height:1.1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px 0;gap:1px}
+.sm-d.blank{background:transparent;cursor:default}
+.sm-d.sun{color:#D9748C}
+.sm-d.sat{color:#5E86B5}
+.sm-d.today{box-shadow:inset 0 0 0 1.5px #CBB6E4}
+.sm-d.sel{background:#F1E7FB;border-color:#C9ADE8;color:#5B3E86;box-shadow:0 2px 8px rgba(123,90,166,.18)}
+.sm-d:not(.blank):active{transform:scale(.96)}
+.sm-cnt{font-style:normal;font-size:8.5px;font-weight:900;color:#4E8F63;background:#EAF7EF;border-radius:999px;
+  padding:0 4px;line-height:1.5;letter-spacing:-.2px}
+.sm-d.sel .sm-cnt{background:#DDEFE3}
+.sm-dot{width:4px;height:4px;border-radius:50%;background:#E3D6C4;margin-top:1px}
+.sm-detail{margin-top:9px;background:#FBF7FF;border:1px solid #EFE3F8;border-radius:13px;padding:8px 9px}
+.sm-dh{display:flex;align-items:center;gap:6px}
+.sm-dh b{font-size:12.5px;font-weight:900;color:#5B4E70;letter-spacing:-.3px}
+.sm-dh span{margin-left:auto;font-size:10.5px;font-weight:900;color:#7B5AA6;white-space:nowrap}
+.sm-list{margin-top:5px;display:flex;flex-direction:column;gap:4px}
+.sm-li{display:flex;align-items:flex-start;gap:5px;font-size:11.5px;font-weight:800;color:#6D6053;line-height:1.3}
+.sm-li .mk{flex:0 0 auto;width:13px;height:13px;margin-top:1px;border-radius:50%;display:grid;place-items:center;
+  font-size:8.5px;font-weight:900;border:1px solid #E3D6C4;color:#fff;background:#fff;line-height:1}
+.sm-li.done .mk{background:#5FA97A;border-color:#5FA97A}
+.sm-li.done .sm-t{color:#9C8F7E}
+.sm-li .st-sub{margin-top:0}
+.sm-t{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;padding-top:1px}
+.sm-empty{font-size:11px;font-weight:800;color:#B4A695;margin-top:4px}
+.sm-weeks{margin-top:9px}
+.sm-wh{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.sm-wh b{font-size:11.5px;font-weight:900;color:#7B5AA6}
+.sm-wh span{margin-left:auto;font-size:9.5px;font-weight:900;color:#7B5AA6;background:#F3ECFA;border-radius:999px;padding:1px 6px}
+.sm-w{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11px;font-weight:800;color:#8B7A63;padding:2px 0}
+.sm-w i{font-style:normal;font-size:9px;font-weight:900;color:#A99A86;background:#F1E8D9;border-radius:999px;
+  padding:0 5px;line-height:1.6;min-width:36px;text-align:center}
+.sm-w b{font-size:11px;font-weight:900;color:#6D6053}
+.sm-w em{margin-left:auto;font-style:normal;color:#B4A695;font-weight:800;font-size:10.5px}
+.sm-w.has em{color:#8B7A63}
+.sm-sum{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:9px}
+.sm-sum div{background:#FFFCF5;border:1px solid #F1E7D6;border-radius:11px;padding:6px 7px;text-align:center;
+  font-size:9.5px;font-weight:800;color:#A99A86;line-height:1.4}
+.sm-sum b{display:block;font-size:12.5px;font-weight:900;color:#5B4E70;margin-top:1px}
+.sm-sum b em{font-style:normal;font-size:10px;color:#8B7A63;margin-left:1px}
+@media (max-width:430px){
+  .sm{padding:0;align-items:flex-end}
+  .sm-card{max-width:100%;border-radius:22px 22px 0 0;max-height:92vh;
+    padding:13px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+  .sm-d{height:32px}
+}
 /* ---------- 윤·봄 프로필 카드 ---------- */
 .kids2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .prof{padding:9px 9px 8px;cursor:pointer;transition:box-shadow .15s,transform .12s}
@@ -1248,6 +1333,16 @@ button.st{padding:0}
     <div id="sheetBody"></div>
   </div>
 </div>
+
+<!-- ============================================================
+     📅 월간 공부 기록 — 아이별 날짜별 공부 기록 (누구나 열람)
+     ============================================================ -->
+<div class="sm" id="sm" hidden>
+  <div class="sm-bd" data-act="sm-close"></div>
+  <div class="sm-card" id="smCard" role="dialog" aria-modal="true" aria-label="월간 공부 기록">
+    <div id="smBody"></div>
+  </div>
+</div>
 <div id="toast"></div>
 <div id="confetti"></div>
 
@@ -1781,6 +1876,7 @@ function mutate(fn){
   if (!state) return {};
   var before = JSON.parse(JSON.stringify(state));
   fn(state);
+  try { studyHistorySync(state); } catch(e){ console.warn('[dashboard] study history sync:', e && e.message); }
   var paths = diffPaths(before, state, 'state');
   if (Object.keys(paths).length) queueWrite(paths);
   return paths;
@@ -1937,7 +2033,7 @@ function defaultStudySubjects(){
   return [ { id:'sub_home', name:'홈스터디' }, { id:'sub_eng', name:'영어학원' } ];
 }
 function defaultStudy(){
-  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '' };
+  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {} };
 }
 /* 요일 키 — String(new Date().getDay()) 기준 (일=0 · 토=6). 화면은 월~일 순서 */
 var DOW_KEYS = ['1','2','3','4','5','6','0'];
@@ -1945,7 +2041,7 @@ var DOW_NAME = { '1':'월','2':'화','3':'수','4':'목','5':'금','6':'토','0'
 function dowKey(d){ return String((d || new Date()).getDay()); }
 function normalizeStudy(raw){
   var s = (raw && typeof raw === 'object') ? raw : {};
-  var out = { date: todayKey(), subjects: [], presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '' };
+  var out = { date: todayKey(), subjects: [], presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {} };
   var subs = Array.isArray(s.subjects) ? s.subjects : [];
   subs.forEach(function(x){
     if (!x || typeof x.name !== 'string' || !x.name.trim()) return;
@@ -2001,7 +2097,40 @@ function normalizeStudy(raw){
     if (Object.keys(wkOut).length) out.weekly[id] = wkOut;
   });
   if (typeof s.weeklyAppliedDate === 'string') out.weeklyAppliedDate = s.weeklyAppliedDate;
+  /* 📅 월간 공부 기록 — history[YYYY-MM-DD][아이] = [{ id, subjectName, text, done }]
+     지난 날짜 기록은 그대로 보존하고, 모양이 깨진 항목만 건너뛴다 */
+  var hr = (s.history && typeof s.history === 'object') ? s.history : {};
+  Object.keys(hr).forEach(function(dk){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) return;
+    var day = hr[dk];
+    if (!day || typeof day !== 'object') return;
+    var perKid = {};
+    KIDS.forEach(function(id){
+      var arr = day[id];
+      if (!Array.isArray(arr)) return;
+      var list = [];
+      arr.forEach(function(x){
+        if (!x || typeof x.text !== 'string' || !x.text.trim()) return;
+        list.push({ id: (typeof x.id === 'string' && x.id) ? x.id : uid('sh'),
+                    subjectName: typeof x.subjectName === 'string' ? x.subjectName : '',
+                    text: x.text.trim(), done: !!x.done });
+      });
+      if (list.length) perKid[id] = list;
+    });
+    if (Object.keys(perKid).length) out.history[dk] = perKid;
+  });
   if (typeof s.date === 'string' && s.date !== todayKey()){
+    /* 날이 지난 채 앱을 열어도 그날 목록은 history 에 남긴다 */
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s.date) && out.date !== s.date){
+      var oldDay = out.history[s.date] || {};
+      KIDS.forEach(function(id){
+        var its = out.items[id];
+        if (Array.isArray(its) && its.length){
+          oldDay[id] = its.map(function(x){ return { id: x.id, subjectName: x.subjectName, text: x.text, done: !!x.done }; });
+        }
+      });
+      if (Object.keys(oldDay).length) out.history[s.date] = oldDay;
+    }
     out.date = todayKey(); out.items = {}; out.weeklyAppliedDate = '';   // 다른 날 기록은 비우고 새 날로
   }
   return out;
@@ -2367,8 +2496,20 @@ function ensureDay(){
       s.hf[id + ':morning'] = '';
       s.hf[id + ':evening'] = '';
     });
-    /* 공부 체크리스트는 날마다 새로 (과목·문제집 목록은 그대로 둔다) */
+    /* 공부 체크리스트는 날마다 새로 (과목·문제집 목록은 그대로 둔다)
+       — 비우기 전에 어제 목록을 history[prev] 로 남긴다 */
     s.study = s.study || defaultStudy();
+    if (prev && s.study.items){
+      s.study.history = (s.study.history && typeof s.study.history === 'object') ? s.study.history : {};
+      var histDay = s.study.history[prev] || {};
+      KIDS.forEach(function(id){
+        var its = s.study.items[id];
+        if (Array.isArray(its) && its.length){
+          histDay[id] = its.map(function(x){ return { id: x.id, subjectName: x.subjectName || '', text: x.text, done: !!x.done }; });
+        }
+      });
+      if (Object.keys(histDay).length) s.study.history[prev] = histDay;
+    }
     s.study.date = k;
     s.study.items = {};
     s.study.weeklyAppliedDate = '';
@@ -3323,8 +3464,31 @@ function studyEnsure(s){
   if (!st.items || typeof st.items !== 'object') st.items = {};
   if (!st.presets || typeof st.presets !== 'object') st.presets = {};
   if (!st.weekly || typeof st.weekly !== 'object') st.weekly = {};
+  if (!st.history || typeof st.history !== 'object') st.history = {};
   st.date = todayKey();
   return st;
+}
+/* 오늘 목록을 history[오늘][아이] 에 그대로 맞춰 둔다 — 체크·추가·수정·삭제·요일 반복이
+   일어날 때마다(모든 mutate 끝) 자동으로 불리므로 따로 호출할 필요가 없다 */
+function studyHistorySync(s){
+  if (!s || !s.study || typeof s.study !== 'object') return;
+  var st = s.study;
+  if (!st.items || typeof st.items !== 'object') return;
+  if (!st.history || typeof st.history !== 'object') st.history = {};
+  var k = todayKey();
+  var day = (st.history[k] && typeof st.history[k] === 'object') ? st.history[k] : null;
+  KIDS.forEach(function(id){
+    var its = Array.isArray(st.items[id]) ? st.items[id] : [];
+    var snap = its.filter(function(x){ return x && typeof x.text === 'string' && x.text.trim(); })
+      .map(function(x){ return { id: x.id, subjectName: x.subjectName || '', text: x.text, done: !!x.done }; });
+    if (snap.length){
+      if (!day) day = st.history[k] = {};
+      day[id] = snap;
+    } else if (day && day[id]){
+      delete day[id];
+    }
+  });
+  if (st.history[k] && !Object.keys(st.history[k]).length) delete st.history[k];
 }
 /* ============================================================
    17-2-b. 요일별 자동 반복 — state.study.weekly[아이][요일]
@@ -3525,6 +3689,8 @@ function renderStudy(){
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
     +   '<span class="st-badge">' + done + ' / ' + items.length + ' 완료</span>'
+    +   '<button class="st-mbtn" type="button" data-act="st-monthly" aria-label="월간 공부 기록 보기">'
+    +     '<span class="lkl">📅 월간 기록</span><span class="lks">📅 월간</span></button>'
     +   studyLockHtml()
     + '</div>'
     + '<div class="st-prog"><i style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></i></div>'
@@ -3536,7 +3702,157 @@ function renderStudy(){
     +   '<div class="rt-add"><input id="studyInput" placeholder="문제집·공부 추가" aria-label="문제집·공부 추가">'
     +     '<button class="addb" type="button" data-act="study-add" aria-label="추가">+</button></div>')
     + remainBoxHtml(items.length - done, items.length, kid);
+  if (smOpen) renderStudyMonth();
 }
+
+/* ============================================================
+   12-3-b. 📅 월간 공부 기록 — state.study.history[YYYY-MM-DD][아이]
+   열람은 누구나(PIN 없이), 내용은 아이별 날짜별 공부 스냅샷
+   ============================================================ */
+var smOpen = false;      // 기기별: 모달 열림
+var smKid = '';          // 모달에서 보고 있는 아이
+var smMon = '';          // 'YYYY-MM'
+var smSel = '';          // 'YYYY-MM-DD'
+function smKidId(){
+  if (smKid && KIDS.indexOf(smKid) > -1) return smKid;
+  smKid = studyKidId();
+  return smKid;
+}
+function smHistory(){ return (state && state.study && state.study.history) || {}; }
+/* 그날 그 아이의 공부 목록 — DB에 history가 없을 때는 오늘 실시간 목록을 그대로 본다 */
+function smDayItems(kid, key){
+  var day = smHistory()[key];
+  var arr = day && day[kid];
+  if (Array.isArray(arr) && arr.length) return arr;
+  if (key === todayKey()) return studyItems(kid);
+  return [];
+}
+function smOpenModal(){
+  if (!state) return;
+  smOpen = true;
+  smKid = studyKidId();
+  smMon = monthKeyOf();
+  smSel = todayKey();
+  renderStudyMonth();
+  var box = $('#sm'); if (box) box.hidden = false;
+  var card = $('#smCard'); if (card) card.scrollTop = 0;
+}
+function smCloseModal(){
+  smOpen = false;
+  var box = $('#sm'); if (box) box.hidden = true;
+}
+function smShiftMonth(delta){
+  var ym = smMon || monthKeyOf();
+  var y = Number(ym.slice(0,4)), mo = Number(ym.slice(5,7)) - 1 + delta;
+  y += Math.floor(mo / 12); mo = ((mo % 12) + 12) % 12;
+  smMon = y + '-' + pad2(mo + 1);
+  var today = todayKey();
+  smSel = (today.slice(0,7) === smMon) ? today : smMon + '-01';
+  renderStudyMonth();
+}
+function smPickDay(key){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(key || ''))) return;
+  smSel = key;
+  renderStudyMonth();
+}
+function renderStudyMonth(){
+  if (!smOpen || !state) return;
+  var body = $('#smBody'); if (!body) return;
+  var card = $('#smCard'), keepTop = card ? card.scrollTop : 0;
+  var kid = smKidId();
+  var ym = smMon || monthKeyOf(), y = Number(ym.slice(0,4)), mo = Number(ym.slice(5,7)) - 1;
+  var firstDow = new Date(y, mo, 1).getDay(), lastDay = new Date(y, mo + 1, 0).getDate();
+  var today = todayKey();
+
+  /* 자녀 전환 칩 — 윤 (초5) / 봄 (초2) */
+  var kidChips = KIDS.map(function(id){
+    var nm = (FAMILY[id] || {}).name || id;
+    var g = gradeTag(id);
+    return '<button class="sm-kid' + (id === kid ? ' on' : '') + '" type="button" data-act="sm-kid"'
+      + ' data-k="' + esc(id) + '" aria-pressed="' + (id === kid ? 'true' : 'false') + '">'
+      + esc(nm + (g ? ' (' + g + ')' : '')) + '</button>';
+  }).join('');
+
+  /* 달력 — 일 월 화 수 목 금 토, 셀에 그날 완료한 공부 개수 */
+  var cells = '';
+  for (var b = 0; b < firstDow; b++) cells += '<span class="sm-d blank"></span>';
+  for (var d = 1; d <= lastDay; d++){
+    var key = y + '-' + pad2(mo + 1) + '-' + pad2(d);
+    var w = new Date(y, mo, d).getDay();
+    var list = smDayItems(kid, key);
+    var done = list.filter(function(x){ return x.done; }).length;
+    var cls = 'sm-d' + (w === 0 ? ' sun' : w === 6 ? ' sat' : '')
+      + (key === today ? ' today' : '') + (key === smSel ? ' sel' : '');
+    var mark = done > 0 ? '<i class="sm-cnt">✓' + done + '</i>'
+                        : (list.length ? '<i class="sm-dot"></i>' : '');
+    cells += '<button class="' + cls + '" type="button" data-act="sm-day" data-d="' + key + '"'
+      + ' aria-label="' + (mo + 1) + '월 ' + d + '일 · 공부 ' + list.length + '개 중 ' + done + '개 완료"'
+      + ' aria-pressed="' + (key === smSel ? 'true' : 'false') + '">' + d + mark + '</button>';
+  }
+
+  /* 선택한 날짜 상세 */
+  var selKey = (/^\d{4}-\d{2}-\d{2}$/.test(String(smSel || ''))) ? smSel : today;
+  var selList = smDayItems(kid, selKey);
+  var selDone = selList.filter(function(x){ return x.done; }).length;
+  var selDate = parseKey(selKey);
+  var detailRows = selList.map(function(x){
+    return '<div class="sm-li' + (x.done ? ' done' : '') + '">'
+      + '<span class="mk">' + (x.done ? '✓' : '') + '</span>'
+      + (x.subjectName ? '<span class="st-sub">' + esc(x.subjectName) + '</span>' : '')
+      + '<span class="sm-t">' + esc(x.text) + '</span>'
+      + '</div>';
+  }).join('');
+  var detail = '<div class="sm-detail">'
+    + '<div class="sm-dh"><b>' + (selDate.getMonth() + 1) + '월 ' + selDate.getDate() + '일'
+    +   (selKey === today ? ' · 오늘' : '') + '</b>'
+    +   '<span>' + (selList.length ? selDone + ' / ' + selList.length + ' 완료' : '0개') + '</span></div>'
+    + (detailRows ? '<div class="sm-list">' + detailRows + '</div>'
+                  : '<div class="sm-empty">기록된 공부가 없어요</div>')
+    + '</div>';
+
+  /* 주차별 — 일요일 시작 주(그 달 1일이 속한 주 = 1주차) */
+  var maxWeek = Math.floor((lastDay - 1 + firstDow) / 7) + 1;
+  var weeks = [], monthDone = 0, studyDays = 0;
+  for (var i = 0; i < maxWeek; i++) weeks.push({ n: 0, days: 0, has: false });
+  for (var d2 = 1; d2 <= lastDay; d2++){
+    var k2 = y + '-' + pad2(mo + 1) + '-' + pad2(d2);
+    var l2 = smDayItems(kid, k2);
+    var wi = Math.min(maxWeek - 1, Math.floor((d2 - 1 + firstDow) / 7));
+    var dn = l2.filter(function(x){ return x.done; }).length;
+    if (l2.length) weeks[wi].has = true;
+    weeks[wi].n += dn;
+    if (dn > 0) weeks[wi].days += 1;
+    monthDone += dn;
+    if (dn > 0) studyDays += 1;
+  }
+  var weekRows = weeks.map(function(wk, i){
+    return '<div class="sm-w' + (wk.has ? ' has' : '') + '"><i>' + (i + 1) + '주차</i>'
+      + (wk.has ? '<b>완료 ' + wk.n + '개</b><em>(' + wk.days + '일)</em>' : '<em>기록 없음</em>') + '</div>';
+  }).join('');
+
+  var monLabel = (ym === monthKeyOf()) ? '이번 달' : (mo + 1) + '월';
+  body.innerHTML =
+      '<div class="sm-h"><div><b>📅 월간 공부 기록</b>'
+    +   '<p>날짜를 누르면 그날의 공부를 볼 수 있어요.</p></div>'
+    +   '<button class="sm-x" type="button" data-act="sm-close" aria-label="닫기">✕</button></div>'
+    + '<div class="sm-kids" role="group" aria-label="자녀 선택">' + kidChips + '</div>'
+    + '<div class="sm-nav">'
+    +   '<button type="button" data-act="sm-prev" aria-label="이전 달">‹</button>'
+    +   '<b>' + y + '년 ' + (mo + 1) + '월</b>'
+    +   '<button type="button" data-act="sm-next" aria-label="다음 달">›</button>'
+    + '</div>'
+    + '<div class="sm-dow"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>'
+    + '<div class="sm-grid">' + cells + '</div>'
+    + detail
+    + '<div class="sm-weeks"><div class="sm-wh"><b>주차별 공부 기록</b><span>' + (mo + 1) + '월</span></div>'
+    +   weekRows + '</div>'
+    + '<div class="sm-sum">'
+    +   '<div>' + monLabel + ' 완료한 공부<b>' + monthDone + '<em>개</em></b></div>'
+    +   '<div>공부한 날<b>' + studyDays + '<em>일</em></b></div>'
+    + '</div>';
+  if (card) card.scrollTop = keepTop;
+}
+
 /* ============================================================
    12-4. 이번 달의 독서리스트 — state.reading[YYYY-MM][아이] = [{id,title,author,date}]
    ============================================================ */
@@ -4402,6 +4718,18 @@ document.addEventListener('click', function(ev){
     return;
   }
 
+  /* 📅 월간 공부 기록 — 누구나 열람 (PIN 없음) */
+  if (act === 'st-monthly'){ smOpenModal(); return; }
+  if (act === 'sm-close'){ smCloseModal(); return; }
+  if (act === 'sm-kid'){
+    var smk = el.dataset.k;
+    if (KIDS.indexOf(smk) > -1){ smKid = smk; renderStudyMonth(); }
+    return;
+  }
+  if (act === 'sm-prev'){ smShiftMonth(-1); return; }
+  if (act === 'sm-next'){ smShiftMonth(1); return; }
+  if (act === 'sm-day'){ smPickDay(el.dataset.d); return; }
+
   /* 요일별 자동 반복 — 열어 보는 건 누구나, 추가·수정·삭제는 엄빠 전용(PIN) */
   if (act === 'st-view'){
     var vw = el.dataset.v === 'week' ? 'week' : 'today';
@@ -4651,6 +4979,13 @@ document.addEventListener('keydown', function(ev){
   }
   else if (t.getAttribute('data-addsched') !== null){ var b7 = $('[data-act="sched-add"]'); if (b7) b7.click(); }
   else if (t.getAttribute('data-pen')){ var b8 = $('[data-act="save-pen"][data-m="' + t.getAttribute('data-pen') + '"]'); if (b8) b8.click(); }
+});
+
+/* ---------- 📅 월간 공부 기록: Esc 로 닫기 ---------- */
+document.addEventListener('keydown', function(ev){
+  if (ev.key !== 'Escape' || !smOpen) return;
+  ev.preventDefault();
+  smCloseModal();
 });
 
 /* ---------- 과목·문제집 이름 수정: Enter 저장 · Esc 취소 ---------- */
