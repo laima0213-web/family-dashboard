@@ -2313,7 +2313,8 @@ function mealCacheGet(sch, ym){
     var rows = (body && body[1] && body[1].row) || [];
     if (rows && !Array.isArray(rows)) rows = [rows];
     rows.forEach(function(r){
-      var k = r.MLSV_YMD; if (!k) return;
+      var k = String(r.MLSV_YMD || '').replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
+      if (!k) return;
       var prev = c.days[k];
       if (!prev || (r.MMEAL_SC_CODE === '2' && prev.MMEAL_SC_CODE !== '2')) c.days[k] = r;
     });
@@ -2367,7 +2368,7 @@ function renderMeal(){
   if (mealSearchOpen){ el.innerHTML = head + mealSearchHtml(); return; }
   var nav = '<div class="ml-nav">'
     + '<button class="ml-arw" type="button" data-act="meal-prev" aria-label="하루 전">◀</button>'
-    + '<span class="ml-date">' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + WD_KO[d.getDay()] + ')' + (isToday ? '<i>· 오늘</i>' : '') + '</span>'
+    + '<span class="ml-date">' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + WD_KO[d.getDay()] + ')' + (isToday ? ' <i>· 오늘</i>' : '') + '</span>'
     + '<button class="ml-arw" type="button" data-act="meal-next" aria-label="하루 뒤">▶</button>'
     + (isToday ? '' : '<button class="ml-now" type="button" data-act="meal-today">오늘</button>')
     + '</div>';
