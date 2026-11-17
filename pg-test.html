@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>놀이터 동작 테스트 (임시)</title>
+<style>
+  html,body{margin:0;padding:0;background:#DED8CE;font:12px/1.4 -apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif}
+  body{display:flex;gap:14px;padding:12px;align-items:flex-start}
+  iframe{width:390px;height:844px;border:0;border-radius:18px;background:#FFFDF9;box-shadow:0 6px 20px rgba(0,0,0,.18);flex:0 0 390px}
+  #wrap{flex:1;min-width:0}
+  #log{white-space:pre-wrap;background:#1f2430;color:#d7e3d1;border-radius:12px;padding:10px;font-size:11.5px;max-height:820px;overflow:auto}
+  #state{margin-top:8px;font-size:11px;color:#5b5348;white-space:pre-wrap}
+</style></head>
+<body>
+<iframe id="f" src="./index.html?pgtest=1"></iframe>
+<div id="wrap"><div id="log">시작…</div><div id="state"></div></div>
+<script>
+(function(){
+  var out = [], f = document.getElementById('f'), box = document.getElementById('log');
+  function L(s){ out.push(s); box.textContent = out.join('\n'); }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  function until(fn, ms){
+    return new Promise(function(res, rej){
+      var t0 = Date.now();
+      (function tick(){
+        var v = null;
+        try { v = fn(); } catch(e){ v = null; }
+        if (v) return res(v);
+        if (Date.now() - t0 > (ms || 15000)) return rej(new Error('timeout'));
+        setTimeout(tick, 120);
+      })();
+    });
+  }
+  function ev(w, type, x, y, id){
+    var cv = w.document.querySelector('#pgStage canvas');
+    var e = new w.PointerEvent(type, { bubbles:true, cancelable:true, pointerId:(id||1), pointerType:'touch', isPrimary:true, clientX:x, clientY:y, buttons: type === 'pointerup' ? 0 : 1 });
+    cv.dispatchEvent(e);
+  }
+  function screenOf(w, v){
+    var S = w.__pg.state, cam = S.camera, cv = S.renderer.domElement;
+    var r = cv.getBoundingClientRect();
+    var p = v.clone().project(cam);
+    return { x: r.left + (p.x * 0.5 + 0.5) * r.width, y: r.top + (-p.y * 0.5 + 0.5) * r.height };
+  }
+  function dragTo(w, from, path, id){
+    ev(w, 'pointerdown', from.x, from.y, id);
+    for (var i = 1; i <= 12; i++){
+      var p = path[i - 1];
+      ev(w, 'pointermove', p.x, p.y, id);
+    }
+    var last = path[path.length - 1];
+    ev(w, 'pointerup', last.x, last.y, id);
+  }
+
+  f.addEventListener('load', function(){ run().catch(function(e){ L('FAIL ' + (e && e.message)); }); });
+
+  async function run(){
+    var w = f.contentWindow, d = w.document;
+    L('iframe load');
+
+    /* 1) 쓰기 차단 (테스트) */
+    var t0 = Date.now();
+    while (Date.now() - t0 < 20000){
+      try {
+        if (w.__pg) break;
+      } catch(e){}
+      await sleep(80);
+    }
+    try {
+      w.eval("window.__writes=0; DB.patch=function(){ window.__writes++; return Promise.resolve(true); };");
+      L('DB.patch mocked');
+    } catch(e){ L('mock fail ' + e); }
+
+    await until(function(){ return d.getElementById('app') && !d.getElementById('app').hidden; }, 20000);
+    L('앱 잠금 해제됨');
+
+    /* 2) 메모리에 보유 캐릭터 넣기 (DB 저장 없음) */
+    w.eval("state.shop=state.shop||{}; state.shop.unlocked=state.shop.unlocked||{}; state.shop.unlocked.k1=['preset:fox_sailor','preset:bun_ribbon','preset:panda_hood','preset:princess_tiara'];");
+    L('보유 캐릭터 4종 주입 (메모리)');
+
+    /* 3) 프로필 카드의 두 버튼 확인 */
+    var shopBtn = d.querySelector('[data-act="avatar-open"][data-m="k1"]');
+    var playBtn = d.querySelector('[data-act="playground-open"][data-m="k1"]');
+    L('프로필 버튼: 상점=' + (shopBtn ? shopBtn.textContent.trim() : '없음') + ' / 놀이터=' + (playBtn ? playBtn.textContent.trim() : '없음'));
+
+    /* 3-b) 📖 오늘의 공부 체크리스트 헤더 — 한 줄 확인 (390 / 360) */
+    function studyLine(tag){
+      var h2 = d.querySelector('#study .h2');
+      if (!h2) return L(tag + ' · #study .h2 없음');
+      var tn = null;
+      Array.prototype.forEach.call(h2.childNodes, function(n){ if (!tn && n.nodeType === 3 && n.textContent.trim()) tn = n; });
+      var rng = d.createRange(); rng.selectNodeContents(tn);
+      var rects = rng.getClientRects();
+      var ttop = rects.length ? Math.round(rects[0].top) : 0;
+      var kids = Array.prototype.slice.call(h2.children).filter(function(el){ return el.offsetWidth > 0; });
+      var same = kids.every(function(el){ return Math.abs(Math.round(el.getBoundingClientRect().top) - ttop) <= 4; });
+      L(tag + ' · h2 높이 ' + Math.round(h2.getBoundingClientRect().height) + 'px · 제목 줄수 ' + rects.length
+        + ' · 배지 같은 줄=' + same + ' · 내용폭 ' + h2.scrollWidth + ' / 카드폭 ' + h2.clientWidth
+        + ' · 제목="' + (tn ? tn.textContent.trim() : '') + '"');
+    }
+    studyLine('390px 공부헤더');
+    var pf = d.querySelector('#kidA .prof-btns');
+    L('390px 프로필 버튼 ' + Math.round(pf.getBoundingClientRect().width) + 'px · 넘침=' + (pf.scrollWidth > pf.clientWidth + 1) + ' · ' + Array.prototype.map.call(pf.children, function(b){ return b.textContent.trim(); }).join(' | '));
+    f.style.width = '360px';
+    await sleep(400);
+    studyLine('360px 공부헤더');
+    var pf2 = d.querySelector('#kidA .prof-btns');
+    L('360px 프로필 버튼 ' + Math.round(pf2.getBoundingClientRect().width) + 'px · 넘침=' + (pf2.scrollWidth > pf2.clientWidth + 1));
+    f.style.width = '390px';
+    await sleep(400);
+
+    playBtn.click();
+    await until(function(){ return w.__pg && w.__pg.state.ready; }, 25000);
+    await sleep(700);
+    var S = w.__pg.state, pgEl = d.getElementById('pg');
+    var r = pgEl.getBoundingClientRect();
+    var ex = d.getElementById('pgExit').getBoundingClientRect();
+    var cv = S.renderer.domElement;
+    L('놀이터 열림 · 3D 준비 완료');
+    L('오버레이 ' + Math.round(r.width) + 'x' + Math.round(r.height) + ' (화면 ' + w.innerWidth + 'x' + w.innerHeight + ') · fixed=' + (w.getComputedStyle(pgEl).position));
+    L('나가기 버튼 x=' + Math.round(ex.left) + ' y=' + Math.round(ex.top) + ' w=' + Math.round(ex.width) + ' (오른쪽 위=' + (ex.left > w.innerWidth * 0.7 && ex.top < 100) + ')');
+    L('놀이기구 ' + Object.keys(S.rides).length + '종: ' + Object.keys(S.rides).join(',') + ' / 이름표 ' + S.labels.length + '개');
+    L('WebGL 캔버스 ' + cv.width + 'x' + cv.height + ' · 오류 ' + (w.__errs ? w.__errs.length : 'n/a'));
+
+    /* 4) 꾸미기 — 캐릭터 3명 넣기 */
+    var cards = d.querySelectorAll('[data-pgadd]');
+    L('꾸미기 보유 카드 ' + cards.length + '개');
+    for (var i = 0; i < 3 && i < cards.length; i++){ cards[i].click(); await sleep(150); }
+    await sleep(300);
+    L('놀이터 캐릭터 ' + S.charOrder.length + '명 · state=' + JSON.stringify(w.state.playground.k1.map(function(x){ return [x.preset, x.x, x.z, x.ride]; })));
+
+    /* 5) 360도 회전 (배경 드래그) */
+    var az0 = S.azim, c0 = { x: 195, y: 300 };
+    ev(w, 'pointerdown', c0.x, c0.y, 7);
+    for (var k = 1; k <= 12; k++) ev(w, 'pointermove', c0.x + k * 26, c0.y, 7);
+    ev(w, 'pointerup', c0.x + 12 * 26, c0.y, 7);
+    await sleep(120);
+    var az1 = S.azim;
+    ev(w, 'pointerdown', c0.x, c0.y, 8);
+    for (var k2 = 1; k2 <= 6; k2++) ev(w, 'pointermove', c0.x, c0.y - k2 * 18, 8);
+    ev(w, 'pointerup', c0.x, c0.y - 6 * 18, 8);
+    await sleep(120);
+    L('회전: azimuth ' + az0.toFixed(3) + ' → ' + az1.toFixed(3) + ' (Δ ' + (az1 - az0).toFixed(3) + ' rad, ' + ((az1 - az0) * 180 / Math.PI).toFixed(0) + '도) · polar ' + S.polar.toFixed(3));
+    await sleep(400);
+
+    /* 6) 캐릭터를 방방이로 드래그 */
+    var id0 = S.charOrder[0], cS = S.chars[id0];
+    var from = screenOf(w, cS.sp.position.clone().add(new w.THREE.Vector3(0, 0.7, 0)));
+    var target = S.rides.tramp.g.position.clone();
+    var to = screenOf(w, target.clone().add(new w.THREE.Vector3(0, 0.3, 0)));
+    var path = [];
+    for (var s = 1; s <= 12; s++) path.push({ x: from.x + (to.x - from.x) * s / 12, y: from.y + (to.y - from.y) * s / 12 });
+    L('드래그 ' + Math.round(from.x) + ',' + Math.round(from.y) + ' → ' + Math.round(to.x) + ',' + Math.round(to.y));
+    dragTo(w, from, path, 11);
+    await sleep(500);
+    var rec0 = w.state.playground.k1.filter(function(x){ return x.id === id0; })[0];
+    L('드롭 결과: ride=' + (rec0 && rec0.ride) + ' · 화면높이 y=' + S.chars[id0].sp.position.y.toFixed(2) + ' · 저장된 좌표 ' + (rec0 ? rec0.x + ',' + rec0.z : '-'));
+    await sleep(600);
+
+    /* 7) 잔디 위로 다시 드래그 (놀이기구에서 내려오기) */
+    var from2 = screenOf(w, S.chars[id0].sp.position.clone().add(new w.THREE.Vector3(0, 0.6, 0)));
+    var grass = screenOf(w, new w.THREE.Vector3(1.5, 0.1, 1.2));
+    var path2 = [];
+    for (var s2 = 1; s2 <= 12; s2++) path2.push({ x: from2.x + (grass.x - from2.x) * s2 / 12, y: from2.y + (grass.y - from2.y) * s2 / 12 });
+    dragTo(w, from2, path2, 12);
+    await sleep(500);
+    var rec1 = w.state.playground.k1.filter(function(x){ return x.id === id0; })[0];
+    L('풀밭 드롭: ride=' + (rec1 && rec1.ride ? rec1.ride : '(없음)') + ' · 좌표 ' + (rec1 ? rec1.x + ',' + rec1.z : '-'));
+
+    /* 8) 시소에 두 명 올려보기 */
+    var id1 = S.charOrder[1];
+    var f2 = screenOf(w, S.chars[id1].sp.position.clone().add(new w.THREE.Vector3(0, 0.7, 0)));
+    var seesaw = S.rides.seesaw.g.position.clone();
+    var t2 = screenOf(w, seesaw.clone().add(new w.THREE.Vector3(0, 0.3, 0)));
+    var p2 = [];
+    for (var s3 = 1; s3 <= 12; s3++) p2.push({ x: f2.x + (t2.x - f2.x) * s3 / 12, y: f2.y + (t2.y - f2.y) * s3 / 12 });
+    dragTo(w, f2, p2, 13);
+    await sleep(400);
+    var rec2 = w.state.playground.k1.filter(function(x){ return x.id === id1; })[0];
+    L('시소 드롭: ride=' + (rec2 && rec2.ride) + ' · 높이 ' + S.chars[id1].sp.position.y.toFixed(2));
+
+    /* 9) 꾸미기에서 빼기 */
+    var delBtn = d.querySelector('[data-pgdel]');
+    var before = S.charOrder.length;
+    delBtn.click();
+    await sleep(300);
+    L('빼기: ' + before + '명 → ' + S.charOrder.length + '명 · state ' + w.state.playground.k1.length + '개');
+
+    /* 10) 쓰기 0건 + 최종 화면 */
+    L('DB.patch 호출 ' + (w.__writes || 0) + '회 · 오류 ' + JSON.stringify(w.__errs || []));
+    d.getElementById('pgDeco').hidden = true;
+    await sleep(900);
+    L('최종: 캐릭터 ' + S.charOrder.length + '명, 이름표 ' + (d.getElementById('pgLabels').hidden ? 'off' : 'on'));
+    document.getElementById('state').textContent = '테스트 끝 · ' + new Date().toISOString();
+  }
+})();
+</script>
+</body></html>
