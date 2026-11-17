@@ -1117,6 +1117,12 @@ button.st{padding:0}
 .av-buy{display:block;width:100%;margin-top:1px;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
   border-radius:999px;height:19px;font-size:9.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
 .av-buy:active{transform:scale(.96)}
+/* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 컴팩트 버튼 */
+.av-refund{display:block;width:100%;margin-top:0;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
+  border-radius:999px;height:16px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  white-space:nowrap;letter-spacing:-.3px}
+.av-refund:hover{background:#FDE9E4;border-color:#E3B0A5}
+.av-refund:active{transform:scale(.96);background:#FBDCD4}
 .av-grid{align-items:stretch}
 .av-bggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
 .av-bgdot{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
@@ -1204,6 +1210,7 @@ button.st{padding:0}
   .av-card-n{font-size:10.5px}
   .av-buy{height:17px;font-size:9px}
   .av-own{font-size:8.5px}
+  .av-refund{height:15px;font-size:8px}
 }
 /* 390px 모바일 — 문제집 입력 줄이 잘리지 않게 두 줄 배치 */
 @media (max-width:430px){
@@ -3232,14 +3239,77 @@ function applyPointBonus(kid, delta){
 }
 function avShopCard(kind, key, label, inner, kid, av){
   var on = (av[kind] === key), has = avUnlocked(kid, kind, key);
+  var paid = avPaid(kid, kind, key);      /* 실제로 1P 주고 산 아이템만 취소할 수 있다 */
   return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
     + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? ' (보유)' : ' · 💎 1P') + '">'
     + (has ? '' : '<span class="av-card-pr">💎 1P</span>')
     + inner
     + '<span class="av-card-n">' + esc(label) + '</span>'
-    + (has ? '<span class="av-own">보유 ✓</span>'
-           : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '">1P로 구매</button>')
+    + (has
+        ? '<span class="av-own">보유 ✓</span>'
+          + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="엄마·아빠 PIN으로 구매를 취소할 수 있어요">🔒 구매 취소</button>' : '')
+        : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '">1P로 구매</button>')
     + '</div>';
+}
+/* 상점에서 실제로 구매해 둔 아이템인지 (무료 기본값 'none' 등은 제외) */
+function avPaid(kid, kind, key){
+  return ((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1;
+}
+function avItemLabel(kind, key){
+  var list = (kind === 'preset') ? AV_PRESETS : (kind === 'bg') ? AV_BGS : AV_DECOS;
+  var hit = (list || []).filter(function(x){ return x.k === key; })[0];
+  if (!hit) return key;
+  return (kind === 'deco') ? (String(hit.n).replace(/^\S+\s*/, '') || hit.n) : hit.n;
+}
+/* ↩ 구매 취소(삭제) — 1P 환불 + 착용·놀이터 배치까지 함께 정리 (호출 전 부모 PIN 통과 필요) */
+function avRefund(kid, kind, key){
+  if (!state) return false;
+  if (!avPaid(kid, kind, key)){ toast('이미 보유하지 않은 아이템이에요'); return false; }
+  var uk = kind + ':' + key;
+  var pgCleaned = 0;
+  mutate(function(s){
+    s.shop = s.shop || {};
+    s.shop.unlocked = s.shop.unlocked || {};
+    s.shop.spent = s.shop.spent || {};
+    /* 1) 보유 목록에서 제거 */
+    var arr = (s.shop.unlocked[kid] || []).slice();
+    var at = arr.indexOf(uk);
+    if (at > -1) arr.splice(at, 1);
+    if (arr.length) s.shop.unlocked[kid] = arr; else delete s.shop.unlocked[kid];
+    /* 2) 💎 1P 환불 (지출 기록에서 차감) */
+    s.shop.spent[kid] = Math.max(0, (Number(s.shop.spent[kid]) || 0) - ITEM_PRICE);
+    /* 3) 착용 정리 — 같은 종류의 남은 아이템으로 갈아끼우고, 없으면 비운다 */
+    s.avatars = s.avatars || {};
+    var av = Object.assign({}, s.avatars[kid] || {});
+    if (av[kind] === key){
+      var alts = arr.filter(function(x){ return x.indexOf(kind + ':') === 0; })
+                    .map(function(x){ return x.slice(kind.length + 1); });
+      if (alts.length) av[kind] = alts[0]; else delete av[kind];
+    }
+    var leftPaid = arr.filter(function(x){ return x !== 'deco:none'; }).length;
+    /* 보유 0개(또는 남은 착용값이 없음) → 프로필 '옷 없음' 배지로 복귀 */
+    if (!leftPaid || !Object.keys(av).length) delete s.avatars[kid];
+    else s.avatars[kid] = av;
+    /* 4) 놀이터에 나와 있던 같은 캐릭터도 함께 정리 */
+    if (kind === 'preset' && s.playground && Array.isArray(s.playground[kid])){
+      var kept = s.playground[kid].filter(function(r){ return !(r && r.preset === key); });
+      pgCleaned = s.playground[kid].length - kept.length;
+      if (pgCleaned > 0) s.playground[kid] = kept;
+    }
+  });
+  /* 열려 있는 꾸미기 시트의 미리보기도 같은 종류만 맞춰 준다 */
+  if (avatarDraft && avatarDraft.kid === kid){
+    var rec = avRec(kid);
+    avatarDraft.av[kind] = rec[kind];
+  }
+  renderAvatarSheet(); renderKids();
+  /* 놀이터가 열려 있으면 즉시 반영 */
+  try {
+    var pg = window.__pg;
+    if (pg && pg.state && pg.state.on && pg.state.kid === kid && typeof pg.refresh === 'function') pg.refresh();
+  } catch(e){ console.warn('[dashboard] 놀이터 갱신:', e && e.message); }
+  toast('↩ 구매를 취소했어요 · 💎 +' + ITEM_PRICE + 'P 환불' + (pgCleaned ? ' · 놀이터 정리' : ''), 2600);
+  return true;
 }
 
 /* ============================================================
@@ -4647,6 +4717,19 @@ document.addEventListener('click', function(ev){
     toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
     return;
   }
+  if (act === 'av-refund'){
+    if (!avatarDraft) return;
+    var rKid = avatarDraft.kid, rKind = el.dataset.k, rKey = el.dataset.v;
+    if (!avPaid(rKid, rKind, rKey)){ toast('이미 보유하지 않은 아이템이에요'); return; }
+    var rMsg = '「' + avItemLabel(rKind, rKey) + '」 구매를 취소하고 1P를 돌려줄까요?'
+             + (rKind === 'preset' ? '\n(놀이터에 나와 있는 캐릭터도 함께 정리돼요)' : '');
+    /* 엄마·아빠 PIN을 통과해야만 — 3분 유지 중이라도 실수 방지를 위해 한 번 더 묻는다 */
+    requireParentPin(function(){
+      if (!window.confirm(rMsg)) return;
+      avRefund(rKid, rKind, rKey);
+    });
+    return;
+  }
   if (act === 'pt-bonus'){
     if (!avatarDraft) return;
     var dKid = avatarDraft.kid, delta = Number(el.dataset.d) || 0;
@@ -5806,6 +5889,11 @@ async function finishBoot(){
   ];
   var RIDES = ['slide','seesaw','jungle','ladder','bars','rope','horse','sand','zip','tramp','bench'];
   var ISLAND_R = 8.0, CHAR_R = 7.15;
+  /* ---------- 🤸 자율 행동(혼자 걷고 기구 타기) ----------
+     · 위치는 화면 메모리(c.wx·c.wz·c.curRide)에서만 움직인다 — DB 저장 없음! */
+  var AI_R = 6.9;                       /* 섬 반경 8.0 안쪽 — 물에 빠지지 않는 산책 반경 */
+  var POND = { x:-2.15, z:-0.85, r:1.95 };   /* 연못 중심(-2.15,-0.85) + 여유 — 이 안쪽은 우회 */
+  function pgAIrand(a, b){ return a + Math.random() * (b - a); }
 
   /* ---------- 색 ---------- */
   var C = {
@@ -6614,8 +6702,18 @@ async function finishBoot(){
     PG.scene.add(sp); PG.scene.add(sh);
     var c = {
       data: { id: rec.id, preset: rec.preset, x: Number(rec.x) || 0, z: Number(rec.z) || 0, ride: rec.ride || '' },
-      sp: sp, sh: sh, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false
+      sp: sp, sh: sh, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false,
+      /* 자율 행동 — aiMode: 'walk' | 'play' | 'idle' (메모리 전용) */
+      aiMode: 'idle', aiTimer: 0, wx: Number(rec.x) || 0, wz: Number(rec.z) || 0,
+      tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1
     };
+    if (rec.ride && PG.rides[rec.ride]){
+      /* 기구에 놓여 있던 캐릭터 — 열자마자 신나게 놀고 있음 */
+      c.aiMode = 'play'; c.curRide = rec.ride; c.aiTimer = pgAIrand(8, 14);
+    } else {
+      /* 잔디에 있던 캐릭터 — 0.5~2초 안에 곤바로 아장아장 기구를 찾아 출발 */
+      c.aiMode = 'idle'; c.aiTimer = pgAIrand(0.5, 2.0);
+    }
     PG.chars[rec.id] = c;
     PG.charOrder.push(rec.id);
   }
@@ -6683,6 +6781,108 @@ async function finishBoot(){
       s.playground[kid] = arr;
     });
     PG.lastSig = JSON.stringify(arr);
+  }
+
+  /* ---------- 🤸 자율 행동 — 혼자 걷고, 기구를 타고, 쉬고 ----------
+     DB 저장은 전혀 하지 않는다 (＋ 넣기 / ✕ 빼기 / 손가락 드롭에서만 pgSave) */
+  function pgAIClamp(x, z){
+    /* 연못 안쪽은 가장자리로 밀어내고, 섬 반경 안으로 가둔다 */
+    var dx = x - POND.x, dz = z - POND.z;
+    var pd = Math.sqrt(dx * dx + dz * dz);
+    if (pd < POND.r){
+      if (pd < 1e-4){ dx = 1; dz = 0; pd = 1; }
+      x = POND.x + dx / pd * POND.r;
+      z = POND.z + dz / pd * POND.r;
+    }
+    var r = Math.sqrt(x * x + z * z);
+    if (r > AI_R){ x = x / r * AI_R; z = z / r * AI_R; }
+    return [x, z];
+  }
+  function pgAIStartPlay(c, key, dur){
+    var R = PG.rides[key];
+    if (!R){ c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3.5); return; }
+    c.aiMode = 'play'; c.curRide = key; c.aiAim = '';
+    c.data.ride = key;
+    pgCountRides();                          /* 한 기구에 여러 명이면 자리를 나눠 앉는다 */
+    c.aiTimer = dur || pgAIrand(8, 14);
+  }
+  function pgAIPickTarget(c){
+    var keys = PG.rideList.filter(function(k){ return !!PG.rides[k]; });
+    /* 70% — 다른 기구로 걸어가서 타기 */
+    if (keys.length && Math.random() < 0.7){
+      var pool = keys.filter(function(k){ return k !== c.curRide; });
+      if (!pool.length) pool = keys;
+      var k = pool[Math.floor(Math.random() * pool.length)];
+      var R = PG.rides[k];
+      var gx = R.g.position.x, gz = R.g.position.z;
+      var ax = c.wx - gx, az = c.wz - gz, al = Math.sqrt(ax * ax + az * az);
+      if (al < 0.2){ var a0 = Math.random() * 6.283; ax = Math.cos(a0); az = Math.sin(a0); al = 1; }
+      var apR = (R.g.userData.radius || 2.0) * 0.55 + 0.5;
+      var p = pgAIClamp(gx + ax / al * apR, gz + az / al * apR);
+      c.tx = p[0]; c.tz = p[1]; c.aiAim = k;
+      return;
+    }
+    /* 30% — 잔디·돗자리·꽃밭 쪽으로 잠깐 산책 */
+    c.aiAim = '';
+    for (var i = 0; i < 12; i++){
+      var a = Math.random() * 6.283, rr = 1.0 + Math.random() * (AI_R - 1.2);
+      var t = pgAIClamp(Math.cos(a) * rr, Math.sin(a) * rr);
+      if (Math.abs(t[0] - c.wx) + Math.abs(t[1] - c.wz) > 1.3){ c.tx = t[0]; c.tz = t[1]; return; }
+    }
+    c.tx = c.wx; c.tz = c.wz;
+  }
+  function pgAIArrive(c){
+    if (c.aiAim){ var k = c.aiAim; c.aiAim = ''; pgAIStartPlay(c, k, pgAIrand(8, 14)); return; }
+    c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3.5);   /* 두리번두리번 잠깐 쉬기 */
+  }
+  function pgAIFinishPlay(c){
+    var R = c.curRide ? PG.rides[c.curRide] : null;
+    c.data.ride = ''; c.curRide = '';
+    if (R){
+      /* 기구 앞 잔디로 스르륵 내려와 다음 놀이를 찾는다 */
+      var gx = R.g.position.x, gz = R.g.position.z;
+      var a = Math.random() * 6.283, rr = (R.g.userData.radius || 2.0) * 0.8 + 0.4;
+      var p = pgAIClamp(gx + Math.cos(a) * rr, gz + Math.sin(a) * rr);
+      c.wx = p[0]; c.wz = p[1];
+    }
+    c.data.x = c.wx; c.data.z = c.wz;
+    c.aiMode = 'walk';
+    pgAIPickTarget(c);
+  }
+  function pgAI(dt){
+    if (!dt || !PG.charOrder.length) return;
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (!c || c.held) continue;             /* 손가락에 집혀 있으면 멈춤 */
+      var d = c.data;
+      c.aiTimer -= dt;
+      if (c.aiMode === 'play'){
+        if (c.aiTimer <= 0) pgAIFinishPlay(c);
+        continue;
+      }
+      if (c.aiMode !== 'walk'){
+        if (c.aiTimer <= 0){ c.aiMode = 'walk'; pgAIPickTarget(c); }
+        continue;
+      }
+      var dx = c.tx - c.wx, dz = c.tz - c.wz;
+      var dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist <= 0.3){ pgAIArrive(c); continue; }
+      var step = Math.min(dist, c.spd * dt);
+      var nx = c.wx + dx / dist * step, nz = c.wz + dz / dist * step;
+      var pos = pgAIClamp(nx, nz);
+      if (Math.abs(pos[0] - nx) + Math.abs(pos[1] - nz) > 0.0005){
+        /* 연못·섬 경계에 막혔으면 가장자리를 따라 옆으로 미끄러진다 */
+        var px = pos[0] - POND.x, pz = pos[1] - POND.z, pl = Math.sqrt(px * px + pz * pz) || 1;
+        var tgx = -pz / pl, tgz = px / pl;
+        var sg = (dx * tgx + dz * tgz) >= 0 ? 1 : -1;
+        var p2 = pgAIClamp(pos[0] + tgx * sg * step, pos[1] + tgz * sg * step);
+        c.wx = p2[0]; c.wz = p2[1];
+      } else { c.wx = pos[0]; c.wz = pos[1]; }
+      if (Math.abs(dx) > 0.02) c.face = dx < 0 ? -1 : 1;
+      d.ride = ''; c.curRide = '';
+      d.x = c.wx; d.z = c.wz;
+      if (Math.sqrt(Math.pow(c.tx - c.wx, 2) + Math.pow(c.tz - c.wz, 2)) <= 0.32) pgAIArrive(c);
+    }
   }
 
   /* ---------- 캐릭터 자세 · 놀이 애니메이션 ---------- */
@@ -6760,12 +6960,24 @@ async function finishBoot(){
         c.sh.scale.set(0.75, 0.75, 1);
         c.sh.material.opacity = 0.1;
       } else {
-        var breathe = Math.sin(t * 1.7 + c.ph) * 0.045;
-        c.sp.position.set(d.x, 0.04 + breathe + hop, d.z);
+        /* 혼자 걷기 · 두리번 쉬기 — 통통 발걸음이 눈에 띄게 */
+        var bounce = 0;
+        if (!c.held && c.aiMode === 'walk'){
+          var st = t * 10 + c.ph;
+          bounce = Math.abs(Math.sin(st)) * 0.16;
+          tilt = Math.sin(st) * 0.095;
+          sx *= (c.face < 0 ? -1 : 1);
+        } else if (!c.held && c.aiMode === 'idle'){
+          bounce = Math.abs(Math.sin(t * 3.2 + c.ph)) * 0.09;
+          tilt = Math.sin(t * 1.6 + c.ph) * 0.03;
+        } else {
+          bounce = Math.sin(t * 1.7 + c.ph) * 0.045;
+          tilt = Math.sin(t * 1.2 + c.ph) * 0.035;
+        }
+        c.sp.position.set(d.x, 0.04 + bounce + hop, d.z);
         c.sh.position.set(d.x, 0.03, d.z);
         c.sh.scale.set(1, 1, 1);
         c.sh.material.opacity = 0.17;
-        tilt = Math.sin(t * 1.2 + c.ph) * 0.035;
       }
       c.sp.scale.set(sx, sy, 1);
       c.sp.material.rotation = tilt;
@@ -6817,6 +7029,7 @@ async function finishBoot(){
     PG.time += dt;
     PG.dist += (PG.distGoal - PG.dist) * Math.min(1, dt * 6);
     pgCamera();
+    pgAI(dt);
     pgPose(PG.time);
     PG.dyn.forEach(function(fn){ try { fn(PG.time); } catch(e){} });
     /* 기구 움직임 */
@@ -6877,10 +7090,14 @@ async function finishBoot(){
     var hit = pgPick(e);
     var el = PG.renderer.domElement;
     if (hit){
-      /* 집어 들기 — 기구 위에 있었으면 그 자리에서 떼어 낸다 */
+      /* 집어 들기 — 기구 위에 있었으면 그 자리에서 떼어 낸다 (자율 이동도 잠시 정지) */
       hit.data.x = hit.sp.position.x;
       hit.data.z = hit.sp.position.z;
       hit.data.ride = '';
+      hit.curRide = '';
+      hit.aiAim = '';
+      hit.aiMode = 'idle'; hit.aiTimer = 999;
+      hit.wx = hit.data.x; hit.wz = hit.data.z;
       hit.held = true;
       hit.hopAt = -9;
       var g = pgGround(e, 0.6);
@@ -6947,6 +7164,10 @@ async function finishBoot(){
             c.data.z = Number(back.z) || 0;
             c.data.ride = back.ride || '';
           }
+          /* 원래 자리로 돌아간 뒤 다시 혼자 놀기 */
+          c.wx = c.data.x; c.wz = c.data.z; c.aiAim = ''; c.curRide = c.data.ride || '';
+          if (c.data.ride){ c.aiMode = 'play'; c.aiTimer = pgAIrand(6, 12); }
+          else { c.aiMode = 'idle'; c.aiTimer = pgAIrand(0.6, 1.4); }
         } else {
           pgDrop(c);
         }
@@ -6965,6 +7186,7 @@ async function finishBoot(){
       if (dist < rad && dist < bd){ bd = dist; best = k; }
     });
     c.data.ride = best;
+    c.curRide = best;
     pgCountRides();
     if (best && best !== 'slide' && best !== 'zip'){
       var R2 = PG.rides[best];
@@ -6974,6 +7196,15 @@ async function finishBoot(){
       c.data.x = PG.vec.x;
       c.data.z = PG.vec.z;
     }
+    /* 🤸 내려둔 자리에서 바로 혼자 놀기 시작한다 */
+    c.wx = c.data.x; c.wz = c.data.z; c.aiAim = '';
+    if (best){
+      /* 기구 위에 놓였으면 — 방금 그 기구에서 10~15초 신나게 */
+      c.aiMode = 'play'; c.aiTimer = pgAIrand(10, 15);
+    } else {
+      /* 잔디에 놓였으면 — 2~3초 두리번 쉬다가 다시 아장아장 */
+      c.aiMode = 'idle'; c.aiTimer = pgAIrand(2, 3);
+    }
     pgSave();
     pgRenderDeco();
   }
@@ -6982,7 +7213,7 @@ async function finishBoot(){
     if (ids.length < 2) return;
     if (PG.drag){ /* 끌던 캐릭터는 제자리에 내려놓는다 */ 
       var c = PG.chars[PG.drag.id];
-      if (c){ c.held = false; }
+      if (c){ c.held = false; c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3); }
       PG.drag = null;
     }
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
@@ -7144,7 +7375,7 @@ async function finishBoot(){
   });
 
   /* 검증·디버그용 (화면에는 영향 없음) */
-  window.__pg = { state: PG, open: pgOpen, close: pgClose, refresh: pgRefreshChars, save: pgSave, deco: pgDeco };
+  window.__pg = { state: PG, open: pgOpen, close: pgClose, refresh: pgRefreshChars, save: pgSave, deco: pgDeco, ai: pgAI };
 })();
 
 </script>
