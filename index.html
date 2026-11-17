@@ -5834,7 +5834,10 @@ async function finishBoot(){
   function pgCone(r,h,color,x,y,z,seg){ return pgMesh(new THREE.ConeGeometry(r,h,seg||10), color, x,y,z); }
   function pgTor(rad,tube,color,x,y,z,arc){ return pgMesh(new THREE.TorusGeometry(rad,tube,8,26,arc||Math.PI*2), color, x,y,z); }
   function pgAt(g, obj, x, y, z, rx, ry, rz){
-    obj.position.set(x || 0, y || 0, z || 0);
+    /* 넘기지 않은 좌표는 건드리지 않는다 (이미 잡아 둔 위치 유지) */
+    if (x !== undefined) obj.position.x = x;
+    if (y !== undefined) obj.position.y = y;
+    if (z !== undefined) obj.position.z = z;
     if (rx) obj.rotation.x = rx;
     if (ry) obj.rotation.y = ry;
     if (rz) obj.rotation.z = rz;
