@@ -8285,7 +8285,9 @@ async function finishBoot(){
       }
     });
     g.userData.pose = function(idx, t){
-      var a = t * 0.55 + idx * Math.PI / 3;
+      /* 회전(spin.rotation.y = +t*0.55)은 말을 -t*0.55 쪽으로 돌리므로 좌석도 같은 방향으로 돌려야
+         캐릭터가 자기 목마 안장 위에 계속 앉아 있다 (예전엔 반대로 돌아 말 사이로 미끄러졌음) */
+      var a = idx * Math.PI / 3 - t * 0.55;
       var b = Math.sin(t * 2.4 + (idx % 6) * 1.0) * CAR_BOB;
       /* 목마 안장 위에 딱 앉는 높이 — 커진 말의 안장 윗면(0.31 + CAR_BASE + 0.985*CAR_S)을 그대로 돌려준다 */
       return { x: Math.cos(a) * 1.5, y: 0.31 + CAR_BASE + 0.985 * CAR_S + b, z: Math.sin(a) * 1.5 };
