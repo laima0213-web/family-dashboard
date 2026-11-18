@@ -12,16 +12,17 @@ var f = document.getElementById('f');
 f.addEventListener('load', function(){
   var w = f.contentWindow, tries = 0, opened = false;
   var q = new URLSearchParams(location.search);
-  var t = Number(q.get('t') || 4.0), ride = q.get('ride') || 'carousel';
-  var az = Number(q.get('az') || 0.92), po = Number(q.get('po') || 1.12), di = Number(q.get('di') || 6.2), ty = Number(q.get('ty') || 1.25);
+  var t = Number(q.get('t') || 4.0);
+  var po = Number(q.get('po') || 1.25), di = Number(q.get('di') || 5.4), ty = Number(q.get('ty') || 1.15);
   var iv = setInterval(function(){
     tries++;
     var pg = w.__pg;
     if (pg && !opened){ opened = true; try { pg.open('k1'); } catch(e){} }
     if (pg && pg.ready() && pg.countRides()){
       clearInterval(iv);
-      pg.look(ride, Math.PI * az, po, di, ty);
       pg.halt();
+      pg.frame(t);
+      pg.lookChar(0, po, di, ty);
       pg.frame(t);
       w.__shotReady = true;
     }

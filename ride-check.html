@@ -8245,7 +8245,8 @@ async function finishBoot(){
       hg.scale.setScalar(CAR_S);
       hg.rotation.y = -a;
       var body = pgSph(0.21, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.78, 0, 10);
-      body.scale.set(0.9, 0.92, 1.5); hg.add(body);
+      /* 몸통은 폭을 조금 줄여 말다운 비율로 — 커져도 올라탄 캐릭터 다리가 몸통 앞으로 보인다 */
+      body.scale.set(0.72, 0.92, 1.5); hg.add(body);
       hg.add(pgCyl(0.09, 0.12, 0.28, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.98, 0.22, 8));
       hg.add(pgSph(0.13, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 1.1, 0.33, 9));
       hg.add(pgSph(0.08, '#FFF3F7', 0, 1.06, 0.44, 7));
@@ -8821,7 +8822,7 @@ async function finishBoot(){
   /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
   var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
   /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
-  var PG_MOUNT_OFF = { carousel:0.36, horse:0.24 };
+  var PG_MOUNT_OFF = { carousel:0.3, horse:0.24 };
   function pgSitOff(k){
     var L = pgLegOf(k);
     return (L.by - L.ly) / 400 * 1.75 * 0.9;
