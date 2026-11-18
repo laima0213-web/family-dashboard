@@ -8203,15 +8203,21 @@ async function finishBoot(){
     spin.position.set(0, 0.31, 0);
     g.add(spin);
     var horses = [];
+    /* 목마 1.35배 — 안장 윗면(0.985)이 예전과 같은 높이에 오도록 그룹을 아래로 내린다.
+       그래야 말만 커지고 올라탄 캐릭터 머리는 천막(y2.575)에 닿지 않는다. */
+    var CAR_S = 1.35, CAR_BOB = 0.15;
+    var CAR_BASE = 0.985 * (1 - CAR_S);
     for (var h = 0; h < 6; h++){
       var a = h * Math.PI / 3;
       var hx = Math.cos(a) * 1.5, hz = Math.sin(a) * 1.5;
-      spin.add(pgCyl(0.035, 0.035, 2.35, '#EAD7B2', hx, 1.2, hz, 6));
+      spin.add(pgCyl(0.042, 0.042, 2.35, '#EAD7B2', hx, 1.2, hz, 6));
       var hg = new THREE.Group();
-      hg.position.set(hx, 0, hz);
+      hg.position.set(hx, CAR_BASE, hz);
+      hg.scale.setScalar(CAR_S);
       hg.rotation.y = -a;
       var body = pgSph(0.21, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.78, 0, 10);
-      body.scale.set(0.9, 0.92, 1.5); hg.add(body);
+      /* 몸통은 폭을 조금 줄여 말다운 비율로 — 커져도 올라탄 캐릭터 다리가 몸통 앞으로 보인다 */
+      body.scale.set(0.72, 0.92, 1.5); hg.add(body);
       hg.add(pgCyl(0.09, 0.12, 0.28, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 0.98, 0.22, 8));
       hg.add(pgSph(0.13, h % 2 ? '#FFD9E4' : '#DCEFF7', 0, 1.1, 0.33, 9));
       hg.add(pgSph(0.08, '#FFF3F7', 0, 1.06, 0.44, 7));
@@ -8246,14 +8252,16 @@ async function finishBoot(){
     PG.dyn.push(function(t){
       spin.rotation.y = t * 0.55;
       for (var i = 0; i < horses.length; i++){
-        horses[i].position.y = Math.sin(t * 2.4 + i * 1.0) * 0.17;
+        horses[i].position.y = CAR_BASE + Math.sin(t * 2.4 + i * 1.0) * CAR_BOB;
       }
     });
     g.userData.pose = function(idx, t){
-      var a = t * 0.55 + idx * Math.PI / 3;
-      var b = Math.sin(t * 2.4 + (idx % 6) * 1.0) * 0.17;
-      /* 목마 안장 위에 딱 앉는 높이 — 안장 윗면(0.31 + 0.95 + 0.035)을 그대로 돌려준다 */
-      return { x: Math.cos(a) * 1.5, y: 0.31 + 0.985 + b, z: Math.sin(a) * 1.5 };
+      /* 회전(spin.rotation.y = +t*0.55)은 말을 -t*0.55 쪽으로 돌리므로 좌석도 같은 방향으로 돌려야
+         캐릭터가 자기 목마 안장 위에 계속 앉아 있다 (예전엔 반대로 돌아 말 사이로 미끄러졌음) */
+      var a = idx * Math.PI / 3 - t * 0.55;
+      var b = Math.sin(t * 2.4 + (idx % 6) * 1.0) * CAR_BOB;
+      /* 목마 안장 위에 딱 앉는 높이 — 커진 말의 안장 윗면(0.31 + CAR_BASE + 0.985*CAR_S)을 그대로 돌려준다 */
+      return { x: Math.cos(a) * 1.5, y: 0.31 + CAR_BASE + 0.985 * CAR_S + b, z: Math.sin(a) * 1.5 };
     };
     g.userData.labelY = 4.4;
     g.userData.radius = 2.5;
