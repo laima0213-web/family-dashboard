@@ -10140,6 +10140,16 @@ async function finishBoot(){
       return id + '>' + ride + '#' + (si || 0);
     },
     mountOff: function(v){ PG_MOUNT_OFF.carousel = v; return PG_MOUNT_OFF.carousel; },
+    /* 탑승 캐릭터 바로 앞에서 올려다보는 카메라 */
+    lookChar: function(i, polar, dist, ty){
+      var c = PG.chars[PG.charOrder[i || 0]]; if (!c) return null;
+      var cx = c.sp.position.x - PG.rides.carousel.g.position.x;
+      var cz = c.sp.position.z - PG.rides.carousel.g.position.z;
+      var az = Math.atan2(cx, cz);
+      PG.azim = az; PG.polar = polar; PG.dist = PG.distGoal = dist;
+      PG.target.set(c.sp.position.x, ty == null ? 1.2 : ty, c.sp.position.z);
+      return { az: Number(az.toFixed(3)), x: Number(c.sp.position.x.toFixed(2)), y: Number(c.sp.position.y.toFixed(2)), z: Number(c.sp.position.z.toFixed(2)) };
+    },
     look: function(key, azim, polar, dist, ty){
       var R = PG.rides[key]; if (!R) return null;
       PG.azim = azim; PG.polar = polar; PG.dist = PG.distGoal = dist;
