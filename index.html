@@ -9905,7 +9905,7 @@ async function finishBoot(){
         var rf = pgRideFramePick(d, c, t, ph);
         if (d.ride === 'drop'){
           var du = (t % 7.6) / 7.6;                 /* 자이로드롭 실제 상승/하강 위상 */
-          rf.arm = ((du > 0.655 && du < 0.86) || ly < 2.6) ? 'dropUp' : 'dropHold';
+          rf.arm = (du >= 0.66) ? 'dropUp' : 'dropHold';   /* 오를 땐 움츠림 · 떨어질 때 만세 */
         } else if (d.ride === 'tramp'){
           rf.arm = Math.abs(Math.sin(t * 3.1 + c.ph * 0.4)) > 0.55 ? 'jumpUp' : 'jumpDown';
         } else if (d.ride === 'viking' || d.ride === 'coaster'){
