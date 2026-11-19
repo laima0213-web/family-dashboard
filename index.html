@@ -2567,22 +2567,7 @@ function normalizeState(raw){
   out.foods = (r.foods && typeof r.foods === 'object') ? Object.assign({}, r.foods) : {};
   out.study = normalizeStudy(r.study);
   out.reading = normalizeReading(r.reading);
-  var avs = {};
-  KIDS.forEach(function(id){
-    var saved = (r.avatars && r.avatars[id]) || {};
-    avs[id] = {
-      preset: (saved && typeof saved.preset === 'string' && AV_PRESETS.some(function(p){ return p.k === saved.preset; })) ? saved.preset : avPresetOf(id),
-      bg: (saved && AV_BGS.some(function(b){ return b.k === saved.bg; })) ? saved.bg : 'cream',
-      deco: (saved && AV_DECOS.some(function(d){ return d.k === saved.deco; })) ? saved.deco : 'none'
-    };
-  });
-  out.avatars = avs;
-  /* 학교 급식 — 나이스 학교 등록 (없으면 석산초등학교) */
-  var ms = (r.mealSchool && typeof r.mealSchool === 'object') ? r.mealSchool : null;
-  out.mealSchool = (ms && typeof ms.atpt === 'string' && ms.atpt && typeof ms.code === 'string' && ms.code && typeof ms.name === 'string' && ms.name)
-    ? { atpt: ms.atpt, code: ms.code, name: ms.name, addr: typeof ms.addr === 'string' ? ms.addr : '' }
-    : { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' };
-  /* 꾸미기 상점 포인트 — 보너스·사용·해금 목록 */
+  /* 꾸미기 상점 포인트 — 보너스·사용·해금 목록 (착용 캐릭터 기본값 판정에 쓰이므로 avatars보다 먼저 정규화) */
   var shopRaw = (r.shop && typeof r.shop === 'object') ? r.shop : {};
   var shopNum = function(src){
     var o = {};
@@ -2602,6 +2587,17 @@ function normalizeState(raw){
     if (list.length) shopUnlocked[k] = list;
   });
   out.shop = { bonus: shopNum(shopRaw.bonus), spent: shopNum(shopRaw.spent), unlocked: shopUnlocked };
+  /* 착용 캐릭터 — 저장값이 없거나 미보유면 보유한 아이템을 우선 (배경 기본값은 무료 'none') */
+  var avs = {};
+  KIDS.forEach(function(id){
+    avs[id] = avResolve(id, (r.avatars && r.avatars[id]) || {}, out.shop);
+  });
+  out.avatars = avs;
+  /* 학교 급식 — 나이스 학교 등록 (없으면 석산초등학교) */
+  var ms = (r.mealSchool && typeof r.mealSchool === 'object') ? r.mealSchool : null;
+  out.mealSchool = (ms && typeof ms.atpt === 'string' && ms.atpt && typeof ms.code === 'string' && ms.code && typeof ms.name === 'string' && ms.name)
+    ? { atpt: ms.atpt, code: ms.code, name: ms.name, addr: typeof ms.addr === 'string' ? ms.addr : '' }
+    : { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' };
   /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 [{ id, preset, x, z, ride }] */
   var pgRaw2 = (r.playground && typeof r.playground === 'object') ? r.playground : {};
   var pgOut = {};
@@ -3168,7 +3164,7 @@ var POINTS_START_MONDAY = '2026-11-16';      /* 이번 주 월요일부터 집�
 var ITEM_PRICE = 1;                           /* 모든 아이템 1개 = 💎 1P */
 var AV_FREE = {
   preset: [],                                 /* 캐릭터 24종 전부 상점 아이템(💎 1P) */
-  bg: [],                                     /* 배경 12종 전부 상점 아이템(💎 1P) */
+  bg: ['none'],                               /* '기본' 배경만 무료 기본값(판매 품목 아님) — 배경 12종은 상점 아이템 */
   deco: ['none']                              /* '꾸미기 안 함'만 기본 선택값(판매 품목 아님) — 꾸미기 12종은 상점 아이템 */
 };
 function shopRaw(){ return (state && state.shop) || {}; }
@@ -3193,13 +3189,27 @@ function pointsRaw(kid){
 function pointsOf(kid){ var p = pointsRaw(kid); return p > 0 ? p : 0; }
 function avIsFree(kind, key){ return (AV_FREE[kind] || []).indexOf(key) > -1; }
 /* 보유 판정은 오직 shop.unlocked(실제 구매) + 무료 기본값만 — 예전에 착용해 둔 값은 보유로 치지 않는다 */
-function avUnlocked(kid, kind, key){
+/* src 를 넘기면 그 상점 값으로 판정한다 (불러오기 정규화처럼 state 가 아직 갱신 전일 때) */
+function avUnlocked(kid, kind, key, src){
   if (avIsFree(kind, key)) return true;
-  return ((shopRaw().unlocked || {})[kid] || []).indexOf(kind + ':' + key) > -1;
+  var list = (((src || shopRaw()).unlocked || {})[kid]) || [];
+  return list.indexOf(kind + ':' + key) > -1;
 }
-/* 실제로 구매해 둔 아이템 개수 (deco:none 은 '꾸미기 안 함'이라 품목이 아님) — 캐릭터·배경·꾸미기·집·건물 모두 포함 */
+/* 보유 목록에서 그 종류의 첫 아이템 (무료 기본값 'none' 등은 제외) — 구매한 옷이 있으면 기본값 대신 이걸 쓴다 */
+function avOwnedFirst(id, kind, src){
+  var list = (((src || shopRaw()).unlocked || {})[id]) || [];
+  var pre = kind + ':';
+  for (var i = 0; i < list.length; i++){
+    var it = list[i];
+    if (typeof it !== 'string' || it.indexOf(pre) !== 0) continue;
+    var v = it.slice(pre.length);
+    if (v && !avIsFree(kind, v)) return v;
+  }
+  return '';
+}
+/* 실제로 구매해 둔 아이템 개수 (deco:none·bg:none 은 '안 함/기본'이라 품목이 아님) — 캐릭터·배경·꾸미기·집·건물 모두 포함 */
 function avOwnedCount(kid){
-  return ((shopRaw().unlocked || {})[kid] || []).filter(function(k){ return k !== 'deco:none'; }).length;
+  return ((shopRaw().unlocked || {})[kid] || []).filter(function(k){ return k !== 'deco:none' && k !== 'bg:none'; }).length;
 }
 /* 지금 착용 중인 캐릭터를 실제로 가지고 있는지 (없으면 '보유 없음' 표시) */
 function avHasPreset(kid){ return avUnlocked(kid, 'preset', avRec(kid).preset); }
@@ -3390,7 +3400,7 @@ function avRefund(kid, kind, key){
                     .map(function(x){ return x.slice(kind.length + 1); });
       if (alts.length) av[kind] = alts[0]; else delete av[kind];
     }
-    var leftPaid = arr.filter(function(x){ return x !== 'deco:none'; }).length;
+    var leftPaid = arr.filter(function(x){ return x !== 'deco:none' && x !== 'bg:none'; }).length;
     /* 보유 0개(또는 남은 착용값이 없음) → 프로필 '옷 없음' 배지로 복귀 */
     if (!leftPaid || !Object.keys(av).length) delete s.avatars[kid];
     else s.avatars[kid] = av;
@@ -3453,6 +3463,7 @@ var AV_PRESETS = [
   { k:'picnic_cherry',  n:'체리 피크닉' }
 ];
 var AV_BGS = [
+  { k:'none',     n:'기본',   c:'#FAF6EC' },   /* 무료 기본 배경 — 판매 품목 아님 */
   { k:'cream',    n:'크림',   c:'#FAF6EC' },
   { k:'pink',     n:'핑크',   c:'#FDE7EE' },
   { k:'lavender', n:'라벤더', c:'#EFEAFB' },
@@ -3629,19 +3640,32 @@ function avBuildSvg(k){
   return S + '</svg>';
 }
 var AV_DEFAULT_PRESET = { k1:'fox_sailor', k2:'bun_ribbon' };   /* 옛 SVG 저장값 호환 기본값 */
-function avPresetOf(id){
-  var saved = (state && state.avatars && state.avatars[id]) || {};
-  if (saved && typeof saved.preset === 'string' && AV_PRESETS.some(function(p){ return p.k === saved.preset; })) return saved.preset;
-  return AV_DEFAULT_PRESET[id] || 'fox_sailor';
+/* 착용 캐릭터 — 저장값이 유효하고 실제로 보유한 것이면 그대로, 아니면 보유한 첫 캐릭터, 그것도 없으면 기본값 */
+function avPickPreset(id, saved, src){
+  saved = saved || {};
+  if (typeof saved.preset === 'string' && AV_PRESETS.some(function(p){ return p.k === saved.preset; })
+      && avUnlocked(id, 'preset', saved.preset, src)) return saved.preset;
+  return avOwnedFirst(id, 'preset', src) || AV_DEFAULT_PRESET[id] || 'fox_sailor';
 }
-function avRec(id){
-  var saved = (state && state.avatars && state.avatars[id]) || {};
+/* 배경·꾸미기 — 저장값이 유효하고 보유한 것이면 그대로, 아니면 보유한 첫 아이템, 그것도 없으면 'none' */
+function avPickSlot(id, saved, kind, list, src){
+  var v = saved ? saved[kind] : '';
+  if (typeof v === 'string' && list.some(function(x){ return x.k === v; }) && avUnlocked(id, kind, v, src)) return v;
+  return avOwnedFirst(id, kind, src) || 'none';
+}
+/* 저장값(saved)+상점값(src)으로 착용 한 벌을 확정 — avRec·normalizeState가 함께 쓴다 */
+function avResolve(id, saved, src){
+  saved = saved || (state && state.avatars && state.avatars[id]) || {};
   return {
-    preset: avPresetOf(id),
-    bg: (saved && AV_BGS.some(function(b){ return b.k === saved.bg; })) ? saved.bg : 'cream',
-    deco: (saved && AV_DECOS.some(function(d){ return d.k === saved.deco; })) ? saved.deco : 'none'
+    preset: avPickPreset(id, saved, src),
+    bg: avPickSlot(id, saved, 'bg', AV_BGS, src),
+    deco: avPickSlot(id, saved, 'deco', AV_DECOS, src)
   };
 }
+function avPresetOf(id){
+  return avPickPreset(id, (state && state.avatars && state.avatars[id]) || {}, null);
+}
+function avRec(id){ return avResolve(id, null, null); }
 function avBgColor(k){
   var b = AV_BGS.filter(function(x){ return x.k === k; })[0];
   return b ? b.c : '#FAF6EC';
@@ -4849,7 +4873,7 @@ function renderAvatarSheet(){
   var tabs = [ ['preset', '🧒 캐릭터'], ['bg', '🎨 배경 색'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'] ];
   var pane = '';
   if (avatarTab === 'bg'){
-    pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + AV_BGS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
+    pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + (AV_BGS.length - 1) + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
       + '<div class="av-bggrid">' + AV_BGS.map(function(bx){
           return avShopCard('bg', bx.k, bx.n,
             '<span class="av-card-img"><span class="av-bgdot" style="background:' + bx.c + '"></span></span>', kid, av);
