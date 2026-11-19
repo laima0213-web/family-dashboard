@@ -10790,6 +10790,32 @@ async function finishBoot(){
       return o;
     },
     mode: function(){ return { mode:PG.mode, panMode:PG.panMode }; },
+    /* 두 손가락(핀치) 흉내 — 포인터 좌표만 넣고 실제 함수 경로를 그대로 탄다 */
+    pinchStart: function(ax, ay, bx, by){
+      PG.ptrs = {}; PG.ptrs[91] = { x:ax, y:ay }; PG.ptrs[92] = { x:bx, y:by };
+      pgStartPinch();
+      return { mode: PG.mode, d: +PG.pinch.d.toFixed(1) };
+    },
+    pinchMove: function(ax, ay, bx, by){
+      PG.ptrs[91] = { x:ax, y:ay }; PG.ptrs[92] = { x:bx, y:by };
+      pgPinchMove();
+      return { dist: +PG.distGoal.toFixed(2), target:{ x:+PG.target.x.toFixed(2), z:+PG.target.z.toFixed(2) } };
+    },
+    pinchEnd: function(){ PG.ptrs = {}; PG.mode = ''; PG.pinch = null; return 1; },
+    /* 자율 목표 고르기를 여러 번 돌려 다리 건너기 비율 확인 */
+    pickStats: function(id, n){
+      var c = PG.chars[id]; if (!c) return null;
+      var bridge = 0, list = [];
+      for (var i = 0; i < (n || 200); i++){
+        c.wx = 6; c.wz = 6;                 /* 다리 밖 기준 위치 */
+        pgAIPickTarget(c);
+        var isB = c.aiBridge ? 1 : 0;
+        if (isB) bridge++;
+        if (i < 6) list.push({ tx:+c.tx.toFixed(2), tz:+c.tz.toFixed(2), bridge:isB });
+      }
+      c.aiBridge = 0;
+      return { n: n || 200, bridge: bridge, pct: +(bridge / (n || 200) * 100).toFixed(1), sample: list };
+    },
     errs: function(){ return window.__errs || []; }
   };
 })();
