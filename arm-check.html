@@ -9163,7 +9163,9 @@ async function finishBoot(){
       Lp.push(p.x + nx * ww, p.y + ny * ww);
       Rp.push(p.x - nx * ww, p.y - ny * ww);
     }
-    return Lp.concat(Rp.reverse());
+    var out = Lp.slice();
+    for (var q = Rp.length - 2; q >= 0; q -= 2) out.push(Rp[q], Rp[q + 1]);
+    return out;
   }
   function pgFillPoly(c, poly, col){
     c.beginPath();
