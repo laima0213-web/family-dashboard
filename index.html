@@ -1287,6 +1287,8 @@ body.pg-open{overflow:hidden!important}
   cursor:pointer;line-height:1;box-shadow:0 4px 14px rgba(60,110,70,.18);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .pg-zoom button:active{transform:scale(.94)}
+.pg-zoom button.pg-pan-btn.on{background:linear-gradient(160deg,#8FE0AE,#58A972);color:#FFFFFF;
+  border-color:#4E9C68;box-shadow:0 4px 14px rgba(60,140,90,.34)}
 .pg-hint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));
   transform:translateX(-50%);max-width:72vw;text-align:center;font-size:11px;font-weight:900;
   color:#41684B;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.95);
@@ -1556,11 +1558,13 @@ body.pg-open{overflow:hidden!important}
   </div>
 
   <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
-  <div class="pg-hint" id="pgHint">빈 곳을 드래그하면 360도 회전 · 캐릭터와 집을 끌어 옮겨요</div>
+  <div class="pg-hint" id="pgHint">드래그로 회전 · ✋ 또는 두 손가락으로 이동·확대 · 캐릭터를 옮겨 보아요</div>
 
   <div class="pg-zoom">
+    <button type="button" id="pgPanBtn" class="pg-pan-btn" aria-label="화면 이동 모드" aria-pressed="false" title="화면 이동/회전 전환">✋</button>
     <button type="button" id="pgZoomIn" aria-label="확대">＋</button>
     <button type="button" id="pgZoomOut" aria-label="축소">－</button>
+    <button type="button" id="pgReset" aria-label="처음 자리로">🏠</button>
   </div>
 
   <div class="pg-load" id="pgLoad">🌳 자연 놀이터 준비 중…</div>
@@ -6171,7 +6175,7 @@ async function finishBoot(){
     chars:{}, charOrder:[], tex:{}, mats:{}, walkTex:{}, walkOrder:[],
     rideTex:{}, rideOrder:[], legLayers:{}, armPal:{},
     builds:{}, buildOrder:[], buildDrag:null, buildSel:'', buildBarAt:0, buildFoot:{},
-    mode:'', ptrs:{}, orbit:null, drag:null, pinch:null,
+    mode:'', ptrs:{}, orbit:null, drag:null, pinch:null, pan:null, panMode:false,
     time:0, lastT:0, decoOpen:false, decoTab:'char', lastSig:'', hintTimer:0
   };
   var CDN = [
@@ -6291,6 +6295,8 @@ async function finishBoot(){
     PG.on = true; PG.kid = kid;
     el.hidden = false;
     document.body.classList.add('pg-open');
+    if (PG.target) PG.target.set(0, 0.8, 0);        /* 🏠 열 때마다 가운데부터 */
+    pgPanSet(false, true);
     pgTitle(); pgSwitch(); pgRenderDeco();
     var hint = document.getElementById('pgHint');
     if (hint){ hint.classList.add('on'); clearTimeout(PG.hintTimer); PG.hintTimer = setTimeout(function(){ hint.classList.remove('on'); }, 6000); }
@@ -9726,14 +9732,45 @@ async function finishBoot(){
 
   /* ---------- 🤸 자율 행동 — 혼자 걷고, 기구를 타고, 쉬고 ----------
      DB 저장은 전혀 하지 않는다 (＋ 넣기 / ✕ 빼기 / 손가락 드롭에서만 pgSave) */
-  function pgAIClamp(x, z){
-    /* 연못 안쪽은 가장자리로 밀어내고, 섬 반경 안으로 가둔다 */
+  /* 🌉 연못 나무 아치 다리 — 그 자리(x,z)에서 발이 딛는 다리 윗면 높이
+     · 양 끝 0.18 · 꼭대기 0.78 · 입구 계단 0.18~0.10 · 바깥은 땅(0) */
+  var BR_W = 0.54, BR_HALF = 2.04, BR_RUN = 1.70, BR_RAIL = 0.36;
+  function pgBridgeY(x, z){
+    var lx = x - POND.x, lz = z - POND.z;
+    var ax = Math.abs(lx), az = Math.abs(lz);
+    if (ax > BR_W || az > BR_HALF) return 0;
+    if (az <= BR_RUN){
+      var u = lz / 3.4 + 0.5;                          /* 0(입구) ~ 1(반대편 입구) */
+      return 0.18 + Math.sin(u * Math.PI) * 0.60;
+    }
+    if (az <= 1.99) return 0.18 - 0.08 * ((az - BR_RUN) / 0.29);   /* 계단 턱 0.18 → 0.10 */
+    return 0.10 - 0.04 * ((az - 1.99) / 0.05);                     /* 계단 끝 0.10 → 땅 0.06 */
+  }
+  /* 다리 위(난간 안쪽)인지 — 자율 이동이 이 통로로는 연못을 건널 수 있다 */
+  function pgOnBridge(x, z){
+    var lx = x - POND.x, lz = z - POND.z;
+    return Math.abs(lx) <= BR_W && Math.abs(lz) <= 2.12;
+  }
+  function pgAIClamp(x, z, prevX, prevZ){
+    /* 연못 안쪽은 가장자리로 밀어내되, 🌉 다리 통로는 걸어서 지나갈 수 있게 열어 둔다 */
     var dx = x - POND.x, dz = z - POND.z;
     var pd = Math.sqrt(dx * dx + dz * dz);
     if (pd < POND.r){
-      if (pd < 1e-4){ dx = 1; dz = 0; pd = 1; }
-      x = POND.x + dx / pd * POND.r;
-      z = POND.z + dz / pd * POND.r;
+      var adz = Math.abs(dz);
+      /* 입구 계단 언저리(|lz| 1.7~2.15)는 비스듬하게 다가와도 폭 안으로 부드럽게 끌어들인다 */
+      var admitW = (adz >= 1.66) ? 0.60 : BR_W;
+      var railW = (adz >= 1.66) ? 0.44 : BR_RAIL;
+      var fromBridge = (prevX === undefined || prevZ === undefined)
+        ? (Math.abs(dx) <= admitW && adz <= 2.15)
+        : (Math.abs(prevX - POND.x) <= 0.60 && Math.abs(prevZ - POND.z) <= 2.15);
+      if (fromBridge && adz <= 2.15){
+        /* 다리 위 — 난간 밖 물로 빠지지 않게 폭만 좁혀서 통과시킨다 */
+        x = POND.x + Math.max(-railW, Math.min(railW, dx));
+      } else {
+        if (pd < 1e-4){ dx = 1; dz = 0; pd = 1; }
+        x = POND.x + dx / pd * POND.r;
+        z = POND.z + dz / pd * POND.r;
+      }
     }
     /* 🏡 내가 지은 집은 빙 둘러 걷는다 (벽을 뚫고 지나가지 않게) */
     for (var i = 0; i < PG.buildOrder.length; i++){
@@ -9749,6 +9786,14 @@ async function finishBoot(){
     }
     var r = Math.sqrt(x * x + z * z);
     if (r > AI_R){ x = x / r * AI_R; z = z / r * AI_R; }
+    /* 집에 밀려 다시 연못에 들어갔으면 한 번 더 밖으로 (다리 위는 통과) */
+    var gx2 = x - POND.x, gz2 = z - POND.z;
+    var gd2 = Math.sqrt(gx2 * gx2 + gz2 * gz2);
+    if (gd2 < POND.r && !(Math.abs(gx2) <= BR_W && Math.abs(gz2) <= 2.15)){
+      if (gd2 < 1e-4){ gx2 = 1; gz2 = 0; gd2 = 1; }
+      x = POND.x + gx2 / gd2 * POND.r;
+      z = POND.z + gz2 / gd2 * POND.r;
+    }
     return [x, z];
   }
   function pgAIStartPlay(c, key, dur){
@@ -9761,6 +9806,20 @@ async function finishBoot(){
   }
   function pgAIPickTarget(c){
     var keys = PG.rideList.filter(function(k){ return !!PG.rides[k]; });
+    /* 🌉 다리 위에 있으면 — 지금 서 있는 쪽 반대편 끝으로 걸어 내려간다 */
+    if (pgBridgeY(c.wx, c.wz) > 0.02){
+      c.aiBridge = 0; c.aiAim = ''; c.aiHome = false;
+      c.tx = POND.x; c.tz = POND.z + (c.wz >= POND.z ? 2.35 : -2.35);
+      return;
+    }
+    /* 16% — 연못 나무 다리를 건너 반대편까지 (입구에 닿으면 이어서 건너간다) */
+    if (Math.random() < 0.16){
+      var side = (c.wz > POND.z) ? 1 : -1;
+      c.aiBridge = -side; c.aiAim = ''; c.aiHome = false;
+      c.tx = POND.x; c.tz = POND.z + side * 2.42;
+      return;
+    }
+    c.aiBridge = 0;
     /* 25% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 */
     if (PG.buildOrder.length && Math.random() < 0.25){
       var bb = PG.builds[PG.buildOrder[Math.floor(Math.random() * PG.buildOrder.length)]];
@@ -9797,6 +9856,13 @@ async function finishBoot(){
     c.tx = c.wx; c.tz = c.wz;
   }
   function pgAIArrive(c){
+    /* 🌉 다리 입구에 닿았으면 반대편 끝을 새 목표로 이어 걷기 */
+    if (c.aiBridge){
+      var exSide = c.aiBridge; c.aiBridge = 0;
+      c.aiAim = ''; c.aiHome = false; c.aiMode = 'walk';
+      c.tx = POND.x; c.tz = POND.z + exSide * 2.35;
+      return;
+    }
     if (c.aiAim){ var k = c.aiAim; c.aiAim = ''; c.aiHome = false; pgAIStartPlay(c, k, pgAIrand(8, 14)); return; }
     /* 🏡 집 앞마당에 도착했으면 조금 더 오래 쉰다 */
     if (c.aiHome){ c.aiHome = false; c.aiMode = 'idle'; c.aiTimer = pgAIrand(4, 7); return; }
@@ -9836,13 +9902,13 @@ async function finishBoot(){
       if (dist <= 0.3){ pgAIArrive(c); continue; }
       var step = Math.min(dist, c.spd * dt);
       var nx = c.wx + dx / dist * step, nz = c.wz + dz / dist * step;
-      var pos = pgAIClamp(nx, nz);
+      var pos = pgAIClamp(nx, nz, c.wx, c.wz);
       if (Math.abs(pos[0] - nx) + Math.abs(pos[1] - nz) > 0.0005){
         /* 연못·섬 경계에 막혔으면 가장자리를 따라 옆으로 미끄러진다 */
         var px = pos[0] - POND.x, pz = pos[1] - POND.z, pl = Math.sqrt(px * px + pz * pz) || 1;
         var tgx = -pz / pl, tgz = px / pl;
         var sg = (dx * tgx + dz * tgz) >= 0 ? 1 : -1;
-        var p2 = pgAIClamp(pos[0] + tgx * sg * step, pos[1] + tgz * sg * step);
+        var p2 = pgAIClamp(pos[0] + tgx * sg * step, pos[1] + tgz * sg * step, c.wx, c.wz);
         c.wx = p2[0]; c.wz = p2[1];
       } else { c.wx = pos[0]; c.wz = pos[1]; }
       if (Math.abs(dx) > 0.02) c.face = dx < 0 ? -1 : 1;
@@ -9866,9 +9932,10 @@ async function finishBoot(){
         /* 손가락에 들려 있는 동안 — 둥실 떠오름 */
         pgCharStill(c);
         c.lift = Math.min(0.55, c.lift + 0.06);
-        c.sp.position.set(d.x, 0.25 + c.lift, d.z);
+        var hby = pgBridgeY(d.x, d.z);          /* 🌉 다리 위로 들고 가도 판자 위에 */
+        c.sp.position.set(d.x, Math.max(0.25, hby + 0.22) + c.lift, d.z);
         c.sp.scale.set(1.9, 1.9, 1);
-        c.sh.position.set(d.x, 0.02, d.z);
+        c.sh.position.set(d.x, hby + 0.02, d.z);
         c.sh.scale.set(1.1, 1.1, 1);
         c.sh.material.opacity = 0.1;
         return;
@@ -9986,10 +10053,11 @@ async function finishBoot(){
           pgCharStill(c);
           tilt = Math.sin(t * 1.2 + c.ph) * 0.02;
         }
-        c.sp.position.set(d.x, 0.04 + bounce + hop, d.z);
-        c.sh.position.set(d.x, 0.03, d.z);
+        var by = pgBridgeY(d.x, d.z);           /* 🌉 연못 다리 위면 판자 높이만큼 올린다 */
+        c.sp.position.set(d.x, by + 0.04 + bounce + hop, d.z);
+        c.sh.position.set(d.x, by + 0.03, d.z);
         c.sh.scale.set(1, 1, 1);
-        c.sh.material.opacity = 0.17;
+        c.sh.material.opacity = by > 0.02 ? 0.12 : 0.17;
       }
       c.sp.scale.set(sx, sy, 1);
       c.sp.material.rotation = tilt;
@@ -10028,7 +10096,7 @@ async function finishBoot(){
   function pgStop(){
     if (PG.raf) cancelAnimationFrame(PG.raf);
     PG.raf = 0;
-    PG.mode = ''; PG.ptrs = {}; PG.drag = null; PG.orbit = null; PG.pinch = null;
+    PG.mode = ''; PG.ptrs = {}; PG.drag = null; PG.orbit = null; PG.pinch = null; PG.pan = null;
     PG.buildDrag = null; PG.buildSel = '';
     pgHideBuildBar();
     Object.keys(PG.chars).forEach(function(id){ if (PG.chars[id]) PG.chars[id].held = false; });
@@ -10110,6 +10178,32 @@ async function finishBoot(){
     }
     return best;
   }
+  /* 🖐 화면 이동(펜) — 손가락/마우스 픽셀 이동량을 바닥 XZ로 바꿔 카메라 시점을 옮긴다 */
+  function pgPan(dxPx, dyPx){
+    if (!PG.camera || !PG.target) return;
+    if (!dxPx && !dyPx) return;
+    var sh = (PG.renderer && PG.renderer.domElement && PG.renderer.domElement.clientHeight) || window.innerHeight || 800;
+    var fovRad = (PG.camera.fov || 50) * Math.PI / 180;
+    var scale = (2 * PG.dist * Math.tan(fovRad / 2)) / sh;
+    var co = Math.cos(PG.azim), si = Math.sin(PG.azim);
+    var rX = co, rZ = -si;            /* 화면 오른쪽 방향(바닥) */
+    var fX = -si, fZ = -co;           /* 화면 위쪽 = 카메라 전방(바닥) */
+    var vk = 1 / Math.max(0.30, Math.sin(PG.polar));   /* 비스듬히 볼수록 화면 상하 이동이 짧아 보인다 */
+    PG.target.x += (-rX * dxPx + fX * dyPx * vk) * scale;
+    PG.target.z += (-rZ * dxPx + fZ * dyPx * vk) * scale;
+    /* 섬 밖으로 너무 나가지 않게 — 범퍼카·울타리 끝까지는 화면 가운데에 놓을 수 있다 */
+    var tr = Math.sqrt(PG.target.x * PG.target.x + PG.target.z * PG.target.z);
+    var tmax = ISLAND_R + 0.5;
+    if (tr > tmax){ PG.target.x = PG.target.x / tr * tmax; PG.target.z = PG.target.z / tr * tmax; }
+    PG.target.y = 0.8;
+  }
+  function pgPanSet(on, quiet){
+    PG.panMode = (on === undefined) ? !PG.panMode : !!on;
+    var b = document.getElementById('pgPanBtn');
+    if (b){ b.classList.toggle('on', PG.panMode); b.setAttribute('aria-pressed', PG.panMode ? 'true' : 'false'); }
+    if (!quiet) toast(PG.panMode ? '✋ 손가락으로 화면을 옮겨 끝쪽도 볼 수 있어요' : '🔄 손가락으로 360° 회전해요', 1700);
+    return PG.panMode;
+  }
   function pgDown(e){
     if (!PG.on || !PG.ready) return;
     PG.ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
@@ -10154,8 +10248,14 @@ async function finishBoot(){
       PG.mode = 'drag';
       pgCountRides();
     } else {
-      PG.mode = 'orbit';
-      PG.orbit = { x: e.clientX, y: e.clientY };
+      var wantPan = PG.panMode || e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey;
+      if (wantPan){
+        PG.mode = 'pan';
+        PG.pan = { x: e.clientX, y: e.clientY };
+      } else {
+        PG.mode = 'orbit';
+        PG.orbit = { x: e.clientX, y: e.clientY };
+      }
       if (PG.buildSel){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
     }
     try { el.setPointerCapture(e.pointerId); } catch(err){}
@@ -10192,6 +10292,13 @@ async function finishBoot(){
         c.data.x = nx; c.data.z = nz;
       }
       PG.drag.moved = Math.max(PG.drag.moved, Math.abs(e.clientX - PG.drag.sx) + Math.abs(e.clientY - PG.drag.sy));
+      e.preventDefault();
+      return;
+    }
+    if (PG.mode === 'pan' && PG.pan){
+      var pdx = e.clientX - PG.pan.x, pdy = e.clientY - PG.pan.y;
+      PG.pan.x = e.clientX; PG.pan.y = e.clientY;
+      pgPan(pdx, pdy);
       e.preventDefault();
       return;
     }
@@ -10259,8 +10366,22 @@ async function finishBoot(){
       PG.drag = null;
     }
     PG.mode = '';
+    PG.pan = null;
   }
   function pgDrop(c){
+    /* 🌉 연못 위에 놓았을 때 — 다리 폭 근처면 다리 위에 안착, 물 한가운데면 연못 밖으로 */
+    var plx = c.data.x - POND.x, plz = c.data.z - POND.z;
+    var ppd = Math.sqrt(plx * plx + plz * plz);
+    if (ppd < POND.r){
+      if (Math.abs(plx) <= 0.65 && Math.abs(plz) <= 2.10){
+        var dropW = (Math.abs(plz) >= 1.66) ? 0.44 : 0.34;
+        c.data.x = POND.x + Math.max(-dropW, Math.min(dropW, plx));
+      } else {
+        var pdl = ppd || 1;
+        c.data.x = POND.x + plx / pdl * (POND.r + 0.06);
+        c.data.z = POND.z + plz / pdl * (POND.r + 0.06);
+      }
+    }
     var best = '', bd = 1e9;
     PG.rideList.forEach(function(k){
       var R = PG.rides[k];
@@ -10306,9 +10427,11 @@ async function finishBoot(){
       PG.buildDrag = null;
     }
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
-    PG.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, goal: PG.distGoal };
+    PG.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, goal: PG.distGoal,
+                 mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
     PG.mode = 'pinch';
     PG.orbit = null;
+    PG.pan = null;
   }
   function pgPinchMove(){
     if (!PG.pinch) return;
@@ -10317,12 +10440,18 @@ async function finishBoot(){
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
     var g = PG.pinch.goal * (PG.pinch.d / d);
-    PG.distGoal = Math.max(13, Math.min(58, g));
+    PG.distGoal = Math.max(6.5, Math.min(58, g));
+    /* 두 손가락을 모은 채 같이 움직이면 화면 이동(펜)도 같이 */
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (PG.pinch.mx !== undefined){
+      pgPan(mx - PG.pinch.mx, my - PG.pinch.my);
+      PG.pinch.mx = mx; PG.pinch.my = my;
+    }
   }
   function pgWheel(e){
     if (!PG.on) return;
     e.preventDefault();
-    PG.distGoal = Math.max(13, Math.min(58, PG.distGoal + (e.deltaY > 0 ? 1.8 : -1.8)));
+    PG.distGoal = Math.max(6.5, Math.min(58, PG.distGoal + (e.deltaY > 0 ? 1.8 : -1.8)));
   }
 
   /* ============================================================
@@ -10523,7 +10652,7 @@ async function finishBoot(){
       return;
     }
     var zi = t.closest('#pgZoomIn');
-    if (zi){ PG.distGoal = Math.max(13, PG.distGoal - 3.0); return; }
+    if (zi){ PG.distGoal = Math.max(6.5, PG.distGoal - 3.0); return; }
     var zo = t.closest('#pgZoomOut');
     if (zo){ PG.distGoal = Math.min(58, PG.distGoal + 3.0); return; }
     var lb = t.closest('#pgLblBtn');
@@ -10536,7 +10665,17 @@ async function finishBoot(){
       return;
     }
     var rs = t.closest('#pgReset');
-    if (rs){ PG.azim = 0.62; PG.polar = 0.95; PG.distGoal = PG.distGoal > 34 ? 32 : 32; PG.dist = 32; return; }
+    if (rs){
+      PG.azim = 0.62; PG.polar = 0.95;
+      var aspR = (PG.renderer && PG.renderer.domElement && PG.renderer.domElement.clientHeight)
+        ? PG.renderer.domElement.clientWidth / PG.renderer.domElement.clientHeight : 0.5;
+      PG.distGoal = PG.dist = (aspR < 0.72) ? 38 : 34;
+      if (PG.target) PG.target.set(0, 0.8, 0);
+      toast('🏠 처음 자리로 돌아왔어요', 1400);
+      return;
+    }
+    var pnb = t.closest('#pgPanBtn');
+    if (pnb){ pgPanSet(); return; }
   }, true);
 
   window.addEventListener('resize', function(){ if (PG.on) pgResize(); });
