@@ -9785,12 +9785,16 @@ async function finishBoot(){
     var dx = x - POND.x, dz = z - POND.z;
     var pd = Math.sqrt(dx * dx + dz * dz);
     if (pd < POND.r){
+      var adz = Math.abs(dz);
+      /* 입구 계단 언저리(|lz| 1.7~2.15)는 비스듬하게 다가와도 폭 안으로 부드럽게 끌어들인다 */
+      var admitW = (adz >= 1.66) ? 0.60 : BR_W;
+      var railW = (adz >= 1.66) ? 0.44 : BR_RAIL;
       var fromBridge = (prevX === undefined || prevZ === undefined)
-        ? (Math.abs(dx) <= BR_W && Math.abs(dz) <= 2.12)
-        : (Math.abs(prevX - POND.x) <= 0.50 && Math.abs(prevZ - POND.z) <= 2.12);
-      if (fromBridge && Math.abs(dz) <= 2.12){
+        ? (Math.abs(dx) <= admitW && adz <= 2.15)
+        : (Math.abs(prevX - POND.x) <= 0.60 && Math.abs(prevZ - POND.z) <= 2.15);
+      if (fromBridge && adz <= 2.15){
         /* 다리 위 — 난간 밖 물로 빠지지 않게 폭만 좁혀서 통과시킨다 */
-        x = POND.x + Math.max(-BR_RAIL, Math.min(BR_RAIL, dx));
+        x = POND.x + Math.max(-railW, Math.min(railW, dx));
       } else {
         if (pd < 1e-4){ dx = 1; dz = 0; pd = 1; }
         x = POND.x + dx / pd * POND.r;
@@ -9814,7 +9818,7 @@ async function finishBoot(){
     /* 집에 밀려 다시 연못에 들어갔으면 한 번 더 밖으로 (다리 위는 통과) */
     var gx2 = x - POND.x, gz2 = z - POND.z;
     var gd2 = Math.sqrt(gx2 * gx2 + gz2 * gz2);
-    if (gd2 < POND.r && !(Math.abs(gx2) <= BR_W && Math.abs(gz2) <= 2.12)){
+    if (gd2 < POND.r && !(Math.abs(gx2) <= BR_W && Math.abs(gz2) <= 2.15)){
       if (gd2 < 1e-4){ gx2 = 1; gz2 = 0; gd2 = 1; }
       x = POND.x + gx2 / gd2 * POND.r;
       z = POND.z + gz2 / gd2 * POND.r;
@@ -10399,7 +10403,8 @@ async function finishBoot(){
     var ppd = Math.sqrt(plx * plx + plz * plz);
     if (ppd < POND.r){
       if (Math.abs(plx) <= 0.65 && Math.abs(plz) <= 2.10){
-        c.data.x = POND.x + Math.max(-0.34, Math.min(0.34, plx));
+        var dropW = (Math.abs(plz) >= 1.66) ? 0.44 : 0.34;
+        c.data.x = POND.x + Math.max(-dropW, Math.min(dropW, plx));
       } else {
         var pdl = ppd || 1;
         c.data.x = POND.x + plx / pdl * (POND.r + 0.06);
