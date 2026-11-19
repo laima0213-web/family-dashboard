@@ -6180,8 +6180,10 @@ async function finishBoot(){
   ];
   var RIDES = ['slide','seesaw','jungle','ladder','bars','rope','horse','sand','zip','tramp','bench',
                'ferris','carousel','coaster','viking','teacup','drop','balloon','bumper','swing'];
-  var ISLAND_R = 17.4, CHAR_R = 16.4;
+  var ISLAND_R = 17.9, CHAR_R = 16.9;   /* 범퍼카 경기장(바깥 17.16)이 울타리(17.7) 안에 여유롭게 들어오는 크기 */
   var BUILD_R = 13.6;                    /* 🏡 집을 짓고 옮길 수 있는 섬 반경 (물에 잠기지 않는 안쪽) */
+  var BUMPER_A = 337.5, BUMPER_RR = 13.45, BUMPER_EDGE = 3.82;
+  /* 🚗 범퍼카 경기장 — 방향각·배치 반경·바닥+핑크 테두리 반경. 소품을 놓기 전에도 이 값으로 겹침을 확인한다. */
   var PG_BUILD_SCALE = 0.9;              /* 공원 기구와 나란히 놓였을 때 딱 좋은 크기 */
   /* ---------- 🤸 자율 행동(혼자 걷고 기구 타기) ----------
      · 위치는 화면 메모리(c.wx·c.wz·c.curRide)에서만 움직인다 — DB 저장 없음! */
@@ -6388,6 +6390,7 @@ async function finishBoot(){
 
     pgBuildGarden(sc);
     pgBuildRides(sc);
+    pgBuildTrees(PG.yard);      /* 놀이기구 자리를 피해 나무·덤불 배치 (반드시 rides 뒤) */
     pgBuildLabels();
 
     var cv = r.domElement;
@@ -7528,45 +7531,21 @@ async function finishBoot(){
     pgGarland(yard, lampTops[0], lampTops[3], [C.pink, C.lemon, C.mint, C.sky, C.lav, C.coral], 18, 0.9);
     pgGarland(yard, lampTops[1], lampTops[4], [C.mint, C.pink, C.lemon, C.sky, C.lav], 18, 0.9);
     pgGarland(yard, lampTops[2], lampTops[0], [C.lemon, C.coral, C.mint, C.pink, C.white], 18, 0.9);
-    /* 순환 산책로 가로등 · 벤치 */
+    /* 순환 산책로 가로등 · 벤치 (범퍼카 경기장 자리는 비운다) */
     [0, 45, 90, 135, 180, 225, 270, 315].forEach(function(d){
       var a = (d + 33.75) * Math.PI / 180;
-      pgLamp(yard, Math.cos(a) * 9.92, Math.sin(a) * 9.92, 1.7);
+      var lx = Math.cos(a) * 9.92, lz = Math.sin(a) * 9.92;
+      if (!pgArenaFree(lx, lz, 0.18)) return;
+      pgLamp(yard, lx, lz, 1.7);
     });
     [0, 45, 90, 135, 180, 225, 270, 315].forEach(function(d){
       var a = (d + 11.25) * Math.PI / 180;
-      pgBenchDeco(yard, Math.cos(a) * 9.95, Math.sin(a) * 9.95, Math.atan2(-Math.cos(a), -Math.sin(a)), '#F3E3C8');
+      var bx2 = Math.cos(a) * 9.95, bz2 = Math.sin(a) * 9.95;
+      if (!pgArenaFree(bx2, bz2, 0.8)) return;
+      pgBenchDeco(yard, bx2, bz2, Math.atan2(-Math.cos(a), -Math.sin(a)), '#F3E3C8');
     });
 
-    /* 5) 나무 — 둥글둥글 큰 나무 · 벚꽃나무 · 덤불 (놀이기구 자리는 비운다) */
-    function pgFreeSpot(x, z, m){
-      for (var q = 0; q < PG.rideList.length; q++){
-        var G = PG.rides[PG.rideList[q]].g;
-        var rad = (G.userData.radius || 2) + (m || 0.6);
-        if (Math.hypot(x - G.position.x, z - G.position.z) < rad) return false;
-      }
-      return true;
-    }
-    [[45, 13.95, 1.25, 'g'], [135, 13.95, 1.3, 'g'], [225, 13.95, 1.25, 'o'], [315, 13.95, 1.3, 'g']].forEach(function(t){
-      var a = t[0] * Math.PI / 180;
-      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
-      if (!pgFreeSpot(x, z, 0.9)) return;
-      var col = t[3] === 'o' ? C.leafO : C.leafG;
-      yard.add(pgTree(x, z, t[2], col, t[3] === 'o' ? C.leafO : C.leafG2));
-    });
-    [[0, 15.9, 1.25], [180, 15.9, 1.3]].forEach(function(t){
-      var a = t[0] * Math.PI / 180;
-      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
-      if (!pgFreeSpot(x, z, 0.9)) return;
-      yard.add(pgCherry(x, z, t[2]));
-    });
-    [[22.5, 14.3], [67.5, 14.3], [112.5, 14.3], [157.5, 14.3], [202.5, 14.3],
-     [247.5, 14.3], [292.5, 14.3], [337.5, 14.3]].forEach(function(t, i){
-      var a = t[0] * Math.PI / 180;
-      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
-      if (!pgFreeSpot(x, z, 0.7)) return;
-      pgShrub(yard, x, z, 0.95 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
-    });
+    /* 5) 나무 — 둥글둥글 큰 나무 · 벚꽃나무 · 덤불은 pgBuildTrees()에서 (놀이기구 배치 뒤에) */
 
     /* 6) 입구 아치 · 수레 */
     pgArch(yard, 0, 4.72, Math.PI);
@@ -7662,20 +7641,68 @@ async function finishBoot(){
         });
       })(bg, wingA, wingB);
     }
-    /* 12) 외곽 통나무 울타리 */
-    var fposts = 52;
+    /* 12) 외곽 통나무 울타리 — ISLAND_R에 연동 (범퍼카 경기장 바깥 테두리 17.11을 침범하지 않게) */
+    var fenceR = ISLAND_R - 0.2;
+    var fposts = 60;
+    PG.fenceR = fenceR;
     for (var i2 = 0; i2 < fposts; i2++){
       var a2 = (i2 / fposts) * Math.PI * 2;
-      var px2 = Math.cos(a2) * 14.8, pz2 = Math.sin(a2) * 14.8;
+      var px2 = Math.cos(a2) * fenceR, pz2 = Math.sin(a2) * fenceR;
       var post = pgCyl(0.09, 0.11, 0.8, C.wood, px2, 0.4, pz2, 6);
       post.rotation.y = a2;
       yard.add(post);
       yard.add(pgCone(0.12, 0.15, C.woodL, px2, 0.86, pz2, 6));
     }
     [0.3, 0.6].forEach(function(hy){
-      var rail = pgTor(14.8, 0.05, C.woodL, 0, hy, 0);
+      var rail = pgTor(fenceR, 0.05, C.woodL, 0, hy, 0);
       rail.rotation.x = -Math.PI / 2;
       yard.add(rail);
+    });
+  }
+  /* 5) 나무 · 벚꽃 · 덤불 — ⚠️ 반드시 pgBuildRides() 뒤에 호출한다.
+     먼저 부르면 PG.rideList가 비어 있어 pgFreeSpot이 모든 자리를 통과시켜
+     범퍼카 경기장 바닥 안에 덤불이 박히게 된다. */
+  function pgFreeSpot(x, z, m){
+    for (var q = 0; q < PG.rideList.length; q++){
+      var G = PG.rides[PG.rideList[q]].g;
+      var rad = (G.userData.radius || 2) + (m || 0.6);
+      if (Math.hypot(x - G.position.x, z - G.position.z) < rad) return false;
+    }
+    return true;
+  }
+  /* 🚗 범퍼카 경기장(바닥 3.45 + 핑크 패드·테두리 3.82) 바깥인지 확인 — 놀이기구를 세우기 전에도 쓸 수 있다 */
+  function pgArenaFree(x, z, m){
+    var a = BUMPER_A * Math.PI / 180;
+    var ax = Math.cos(a) * BUMPER_RR, az = Math.sin(a) * BUMPER_RR;
+    return Math.hypot(x - ax, z - az) > BUMPER_EDGE + (m || 0);
+  }
+  function pgBuildTrees(yard){
+    yard = yard || PG.yard || PG.scene;
+    [[45, 13.95, 1.25, 'g'], [135, 13.95, 1.3, 'g'], [225, 13.95, 1.25, 'o'], [315, 13.95, 1.3, 'g']].forEach(function(t){
+      var a = t[0] * Math.PI / 180;
+      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
+      if (!pgFreeSpot(x, z, 0.9)) return;
+      var col = t[3] === 'o' ? C.leafO : C.leafG;
+      yard.add(pgTree(x, z, t[2], col, t[3] === 'o' ? C.leafO : C.leafG2));
+    });
+    [[0, 15.9, 1.25], [180, 15.9, 1.3]].forEach(function(t){
+      var a = t[0] * Math.PI / 180;
+      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
+      if (!pgFreeSpot(x, z, 0.9)) return;
+      yard.add(pgCherry(x, z, t[2]));
+    });
+    [[22.5, 14.3], [67.5, 14.3], [112.5, 14.3], [157.5, 14.3], [202.5, 14.3],
+     [247.5, 14.3], [292.5, 14.3], [337.5, 14.3]].forEach(function(t, i){
+      var a = t[0] * Math.PI / 180;
+      /* 큰 놀이기구 바로 뒤는 비어 있으니, 막히면 조금 바깥으로 밀어 덤불을 살린다 */
+      var placed = false;
+      [t[1], 15.3, 15.9].forEach(function(rr2){
+        if (placed) return;
+        var x = Math.cos(a) * rr2, z = Math.sin(a) * rr2;
+        if (!pgFreeSpot(x, z, 0.7) || !pgArenaFree(x, z, 0.8)) return;
+        pgShrub(yard, x, z, 0.95 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
+        placed = true;
+      });
     });
   }
   function pgTree(x, z, s, col, col2){
@@ -7726,7 +7753,7 @@ async function finishBoot(){
                   teacup:202.5, drop:247.5, balloon:292.5, bumper:337.5 };
     Object.keys(outer).forEach(function(k){
       var a = outer[k] * Math.PI / 180;
-      var rr = (k === 'bumper') ? 13.25 : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 */
+      var rr = (k === 'bumper') ? BUMPER_RR : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 (13.45±3.82 = 9.63~17.27) */
       var x = Math.cos(a) * rr, z = Math.sin(a) * rr;
       pgBuildOne(k);
       var g = PG.rides[k].g;
