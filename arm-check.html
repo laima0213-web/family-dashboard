@@ -5,6 +5,10 @@
 window.__errs = [];
 window.addEventListener('error', function(e){ window.__errs.push('error: ' + (e.message || '') + ' @' + (e.filename||'') + ':' + (e.lineno||'')); });
 window.addEventListener('unhandledrejection', function(e){ window.__errs.push('reject: ' + ((e.reason && (e.reason.message || e.reason)) || '')); });
+window.addEventListener('load', function(){
+  var n = document.querySelectorAll('script[src]').length;
+  window.__scripts = n;
+});
 (function(){
   var ce = console.error, cw = console.warn;
   console.error = function(){ window.__errs.push('console.error: ' + Array.prototype.join.call(arguments, ' ')); ce.apply(console, arguments); };
@@ -6206,7 +6210,7 @@ async function finishBoot(){
   ];
   var RIDES = ['slide','seesaw','jungle','ladder','bars','rope','horse','sand','zip','tramp','bench',
                'ferris','carousel','coaster','viking','teacup','drop','balloon','bumper','swing'];
-  var ISLAND_R = 15.0, CHAR_R = 14.35;
+  var ISLAND_R = 17.4, CHAR_R = 16.4;
   var BUILD_R = 13.6;                    /* 🏡 집을 짓고 옮길 수 있는 섬 반경 (물에 잠기지 않는 안쪽) */
   var PG_BUILD_SCALE = 0.9;              /* 공원 기구와 나란히 놓였을 때 딱 좋은 크기 */
   /* ---------- 🤸 자율 행동(혼자 걷고 기구 타기) ----------
@@ -7564,20 +7568,34 @@ async function finishBoot(){
       pgBenchDeco(yard, Math.cos(a) * 9.95, Math.sin(a) * 9.95, Math.atan2(-Math.cos(a), -Math.sin(a)), '#F3E3C8');
     });
 
-    /* 5) 나무 — 둥글둥글 큰 나무 · 벚꽃나무 · 덤불 */
+    /* 5) 나무 — 둥글둥글 큰 나무 · 벚꽃나무 · 덤불 (놀이기구 자리는 비운다) */
+    function pgFreeSpot(x, z, m){
+      for (var q = 0; q < PG.rideList.length; q++){
+        var G = PG.rides[PG.rideList[q]].g;
+        var rad = (G.userData.radius || 2) + (m || 0.6);
+        if (Math.hypot(x - G.position.x, z - G.position.z) < rad) return false;
+      }
+      return true;
+    }
     [[45, 13.95, 1.25, 'g'], [135, 13.95, 1.3, 'g'], [225, 13.95, 1.25, 'o'], [315, 13.95, 1.3, 'g']].forEach(function(t){
       var a = t[0] * Math.PI / 180;
+      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
+      if (!pgFreeSpot(x, z, 0.9)) return;
       var col = t[3] === 'o' ? C.leafO : C.leafG;
-      yard.add(pgTree(Math.cos(a) * t[1], Math.sin(a) * t[1], t[2], col, t[3] === 'o' ? C.leafO : C.leafG2));
+      yard.add(pgTree(x, z, t[2], col, t[3] === 'o' ? C.leafO : C.leafG2));
     });
-    [[0, 13.9, 1.25], [180, 13.9, 1.3]].forEach(function(t){
+    [[0, 15.9, 1.25], [180, 15.9, 1.3]].forEach(function(t){
       var a = t[0] * Math.PI / 180;
-      yard.add(pgCherry(Math.cos(a) * t[1], Math.sin(a) * t[1], t[2]));
+      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
+      if (!pgFreeSpot(x, z, 0.9)) return;
+      yard.add(pgCherry(x, z, t[2]));
     });
     [[22.5, 14.3], [67.5, 14.3], [112.5, 14.3], [157.5, 14.3], [202.5, 14.3],
      [247.5, 14.3], [292.5, 14.3], [337.5, 14.3]].forEach(function(t, i){
       var a = t[0] * Math.PI / 180;
-      pgShrub(yard, Math.cos(a) * t[1], Math.sin(a) * t[1], 0.95 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
+      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
+      if (!pgFreeSpot(x, z, 0.7)) return;
+      pgShrub(yard, x, z, 0.95 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
     });
 
     /* 6) 입구 아치 · 수레 */
@@ -7738,7 +7756,8 @@ async function finishBoot(){
                   teacup:202.5, drop:247.5, balloon:292.5, bumper:337.5 };
     Object.keys(outer).forEach(function(k){
       var a = outer[k] * Math.PI / 180;
-      var x = Math.cos(a) * ROAD.outer, z = Math.sin(a) * ROAD.outer;
+      var rr = (k === 'bumper') ? 13.25 : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 */
+      var x = Math.cos(a) * rr, z = Math.sin(a) * rr;
       pgBuildOne(k);
       var g = PG.rides[k].g;
       g.position.set(x, 0, z);
@@ -7759,7 +7778,7 @@ async function finishBoot(){
     var made = 0, tries = 0;
     while (made < 110 && tries < 900){
       tries++;
-      var r = 4.9 + Math.random() * 9.3;
+      var r = 4.9 + Math.random() * 11.6;
       var a = Math.random() * Math.PI * 2;
       var x = Math.cos(a) * r, z = Math.sin(a) * r;
       if (Math.abs(r - ROAD.prom) < 0.62) continue;
@@ -8583,56 +8602,215 @@ async function finishBoot(){
   }
 
   function pgBumper(g){
-    pgPad(g, 2.3, '#FFEFF4', C.pink);
-    var floorM = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.12, 36), pgTileMat(6, 6));
+    /* 🚗 범퍼카 — 넓은 경기장(반경 3.45) 안에서 차 4대가 서로 쫓고 부딪힌다.
+       가운데 기둥 없이 뻥 뚫려 있어 가로질러 들이받을 수 있다. */
+    var R_FLOOR = 3.45, R_DR = 2.95, R_PILL = 3.86, RING_Y = 3.05;
+    pgPad(g, 3.66, '#FFF0F5', C.pink);
+    var floorM = new THREE.Mesh(new THREE.CylinderGeometry(R_FLOOR, R_FLOOR, 0.12, 48), pgTileMat(7, 7));
     floorM.position.y = 0.24; g.add(floorM);
-    var wall = pgTor(2.16, 0.13, C.pink, 0, 0.44, 0); wall.rotation.x = Math.PI / 2; g.add(wall);
-    for (var i = 0; i < 20; i++){
-      var a = i * Math.PI * 2 / 20;
-      g.add(pgSph(0.105, i % 2 ? C.lemon : C.mint, Math.cos(a) * 2.16, 0.46, Math.sin(a) * 2.16, 7));
+    var wall = pgTor(3.42, 0.12, C.pink, 0, 0.44, 0); wall.rotation.x = Math.PI / 2; g.add(wall);
+    for (var i = 0; i < 28; i++){
+      var a = i * Math.PI * 2 / 28;
+      g.add(pgSph(0.1, i % 2 ? C.lemon : C.mint, Math.cos(a) * 3.42, 0.46, Math.sin(a) * 3.42, 7));
     }
-    g.add(pgCyl(0.18, 0.22, 1.85, C.iron, 0, 1.1, 0, 10));
-    var cap = pgTor(0.8, 0.05, C.iron, 0, 1.98, 0); cap.rotation.x = Math.PI / 2; g.add(cap);
-    g.add(pgSph(0.17, C.coral, 0, 2.04, 0, 9));
-    var cars = [];
+    /* 천장 링 + 아치 기둥 (테두리에만 · 가운데는 비움) */
+    var ring = pgTor(R_PILL, 0.07, C.lemon, 0, RING_Y, 0); ring.rotation.x = Math.PI / 2; g.add(ring);
+    var ring2 = pgTor(R_PILL, 0.028, '#FFF6E4', 0, RING_Y + 0.26, 0); ring2.rotation.x = Math.PI / 2; g.add(ring2);
+    for (var p = 0; p < 4; p++){
+      var pa = p * Math.PI / 2 + Math.PI / 4;
+      var px = Math.cos(pa) * R_PILL, pz = Math.sin(pa) * R_PILL;
+      g.add(pgCyl(0.08, 0.105, RING_Y, '#FFFDF8', px, RING_Y / 2, pz, 8));
+      g.add(pgSph(0.1, C.pink, px, RING_Y + 0.02, pz, 7));
+      var pa2 = (p + 1) * Math.PI / 2 + Math.PI / 4;
+      var qx = Math.cos(pa2) * R_PILL, qz = Math.sin(pa2) * R_PILL;
+      var mx = (px + qx) / 2, mz = (pz + qz) / 2;
+      var ch = Math.sqrt((qx - px) * (qx - px) + (qz - pz) * (qz - pz));
+      var arch = pgTor(ch / 2, 0.05, C.mint, mx, RING_Y, mz, Math.PI);
+      arch.rotation.y = -Math.atan2(qz - pz, qx - px);
+      g.add(arch);
+    }
+    for (var b = 0; b < 14; b++){
+      var ba = b * Math.PI / 7;
+      var bulb = pgSph(0.055, b % 2 ? C.lemon : C.white,
+        Math.cos(ba) * (R_PILL - 0.3), RING_Y - 0.18, Math.sin(ba) * (R_PILL - 0.3), 6);
+      bulb.material = new THREE.MeshBasicMaterial({ color: b % 2 ? 0xFFE9A8 : 0xFFFDF6 });
+      g.add(bulb);
+      (function(bb, bb2){
+        PG.dyn.push(function(t){ bb.scale.setScalar(0.82 + 0.3 * (0.5 + 0.5 * Math.sin(t * 2.4 + bb2 * 0.7))); });
+      })(bulb, b);
+    }
+    /* 차 4대 — 앞(+x)이 진행 방향 */
+    var cars = [], sim = [], COL = [C.sky, C.pink, C.lemon, C.mint];
     for (var k = 0; k < 4; k++){
       var cg = new THREE.Group();
-      var col = [C.sky, C.pink, C.lemon, C.mint][k];
-      cg.add(pgBox(0.68, 0.32, 0.5, col, 0, 0.58, 0));
-      cg.add(pgBox(0.62, 0.22, 0.46, '#FFF7EE', 0, 0.8, -0.04));
-      cg.add(pgBox(0.72, 0.06, 0.54, '#FFFFFF', 0, 0.43, 0));
-      [-0.19, 0.19].forEach(function(x){
-        cg.add(pgSph(0.06, C.lemon, x, 0.66, 0.24, 6));
+      cg.add(pgBox(0.72, 0.3, 0.54, COL[k], 0, 0.56, 0));
+      cg.add(pgBox(0.62, 0.2, 0.46, '#FFF7EE', 0, 0.78, -0.03));
+      cg.add(pgBox(0.8, 0.1, 0.62, '#FFFFFF', 0, 0.44, 0));              /* 범퍼 링 */
+      cg.add(pgBox(0.1, 0.12, 0.5, '#FFF0B8', 0.36, 0.52, 0));           /* 앞 범퍼 */
+      cg.add(pgBox(0.1, 0.12, 0.5, '#FFE0B8', -0.36, 0.52, 0));          /* 뒤 범퍼 */
+      [-0.18, 0.18].forEach(function(x){
+        cg.add(pgSph(0.055, C.lemon, x, 0.62, 0.29, 6));
       });
-      cg.add(pgCyl(0.04, 0.04, 0.22, C.iron, 0, 1.04, -0.02, 6));
-      cg.add(pgSph(0.075, C.coral, 0, 1.16, -0.02, 7));
-      [[-0.24, 0.16], [0.24, 0.16], [-0.24, -0.16], [0.24, -0.16]].forEach(function(w){
-        var wh = pgCyl(0.075, 0.075, 0.06, C.dark, w[0], 0.46, w[1], 8);
-        wh.rotation.z = Math.PI / 2; cg.add(wh);
+      cg.add(pgCyl(0.035, 0.035, 0.2, C.iron, 0.1, 1.0, 0, 6));
+      cg.add(pgSph(0.07, C.coral, 0.1, 1.12, 0, 7));
+      [-0.22, 0.22].forEach(function(x){
+        [-0.2, 0.2].forEach(function(z){
+          var wh = pgCyl(0.085, 0.085, 0.07, C.dark, x, 0.46, z, 8);
+          wh.rotation.x = Math.PI / 2; cg.add(wh);
+        });
       });
       g.add(cg); cars.push(cg);
+      var ia = k * Math.PI / 2 + 0.5, ir = 1.45 + (k % 2) * 0.5;
+      sim.push({
+        x: Math.cos(ia) * ir, z: Math.sin(ia) * ir,
+        vx: 0, vz: 0, dir: ia + Math.PI / 2, target: 0.2 + k * 0.25,
+        bump: 0, bumpV: 0, roll: 0, pitch: 0, heading: 0
+      });
     }
-    function carAt(idx, t){
-      var k = idx % 4;
-      var a = t * 0.62 + k * Math.PI / 2 + Math.sin(t * 0.5 + k) * 0.3;
-      var rr = 1.2 + Math.sin(t * 1.1 + k * 1.7) * 0.1;
-      return { a: a, x: Math.cos(a) * rr, z: Math.sin(a) * rr, k: k };
+    /* 충돌 스파크 — 노란 링 + 흰 별 3개 */
+    var fx = [], fxI = 0;
+    for (var f = 0; f < 6; f++){
+      var rp = new THREE.Group();
+      var rg = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.035, 6, 16),
+        new THREE.MeshBasicMaterial({ color: 0xFFE58A, transparent: true, opacity: 0 }));
+      rg.rotation.x = Math.PI / 2; rp.add(rg);
+      var stars = [];
+      for (var st = 0; st < 3; st++){
+        var sm = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5),
+          new THREE.MeshBasicMaterial({ color: st === 1 ? 0xFFFFFF : 0xFFF0A8, transparent: true, opacity: 0 }));
+        rp.add(sm); stars.push(sm);
+      }
+      rp.visible = false; g.add(rp);
+      fx.push({ g: rp, ring: rg, stars: stars, t: -99, x: 0, z: 0 });
+    }
+    function spark(x, z, t){
+      var e = fx[fxI++ % fx.length];
+      e.t = t; e.x = x; e.z = z;
+      e.g.visible = true;
+      e.g.position.set(x, 0.78, z);
+    }
+    var lastT = -1, MAXV = 1.95, ACC = 2.5, TURN = 3.1, SEP = 0.70, CAR_R = 0.36;
+    function step(dt, t){
+      var j, k2;
+      for (k2 = 0; k2 < 4; k2++){
+        var s = sim[k2];
+        s.target -= dt;
+        if (s.target <= 0){
+          /* 가장 가까운 차를 겨냥해 돌진 (가끔은 엇갈리게 방향 전환) */
+          var tgt = -1, best = 1e9;
+          for (j = 0; j < 4; j++){
+            if (j === k2) continue;
+            var ddx = sim[j].x - s.x, ddz = sim[j].z - s.z, dd = Math.sqrt(ddx * ddx + ddz * ddz);
+            if (dd < best){ best = dd; tgt = j; }
+          }
+          if (tgt >= 0 && Math.random() < 0.74) s.dir = Math.atan2(sim[tgt].z - s.z, sim[tgt].x - s.x);
+          else s.dir = Math.random() * Math.PI * 2;
+          s.target = 0.8 + Math.random() * 1.4;
+        }
+        var sp = Math.sqrt(s.vx * s.vx + s.vz * s.vz);
+        var cur = sp > 0.01 ? Math.atan2(s.vz, s.vx) : s.dir;
+        var dA = ((s.dir - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        var lim = TURN * dt;
+        cur += Math.max(-lim, Math.min(lim, dA));
+        sp = Math.min(MAXV, sp + ACC * dt);
+        s.vx = Math.cos(cur) * sp; s.vz = Math.sin(cur) * sp;
+        s.x += s.vx * dt; s.z += s.vz * dt;
+        /* 외벽 충돌 */
+        var r = Math.sqrt(s.x * s.x + s.z * s.z);
+        if (r > R_DR){
+          var nx = s.x / r, nz = s.z / r;
+          s.x = nx * R_DR; s.z = nz * R_DR;
+          var vn = s.vx * nx + s.vz * nz;
+          if (vn > 0){
+            s.vx -= 1.75 * vn * nx; s.vz -= 1.75 * vn * nz;
+            s.bumpV = Math.min(0.55, Math.max(s.bumpV, vn * 0.4));
+            s.dir = Math.atan2(-nz, -nx) + (Math.random() - 0.5) * 1.2;
+            s.target = 0.4 + Math.random() * 0.6;
+            if (vn > 0.5 && Math.random() < 0.5) spark(s.x + nx * 0.3, s.z + nz * 0.3, t);
+          }
+        }
+      }
+      /* 차끼리 탄성 충돌 */
+      for (var a2 = 0; a2 < 4; a2++){
+        for (var b2 = a2 + 1; b2 < 4; b2++){
+          var A = sim[a2], B = sim[b2];
+          var dx = B.x - A.x, dz = B.z - A.z;
+          var d = Math.sqrt(dx * dx + dz * dz);
+          if (d < 0.0001) continue;
+          if (d < SEP){
+            var ux = dx / d, uz = dz / d, ov = (SEP - d) / 2 + 0.01;
+            A.x -= ux * ov; A.z -= uz * ov;
+            B.x += ux * ov; B.z += uz * ov;
+            var rel = (B.vx - A.vx) * ux + (B.vz - A.vz) * uz;
+            if (rel < 0){
+              var jimp = -(1.85) * rel / 2;
+              A.vx -= jimp * ux; A.vz -= jimp * uz;
+              B.vx += jimp * ux; B.vz += jimp * uz;
+              var pow = Math.min(1, -rel / 2.2);
+              A.bumpV = Math.min(0.85, 0.25 + pow * 0.6);
+              B.bumpV = Math.min(0.85, 0.25 + pow * 0.6);
+              A.roll = (Math.random() - 0.5) * 0.5 * (0.4 + pow);
+              B.roll = (Math.random() - 0.5) * 0.5 * (0.4 + pow);
+              A.pitch = -0.3 * (0.4 + pow); B.pitch = 0.3 * (0.4 + pow);
+              A.target = 0.55; B.target = 0.55;
+              /* 서로 밀려난 뒤 새 방향 */
+              A.dir = Math.atan2(-uz, -ux) + (Math.random() - 0.5) * 1.4;
+              B.dir = Math.atan2(uz, ux) + (Math.random() - 0.5) * 1.4;
+              spark((A.x + B.x) / 2, (A.z + B.z) / 2, t);
+              if (pow > 0.35) spark((A.x + B.x) / 2 + ux * 0.12, (A.z + B.z) / 2 + uz * 0.12, t + 0.02);
+            }
+          }
+        }
+      }
+      for (k2 = 0; k2 < 4; k2++){
+        var q = sim[k2];
+        q.bumpV -= q.bump * 9.0 * dt;      /* 들썩임 스프링 */
+        q.bumpV -= q.bumpV * 3.2 * dt;
+        q.bump += q.bumpV * dt;
+        if (q.bump < 0){ q.bump = 0; q.bumpV *= -0.35; }
+        q.roll *= (1 - Math.min(1, dt * 6));
+        q.pitch *= (1 - Math.min(1, dt * 6));
+        var want = Math.atan2(q.vz, q.vx);
+        var dh = ((want - q.heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        q.heading += Math.max(-8 * dt, Math.min(8 * dt, dh));
+      }
+      /* 스파크 수명 */
+      for (var e2 = 0; e2 < fx.length; e2++){
+        var F = fx[e2], age = t - F.t;
+        if (age < 0 || age > 0.36){ F.g.visible = false; continue; }
+        var u = age / 0.36;
+        F.g.visible = true;
+        F.ring.scale.setScalar(0.5 + u * 3.4);
+        F.ring.material.opacity = 0.9 * (1 - u);
+        for (var si = 0; si < F.stars.length; si++){
+          var ag = u * 2.6 + si * 2.1;
+          F.stars[si].position.set(Math.cos(ag) * 0.28 * (0.4 + u), 0.1 + u * 0.35, Math.sin(ag) * 0.28 * (0.4 + u));
+          F.stars[si].scale.setScalar(1.5 * (1 - u));
+          F.stars[si].material.opacity = 1 - u;
+        }
+      }
     }
     PG.dyn.push(function(t){
-      for (var k = 0; k < 4; k++){
-        var c = carAt(k, t);
-        cars[k].position.set(c.x, 0.24, c.z);
-        cars[k].rotation.y = -c.a + Math.PI / 2;
-        cars[k].rotation.z = Math.sin(t * 7 + k) * 0.025;
+      var dt = 0.016;
+      if (lastT >= 0) dt = Math.max(0, Math.min(0.05, t - lastT));
+      lastT = t;
+      step(dt, t);
+      for (var k3 = 0; k3 < 4; k3++){
+        var s3 = sim[k3], c3 = cars[k3];
+        c3.position.set(s3.x, 0.24 + s3.bump, s3.z);
+        c3.rotation.y = -s3.heading;
+        c3.rotation.z = s3.roll * 0.5;
+        c3.rotation.x = s3.pitch * 0.35;
       }
     });
     g.userData.pose = function(idx, t){
-      var c = carAt(idx, t);
-      return { x: c.x, y: 0.86, z: c.z };
+      var s = sim[idx % 4];
+      return { x: s.x, y: 0.86 + s.bump * 0.62, z: s.z, tilt: s.roll * 0.5 + s.pitch * 0.25 };
     };
-    g.userData.labelY = 2.5;
-    g.userData.radius = 2.6;
+    g.userData.labelY = 3.9;
+    g.userData.radius = 4.05;
     g.userData.spots = [{ x:0, y:0.86, z:0 }];
+    g.userData.sim = sim;
   }
 
   /* ---------- 이름표 ---------- */
@@ -8846,45 +9024,45 @@ async function finishBoot(){
   /* ============================================================
      🙌 팔 모션 — 놀이기구마다 다른 팔 동작 (24종 캐릭터 × 15가지)
      · 원본 그림에서 팔(주머니에 넣은 손·옆으로 내린 팔)과 소품을 지운
-       '몸통 레이어'(bodyA) 위에 어깨에서 뻗는 새 팔을 캔버스로 그립니다.
-     · 서기·걷기는 원본 그림 그대로 (여기 값은 기구에 탈 때만 씁니다)
+       '몸통 레이어'(bodyA) 위에, 어깨에서 뻗는 새 팔을 캔버스로 그립니다.
+     · 서기·걷기는 원본 그림 그대로이고, 기구에 탈 때만 이 팔을 씁니다.
      · 좌표는 400×400 원본 기준
         cx 몸통 중심 · hw 몸통 반폭 · sy 어깨 y · len 어깨→손 길이 · w 소매 두께
         ss 1=반소매(아래팔이 피부) · slv 소매색 · cuff 커프색 · skin 손 색
         clr 소품을 지울 사각형 [x0,y0,x1,y1]
      ============================================================ */
   var PG_ARM = {
-    angel_wing:     { cx:196, hw:40, sy:228, len:56, w:13, ss:1, slv:'#CFE2F3', cuff:'#EAF3FB', skin:'#FADFC8' },
-    astronaut_suit: { cx:206, hw:46, sy:224, len:58, w:15, ss:0, slv:'#FBF6EC', cuff:'#A9C4DF', skin:'#FBE4D2' },
-    bear_hood:      { cx:202, hw:47, sy:224, len:58, w:15, ss:0, slv:'#F0D6A8', cuff:'#FBE7C6', skin:'#FADFC8' },
-    beret_study:    { cx:205, hw:42, sy:226, len:56, w:13, ss:0, slv:'#FCF4E6', cuff:'#E7D3B8', skin:'#F8DCC4',
-                      clr:[[150, 234, 240, 292]] },
-    berry_twin:     { cx:205, hw:45, sy:230, len:56, w:15, ss:0, slv:'#FBF0DC', cuff:'#F6E2C8', skin:'#FBDEC9' },
-    bun_ribbon:     { cx:203, hw:42, sy:224, len:56, w:13, ss:1, slv:'#F5C3CC', cuff:'#FBE0E4', skin:'#FADCC6' },
-    cap_track:      { cx:210, hw:42, sy:216, len:60, w:15, ss:0, slv:'#2F3D66', cuff:'#FBFBF8', skin:'#F9DDC6' },
-    cat_ribbon:     { cx:200, hw:38, sy:226, len:56, w:13, ss:0, slv:'#3E3742', cuff:'#7E6A85', skin:'#F6D8C2' },
-    dino_pajama:    { cx:203, hw:44, sy:232, len:58, w:15, ss:1, slv:'#CFE8C8', cuff:'#E4F4DE', skin:'#FBE0C8' },
-    flower_wave:    { cx:202, hw:40, sy:230, len:56, w:13, ss:1, slv:'#DCE8F5', cuff:'#F0F6FC', skin:'#FADCC2' },
-    fox_sailor:     { cx:203, hw:42, sy:226, len:56, w:14, ss:0, slv:'#D9C5E4', cuff:'#F6EFFB', skin:'#FADDC5' },
-    hanbok_pastel:  { cx:201, hw:45, sy:226, len:58, w:15, ss:0, slv:'#E9EFDF', cuff:'#FFF6EE', skin:'#F9DBC0' },
-    mint_hood:      { cx:205, hw:48, sy:222, len:58, w:15, ss:0, slv:'#CFE7CE', cuff:'#E7F5E4', skin:'#FADFC8' },
-    panda_hood:     { cx:202, hw:46, sy:226, len:58, w:15, ss:0, slv:'#33312E', cuff:'#EFE8D8', skin:'#F9DCC4' },
-    patissier_chef: { cx:204, hw:43, sy:228, len:56, w:14, ss:1, slv:'#F5B9BC', cuff:'#FDE6E7', skin:'#FBDFC9' },
-    pearl_denim:    { cx:200, hw:40, sy:222, len:58, w:15, ss:0, slv:'#A6C2DE', cuff:'#DDE8F3', skin:'#F8DAC2' },
-    picnic_cherry:  { cx:201, hw:43, sy:226, len:56, w:14, ss:1, slv:'#FBF4E6', cuff:'#FFFFFF', skin:'#FADFC6' },
-    pony_star:      { cx:199, hw:39, sy:224, len:58, w:15, ss:1, slv:'#FFDE73', cuff:'#FFF0BC', skin:'#F9DCC2' },
-    prince_royal:   { cx:204, hw:41, sy:220, len:58, w:15, ss:0, slv:'#FAF4E8', cuff:'#E2D8C4', skin:'#FBE3CF' },
-    princess_tiara: { cx:202, hw:43, sy:232, len:56, w:13, ss:1, slv:'#F8CBD8', cuff:'#FDE8EE', skin:'#FBDFC7' },
-    rabbit_pajama:  { cx:206, hw:43, sy:228, len:58, w:15, ss:0, slv:'#E3D6F2', cuff:'#F3EAFB', skin:'#FADBC4' },
-    rock_headset:   { cx:201, hw:43, sy:224, len:58, w:15, ss:0, slv:'#B7DFC9', cuff:'#F4FBF5', skin:'#FADFC8' },
-    soccer_sport:   { cx:206, hw:43, sy:220, len:58, w:15, ss:1, slv:'#BFDDEE', cuff:'#EFF8FC', skin:'#F9DBC1' },
-    wizard_robe:    { cx:198, hw:42, sy:218, len:58, w:15, ss:0, slv:'#A98BC0', cuff:'#CBB4DA', skin:'#F8D9C2' }
+    angel_wing:     { cx:196, hw:40, sy:228, len:50, w:16, ss:1, slv:'#CFE2F3', cuff:'#EAF3FB', skin:'#FADFC8' },
+    astronaut_suit: { cx:206, hw:46, sy:224, len:52, w:18, ss:0, slv:'#FBF6EC', cuff:'#A9C4DF', skin:'#FBE4D2' },
+    bear_hood:      { cx:202, hw:47, sy:224, len:52, w:18, ss:0, slv:'#F0D6A8', cuff:'#FBE7C6', skin:'#FADFC8' },
+    beret_study:    { cx:205, hw:42, sy:226, len:50, w:16, ss:0, slv:'#FCF4E6', cuff:'#E7D3B8', skin:'#F8DCC4', clr:[[150,234,240,292]] },
+    berry_twin:     { cx:205, hw:45, sy:230, len:50, w:18, ss:0, slv:'#FBF0DC', cuff:'#F6E2C8', skin:'#FBDEC9' },
+    bun_ribbon:     { cx:203, hw:42, sy:224, len:50, w:16, ss:1, slv:'#F5C3CC', cuff:'#FBE0E4', skin:'#FADCC6' },
+    cap_track:      { cx:210, hw:42, sy:216, len:52, w:18, ss:0, slv:'#2F3D66', cuff:'#FBFBF8', skin:'#F9DDC6' },
+    cat_ribbon:     { cx:200, hw:38, sy:226, len:50, w:16, ss:0, slv:'#3E3742', cuff:'#7E6A85', skin:'#F6D8C2' },
+    dino_pajama:    { cx:203, hw:44, sy:232, len:52, w:18, ss:1, slv:'#CFE8C8', cuff:'#E4F4DE', skin:'#FBE0C8' },
+    flower_wave:    { cx:202, hw:40, sy:230, len:50, w:16, ss:1, slv:'#DCE8F5', cuff:'#F0F6FC', skin:'#FADCC2' },
+    fox_sailor:     { cx:203, hw:42, sy:226, len:50, w:17, ss:0, slv:'#D9C5E4', cuff:'#F6EFFB', skin:'#FADDC5' },
+    hanbok_pastel:  { cx:201, hw:45, sy:226, len:52, w:18, ss:0, slv:'#E9EFDF', cuff:'#FFF6EE', skin:'#F9DBC0' },
+    mint_hood:      { cx:205, hw:48, sy:222, len:52, w:18, ss:0, slv:'#CFE7CE', cuff:'#E7F5E4', skin:'#FADFC8' },
+    panda_hood:     { cx:202, hw:44, sy:226, len:52, w:18, ss:0, slv:'#33312E', cuff:'#EFE8D8', skin:'#F9DCC4' },
+    patissier_chef: { cx:204, hw:43, sy:228, len:50, w:17, ss:1, slv:'#F5B9BC', cuff:'#FDE6E7', skin:'#FBDFC9' },
+    pearl_denim:    { cx:200, hw:40, sy:222, len:52, w:18, ss:0, slv:'#A6C2DE', cuff:'#DDE8F3', skin:'#F8DAC2' },
+    picnic_cherry:  { cx:201, hw:43, sy:226, len:50, w:17, ss:1, slv:'#FBF4E6', cuff:'#FFFFFF', skin:'#FADFC6' },
+    pony_star:      { cx:199, hw:39, sy:224, len:52, w:18, ss:1, slv:'#FFDE73', cuff:'#FFF0BC', skin:'#F9DCC2' },
+    prince_royal:   { cx:204, hw:41, sy:220, len:52, w:18, ss:0, slv:'#FAF4E8', cuff:'#E2D8C4', skin:'#FBE3CF' },
+    princess_tiara: { cx:202, hw:43, sy:232, len:50, w:16, ss:1, slv:'#F8CBD8', cuff:'#FDE8EE', skin:'#FBDFC7' },
+    rabbit_pajama:  { cx:206, hw:43, sy:226, len:52, w:18, ss:0, slv:'#E3D6F2', cuff:'#F3EAFB', skin:'#FADBC4' },
+    rock_headset:   { cx:201, hw:43, sy:224, len:52, w:18, ss:0, slv:'#B7DFC9', cuff:'#F4FBF5', skin:'#FADFC8' },
+    soccer_sport:   { cx:206, hw:43, sy:220, len:52, w:18, ss:1, slv:'#BFDDEE', cuff:'#EFF8FC', skin:'#F9DBC1' },
+    wizard_robe:    { cx:198, hw:42, sy:218, len:52, w:18, ss:0, slv:'#A98BC0', cuff:'#CBB4DA', skin:'#F8D9C2' },
   };
-  var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:57, w:14, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
+  var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:51, w:17, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
   function pgArmOf(k){ return PG_ARM[k] || PG_ARM_DEF; }
   function pgHexToRgb(h){
     h = String(h || '#FFFFFF').replace('#', '');
-    return [parseInt(h.substr(0, 2), 16) || 0, parseInt(h.substr(2, 2), 16) || 0, parseInt(h.substr(4, 2), 16) || 0];
+    var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16);
+    return [isNaN(r) ? 255 : r, isNaN(g) ? 255 : g, isNaN(b) ? 255 : b];
   }
   function pgMixHex(h1, h2, t){
     var a = pgHexToRgb(h1), b = pgHexToRgb(h2), o = '#';
@@ -8899,47 +9077,61 @@ async function finishBoot(){
     if (PG.armPal[k]) return PG.armPal[k];
     var a = pgArmOf(k);
     var p = { slv: a.slv || '#F3E9DA', cuff: a.cuff || '#FFF8EE', skin: a.skin || '#F9DCC4' };
-    p.out = pgMixHex(p.slv, '#6B4A35', 0.52);      /* 소매보다 살짝 진한 따뜻한 갈색 테두리 */
+    p.out = pgMixHex(p.slv, '#6B4A38', 0.48);      /* 소매보다 살짝 진한 따뜻한 갈색 테두리 */
     PG.armPal[k] = p;
     return p;
   }
-  /* 팔·주머니 손·소품을 지운 몸통 레이어 — 실루엣(알파)은 원본 그대로 둔다 */
+  /* 둥근 사각(캡슐) 마스크 — 가장자리를 부드럽게 */
+  function pgCapsuleMask(w, h, feather){
+    var cv = document.createElement('canvas'); cv.width = Math.max(2, Math.ceil(w)); cv.height = Math.max(2, Math.ceil(h));
+    var c = cv.getContext('2d');
+    var r = Math.min(cv.width, cv.height) / 2;
+    try { c.filter = 'blur(' + (feather || 6) + 'px)'; } catch(e){}
+    c.fillStyle = '#fff';
+    c.beginPath();
+    c.moveTo(r, 0); c.lineTo(cv.width - r, 0); c.arc(cv.width - r, r, r, -Math.PI / 2, Math.PI / 2);
+    c.lineTo(r, cv.height); c.arc(r, cv.height - r, r, Math.PI / 2, Math.PI * 1.5);
+    c.closePath(); c.fill();
+    return cv;
+  }
+  /* 팔·주머니 손·소품을 지운 몸통 레이어 — 실루엣(알파)은 원본 그대로 */
   function pgArmBody(img, L, cfg, pal){
     var w = img.width || 400, h = img.height || 400;
     var out = document.createElement('canvas'); out.width = w; out.height = h;
     var c = out.getContext('2d');
     c.drawImage(img, 0, 0, w, h);
-    var y0 = Math.max(0, cfg.sy - 14);
-    var y1 = Math.min(h, Math.min(L.ly + 4, cfg.sy + cfg.len + 20));
-    if (y1 - y0 < 8) return out;
+    var y0 = Math.max(0, Math.round(cfg.sy - 14));
+    var y1 = Math.round(Math.min(h, Math.min(L.ly + 4, cfg.sy + cfg.len + 22)));
+    var bh = y1 - y0;
+    if (bh < 10) return out;
     [-1, 1].forEach(function(side){
-      var bw = 30;                                   /* 지울 팔 밴드 폭 */
-      var xin = cfg.cx + side * (cfg.hw - 2);        /* 몸통 쪽 기준선 */
+      var bw = 26;                                    /* 지울 팔 밴드 폭 */
+      var xin = cfg.cx + side * (cfg.hw - 2);         /* 몸통 쪽 기준선 */
       var x0 = xin, x1 = xin + side * bw, t;
       if (x0 > x1){ t = x0; x0 = x1; x1 = t; }
-      var bw2 = Math.max(4, Math.round(x1 - x0));
-      var bh = Math.round(y1 - y0);
-      var tmp = document.createElement('canvas'); tmp.width = bw2; tmp.height = bh;
+      var sx = side < 0 ? xin : xin - bw;             /* 기준선에서 안쪽을 거울처럼 */
+      var tmp = document.createElement('canvas'); tmp.width = bw; tmp.height = bh;
       var tc = tmp.getContext('2d');
-      var sx = side < 0 ? xin : xin - bw2;           /* 기준선에서 안쪽으로 같은 폭 */
       tc.save();
-      tc.translate(bw2, 0); tc.scale(-1, 1);
-      try { tc.filter = 'blur(2px)'; } catch(e){}
-      tc.drawImage(img, sx, y0, bw2, bh, 0, 0, bw2, bh);
+      tc.translate(bw, 0); tc.scale(-1, 1);
+      try { tc.filter = 'blur(4px)'; } catch(e){}
+      tc.drawImage(img, sx, y0, bw, bh, 0, 0, bw, bh);
       tc.restore();
-      c.save();
-      try { c.filter = 'blur(2.4px)'; } catch(e){}
-      c.drawImage(tmp, Math.round(x0), Math.round(y0));
-      c.restore();
+      tc.globalCompositeOperation = 'destination-in';
+      tc.drawImage(pgCapsuleMask(bw, bh, 6), 0, 0);
+      tc.globalCompositeOperation = 'source-over';
+      c.drawImage(tmp, Math.round(x0), y0);
     });
-    (cfg.clr || []).forEach(function(r){              /* 책·지팡이 같은 소품 지우기 */
-      c.save();
-      try { c.filter = 'blur(3px)'; } catch(e){}
-      c.fillStyle = pal.slv;
-      c.fillRect(r[0], r[1], r[2] - r[0], r[3] - r[1]);
-      c.restore();
+    (cfg.clr || []).forEach(function(r){               /* 책·지팡이 같은 소품 지우기 */
+      var pw = Math.round(r[2] - r[0]), ph = Math.round(r[3] - r[1]);
+      var pc = document.createElement('canvas'); pc.width = pw; pc.height = ph;
+      var pctx = pc.getContext('2d');
+      pctx.fillStyle = pal.slv; pctx.fillRect(0, 0, pw, ph);
+      pctx.globalCompositeOperation = 'destination-in';
+      pctx.drawImage(pgCapsuleMask(pw, ph, 7), 0, 0);
+      c.drawImage(pc, Math.round(r[0]), Math.round(r[1]));
     });
-    c.globalCompositeOperation = 'destination-in';    /* 실루엣 유지 */
+    c.globalCompositeOperation = 'destination-in';     /* 실루엣 유지 */
     c.drawImage(img, 0, 0, w, h);
     c.globalCompositeOperation = 'source-over';
     return out;
@@ -8949,64 +9141,86 @@ async function finishBoot(){
     return { x: it * it * p0.x + 2 * it * t * p1.x + t * t * p2.x,
              y: it * it * p0.y + 2 * it * t * p1.y + t * t * p2.y };
   }
-  /* 어깨 S 에서 각도 a(0=아래 · +π/2=옆 · π=위)로 뻗는 팔 한 개 */
+  function pgQuadPts(S, C, H, n){
+    var a = [];
+    for (var i = 0; i <= n; i++) a.push(pgQuadPt(S, C, H, i / n));
+    return a;
+  }
+  /* 곡선 구간 t0~t1 을 굵기 w0→w1 로 부풀린 폴리곤 (어깨 굵고 손목 가늘게) */
+  function pgTaperPoly(pts, w, t0, t1, w0, w1){
+    var n = pts.length - 1;
+    var i0 = Math.round(t0 * n), i1 = Math.round(t1 * n);
+    if (i1 <= i0) i1 = Math.min(n, i0 + 1);
+    if (i1 >= n){ i1 = n; }
+    var Lp = [], Rp = [], i;
+    for (i = i0; i <= i1; i++){
+      var p = pts[i];
+      var tt = i0 === i1 ? t0 : (t0 + (t1 - t0) * ((i - i0) / (i1 - i0)));
+      var ww = w * (w0 + (w1 - w0) * tt) / 2;
+      var qa = pts[Math.max(i0, i - 1)], qb = pts[Math.min(i1, i + 1)];
+      var dx = qb.x - qa.x, dy = qb.y - qa.y, dl = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = -dy / dl, ny = dx / dl;
+      Lp.push(p.x + nx * ww, p.y + ny * ww);
+      Rp.push(p.x - nx * ww, p.y - ny * ww);
+    }
+    return Lp.concat(Rp.reverse());
+  }
+  function pgFillPoly(c, poly, col){
+    c.beginPath();
+    c.moveTo(poly[0], poly[1]);
+    for (var i = 2; i < poly.length; i += 2) c.lineTo(poly[i], poly[i + 1]);
+    c.closePath();
+    c.fillStyle = col; c.fill();
+  }
+  /* 어깨 S 에서 각도 a(0=아래 · π/2=옆 · π=위)로 뻗는 팔 한 개 */
   function pgArmStroke(c, S, a, bow, k, cfg, pal, side){
     var len = cfg.len * k, w = cfg.w;
-    var ca = Math.cos(a), sa = Math.sin(a);
-    var H = { x: S.x + side * sa * len, y: S.y + ca * len };
-    var C = { x: (S.x + H.x) / 2 + side * ca * bow, y: (S.y + H.y) / 2 - sa * bow };
-    c.lineCap = 'round'; c.lineJoin = 'round';
-    /* 테두리 */
-    c.beginPath(); c.moveTo(S.x, S.y); c.quadraticCurveTo(C.x, C.y, H.x, H.y);
-    c.globalAlpha = 0.55; c.strokeStyle = pal.out; c.lineWidth = w + 3.4; c.stroke();
-    /* 소매 */
-    c.globalAlpha = 1; c.strokeStyle = pal.slv; c.lineWidth = w; c.stroke();
-    var wp;
+    var H = { x: S.x + side * Math.sin(a) * len, y: S.y + Math.cos(a) * len };
+    var C = { x: (S.x + H.x) / 2 + side * Math.cos(a) * bow, y: (S.y + H.y) / 2 - Math.sin(a) * bow };
+    var pts = pgQuadPts(S, C, H, 22);
+    var split = cfg.ss ? 0.46 : 1;
+    /* 겉선 → 소매 */
+    pgFillPoly(c, pgTaperPoly(pts, w, 0, split, 1.04, cfg.ss ? 0.98 : 0.74), pal.out);
+    pgFillPoly(c, pgTaperPoly(pts, w - 3.0, 0.02, split, 1.04, cfg.ss ? 0.98 : 0.74), pal.slv);
     if (cfg.ss){
       /* 반소매 — 아래팔은 피부 */
-      var m = pgQuadPt(S, C, H, 0.52);
-      var c0 = { x: S.x + (C.x - S.x) * 0.52, y: S.y + (C.y - S.y) * 0.52 };
-      var c1 = { x: C.x + (H.x - C.x) * 0.52, y: C.y + (H.y - C.y) * 0.52 };
-      var m1 = { x: c0.x + (c1.x - c0.x) * 0.52, y: c0.y + (c1.y - c0.y) * 0.52 };
-      c.beginPath(); c.moveTo(m.x, m.y); c.quadraticCurveTo(m1.x, m1.y, H.x, H.y);
-      c.globalAlpha = 0.5; c.strokeStyle = pal.out; c.lineWidth = w * 0.9 + 3.0; c.stroke();
-      c.globalAlpha = 1; c.strokeStyle = pal.skin; c.lineWidth = w * 0.9; c.stroke();
-      /* 소매 끝단 */
-      c.beginPath(); c.arc(m.x, m.y, w * 0.62, 0, 6.2832);
+      pgFillPoly(c, pgTaperPoly(pts, w * 0.86, split, 1, 1.0, 0.78), pal.out);
+      pgFillPoly(c, pgTaperPoly(pts, w * 0.86 - 2.8, split + 0.02, 0.99, 1.0, 0.78), pal.skin);
+      var m = pgQuadPt(S, C, H, split);
+      c.beginPath(); c.arc(m.x, m.y, w * 0.52, 0, 6.2832);
       c.fillStyle = pal.slv; c.fill();
+      c.strokeStyle = pal.out; c.lineWidth = 2; c.stroke();
     } else {
-      /* 긴소매 — 손목 커프 */
-      wp = pgQuadPt(S, C, H, 0.88);
-      c.beginPath(); c.arc(wp.x, wp.y, w * 0.5, 0, 6.2832);
+      var wp = pgQuadPt(S, C, H, 0.9);
+      c.beginPath(); c.arc(wp.x, wp.y, w * 0.40, 0, 6.2832);
       c.fillStyle = pal.cuff; c.fill();
     }
     /* 둥근 손 */
-    c.beginPath(); c.arc(H.x, H.y, w * 0.64, 0, 6.2832);
+    c.beginPath(); c.arc(H.x, H.y, w * 0.60, 0, 6.2832);
     c.fillStyle = pal.skin; c.fill();
-    c.globalAlpha = 0.42; c.strokeStyle = pal.out; c.lineWidth = 1.9; c.stroke();
-    c.globalAlpha = 1;
+    c.strokeStyle = pal.out; c.lineWidth = 2; c.stroke();
   }
   /* 기구별 팔 동작 — u 는 0~1 한 바퀴 위상, side -1=왼팔 1=오른팔 */
   function pgArmAt(mode, u, side){
     var tw = Math.PI * 2, s = Math.sin(u * tw), cs = Math.cos(u * tw);
-    if (mode === 'cheer')      return { a: 2.36 + 0.22 * s, bow: 11, k: 1.02 };      /* 만세 + 흔들기 */
-    if (mode === 'dropUp')     return { a: 2.46 + 0.15 * s, bow: 13, k: 1.04 };      /* 하강 만세! */
-    if (mode === 'dropHold')   return { a: 0.30 + 0.05 * s, bow: -9, k: 0.74 };      /* 올라갈 때 움츠림 */
-    if (mode === 'hold')       return { a: 2.56 + 0.11 * Math.sin(u * tw + (side > 0 ? 1.0 : 0)), bow: 7, k: 1.14 }; /* 줄·봉 잡기 */
-    if (mode === 'swingArms')  return { a: 2.28 + 0.30 * Math.sin(u * Math.PI), bow: 9, k: 1.06 };  /* 그네 박자 */
-    if (mode === 'climb')      return { a: 1.92 + 0.58 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: 8, k: 1.0 };
-    if (mode === 'slideArms')  return { a: 1.92 + 0.34 * s, bow: 15, k: 1.04 };      /* 활짝 벌려 내려오기 */
-    if (mode === 'jumpUp')     return { a: 2.40 + 0.10 * s, bow: 12, k: 1.03 };      /* 점프 만세 */
-    if (mode === 'jumpDown')   return { a: 0.56 + 0.12 * s, bow: -6, k: 0.88 };      /* 착지 */
-    if (mode === 'rope')       return { a: 0.95 + 0.44 * s, bow: 20 * cs, k: 0.96 }; /* 줄 돌리기 */
+    if (mode === 'cheer')      return { a: 2.02 + 0.20 * s, bow: 9, k: 1.06 };      /* 만세 + 흔들기 */
+    if (mode === 'dropUp')     return { a: 2.10 + 0.16 * s, bow: 11, k: 1.08 };     /* 하강 만세! */
+    if (mode === 'dropHold')   return { a: 0.28 + 0.05 * s, bow: -8, k: 0.76 };     /* 올라갈 때 움츠림 */
+    if (mode === 'hold')       return { a: 2.18 + 0.10 * Math.sin(u * tw + (side > 0 ? 1.0 : 0)), bow: 6, k: 1.14 }; /* 줄·봉 잡기 */
+    if (mode === 'swingArms')  return { a: 1.94 + 0.30 * Math.sin(u * Math.PI), bow: 8, k: 1.10 };  /* 그네 박자 */
+    if (mode === 'climb')      return { a: 1.58 + 0.62 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: 7, k: 1.04 };
+    if (mode === 'slideArms')  return { a: 1.72 + 0.34 * s, bow: 14, k: 1.08 };     /* 활짝 벌려 내려오기 */
+    if (mode === 'jumpUp')     return { a: 2.06 + 0.10 * s, bow: 10, k: 1.06 };     /* 점프 만세 */
+    if (mode === 'jumpDown')   return { a: 0.54 + 0.12 * s, bow: -6, k: 0.90 };     /* 착지 */
+    if (mode === 'rope')       return { a: 0.92 + 0.42 * s, bow: 18 * cs, k: 1.00 };/* 줄 돌리기 */
     if (mode === 'carWave'){
-      if (side > 0) return { a: 1.52 + 0.05 * s, bow: 6, k: 0.92 };                  /* 손잡이 잡기 */
-      return { a: 2.02 + 0.30 * s, bow: 12, k: 1.06 };                               /* 바깥으로 흔들기 */
+      if (side > 0) return { a: 1.44 + 0.05 * s, bow: 5, k: 0.95 };                 /* 손잡이 잡기 */
+      return { a: 1.80 + 0.26 * s, bow: 11, k: 1.08 };                              /* 바깥으로 흔들기 */
     }
-    if (mode === 'wave')       return { a: 1.84 + 0.27 * s, bow: 12, k: 1.04 };
-    if (mode === 'steer')      return { a: -0.10 + 0.17 * s * side, bow: -8 - 4 * cs, k: 0.80 };  /* 핸들·고삐 */
-    if (mode === 'dig')        return { a: 0.30 + 0.44 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: -10, k: 0.82 };
-    if (mode === 'bench')      return { a: 0.16 + 0.06 * s, bow: -7, k: 0.64 };      /* 무릎에 손 */
+    if (mode === 'wave')       return { a: 1.68 + 0.26 * s, bow: 11, k: 1.06 };
+    if (mode === 'steer')      return { a: -0.10 + 0.17 * s * side, bow: -7 - 4 * cs, k: 0.84 };  /* 핸들·고삐 */
+    if (mode === 'dig')        return { a: 0.28 + 0.44 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: -9, k: 0.86 };
+    if (mode === 'bench')      return { a: 0.14 + 0.06 * s, bow: -6, k: 0.68 };     /* 무릎에 손 */
     return { a: 0.12 + 0.05 * s, bow: 0, k: 1 };
   }
   /* 놀이기구 → 팔 모션 */
@@ -9016,7 +9230,6 @@ async function finishBoot(){
     tramp:'jumpUp', rope:'rope', carousel:'carWave', ferris:'wave', balloon:'wave',
     bumper:'steer', teacup:'steer', horse:'steer', seesaw:'steer', sand:'dig', bench:'bench'
   };
-
   /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
   var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
   /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
@@ -10347,10 +10560,12 @@ async function finishBoot(){
     app: function(){ return state; },
     /* 🧪 테스트 전용 훅 (배포 파일에는 없음) */
     pose: pgPose, cam: pgCamera, rideFrames: pgRideFrames, walkFrames: pgWalkFrames,
-    armOf: pgArmOf, armPal: pgArmPal, armAt: pgArmAt, legOf: pgLegOf,
+    armOf: pgArmOf, armPal: pgArmPal, armAt: pgArmAt, legOf: pgLegOf, legLayers: pgLegLayers,
     framePick: pgRideFramePick, rideMode: PG_RIDE_MODE, armMode: PG_ARM_MODE,
     chars: function(){ return PG.chars; }, order: function(){ return PG.charOrder; },
+    rides: function(){ return PG.rides; }, rideList: function(){ return PG.rideList; },
     texCount: function(){ var n = 0; for (var q in PG.rideTex) if (PG.rideTex[q]) n++; return n; },
+    texKeys: function(){ return Object.keys(PG.rideTex); },
     halt: function(){ PG.on = false; },
     seat: function(i, ride, si){
       var id = PG.charOrder[i]; if (!id) return null;
@@ -10374,43 +10589,80 @@ async function finishBoot(){
       pgCamera(); PG.renderer.render(PG.scene, PG.camera);
       return t;
     },
-    /* 캐릭터 그림 시트 — [[preset, legMode, armMode, frameIdx], ...] */
-    sheet: function(items, size, crop){
+    render: function(){ pgCamera(); PG.renderer.render(PG.scene, PG.camera); return 1; },
+    /* 캐릭터 그림 시트 — 비율 유지 */
+    sheet: function(items, S, cs, cols){
       var box = document.getElementById('sheetBox'); if (!box) return 'nobox';
-      var S = size || 200, cs = crop || [110, 140, 290, 400];
-      var cw = cs[2] - cs[0], ch = cs[3] - cs[1];
-      var cols = 6, rows = Math.ceil(items.length / cols);
+      S = S || 200; cs = cs || [100, 140, 300, 400]; cols = cols || 6;
+      var cw = cs[2] - cs[0], chh = cs[3] - cs[1], cH = Math.round(S * chh / cw);
+      var rows = Math.ceil(items.length / cols);
       var cv = document.createElement('canvas');
-      cv.width = cols * (S + 6) + 6; cv.height = rows * (S + 26) + 8;
+      cv.width = cols * (S + 6) + 6; cv.height = rows * (cH + 24) + 8;
       var c = cv.getContext('2d');
       c.fillStyle = '#BFE3A8'; c.fillRect(0, 0, cv.width, cv.height);
       for (var i = 0; i < items.length; i++){
         var it = items[i], fr = pgRideFrames(it[0], it[1], it[2]);
-        var gx = 6 + (i % cols) * (S + 6), gy = 26 + Math.floor(i / cols) * (S + 26);
-        c.fillStyle = '#31421f'; c.font = 'bold 13px sans-serif';
-        c.fillText(it[0] + ' · ' + it[2], gx, gy - 8);
+        var gx = 6 + (i % cols) * (S + 6), gy = 26 + Math.floor(i / cols) * (cH + 24);
+        c.fillStyle = '#31421f'; c.font = 'bold 12px sans-serif';
+        c.fillText(it[0] + ' · ' + it[2] + (it[3] != null ? ' ' + it[3] : ''), gx, gy - 8);
         if (!fr){ c.fillStyle = 'red'; c.fillText('noframes', gx + 6, gy + 40); continue; }
         var tx = fr[(it[3] == null ? 3 : it[3]) % fr.length];
-        c.drawImage(tx.image, cs[0], cs[1], cw, ch, gx, gy, S, S);
+        c.drawImage(tx.image, cs[0], cs[1], cw, chh, gx, gy, S, cH);
       }
       box.innerHTML = ''; box.appendChild(cv); box.style.display = 'block';
       return items.length + ' items ' + cv.width + 'x' + cv.height;
     },
-    sheetHide: function(){ var b = document.getElementById('sheetBox'); if (b){ b.style.display='none'; b.innerHTML=''; } },
-    /* 원본(서기) 그림과 비교용 — 팔 지운 몸통 + 팔 한 프레임만 */
-    bodyOnly: function(preset, size){
-      var ly = pgLegLayers(preset); if (!ly) return 'nolayers';
+    /* 원본 | 팔 지운 몸통 | 팔 그린 프레임 3단 비교 */
+    bodies: function(list, S, arm){
       var box = document.getElementById('sheetBox'); if (!box) return 'nobox';
-      var S = size || 300, cv = document.createElement('canvas');
-      cv.width = S * 2 + 12; cv.height = S + 24;
-      var c = cv.getContext('2d');
-      c.fillStyle = '#BFE3A8'; c.fillRect(0, 0, cv.width, cv.height);
-      c.drawImage(ly.body, 120, 150, 220, 250, 6, 22, S, S);
-      c.drawImage(ly.bodyA, 120, 150, 220, 250, S + 12, 22, S, S);
-      c.fillStyle = '#31421f'; c.font = 'bold 14px sans-serif';
-      c.fillText('원본', 8, 16); c.fillText('팔 지운 몸통', S + 14, 16);
+      S = S || 200; var cs = [100, 140, 300, 400], cw = cs[2]-cs[0], chh = cs[3]-cs[1];
+      var cH = Math.round(S * chh / cw);
+      var cv = document.createElement('canvas');
+      cv.width = list.length * (3*S + 12) + 8; cv.height = cH + 30;
+      var c = cv.getContext('2d'); c.fillStyle = '#BFE3A8'; c.fillRect(0,0,cv.width,cv.height);
+      for (var i = 0; i < list.length; i++){
+        var p = list[i], ly = pgLegLayers(p); if (!ly) continue;
+        var fr = pgRideFrames(p, 'kick', arm || 'cheer');
+        var bx = 8 + i*(3*S+12);
+        var bg = document.createElement('canvas'); bg.width = 400; bg.height = 400;
+        var bc = bg.getContext('2d'); bc.fillStyle = '#FAFAFA'; bc.fillRect(0,0,400,400);
+        bc.drawImage(ly.body, 0, 0);
+        c.drawImage(bg, cs[0],cs[1],cw,chh, bx, 24, S, cH);
+        var bg2 = document.createElement('canvas'); bg2.width = 400; bg2.height = 400;
+        var bc2 = bg2.getContext('2d'); bc2.fillStyle = '#FAFAFA'; bc2.fillRect(0,0,400,400);
+        bc2.drawImage(ly.bodyA, 0, 0);
+        c.drawImage(bg2, cs[0],cs[1],cw,chh, bx + S, 24, S, cH);
+        if (fr) c.drawImage(fr[3].image, cs[0],cs[1],cw,chh, bx + 2*S, 24, S, cH);
+        c.fillStyle = '#31421f'; c.font = 'bold 12px sans-serif';
+        c.fillText(p, bx, 16);
+      }
       box.innerHTML = ''; box.appendChild(cv); box.style.display = 'block';
-      return preset;
+      return 'bodies ' + cv.width + 'x' + cv.height;
+    },
+    sheetHide: function(){ var b = document.getElementById('sheetBox'); if (b){ b.style.display='none'; b.innerHTML=''; } },
+    /* 범퍼카 시뮬레이션 상태 */
+    bumper: function(){
+      var R = PG.rides.bumper; if (!R) return null;
+      var sim = R.g.userData.sim || [];
+      return {
+        pos: R.g.position.toArray().map(function(v){ return Number(v.toFixed(2)); }),
+        radius: R.g.userData.radius,
+        cars: sim.map(function(s){
+          return { x: Number(s.x.toFixed(3)), z: Number(s.z.toFixed(3)),
+                   v: Number(Math.sqrt(s.vx*s.vx+s.vz*s.vz).toFixed(3)),
+                   dir: Number(s.dir.toFixed(2)), bump: Number(s.bump.toFixed(3)),
+                   r: Number(Math.sqrt(s.x*s.x+s.z*s.z).toFixed(3)) };
+        })
+      };
+    },
+    island: function(){ return { islandR: ISLAND_R, charR: CHAR_R }; },
+    dists: function(){
+      var out = [];
+      PG.rideList.forEach(function(k){
+        var g = PG.rides[k].g;
+        out.push([k, Number(g.position.x.toFixed(2)), Number(g.position.z.toFixed(2)), g.userData.radius || 0]);
+      });
+      return out;
     }
   };
 })();
