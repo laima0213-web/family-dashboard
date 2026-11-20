@@ -1536,6 +1536,14 @@ function studyItems(id){ return ((state.study && state.study.items) || {})[id] |
 function studyWeekMap(kid){ var w=(state&&state.study&&state.study.weekly)||{}; return (w[kid]&&typeof w[kid]==='object')?w[kid]:{}; }
 function smHistory(){ return (state && state.study && state.study.history) || {}; }
 function listOf(id,tab){ return (state&&state.kids&&state.kids[id]&&state.kids[id][tab])||[]; }
+function monthKeyOf(d){ d = d || new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1); }
+function parseKey(k){ return ymdParse(k); }
+function smDayItems(kid, key){
+  var h = smHistory()[key], arr = h && h[kid];
+  if (arr && arr.length) return arr;
+  if (key === todayKey()) return studyItems(kid);
+  return [];
+}
 function studyHistorySync(){
   var st = state.study, k = todayKey();
   if (!st.history[k]) st.history[k] = {};
