@@ -456,6 +456,72 @@ button{font:inherit;color:inherit}
     padding:13px 12px calc(12px + env(safe-area-inset-bottom,0px))}
   .sm-d{height:32px}
 }
+/* ---------- 📊 루틴 통계 — 세그먼트 탭 · 주간 흐름 표 ---------- */
+.sm-tabs{display:flex;gap:4px;background:#F0F0F8;border-radius:14px;padding:4px;margin:0 0 10px}
+.sm-tab{flex:1 1 0;min-width:0;height:34px;border:0;background:transparent;border-radius:11px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  font-size:12.5px;font-weight:900;color:#8B88A0;cursor:pointer;font-family:inherit;letter-spacing:-.4px}
+.sm-tab svg{flex:0 0 auto;opacity:.7}
+.sm-tab.on{background:#fff;color:#3F3A52;box-shadow:0 2px 8px rgba(122,110,160,.16)}
+.sm-tab.on svg{opacity:1}
+.smw-nav{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.smw-nav button{flex:0 0 auto;width:34px;height:34px;border:1px solid #EEE8F4;background:#fff;border-radius:12px;
+  font-size:17px;font-weight:900;color:#6B5E7A;line-height:1;cursor:pointer;font-family:inherit;
+  box-shadow:0 2px 6px rgba(150,140,180,.10)}
+.smw-nav button:active{transform:scale(.94)}
+.smw-mid{flex:1 1 auto;min-width:0;text-align:center}
+.smw-mid b{display:block;font-size:15px;font-weight:900;color:#3F3A52;letter-spacing:-.5px}
+.smw-mid span{display:block;margin-top:1px;font-size:10.5px;font-weight:800;color:#A29AB0;letter-spacing:-.2px}
+.smw-card{background:#fff;border:1px solid #F0EBF6;border-radius:16px;padding:7px 7px 8px;
+  box-shadow:0 3px 12px rgba(150,140,180,.07)}
+.smw{display:block}
+.smw-row{display:grid;grid-template-columns:52px minmax(0,1fr) repeat(7,25px);column-gap:3px;
+  align-items:center;min-height:30px;padding:1px 0}
+.smw-row.g{border-top:1px solid #F4F0F9;margin-top:3px;padding-top:3px}
+.smw-th{padding-bottom:5px;min-height:0}
+.smw-th .lab{align-self:end;font-size:9.5px;font-weight:900;color:#B3A9BC;text-align:left;padding-left:3px}
+.smw-th .lab2{align-self:end;font-size:9.5px;font-weight:900;color:#B3A9BC;text-align:left;padding-left:3px}
+.smw-th div{display:block;text-align:center;font-size:9px;font-weight:900;color:#A99EB2;line-height:1.15;
+  border-radius:8px;padding:3px 0 2px}
+.smw-th em{display:block;font-style:normal;font-size:10px;font-weight:900;color:#8E86A0;margin-top:1px}
+.smw-th.tod div{background:#FFE9EF}
+.smw-th.tod div,.smw-th.tod em{color:#C4607F}
+.smw-ar{min-width:0}
+.smw-ab{display:inline-flex;align-items:center;gap:2px;max-width:52px;padding:2px 5px;border-radius:999px;
+  font-size:8.5px;font-weight:900;line-height:1.15;letter-spacing:-.3px;white-space:nowrap}
+.smw-ab span{min-width:0;overflow:hidden}
+.smw-ab.long{font-size:8px;letter-spacing:-.5px;padding:2px 4px}
+.smw-ab i{font-style:normal;font-size:9px;flex:0 0 auto;line-height:1}
+.smw-ab i.tx{font-size:7.5px;font-weight:900;font-style:normal;letter-spacing:-.3px}
+.smw-rn{font-size:10.5px;font-weight:800;color:#6D6473;line-height:1.2;letter-spacing:-.3px;
+  padding:0 2px 0 3px;overflow-wrap:anywhere;min-width:0}
+.smw-rn.b{color:#4B4450}
+.smw-cw{display:flex;justify-content:center}
+.smw-c{width:25px;height:25px;border-radius:8px;border:1.5px solid #ECE6F0;background:#fff;
+  display:grid;place-items:center;padding:0;font-size:11px;font-weight:900;color:#fff;line-height:1;
+  cursor:pointer;font-family:inherit}
+.smw-c:active{transform:scale(.92)}
+.smw-c.done{background:var(--dc,#57B87E);border-color:var(--dc,#57B87E);box-shadow:0 1px 4px rgba(120,110,140,.14)}
+.smw-c.rest{background:#E4F6DF;border-color:#CFE9C5;font-size:10px;color:#4E8F63}
+.smw-c.plan{background:#FFFDFB}
+.smw-c.none{background:transparent;border-color:transparent;color:#CFC8D8;font-size:12px;font-weight:900}
+.smw-c.fut{cursor:default;opacity:.85}
+.smw-c.fut:active{transform:none}
+.smw-none{font-size:11px;font-weight:800;color:#B4A695;text-align:center;padding:10px 4px}
+.smw-leg{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:9px;
+  font-size:10px;font-weight:800;color:#8D8598}
+.smw-leg b{display:inline-flex;align-items:center;gap:4px;font-weight:800;color:#8D8598}
+.smw-lc{width:15px;height:15px;border-radius:5px;display:grid;place-items:center;font-size:8px;font-weight:900;
+  color:#fff;background:linear-gradient(135deg,#7FD3C0,#5FA97A,#9B7FD4);font-style:normal;line-height:1}
+.smw-lc.gr{background:#E4F6DF;font-size:8.5px;color:#4E8F63}
+.smw-lc.pl{background:#fff;border:1.5px solid #ECE6F0;color:transparent}
+.smw-lc.no{background:transparent;color:#CFC8D8;font-size:11px}
+@media (min-width:431px){ .sm-card.wide{max-width:430px} }
+@media (max-width:374px){
+  .smw-row{grid-template-columns:48px minmax(0,1fr) repeat(7,22px);column-gap:2px}
+  .smw-c{width:22px;height:22px;border-radius:7px;font-size:10px}
+  .smw-rn{font-size:9.5px}
+}
 /* ---------- 윤·봄 프로필 카드 ---------- */
 .kids2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .prof{padding:9px 9px 8px;cursor:pointer;transition:box-shadow .15s,transform .12s}
@@ -2172,6 +2238,7 @@ function mutate(fn){
   var before = JSON.parse(JSON.stringify(state));
   fn(state);
   try { studyHistorySync(state); } catch(e){ console.warn('[dashboard] study history sync:', e && e.message); }
+  try { routineHistorySync(state); } catch(e){ console.warn('[dashboard] routine history sync:', e && e.message); }
   var paths = diffPaths(before, state, 'state');
   if (Object.keys(paths).length) queueWrite(paths);
   return paths;
@@ -2328,7 +2395,7 @@ function defaultStudySubjects(){
   return [ { id:'sub_home', name:'홈스터디' }, { id:'sub_eng', name:'영어학원' } ];
 }
 function defaultStudy(){
-  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {} };
+  return { date: todayKey(), subjects: defaultStudySubjects(), presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {}, rest: {} };
 }
 /* 요일 키 — String(new Date().getDay()) 기준 (일=0 · 토=6). 화면은 월~일 순서 */
 var DOW_KEYS = ['1','2','3','4','5','6','0'];
@@ -2336,7 +2403,7 @@ var DOW_NAME = { '1':'월','2':'화','3':'수','4':'목','5':'금','6':'토','0'
 function dowKey(d){ return String((d || new Date()).getDay()); }
 function normalizeStudy(raw){
   var s = (raw && typeof raw === 'object') ? raw : {};
-  var out = { date: todayKey(), subjects: [], presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {} };
+  var out = { date: todayKey(), subjects: [], presets: {}, items: {}, weekly: {}, weeklyAppliedDate: '', history: {}, rest: {} };
   var subs = Array.isArray(s.subjects) ? s.subjects : [];
   subs.forEach(function(x){
     if (!x || typeof x.name !== 'string' || !x.name.trim()) return;
@@ -2414,6 +2481,21 @@ function normalizeStudy(raw){
     });
     if (Object.keys(perKid).length) out.history[dk] = perKid;
   });
+  /* 쉬어가기 — rest[YYYY-MM-DD][아이] = [셀 키 'S|과목|문제집', ...] */
+  var rst = (s.rest && typeof s.rest === 'object') ? s.rest : {};
+  Object.keys(rst).forEach(function(dk){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) return;
+    var day = rst[dk];
+    if (!day || typeof day !== 'object') return;
+    var per = {};
+    KIDS.forEach(function(id){
+      var arr = day[id];
+      if (!Array.isArray(arr)) return;
+      var list = arr.filter(function(x){ return typeof x === 'string' && x; });
+      if (list.length) per[id] = list;
+    });
+    if (Object.keys(per).length) out.rest[dk] = per;
+  });
   if (typeof s.date === 'string' && s.date !== todayKey()){
     /* 날이 지난 채 앱을 열어도 그날 목록은 history 에 남긴다 */
     if (/^\d{4}-\d{2}-\d{2}$/.test(s.date) && out.date !== s.date){
@@ -2452,6 +2534,8 @@ function defaultState(){
     want: [],
     foods: {},
     study: defaultStudy(),
+    routineHistory: {},                          /* 생활 루틴 날짜별 기록 */
+    routineRest: {},                             /* 생활 루틴 쉬어가기 표시 */
     reading: {},
     avatars: {},
     mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
@@ -2548,6 +2632,51 @@ function normalizeReading(raw){
   });
   return out;
 }
+/* 생활 루틴 기록 — routineHistory[YYYY-MM-DD][아이] = [{ id, text, tab, done }] */
+function normalizeRoutineHistory(raw){
+  var out = {};
+  if (!raw || typeof raw !== 'object') return out;
+  Object.keys(raw).forEach(function(dk){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) return;
+    var day = raw[dk];
+    if (!day || typeof day !== 'object') return;
+    var per = {};
+    KIDS.forEach(function(kid){
+      var arr = day[kid];
+      if (!Array.isArray(arr)) return;
+      var list = [];
+      arr.forEach(function(x){
+        if (!x || typeof x.text !== 'string' || !x.text.trim()) return;
+        list.push({ id: (typeof x.id === 'string' && x.id) ? x.id : uid('rh'),
+                    text: x.text.trim(),
+                    tab: (x.tab === 'evening') ? 'evening' : 'morning',
+                    done: !!x.done });
+      });
+      if (list.length) per[kid] = list;
+    });
+    if (Object.keys(per).length) out[dk] = per;
+  });
+  return out;
+}
+/* 쉬어가기 표시 — routineRest[YYYY-MM-DD][아이] = [루틴 id, ...] */
+function normalizeRoutineRest(raw){
+  var out = {};
+  if (!raw || typeof raw !== 'object') return out;
+  Object.keys(raw).forEach(function(dk){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) return;
+    var day = raw[dk];
+    if (!day || typeof day !== 'object') return;
+    var per = {};
+    KIDS.forEach(function(kid){
+      var arr = day[kid];
+      if (!Array.isArray(arr)) return;
+      var list = arr.filter(function(x){ return typeof x === 'string' && x; });
+      if (list.length) per[kid] = list;
+    });
+    if (Object.keys(per).length) out[dk] = per;
+  });
+  return out;
+}
 function normalizeState(raw){
   var base = defaultState();
   var r = (raw && typeof raw === 'object') ? raw : {};
@@ -2570,6 +2699,8 @@ function normalizeState(raw){
   out.want = normalizeList(r.want, [], 'w');
   out.foods = (r.foods && typeof r.foods === 'object') ? Object.assign({}, r.foods) : {};
   out.study = normalizeStudy(r.study);
+  out.routineHistory = normalizeRoutineHistory(r.routineHistory);
+  out.routineRest = normalizeRoutineRest(r.routineRest);
   out.reading = normalizeReading(r.reading);
   /* 꾸미기 상점 포인트 — 보너스·사용·해금 목록 (착용 캐릭터 기본값 판정에 쓰이므로 avatars보다 먼저 정규화) */
   var shopRaw = (r.shop && typeof r.shop === 'object') ? r.shop : {};
@@ -2836,6 +2967,16 @@ function ensureDay(){
       if (!s.days[prev]) s.days[prev] = {};
       KIDS.forEach(function(id){
         if (!s.days[prev][id]) s.days[prev][id] = studyDone(id) ? 'done' : 'miss';
+      });
+    }
+    /* 생활 루틴도 전날 모습 그대로 routineHistory[prev] 에 남겨 두고 오늘로 넘어간다 */
+    if (prev){
+      if (!s.routineHistory || typeof s.routineHistory !== 'object') s.routineHistory = {};
+      KIDS.forEach(function(id){
+        var snap = smRoutineSnap(s, id);
+        if (!snap.length) return;
+        if (!s.routineHistory[prev] || typeof s.routineHistory[prev] !== 'object') s.routineHistory[prev] = {};
+        s.routineHistory[prev][id] = snap;
       });
     }
     KIDS.forEach(function(id){
@@ -4062,6 +4203,7 @@ function studyEnsure(s){
   if (!st.presets || typeof st.presets !== 'object') st.presets = {};
   if (!st.weekly || typeof st.weekly !== 'object') st.weekly = {};
   if (!st.history || typeof st.history !== 'object') st.history = {};
+  if (!st.rest || typeof st.rest !== 'object') st.rest = {};
   st.date = todayKey();
   return st;
 }
@@ -4086,6 +4228,22 @@ function studyHistorySync(s){
     }
   });
   if (st.history[k] && !Object.keys(st.history[k]).length) delete st.history[k];
+}
+/* 생활 루틴도 날마다 스냅샷을 남긴다 — state.routineHistory[YYYY-MM-DD][아이]
+   = [{ id, text, tab, done }] · 오늘 kids[morning/evening] 중 문제집류(wb)는 뺀다.
+   체크·추가·수정·삭제가 일어날 때마다(모든 mutate 끝) 자동으로 불린다 */
+function routineHistorySync(s){
+  if (!s || !s.kids) return;
+  var k = todayKey();
+  if (s.date && s.date !== k) return;          /* 날이 안 바뀐 상태에서만 오늘 기록을 덮는다 */
+  if (!s.routineHistory || typeof s.routineHistory !== 'object') s.routineHistory = {};
+  var day = (s.routineHistory[k] && typeof s.routineHistory[k] === 'object') ? s.routineHistory[k] : (s.routineHistory[k] = {});
+  KIDS.forEach(function(id){
+    var snap = smRoutineSnap(s, id);
+    if (snap.length) day[id] = snap;
+    else if (day[id]) delete day[id];
+  });
+  if (!Object.keys(day).length) delete s.routineHistory[k];
 }
 /* ============================================================
    17-2-b. 요일별 자동 반복 — state.study.weekly[아이][요일]
@@ -4286,8 +4444,8 @@ function renderStudy(){
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
     +   '<span class="st-badge">' + done + ' / ' + items.length + ' 완료</span>'
-    +   '<button class="st-mbtn" type="button" data-act="st-monthly" aria-label="월간 공부 기록 보기">'
-    +     '<span class="lkl">📅 월간 기록</span><span class="lks">📅 월간</span></button>'
+    +   '<button class="st-mbtn" type="button" data-act="st-stats" aria-label="루틴 통계 보기">'
+    +     '<span class="lkl">📊 루틴 통계</span><span class="lks">📊 통계</span></button>'
     +   studyLockHtml()
     + '</div>'
     + '<div class="st-prog"><i style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></i></div>'
@@ -4330,6 +4488,8 @@ function smOpenModal(){
   smKid = studyKidId();
   smMon = monthKeyOf();
   smSel = todayKey();
+  smTab = 'week';
+  smWeek = ymd(mondayOf(new Date()));
   renderStudyMonth();
   var box = $('#sm'); if (box) box.hidden = false;
   var card = $('#smCard'); if (card) card.scrollTop = 0;
@@ -4357,6 +4517,11 @@ function renderStudyMonth(){
   var body = $('#smBody'); if (!body) return;
   var card = $('#smCard'), keepTop = card ? card.scrollTop : 0;
   var kid = smKidId();
+  if (card && card.classList) card.classList.toggle('wide', smTab === 'week');
+  body.innerHTML = smHeadHtml(kid) + (smTab === 'month' ? smMonthHtml(kid) : smWeekHtml(kid));
+  if (card) card.scrollTop = keepTop;
+}
+function smMonthHtml(kid){
   var ym = smMon || monthKeyOf(), y = Number(ym.slice(0,4)), mo = Number(ym.slice(5,7)) - 1;
   var firstDow = new Date(y, mo, 1).getDay(), lastDay = new Date(y, mo + 1, 0).getDate();
   var today = todayKey();
@@ -4428,12 +4593,7 @@ function renderStudyMonth(){
   }).join('');
 
   var monLabel = (ym === monthKeyOf()) ? '이번 달' : (mo + 1) + '월';
-  body.innerHTML =
-      '<div class="sm-h"><div><b>📅 월간 공부 기록</b>'
-    +   '<p>날짜를 누르면 그날의 공부를 볼 수 있어요.</p></div>'
-    +   '<button class="sm-x" type="button" data-act="sm-close" aria-label="닫기">✕</button></div>'
-    + '<div class="sm-kids" role="group" aria-label="자녀 선택">' + kidChips + '</div>'
-    + '<div class="sm-nav">'
+  return + '<div class="sm-nav">'
     +   '<button type="button" data-act="sm-prev" aria-label="이전 달">‹</button>'
     +   '<b>' + y + '년 ' + (mo + 1) + '월</b>'
     +   '<button type="button" data-act="sm-next" aria-label="다음 달">›</button>'
@@ -4447,7 +4607,380 @@ function renderStudyMonth(){
     +   '<div>' + monLabel + ' 완료한 공부<b>' + monthDone + '<em>개</em></b></div>'
     +   '<div>공부한 날<b>' + studyDays + '<em>일</em></b></div>'
     + '</div>';
-  if (card) card.scrollTop = keepTop;
+}
+/* ============================================================
+   12-3-c. 📊 루틴 통계 — 주간 흐름(공부 + 생활 루틴) / 월간 기록
+   ============================================================ */
+var smTab = 'week';        /* 'week' 주간 흐름 | 'month' 월간 기록 */
+var smWeek = '';           /* 보고 있는 주의 월요일 'YYYY-MM-DD' ('' = 이번 주) */
+var SM_IC_GRID = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor"><rect x="1.6" y="1.6" width="5.1" height="5.1" rx="1.5"></rect><rect x="9.3" y="1.6" width="5.1" height="5.1" rx="1.5"></rect><rect x="1.6" y="9.3" width="5.1" height="5.1" rx="1.5"></rect><rect x="9.3" y="9.3" width="5.1" height="5.1" rx="1.5"></rect></svg>';
+var SM_IC_CAL = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.9" y="3.1" width="12.2" height="11.1" rx="2.2"></rect><path d="M2.2 6.6h11.6M5.5 1.7v2.6M10.5 1.7v2.6"></path></svg>';
+var SM_CELL_LABEL = { done: '완료', rest: '쉬어가기', plan: '계획일', none: '계획 없음' };
+
+/* 영역(과목·생활) 뱃지 팔레트 — 아이콘 + 파스텔 배경 + 완료 셀 색 */
+var AREA_ORDER = ['국어', '영어', '수학', '과학', '사회·역사', '한자', '독서', '미술', '습관', '기타'];
+var AREA_STYLE = {
+  '국어':      { icon: '📖', bg: '#FFE4EA', ink: '#BE566D', done: '#EE7E96' },
+  '영어':      { icon: 'abc', bg: '#E3EEFB', ink: '#3F6FA8', done: '#5B8FD6' },
+  '수학':      { icon: '🔢', bg: '#DDF4E4', ink: '#3E8B58', done: '#57B87E' },
+  '과학':      { icon: '🔬', bg: '#DBF2F2', ink: '#2F8A8D', done: '#4BB3B6' },
+  '사회·역사': { icon: '🌏', bg: '#FFE8D6', ink: '#B5713A', done: '#E9A05B' },
+  '한자':      { icon: '✏️', bg: '#E6E6FA', ink: '#5F5BA8', done: '#8580D6' },
+  '독서':      { icon: '📚', bg: '#EFE4FA', ink: '#7A4FA8', done: '#A97BE0' },
+  '미술':      { icon: '🎨', bg: '#FBE4EF', ink: '#B04E7C', done: '#DD7FAE' },
+  '습관':      { icon: '⭐', bg: '#FFF4CF', ink: '#A8802A', done: '#E3B93F' },
+  '기타':      { icon: '📌', bg: '#ECEEF4', ink: '#5C6478', done: '#8C93A6' }
+};
+/* 이름이 조금 달라도 같은 영역으로 묶는다 (은혜님이 새로 만든 과목 태그도 자동 매핑) */
+var AREA_ALIAS = { '영어학원': '영어', '홈스터디': '기타', '사회': '사회·역사', '역사': '사회·역사', '한국사': '사회·역사', '국사': '사회·역사', '음악': '미술', '체육': '기타', '코딩': '기타' };
+var AREA_EXTRA = [
+  { bg: '#E8F0FB', ink: '#4A6C99', done: '#7B9CC9' },
+  { bg: '#FDEBE3', ink: '#A9704A', done: '#D69C74' },
+  { bg: '#E9F6EC', ink: '#4C8359', done: '#7DB48B' },
+  { bg: '#F3E9F9', ink: '#7B5AA6', done: '#AE8BD1' },
+  { bg: '#FFF2DA', ink: '#9A7833', done: '#D4AC5C' },
+  { bg: '#E7F5F6', ink: '#3C7F84', done: '#6FB3B8' },
+  { bg: '#FBE9F0', ink: '#A75C79', done: '#D492AC' },
+  { bg: '#EDF0FA', ink: '#5B6491', done: '#8E97C4' }
+];
+function areaKey(name){
+  var raw = String(name === undefined || name === null ? '' : name).trim();
+  var n = raw.replace(/\s+/g, '');
+  if (!n) return '기타';
+  if (AREA_STYLE[n]) return n;
+  if (AREA_ALIAS[n]) return AREA_ALIAS[n];
+  var KW = [
+    ['수학', ['수학', '연산', '최상위', '쎈', '디딤돌', '사고력']],
+    ['국어', ['국어', '독해', '문해', '받아쓰기', '일기', '논술']],
+    ['영어', ['영어', 'english', '파닉스', '리스닝', '리딩', 'phonics']],
+    ['과학', ['과학', '실험']],
+    ['사회·역사', ['사회', '역사', '한국사', '지리']],
+    ['한자', ['한자', '급수', '천자문']],
+    ['독서', ['독서', '독후', '책']],
+    ['미술', ['미술', '그림', '만들기']],
+    ['습관', ['습관', '정리', '양치', '씻기', '로션']]
+  ];
+  var low = n.toLowerCase();
+  for (var i = 0; i < KW.length; i++){
+    for (var j = 0; j < KW[i][1].length; j++){
+      if (low.indexOf(String(KW[i][1][j]).toLowerCase()) > -1) return KW[i][0];
+    }
+  }
+  return raw;      /* 모르는 과목은 이름 그대로 하나의 영역이 된다 */
+}
+function areaStyle(name){
+  var a = areaKey(name);
+  if (AREA_STYLE[a]) return AREA_STYLE[a];
+  var s = String(a), h = 0;
+  for (var i = 0; i < s.length; i++) h = (h * 131 + s.charCodeAt(i)) >>> 0;
+  return AREA_EXTRA[h % AREA_EXTRA.length];
+}
+function areaRank(name){
+  var i = AREA_ORDER.indexOf(areaKey(name));
+  return i < 0 ? AREA_ORDER.length : i;
+}
+function areaBadge(name){
+  var a = areaKey(name), st = areaStyle(name);
+  var ico = String(st.icon || '📌');
+  /* 이름이 길면(예: 사회·역사) 아이콘 없이 알약 안에 한 줄로 담는다 */
+  var icoHtml = (a.length > 3) ? ''
+    : (/^[a-z]+$/i.test(ico) ? '<i class="tx">' + esc(ico) + '</i>' : '<i>' + ico + '</i>');
+  return '<span class="smw-ab' + (a.length > 3 ? ' long' : '') + '" style="background:' + st.bg + ';color:' + st.ink + '">'
+    + icoHtml + '<span>' + esc(a) + '</span></span>';
+}
+/* ---------- 주(월~일) 계산 ---------- */
+function smWeekMon(){ return smWeek || ymd(mondayOf(new Date())); }
+function smWeekDays(){
+  var m = ymdParse(smWeekMon()), out = [];
+  for (var i = 0; i < 7; i++) out.push(ymd(addDays(m, i)));
+  return out;
+}
+function smShiftWeek(delta){
+  var m = ymdParse(smWeekMon());
+  smWeek = ymd(addDays(m, delta * 7));
+  renderStudyMonth();
+}
+function smMd(d){ return pad2(d.getMonth() + 1) + '.' + pad2(d.getDate()); }
+function smWeekNo(d){
+  var first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+  return Math.ceil((d.getDate() + ((first + 6) % 7)) / 7);
+}
+/* ---------- 쉬어가기 / 생활 루틴 기록 저장소 ---------- */
+function routineHistOf(dk){
+  var all = (state && state.routineHistory) || {};
+  var day = all[dk];
+  return (day && typeof day === 'object') ? day : null;
+}
+function smRestOf(store, dk, kid){
+  var day = store && store[dk];
+  return (day && Array.isArray(day[kid])) ? day[kid] : [];
+}
+function studyRestStore(){ return (state && state.study && state.study.rest && typeof state.study.rest === 'object') ? state.study.rest : {}; }
+function routineRestStore(){ return (state && state.routineRest && typeof state.routineRest === 'object') ? state.routineRest : {}; }
+function smRestSet(store, dk, kid, key, on){
+  var day = (store[dk] && typeof store[dk] === 'object') ? store[dk] : (store[dk] = {});
+  var arr = Array.isArray(day[kid]) ? day[kid].slice() : [];
+  var i = arr.indexOf(key);
+  if (on){ if (i < 0) arr.push(key); }
+  else if (i > -1){ arr.splice(i, 1); }
+  if (arr.length) day[kid] = arr;
+  else {
+    delete day[kid];
+    if (!Object.keys(day).length) delete store[dk];
+  }
+}
+/* 생활 루틴 스냅샷 — 오늘 kids[morning/evening] 중 '문제집 풀기'류(wb)는 뺀다 */
+function smRoutineSnap(s, kid, blank){
+  var out = [];
+  ['morning', 'evening'].forEach(function(tab){
+    (((s.kids || {})[kid] || {})[tab] || []).forEach(function(t){
+      if (!t || typeof t.text !== 'string' || !t.text.trim()) return;
+      if (isWB(t)) return;
+      out.push({ id: t.id, text: t.text, tab: tab, done: blank ? false : !!t.done });
+    });
+  });
+  return out;
+}
+/* ---------- 주간 표의 행(루틴) 모으기 ---------- */
+function smStatRows(kid){
+  var days = smWeekDays(), today = todayKey();
+  var weekly = studyWeekMap(kid), histAll = smHistory();
+  var restS = studyRestStore(), restR = routineRestStore();
+  var rows = [], byKey = {};
+  days.forEach(function(dk){
+    var dow = String(ymdParse(dk).getDay());
+    var isToday = (dk === today);
+    var map = {}, order = [];
+    function put(key, kind, text, area, tab, planned, done){
+      var c = map[key];
+      if (!c){ c = map[key] = { kind: kind, text: text, area: area, tab: tab || '', planned: false, done: false }; order.push(key); }
+      if (planned) c.planned = true;
+      if (done) c.done = true;
+    }
+    /* (1) 공부 — 그 요일 반복 계획 + 그날 기록(오늘은 오늘의 체크리스트) */
+    (Array.isArray(weekly[dow]) ? weekly[dow] : []).forEach(function(w){
+      if (!w || !w.text) return;
+      var sn = w.subjectName || '';
+      put('S|' + sn + '|' + w.text, 'study', w.text, sn, '', true, false);
+    });
+    var rec = isToday ? studyItems(kid) : ((histAll[dk] && histAll[dk][kid]) || []);
+    (Array.isArray(rec) ? rec : []).forEach(function(x){
+      if (!x || !x.text) return;
+      var sn = x.subjectName || '';
+      put('S|' + sn + '|' + x.text, 'study', x.text, sn, '', true, !!x.done);
+    });
+    /* (2) 생활 루틴 — 오늘은 지금 루틴, 지난 날은 routineHistory(기록이 없으면 계획일로만) */
+    var rArr = null;
+    if (isToday){
+      rArr = smRoutineSnap(state, kid);
+    } else {
+      var rh = routineHistOf(dk);
+      rArr = (rh && Array.isArray(rh[kid])) ? rh[kid] : null;
+      if (!rArr){
+        rArr = smRoutineSnap(state, kid).map(function(t){ return { id: t.id, text: t.text, tab: t.tab, done: false }; });
+      }
+    }
+    rArr.forEach(function(t){
+      if (!t || !t.id || !t.text || isWB(t)) return;
+      var area = (String(t.text).replace(/\s+/g, '') === '독서') ? '독서' : '습관';
+      put('R|' + t.id, 'routine', t.text, area, t.tab, true, !!t.done);
+    });
+    /* 셀 상태 — 쉬어가기 > 완료 > 계획일 > 계획 없음 */
+    order.forEach(function(key){
+      var c = map[key];
+      var r = byKey[key];
+      if (!r){
+        r = byKey[key] = {
+          key: key, kind: c.kind, text: c.text, area: c.area,
+          subject: (c.kind === 'study') ? c.area : '',
+          id: (c.kind === 'routine') ? key.slice(2) : '',
+          tab: c.tab || '', cells: {}, planned: {}, idx: rows.length
+        };
+        rows.push(r);
+      }
+      if (!r.tab && c.tab) r.tab = c.tab;
+      var restList = smRestOf(c.kind === 'routine' ? restR : restS, dk, kid);
+      var st;
+      if (restList.indexOf(key) > -1) st = 'rest';
+      else if (c.done) st = 'done';
+      else if (c.planned) st = 'plan';
+      else st = 'none';
+      r.cells[dk] = st;
+      r.planned[dk] = !!c.planned;
+    });
+  });
+  rows.sort(function(a, b){
+    var d = areaRank(a.area) - areaRank(b.area);
+    if (d) return d;
+    var s = String(a.area).localeCompare(String(b.area), 'ko');
+    if (s) return s;
+    return a.idx - b.idx;
+  });
+  /* 아침·저녁에 같은 이름의 생활 루틴이 있으면 ☀/🌙 로 구분해 준다 */
+  var dup = {};
+  rows.forEach(function(r){ if (r.kind === 'routine') dup[r.text] = (dup[r.text] || 0) + 1; });
+  rows.forEach(function(r){
+    r.label = (r.kind === 'routine' && dup[r.text] > 1)
+      ? ((r.tab === 'evening') ? '🌙 ' : '☀ ') + r.text
+      : r.text;
+  });
+  return rows;
+}
+/* ---------- 셀 클릭 → 계획일/없음 → 완료 ✓ → 쉬어가기 🌿 → 되돌리기 ---------- */
+function smSetStudy(s, kid, dk, r, val){
+  var st = studyEnsure(s);
+  if (dk === todayKey()){
+    var list = (st.items[kid] || []).slice(), it = null;
+    for (var i = 0; i < list.length; i++){
+      if ((list[i].subjectName || '') === r.subject && list[i].text === r.text){ it = list[i]; break; }
+    }
+    if (!it){
+      if (!val) return;
+      list.push({ id: uid('st'), subjectName: r.subject, text: r.text, done: true });
+      st.items[kid] = list;
+    } else {
+      it.done = !!val;
+    }
+    return;
+  }
+  st.history = (st.history && typeof st.history === 'object') ? st.history : {};
+  var day = (st.history[dk] && typeof st.history[dk] === 'object') ? st.history[dk] : (st.history[dk] = {});
+  var arr = Array.isArray(day[kid]) ? day[kid].slice() : [], ex = null;
+  for (var j = 0; j < arr.length; j++){
+    if ((arr[j].subjectName || '') === r.subject && arr[j].text === r.text){ ex = arr[j]; break; }
+  }
+  if (!ex){
+    if (!val) return;
+    arr.push({ id: uid('sh'), subjectName: r.subject, text: r.text, done: true });
+  } else ex.done = !!val;
+  day[kid] = arr;
+}
+function smSetRoutine(s, kid, dk, r, val){
+  if (dk === todayKey()){
+    var tabs = ['morning', 'evening'];
+    for (var i = 0; i < tabs.length; i++){
+      var list = ((s.kids || {})[kid] || {})[tabs[i]] || [];
+      for (var j = 0; j < list.length; j++){
+        if (list[j].id === r.id){ list[j].done = !!val; return; }
+      }
+    }
+    return;
+  }
+  if (!s.routineHistory || typeof s.routineHistory !== 'object') s.routineHistory = {};
+  var day = (s.routineHistory[dk] && typeof s.routineHistory[dk] === 'object') ? s.routineHistory[dk] : null;
+  if (!day){ if (!val) return; day = s.routineHistory[dk] = {}; }
+  var arr = Array.isArray(day[kid]) ? day[kid].slice() : smRoutineSnap(s, kid, true), ex = null;
+  for (var k = 0; k < arr.length; k++){ if (arr[k].id === r.id){ ex = arr[k]; break; } }
+  if (!ex){
+    if (!val) return;
+    arr.push({ id: r.id, text: r.text, tab: r.tab || 'morning', done: true });
+  } else ex.done = !!val;
+  day[kid] = arr;
+}
+function smCellToggle(kid, key, dk){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dk || '')) || dk > todayKey()) return;
+  var rows = smStatRows(kid), r = null;
+  for (var i = 0; i < rows.length; i++){ if (rows[i].key === key){ r = rows[i]; break; } }
+  if (!r) return;
+  var cur = r.cells[dk] || 'none';
+  var next = (cur === 'done') ? 'rest' : (cur === 'rest') ? (r.planned[dk] ? 'plan' : 'none') : 'done';
+  mutate(function(s){
+    var store;
+    if (r.kind === 'study'){
+      studyEnsure(s);
+      store = s.study.rest;
+      smRestSet(store, dk, kid, key, next === 'rest');
+      smSetStudy(s, kid, dk, r, next === 'done');
+    } else {
+      if (!s.routineRest || typeof s.routineRest !== 'object') s.routineRest = {};
+      store = s.routineRest;
+      smRestSet(store, dk, kid, key, next === 'rest');
+      smSetRoutine(s, kid, dk, r, next === 'done');
+    }
+  });
+  renderStudy();
+  try { renderKids(); } catch(e){}
+}
+/* ---------- 모달 머리(제목·자녀·탭) ---------- */
+function smKidChipsHtml(kid){
+  return KIDS.map(function(id){
+    var nm = (FAMILY[id] || {}).name || id;
+    var g = gradeTag(id);
+    return '<button class="sm-kid' + (id === kid ? ' on' : '') + '" type="button" data-act="sm-kid"'
+      + ' data-k="' + esc(id) + '" aria-pressed="' + (id === kid ? 'true' : 'false') + '">'
+      + esc(nm + (g ? ' (' + g + ')' : '')) + '</button>';
+  }).join('');
+}
+function smHeadHtml(kid){
+  var sub = (smTab === 'month') ? '날짜를 누르면 그날의 공부를 볼 수 있어요.'
+                                : '공부·생활 루틴을 한눈에 · 날짜 칸을 눌러 완료·🌿 쉬어가기 수정';
+  return '<div class="sm-h"><div><b>📊 루틴 통계</b>'
+    +   '<p>' + sub + '</p></div>'
+    +   '<button class="sm-x" type="button" data-act="sm-close" aria-label="닫기">✕</button></div>'
+    + '<div class="sm-kids" role="group" aria-label="자녀 선택">' + smKidChipsHtml(kid) + '</div>'
+    + '<div class="sm-tabs" role="tablist">'
+    +   '<button class="sm-tab' + (smTab === 'week' ? ' on' : '') + '" type="button" data-act="sm-tab" data-t="week" role="tab" aria-selected="' + (smTab === 'week' ? 'true' : 'false') + '">' + SM_IC_GRID + '주간 흐름</button>'
+    +   '<button class="sm-tab' + (smTab === 'month' ? ' on' : '') + '" type="button" data-act="sm-tab" data-t="month" role="tab" aria-selected="' + (smTab === 'month' ? 'true' : 'false') + '">' + SM_IC_CAL + '월간 기록</button>'
+    + '</div>';
+}
+/* ---------- 주간 흐름 탭 ---------- */
+function smWeekHtml(kid){
+  var days = smWeekDays(), today = todayKey();
+  var mon = ymdParse(days[0]), sun = ymdParse(days[6]);
+  var thisMon = ymd(mondayOf(new Date()));
+  var away = Math.round((new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()) - new Date(ymdParse(thisMon).getFullYear(), ymdParse(thisMon).getMonth(), ymdParse(thisMon).getDate())) / 604800000);
+  var label = (away === 0) ? '이번 주'
+            : (away === -1) ? '지난주'
+            : (away === 1) ? '다음주'
+            : (mon.getMonth() + 1) + '월 ' + smWeekNo(mon) + '주차';
+  var range = smMd(mon) + ' (' + DOW_NAME[String(mon.getDay())] + ') - ' + smMd(sun) + ' (' + DOW_NAME[String(sun.getDay())] + ')';
+
+  var nav = '<div class="smw-nav">'
+    +   '<button type="button" data-act="sm-wprev" aria-label="지난주">‹</button>'
+    +   '<div class="smw-mid"><b>' + label + '</b><span>' + range + '</span></div>'
+    +   '<button type="button" data-act="sm-wnext" aria-label="다음주">›</button>'
+    + '</div>';
+
+  var headCells = days.map(function(dk){
+    var d = ymdParse(dk);
+    return '<div class="smw-th' + (dk === today ? ' tod' : '') + '"><div>'
+      + DOW_NAME[String(d.getDay())] + '<em>' + d.getDate() + '</em></div></div>';
+  }).join('');
+  var head = '<div class="smw-row smw-th">'
+    + '<div class="lab">영역</div><div class="lab2">루틴</div>' + headCells + '</div>';
+
+  var rows = smStatRows(kid);
+  var body = '', lastArea = '';
+  rows.forEach(function(r){
+    var stl = areaStyle(r.area);
+    var newGrp = (r.area !== lastArea);
+    lastArea = r.area;
+    body += '<div class="smw-row' + (newGrp && body ? ' g' : '') + '">'
+      + '<div class="smw-ar">' + (newGrp ? areaBadge(r.area) : '') + '</div>'
+      + '<div class="smw-rn' + (newGrp ? ' b' : '') + '">' + esc(r.label || r.text) + '</div>';
+    days.forEach(function(dk){
+      var c = r.cells[dk] || 'none';
+      var live = (dk <= today);
+      var inner = (c === 'done') ? '✓' : (c === 'rest') ? '🌿' : (c === 'plan') ? '' : '–';
+      var d = ymdParse(dk);
+      body += '<div class="smw-cw"><button class="smw-c ' + c + (live ? '' : ' fut') + '" type="button"'
+        + (live ? ' data-act="sm-cell" data-row="' + esc(r.key) + '" data-col="' + dk + '"' : ' disabled')
+        + ' style="--dc:' + stl.done + '"'
+        + ' aria-label="' + esc(r.label || r.text) + ' · ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 · ' + SM_CELL_LABEL[c] + '">'
+        + inner + '</button></div>';
+    });
+    body += '</div>';
+  });
+  if (!rows.length) body = '<div class="smw-none">이 주에 잡힌 루틴이 없어요</div>';
+
+  var legend = '<div class="smw-leg">'
+    + '<b><i class="smw-lc">✓</i>완료</b>'
+    + '<b><i class="smw-lc gr">🌿</i>쉬어가기</b>'
+    + '<b><i class="smw-lc pl"></i>계획일</b>'
+    + '<b><i class="smw-lc no">–</i>계획 없음</b>'
+    + '</div>';
+
+  return nav + '<div class="smw-card"><div class="smw">' + head + body + '</div></div>' + legend;
 }
 
 /* ============================================================
@@ -5340,8 +5873,16 @@ document.addEventListener('click', function(ev){
   }
 
   /* 📅 월간 공부 기록 — 누구나 열람 (PIN 없음) */
-  if (act === 'st-monthly'){ smOpenModal(); return; }
+  if (act === 'st-stats' || act === 'st-monthly'){ smOpenModal(); return; }
   if (act === 'sm-close'){ smCloseModal(); return; }
+  if (act === 'sm-tab'){
+    var smt = (el.dataset.t === 'month') ? 'month' : 'week';
+    if (smt !== smTab){ smTab = smt; renderStudyMonth(); }
+    return;
+  }
+  if (act === 'sm-wprev'){ smShiftWeek(-1); return; }
+  if (act === 'sm-wnext'){ smShiftWeek(1); return; }
+  if (act === 'sm-cell'){ smCellToggle(smKidId(), el.dataset.row, el.dataset.col); return; }
   if (act === 'sm-kid'){
     var smk = el.dataset.k;
     if (KIDS.indexOf(smk) > -1){ smKid = smk; renderStudyMonth(); }
