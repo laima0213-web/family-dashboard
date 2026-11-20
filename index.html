@@ -89,6 +89,10 @@ button{font:inherit;color:inherit}
   border-radius:999px;padding:0 12px;font-size:12.5px;font-weight:800;color:#6F6252;cursor:pointer;box-shadow:0 2px 6px rgba(180,158,128,.1)}
 .cchip b{color:#C08344}
 .cchip.hf{background:linear-gradient(100deg,#FFF3CC,#EAF7EC);border-color:#F0E2B4;color:#8A6A28;cursor:default}
+/* 📊 주간·루틴 통계 바로가기 — 첫 화면에서 바로 보이게 */
+.cchip-stat{background:linear-gradient(100deg,#E9DCFF,#DCF5E7);border-color:#C7AEEF;color:#553A96;
+  font-weight:900;box-shadow:0 3px 11px rgba(138,104,206,.26);letter-spacing:-.2px}
+.cchip-stat:active{transform:scale(.96)}
 
 /* ---------- 공통 카드 ---------- */
 .grid{display:flex;flex-direction:column;gap:var(--gap)}
@@ -335,6 +339,10 @@ button{font:inherit;color:inherit}
   border-radius:999px;padding:0 4px;line-height:1.5}
 .st-tab.on{background:#5FA97A;border-color:#5FA97A;color:#fff}
 .st-tab.on i{color:#3F7A57;background:#EAF7EC}
+/* 📊 주간 흐름 바로가기 탭 — 오늘/요일별 반복과 구분되는 보라·민트 */
+.st-tab-stat{background:linear-gradient(100deg,#EFE4FF,#E1F6EA);border-color:#D2BCF0;color:#6943A6;
+  font-weight:900;letter-spacing:-.2px}
+.st-tab-stat:active{transform:scale(.97)}
 .wk-subrow{display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin:0 0 6px}
 .wk-who{flex:0 0 auto;font-size:10.5px;font-weight:900;color:#A99A86;white-space:nowrap;margin:0 2px 0 0}
 .wk-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin:0 0 6px}
@@ -3091,7 +3099,8 @@ function renderChips(){
   var commuteWho = FAMILY[(CFG.adults && CFG.adults[0]) || 'dad'];
   var commuteTxt = c ? (c.k === 'now' ? (c.text || '🚗 지금 퇴근 출발!') : (c.icon || '🕐') + ' ' + esc((commuteWho && commuteWho.name) || '') + ' 퇴근 ' + esc(c.label || '')) : '';
   el.innerHTML =
-      '<button class="cchip" type="button" data-act="goto" data-t="want">🛒 이거 사주세요 <b>(' + pendingWants() + ')</b></button>'
+      '<button class="cchip cchip-stat" type="button" data-act="st-stats" aria-label="주간 흐름·루틴 통계 열기">📊 주간·루틴 통계</button>'
+    + '<button class="cchip" type="button" data-act="goto" data-t="want">🛒 이거 사주세요 <b>(' + pendingWants() + ')</b></button>'
     + (commuteTxt ? '<button class="cchip" type="button" data-act="status-open">' + commuteTxt + '</button>' : '')
     + (allM && allE ? '<span class="cchip hf">🙌 아침·저녁 온 가족 하이파이브!</span>'
       : allM ? '<span class="cchip hf">🙌 아침 온 가족 하이파이브!</span>'
@@ -4441,6 +4450,7 @@ function renderStudy(){
       '<div class="st-tabs">'
     +   '<button class="st-tab' + (studyView === 'week' ? '' : ' on') + '" type="button" data-act="st-view" data-v="today">📖 오늘<i>' + items.length + '</i></button>'
     +   '<button class="st-tab' + (studyView === 'week' ? ' on' : '') + '" type="button" data-act="st-view" data-v="week">📅 요일별 반복' + (weekToday ? '<i>' + weekToday + '</i>' : '') + '</button>'
+    +   '<button class="st-tab st-tab-stat" type="button" data-act="st-stats" aria-label="주간 흐름 통계 보기">📊 주간 흐름</button>'
     + '</div>';
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
@@ -4783,8 +4793,10 @@ function smStatRows(kid){
     }
     rArr.forEach(function(t){
       if (!t || !t.id || !t.text || isWB(t)) return;
-      var area = (String(t.text).replace(/\s+/g, '') === '독서') ? '독서' : '습관';
-      put('R|' + t.id, 'routine', t.text, area, t.tab, true, !!t.done);
+      /* 주간 표에는 생활 루틴 중 '독서'만 남긴다 — 양치·로션 같은 ⭐ 습관은 표에서 뺀다
+         (아침·저녁 체크리스트와 DB state.kids 는 그대로 두고 여기 표시만 거른다) */
+      if (String(t.text).replace(/\s+/g, '') !== '독서') return;
+      put('R|' + t.id, 'routine', t.text, '독서', t.tab, true, !!t.done);
     });
     /* 셀 상태 — 쉬어가기 > 완료 > 계획일 > 계획 없음 */
     order.forEach(function(key){
