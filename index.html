@@ -4449,8 +4449,8 @@ function renderStudy(){
   var tabs =
       '<div class="st-tabs">'
     +   '<button class="st-tab' + (studyView === 'week' ? '' : ' on') + '" type="button" data-act="st-view" data-v="today">📖 오늘<i>' + items.length + '</i></button>'
-    +   '<button class="st-tab' + (studyView === 'week' ? ' on' : '') + '" type="button" data-act="st-view" data-v="week">📅 요일별 반복' + (weekToday ? '<i>' + weekToday + '</i>' : '') + '</button>'
     +   '<button class="st-tab st-tab-stat" type="button" data-act="st-stats" aria-label="주간 흐름 통계 보기">📊 주간 흐름</button>'
+    +   '<button class="st-tab' + (studyView === 'week' ? ' on' : '') + '" type="button" data-act="st-view" data-v="week">📅 요일별 반복' + (weekToday ? '<i>' + weekToday + '</i>' : '') + '</button>'
     + '</div>';
   el.innerHTML =
       '<div class="h2">📖 오늘의 공부 체크리스트'
