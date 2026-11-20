@@ -461,7 +461,7 @@ button{font:inherit;color:inherit}
 .smw-card{background:#fff;border:1px solid #F0EBF6;border-radius:16px;padding:7px 7px 8px;
   box-shadow:0 3px 12px rgba(150,140,180,.07)}
 .smw{display:block}
-.smw-row{display:grid;grid-template-columns:46px minmax(0,1fr) repeat(7,26px);column-gap:3px;
+.smw-row{display:grid;grid-template-columns:52px minmax(0,1fr) repeat(7,25px);column-gap:3px;
   align-items:center;min-height:30px;padding:1px 0}
 .smw-row.g{border-top:1px solid #F4F0F9;margin-top:3px;padding-top:3px}
 .smw-th{padding-bottom:5px;min-height:0}
@@ -473,15 +473,17 @@ button{font:inherit;color:inherit}
 .smw-th.tod div{background:#FFE9EF}
 .smw-th.tod div,.smw-th.tod em{color:#C4607F}
 .smw-ar{min-width:0}
-.smw-ab{display:inline-flex;align-items:center;gap:2px;max-width:46px;padding:2px 5px;border-radius:999px;
-  font-size:8.5px;font-weight:900;line-height:1.15;letter-spacing:-.3px;word-break:keep-all;overflow-wrap:anywhere}
+.smw-ab{display:inline-flex;align-items:center;gap:2px;max-width:52px;padding:2px 5px;border-radius:999px;
+  font-size:8.5px;font-weight:900;line-height:1.15;letter-spacing:-.3px;white-space:nowrap}
+.smw-ab span{min-width:0;overflow:hidden}
+.smw-ab.long{font-size:8px;letter-spacing:-.5px;padding:2px 4px}
 .smw-ab i{font-style:normal;font-size:9px;flex:0 0 auto;line-height:1}
 .smw-ab i.tx{font-size:7.5px;font-weight:900;font-style:normal;letter-spacing:-.3px}
 .smw-rn{font-size:10.5px;font-weight:800;color:#6D6473;line-height:1.2;letter-spacing:-.3px;
   padding:0 2px 0 3px;overflow-wrap:anywhere;min-width:0}
 .smw-rn.b{color:#4B4450}
 .smw-cw{display:flex;justify-content:center}
-.smw-c{width:26px;height:26px;border-radius:8px;border:1.5px solid #ECE6F0;background:#fff;
+.smw-c{width:25px;height:25px;border-radius:8px;border:1.5px solid #ECE6F0;background:#fff;
   display:grid;place-items:center;padding:0;font-size:11px;font-weight:900;color:#fff;line-height:1;
   cursor:pointer;font-family:inherit}
 .smw-c:active{transform:scale(.92)}
@@ -502,8 +504,8 @@ button{font:inherit;color:inherit}
 .smw-lc.no{background:transparent;color:#CFC8D8;font-size:11px}
 @media (min-width:431px){ .sm-card.wide{max-width:430px} }
 @media (max-width:374px){
-  .smw-row{grid-template-columns:42px minmax(0,1fr) repeat(7,23px);column-gap:2px}
-  .smw-c{width:23px;height:23px;border-radius:7px;font-size:10px}
+  .smw-row{grid-template-columns:48px minmax(0,1fr) repeat(7,22px);column-gap:2px}
+  .smw-c{width:22px;height:22px;border-radius:7px;font-size:10px}
   .smw-rn{font-size:9.5px}
 }
 /* ---------- 윤·봄 프로필 카드 ---------- */
@@ -1655,8 +1657,11 @@ function areaRank(name){
 function areaBadge(name){
   var a = areaKey(name), st = areaStyle(name);
   var ico = String(st.icon || '📌');
-  var icoHtml = /^[a-z]+$/i.test(ico) ? '<i class="tx">' + esc(ico) + '</i>' : '<i>' + ico + '</i>';
-  return '<span class="smw-ab" style="background:' + st.bg + ';color:' + st.ink + '">' + icoHtml + esc(a) + '</span>';
+  /* 이름이 길면(예: 사회·역사) 아이콘 없이 알약 안에 한 줄로 담는다 */
+  var icoHtml = (a.length > 3) ? ''
+    : (/^[a-z]+$/i.test(ico) ? '<i class="tx">' + esc(ico) + '</i>' : '<i>' + ico + '</i>');
+  return '<span class="smw-ab' + (a.length > 3 ? ' long' : '') + '" style="background:' + st.bg + ';color:' + st.ink + '">'
+    + icoHtml + '<span>' + esc(a) + '</span></span>';
 }
 /* ---------- 주(월~일) 계산 ---------- */
 function smWeekMon(){ return smWeek || ymd(mondayOf(new Date())); }
