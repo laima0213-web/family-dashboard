@@ -11579,7 +11579,7 @@ async function finishBoot(){
     pgCart(yard, Math.cos(315 * Math.PI / 180) * 12.6, Math.sin(315 * Math.PI / 180) * 12.6, -315 * Math.PI / 180, 'pop');
 
     /* 7) 🏡 오두막 · 🧁 디저트 카페 */
-    yard.add(pgCottage(0, 18.6, Math.PI));
+    yard.add(pgCottage(-11, 17.6, Math.PI * 0.72));   /* 🎢 트랙 타원 안에 갇히지 않게 서쪽 잔디로 */
     yard.add(pgCafe(0, -18.6, 0));
 
     /* 8) 소풍 돗자리 — 파크 바깥 잔디 */
@@ -12430,30 +12430,33 @@ async function finishBoot(){
       g.add(aim(new THREE.Mesh(tieGeo, i % 2 ? tieA : tieB), curve.getPointAt(tu), curve.getTangentAt(tu), 0.02));
     }
     /* ---------- ③ 지지 기둥 · 트러스 · 아치 ---------- */
-    for (i = 0; i < 28; i++){
-      var su = i / 28;
+    for (i = 0; i < 20; i++){
+      var su = i / 20;
       var pq = curve.getPointAt(su), tq = curve.getTangentAt(su);
       if (pq.y < 0.95) continue;
       var lx = new THREE.Vector3().crossVectors(tq, up).normalize();
       [-0.64, 0.64].forEach(function(sgn){
         var bx = pq.x + lx.x * sgn, bz = pq.z + lx.z * sgn;
-        g.add(pgBeam([bx, 0.05, bz], [bx, pq.y - 0.03, bz], 0.075, '#DCC09B', 6));
-        if (pq.y > 2.4){
-          g.add(pgBeam([bx, 0.12, bz], [pq.x + lx.x * sgn * 0.12, pq.y - 0.14, pq.z + lx.z * sgn * 0.12], 0.038, '#EBD4B4', 5));
+        g.add(pgBeam([bx, 0.05, bz], [bx, pq.y - 0.03, bz], 0.095, '#DCC09B', 6));
+        if (pq.y > 3.2){
+          g.add(pgBeam([bx, 0.14, bz], [pq.x + lx.x * sgn * 0.10, pq.y - 0.12, pq.z + lx.z * sgn * 0.10], 0.042, '#EBD4B4', 5));
         }
       });
       if (pq.y > 1.2){
-        var hy = pq.y * 0.56;
-        g.add(pgBeam([pq.x + lx.x * 0.64, hy, pq.z + lx.z * 0.64],
-                     [pq.x - lx.x * 0.64, hy, pq.z - lx.z * 0.64], 0.042, '#E2C8A4', 5));
+        [0.42, 0.74].forEach(function(kk){
+          if (pq.y * kk < 1.0) return;
+          var hy = pq.y * kk;
+          g.add(pgBeam([pq.x + lx.x * 0.64, hy, pq.z + lx.z * 0.64],
+                       [pq.x - lx.x * 0.64, hy, pq.z - lx.z * 0.64], 0.05, '#E2C8A4', 5));
+        });
       }
-      if (pq.y > 5.4){
-        /* 높은 언덕 — 아치형 보강 */
+      if (pq.y > 5.2){
+        /* 높은 언덕 — 아치형 트러스 보강 */
         var ay = pq.y - 0.55;
         g.add(pgBeam([pq.x + lx.x * 0.64, ay, pq.z + lx.z * 0.64],
-                     [pq.x, pq.y - 0.30, pq.z], 0.045, '#E8D0AE', 5));
+                     [pq.x, pq.y - 0.28, pq.z], 0.05, '#E8D0AE', 5));
         g.add(pgBeam([pq.x - lx.x * 0.64, ay, pq.z - lx.z * 0.64],
-                     [pq.x, pq.y - 0.30, pq.z], 0.045, '#E8D0AE', 5));
+                     [pq.x, pq.y - 0.28, pq.z], 0.05, '#E8D0AE', 5));
       }
     }
     /* ---------- ④ 승강장 — 캐노피 지붕 · 계단 · 꽃 화단 ---------- */
@@ -12465,6 +12468,12 @@ async function finishBoot(){
     });
     st.add(pgBox(5.4, 0.12, 1.72, '#FFE3EC', 0.35, 3.30, 4.55));
     st.add(pgBox(5.42, 0.15, 0.20, C.mint, 0.35, 3.16, 3.72));
+    st.add(pgBox(5.42, 0.16, 0.16, C.mint, 0.35, 3.14, 5.36));
+    [-1.9, 2.5].forEach(function(sx){
+      st.add(pgBox(0.10, 0.62, 1.30, '#FFE3EC', sx, 1.34, 4.55));
+    });
+    st.add(pgBox(5.0, 0.09, 0.07, C.mint, 0.35, 1.66, 5.14));
+    st.add(pgBox(0.07, 0.09, 1.16, C.mint, -1.95, 1.66, 4.55));
     for (var rf = 0; rf < 7; rf++){
       st.add(pgSph(0.13, rf % 2 ? C.lemon : '#FFFFFF', -1.85 + rf * 0.74, 3.43, 4.55, 7));
     }
@@ -13727,7 +13736,7 @@ async function finishBoot(){
     });
     obs.push([POND.x, POND.z, 2.1]);                               /* 광장 연못 + 나무다리 */
     obs.push([PARK.x + 1.8, PARK.z - 0.15, 1.25]);                 /* 광장 분수 */
-    obs.push([PARK.x, PARK.z + 18.6, 2.0], [PARK.x, PARK.z - 18.6, 2.0]);  /* 기본 오두막·카페 */
+    obs.push([PARK.x - 11, PARK.z + 17.6, 2.0], [PARK.x, PARK.z - 18.6, 2.0]);  /* 기본 오두막·카페 */
     obs.push([PARK.x - 16.5, PARK.z - 13.5, 1.3]);                 /* 소풍 돗자리 */
     obs.push([PARK.x, PARK.z + 4.72, 1.1]);                        /* 입구 아치 */
     (PG.solids || []).forEach(function(o){ obs.push(o); });
@@ -14700,7 +14709,7 @@ async function finishBoot(){
       if (cvw && PG.lastPt.x < ex) dir = 1;
       else if (cvw && PG.lastPt.x > cvw - ex) dir = -1;
       if (dir){
-        pgPan(dir * cvw * 0.55 * dt, 0);
+        pgPan(dir * (PG.renderer.domElement.clientHeight || 800) * 0.32 * dt, 0);
         if (PG.mode === 'rdrag') pgRideDragAt(PG.lastPt.x, PG.lastPt.y);
         else pgBuildDragAt(PG.lastPt.x, PG.lastPt.y);
       }
