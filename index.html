@@ -1902,10 +1902,10 @@ body.pg-open{overflow:hidden!important}
   </div>
 
   <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
-  <div class="pg-hint" id="pgHint">드래그로 회전 · ✋ 또는 두 손가락으로 이동·확대 · 위 버튼으로 나라를 옮겨 보아요</div>
+  <div class="pg-hint" id="pgHint">손가락으로 자유롭게 이동 · 🔄 버튼으로 360° 회전 · 두 손가락 확대</div>
 
   <div class="pg-zoom">
-    <button type="button" id="pgPanBtn" class="pg-pan-btn" aria-label="화면 이동 모드" aria-pressed="false" title="화면 이동/회전 전환">✋</button>
+    <button type="button" id="pgPanBtn" class="pg-pan-btn on" aria-label="지금 손가락으로 화면 이동 중 · 누르면 360° 회전" aria-pressed="true" title="지금 손가락으로 화면 이동 중 · 누르면 360° 회전">✋</button>
     <button type="button" id="pgZoomIn" aria-label="확대">＋</button>
     <button type="button" id="pgZoomOut" aria-label="축소">－</button>
     <button type="button" id="pgReset" aria-label="처음 자리로">🏠</button>
@@ -8164,7 +8164,7 @@ async function finishBoot(){
     PG.polar = 0.55; PG.azim = 0;
     PG.camTween = null;
     pgNationMark('all');
-    pgPanSet(false, true);
+    pgPanSet(true, true);            /* ✋ 기본은 한 손가락 화면 이동 — 끝쪽 구석까지 바로 끌어 갈 수 있게 */
     pgTitle(); pgSwitch(); pgRenderNations(); pgRenderDeco();
     var hint = document.getElementById('pgHint');
     if (hint){ hint.classList.add('on'); clearTimeout(PG.hintTimer); PG.hintTimer = setTimeout(function(){ hint.classList.remove('on'); }, 6000); }
@@ -14332,8 +14332,9 @@ async function finishBoot(){
     var vk = 1 / Math.max(0.30, Math.sin(PG.polar));   /* 비스듬히 볼수록 화면 상하 이동이 짧아 보인다 */
     PG.target.x += (-rX * dxPx + fX * dyPx * vk) * scale;
     PG.target.z += (-rZ * dxPx + fZ * dyPx * vk) * scale;
-    /* 월드 밖으로 너무 나가지 않게 — 둥근 모서리 사각 경계 */
-    var tp2 = pgInRect(PG.target.x, PG.target.z, -2.2);
+    /* 월드 밖으로 너무 나가지 않게 — 둥근 모서리 사각 경계
+       카메라 초점만 넉넉히(-8.0m) 풀어, 울타리·바다·눈밭 가장자리까지 화면 가운데로 끌어온다 */
+    var tp2 = pgInRect(PG.target.x, PG.target.z, -8.0);
     PG.target.x = tp2[0]; PG.target.z = tp2[1];
     PG.target.y = 0.8;
     PG.camTween = null;
@@ -14341,8 +14342,15 @@ async function finishBoot(){
   function pgPanSet(on, quiet){
     PG.panMode = (on === undefined) ? !PG.panMode : !!on;
     var b = document.getElementById('pgPanBtn');
-    if (b){ b.classList.toggle('on', PG.panMode); b.setAttribute('aria-pressed', PG.panMode ? 'true' : 'false'); }
-    if (!quiet) toast(PG.panMode ? '✋ 손가락으로 화면을 옮겨 끝쪽도 볼 수 있어요' : '🔄 손가락으로 360° 회전해요', 1700);
+    if (b){
+      var lbl = PG.panMode ? '지금 손가락으로 화면 이동 중 · 누르면 360° 회전' : '지금 손가락으로 360° 회전 중 · 누르면 화면 이동';
+      b.classList.toggle('on', PG.panMode);
+      b.setAttribute('aria-pressed', PG.panMode ? 'true' : 'false');
+      b.setAttribute('aria-label', lbl);
+      b.setAttribute('title', lbl);
+      b.textContent = PG.panMode ? '✋' : '🔄';
+    }
+    if (!quiet) toast(PG.panMode ? '✋ 한 손가락으로 화면을 자유롭게 옮겨요 · 🔄 누르면 회전' : '🔄 한 손가락으로 360° 회전해요 · ✋ 누르면 이동', 1900);
     return PG.panMode;
   }
   function pgDown(e){
@@ -14456,7 +14464,14 @@ async function finishBoot(){
     if (PG.ptrs[e.pointerId]) delete PG.ptrs[e.pointerId];
     var mode = PG.mode;
     if (mode === 'pinch'){
-      if (Object.keys(PG.ptrs).length < 2) PG.mode = '';
+      var rest = Object.keys(PG.ptrs);
+      if (rest.length >= 1){
+        /* 두 손가락 중 하나만 떼면 — 남은 손가락으로 바로 이동/회전을 이어 간다 */
+        var pRest = PG.ptrs[rest[0]];
+        PG.pinch = null;
+        if (PG.panMode){ PG.mode = 'pan'; PG.pan = { x: pRest.x, y: pRest.y }; }
+        else { PG.mode = 'orbit'; PG.orbit = { x: pRest.x, y: pRest.y }; }
+      } else PG.mode = '';
       return;
     }
     if (mode === 'bdrag' && PG.buildDrag){
@@ -14569,7 +14584,8 @@ async function finishBoot(){
     }
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     PG.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, goal: PG.distGoal,
-                 mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+                 mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2,
+                 a: Math.atan2(b.y - a.y, b.x - a.x) };   /* 두 손가락 각도 — 비틀면 360° 회전 */
     PG.mode = 'pinch';
     PG.orbit = null;
     PG.pan = null;
@@ -14580,14 +14596,38 @@ async function finishBoot(){
     if (ids.length < 2) return;
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-    var g = PG.pinch.goal * (PG.pinch.d / d);
-    PG.distGoal = Math.max(6.5, Math.min(520, g));
-    /* 두 손가락을 모은 채 같이 움직이면 화면 이동(펜)도 같이 */
     var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    if (PG.pinch.mx !== undefined){
+    var dNow = PG.dist || 1;
+    var nd = Math.max(6.5, Math.min(520, PG.pinch.goal * (PG.pinch.d / d)));
+    var k = nd / dNow;                        /* 이번에 확대·축소되는 비율 */
+    /* ① 두 손가락을 모은 채 같이 움직이면 화면 이동(펜) — 초점이 끝쪽까지 따라간다 */
+    if (PG.pinch.mx !== undefined && (mx !== PG.pinch.mx || my !== PG.pinch.my)){
       pgPan(mx - PG.pinch.mx, my - PG.pinch.my);
-      PG.pinch.mx = mx; PG.pinch.my = my;
     }
+    /* ② 두 손가락 각도 변화 = 360° 회전 — 초점(PG.target)은 그대로 두고 카메라만 돈다 */
+    var ang = Math.atan2(b.y - a.y, b.x - a.x);
+    if (PG.pinch.a !== undefined){
+      var da = ang - PG.pinch.a;
+      while (da > Math.PI) da -= Math.PI * 2;
+      while (da < -Math.PI) da += Math.PI * 2;
+      if (Math.abs(da) > 0.0006 && Math.abs(da) < 1.2){ PG.azim -= da; PG.camTween = null; }
+    }
+    PG.pinch.a = ang;
+    /* ③ 확대·축소해도 손가락 아래 바닥 지점이 그 자리에 머물도록 초점을 따라 옮긴다 */
+    if (Math.abs(k - 1) > 0.0008 && PG.camera && PG.target){
+      pgCamera();
+      var G = pgGround({ clientX: mx, clientY: my }, PG.target.y || 0.8);
+      if (G){
+        var f = 1 - k;
+        var cl2 = pgInRect(PG.target.x + (G.x - PG.target.x) * f,
+                           PG.target.z + (G.z - PG.target.z) * f, -8.0);
+        PG.target.x = cl2[0]; PG.target.z = cl2[1];
+      }
+    }
+    PG.distGoal = PG.dist = nd;               /* 손가락에 딱 붙는 줌 (뒤처짐 없이) */
+    PG.target.y = 0.8;
+    PG.camTween = null;
+    PG.pinch.mx = mx; PG.pinch.my = my;
   }
   function pgWheel(e){
     if (!PG.on) return;
