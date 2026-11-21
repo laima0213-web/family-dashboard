@@ -637,7 +637,7 @@ button{font:inherit;color:inherit}
 .gft-stage{position:relative;width:100%;height:clamp(190px,48vmin,270px);display:grid;place-items:center;margin:4px 0 0}
 .gft-burst{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .gft-burst i{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:2px;opacity:0;
-  animation:gftFly 1.7s cubic-bezier(.22,.72,.32,1) forwards;animation-delay:var(--d,0s)}
+  animation:gftFly 2.4s cubic-bezier(.22,.72,.32,1) forwards;animation-delay:var(--d,0s)}
 @keyframes gftFly{0%{opacity:1;transform:translate(-50%,-50%) scale(.45) rotate(0deg)}
   62%{opacity:1}
   100%{opacity:0;transform:translate(calc(-50% + var(--x,0px)),calc(-50% + var(--y,0px))) scale(1) rotate(var(--r,200deg))}}
@@ -663,6 +663,15 @@ button{font:inherit;color:inherit}
 .gft-build{width:clamp(160px,38vmin,232px);height:clamp(160px,38vmin,232px);border-radius:30px;background:#FFFDF6;border:4px solid #fff;
   box-shadow:0 12px 22px rgba(150,80,20,.3);display:grid;place-items:center;padding:8px}
 .gft-build svg{width:100%;height:100%;display:block}
+.gft-spk{position:absolute;font-style:normal;font-size:15px;opacity:0;pointer-events:none;
+  filter:drop-shadow(0 1px 3px rgba(255,200,90,.9))}
+.gft.opened .gft-spk{opacity:1;animation:avdTw 1.7s ease-in-out infinite}
+.gft-spk1{left:12%;top:16%;font-size:17px}
+.gft-spk2{right:13%;top:22%;font-size:14px;animation-delay:.35s}
+.gft-spk3{left:16%;bottom:20%;font-size:13px;animation-delay:.7s}
+.gft-spk4{right:16%;bottom:16%;font-size:16px;animation-delay:1s}
+.gft-spk5{left:50%;top:2%;margin-left:-8px;font-size:13px;animation-delay:.55s}
+.gft-spk6{left:50%;bottom:4%;margin-left:-6px;font-size:12px;animation-delay:1.25s}
 .gft-name{margin:8px 0 0;font-size:clamp(16px,4vmin,22px);font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(176,104,26,.45),0 6px 14px rgba(140,80,18,.45);
   opacity:0;transform:translateY(8px);transition:opacity .3s .12s ease,transform .3s .12s ease}
 .gft.opened .gft-name{opacity:1;transform:translateY(0)}
@@ -3876,7 +3885,9 @@ function giftOpen(kid, kind, key){
       + '<div class="gft-stage">'
       + '<div class="gft-burst"></div>'
       + '<div class="gft-boxwrap">' + gftBoxSvg() + '</div>'
-      + '<div class="gft-item">' + gftVisual(kid, kind, key) + '</div>'
+      + '<div class="gft-item">' + gftVisual(kid, kind, key)
+      + '<i class="gft-spk gft-spk1">✨</i><i class="gft-spk gft-spk2">✨</i><i class="gft-spk gft-spk3">✨</i>'
+      + '<i class="gft-spk gft-spk4">✨</i><i class="gft-spk gft-spk5">✨</i><i class="gft-spk gft-spk6">✨</i></div>'
       + '</div>'
       + '<div class="gft-name">“' + esc(gftName(kind, key)) + '” 획득! 💎</div>'
       + '<button type="button" class="gft-ok">좋아요!</button>'
