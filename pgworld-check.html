@@ -12793,7 +12793,8 @@ async function finishBoot(){
   function pgLabelText(k){
     if (k.indexOf('nat:') === 0){
       var nn = pgNationKey(k.slice(4));
-      return nn ? (nn.ic + ' ' + nn.n + ' 나라') : k.slice(4);
+      if (!nn) return k.slice(4);
+      return nn.ic + ' ' + nn.n + (nn.n.slice(-2) === '나라' ? '' : ' 나라');
     }
     var names = { slide:'🛝 미끄럼틀', seesaw:'⚖️ 시소', jungle:'🧗 정글짐', ladder:'☁️ 구름사다리',
       bars:'🤸 철봉', rope:'🪢 줄넘기', horse:'🐴 흔들말', sand:'🏰 모래놀이',
@@ -12809,9 +12810,10 @@ async function finishBoot(){
     if (!box || box.hidden) return;
     var w = PG.renderer.domElement.clientWidth, h = PG.renderer.domElement.clientHeight;
     var farView = PG.dist > 56;              /* 멀리서 볼 땐 기구 이름표를 숨긴다 (나라 이름표는 계속) */
+    var mapView = PG.dist > 200;             /* 아주 멀리서(전체 지도)는 이름표를 모두 숨긴다 */
     PG.labels.forEach(function(L){
       if (!L.el) return;
-      if (farView && L.key.indexOf('nat:') !== 0){ L.el.style.display = 'none'; return; }
+      if (mapView || (farView && L.key.indexOf('nat:') !== 0)){ L.el.style.display = 'none'; return; }
       var v = PG.vec.set(L.g.position.x, L.g.position.y + L.y, L.g.position.z);
       v.project(PG.camera);
       if (v.z > 1){ L.el.style.display = 'none'; return; }
