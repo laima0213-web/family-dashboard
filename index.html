@@ -870,14 +870,14 @@ button{font:inherit;color:inherit}
 .avd-sfr4{right:5px;bottom:20px;animation-delay:1.2s;width:14px;height:14px}
 .avd-sfr5{left:50%;top:-4px;margin-left:-6px;animation-delay:1.6s;width:13px;height:13px}
 .avd-sfr6{left:50%;bottom:2px;margin-left:-5px;animation-delay:2s;width:11px;height:11px}
-/* 캐릭터 고르기 그리드 */
-.av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
-.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:6px 4px 5px;display:flex;
-  flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+/* 캐릭터 고르기 그리드 — 11-21: 3열 → 2열 큰 카드로 확대 */
+.av-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
+.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:18px;padding:28px 7px 9px;display:flex;
+  flex-direction:column;align-items:center;gap:5px;cursor:pointer}
 .av-card.on{border-color:#5FA97A;background:#F2FBF5;box-shadow:0 3px 8px rgba(95,169,122,.2)}
-.av-card-img{width:100%;height:62px;display:grid;place-items:center}
-.av-card-img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.av-card-n{font-size:12px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis}
+.av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
+.av-card-n{font-size:14px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;line-height:1.25}
 .av-card.on .av-card-n{color:#3E7A54}
 /* 배경 색 칩 */
 .av-bgs{display:flex;flex-wrap:wrap;gap:9px}
@@ -906,12 +906,12 @@ button{font:inherit;color:inherit}
 .av-tip{font-size:10.5px;font-weight:800;color:#A99F92;background:#FFF6E9;border:1px solid #F3E6D2;
   border-radius:999px;padding:2px 8px;align-self:flex-start;margin-top:3px}
 .av-tabs{display:flex;gap:4px;margin:4px 0 2px}
-.avtab{flex:1;height:30px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
-  font-size:11.5px;font-weight:800;color:#8B7A63;cursor:pointer;white-space:nowrap;padding:0 2px}
+.avtab{flex:1;height:34px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
+  font-size:12.5px;font-weight:800;color:#8B7A63;cursor:pointer;white-space:nowrap;padding:0 2px}
 .avtab.on{background:#F5ECFB;border-color:#E2CFF2;color:#7B5AA6;font-weight:900;
   box-shadow:0 2px 6px rgba(150,120,190,.16)}
 .av-sec{margin-top:8px}
-.av-lab{font-size:11.5px;font-weight:900;color:#8B7A63;margin-bottom:4px}
+.av-lab{font-size:12.5px;font-weight:900;color:#8B7A63;margin-bottom:5px}
 .av-opts{display:flex;flex-wrap:wrap;gap:4px}
 .avopt{border:1px solid #E7DCCB;background:#fff;border-radius:999px;height:26px;padding:0 10px;
   font-size:12px;font-weight:800;color:#7A6A58;cursor:pointer;white-space:nowrap}
@@ -1426,28 +1426,38 @@ button.st{padding:0}
 .av-ptnote{flex:1 1 100%;font-size:10px;font-weight:800;color:#9C8EC0;line-height:1.35;letter-spacing:-.2px}
 .av-card{position:relative}
 .av-card.locked{background:#FCFAF5;border-style:dashed;border-color:#EADCC5}
-.av-card-pr{position:absolute;top:4px;right:4px;font-size:9px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
-  border:1px solid #E5D8F6;border-radius:999px;padding:0 5px;line-height:1.55;z-index:3}
-.av-card-img{width:100%;height:62px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;flex:0 0 auto}
-.av-card-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
-.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:11.5px;
-  line-height:1.3;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av-card-pr{position:absolute;top:6px;right:6px;font-size:11px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
+  border:1px solid #E5D8F6;border-radius:999px;padding:0 8px;line-height:1.7;z-index:3}
+.av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
+.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:14px;
+  line-height:1.25;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .av-card.on .av-card-n{color:#3E7A54}
 .av-card-emoji{font-size:26px;line-height:1}
-.av-own{display:block;width:100%;text-align:center;font-size:9px;font-weight:900;color:#6FA97E;line-height:1.7}
-.av-buy{display:block;width:100%;margin-top:1px;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
-  border-radius:999px;height:19px;font-size:9.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
+.av-own{display:block;width:100%;text-align:center;font-size:11.5px;font-weight:900;color:#6FA97E;line-height:1.4;margin-top:auto}
+.av-buy{display:block;width:100%;margin-top:auto;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
+  border-radius:999px;height:28px;font-size:12px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
 .av-buy:active{transform:scale(.96)}
-/* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 컴팩트 버튼 */
+/* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 버튼 */
 .av-refund{display:block;width:100%;margin-top:0;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
-  border-radius:999px;height:16px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  border-radius:999px;height:24px;font-size:11px;font-weight:900;cursor:pointer;padding:0;line-height:1;
   white-space:nowrap;letter-spacing:-.3px}
 .av-refund:hover{background:#FDE9E4;border-color:#E3B0A5}
 .av-refund:active{transform:scale(.96);background:#FBDCD4}
 .av-grid{align-items:stretch}
-.av-bggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
-.av-bgdot{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
+/* 배경 색도 2열 큰 칩 */
+.av-bggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
+.av-bgdot{width:82px;height:82px;border-radius:22px;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
 .av-card.on .av-bgdot{box-shadow:0 0 0 2.5px #5FA97A}
+/* ✨ 꾸미기 카드 — 고른 캐릭터에 실제로 씌운 모습을 118px 프리뷰로 (위 미리보기와 같은 크기라 48종 위치 그대로) */
+.av-deco-pv{width:118px;height:118px;flex:0 0 118px;border-radius:26px;border:1px solid #F0E6D6;
+  box-shadow:0 4px 10px rgba(160,140,110,.12)}
+.av-deco-pv > img{width:97%;height:97%;object-fit:contain;position:relative;z-index:1}
+.av-deco-pv .avd{animation:none!important}
+.av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#BCAB93;
+  border:2px dashed #E7DBC9;border-radius:26px;box-shadow:none;background:linear-gradient(150deg,#FFFDF8,#F8F3EA)}
+/* 상점 시트는 여백을 살짝 줄여 카드 가로폭 확보 */
+.sheet-card:has(.av-grid),.sheet-card:has(.av-bggrid){padding-left:10px;padding-right:10px}
 .av-lab-note{margin-left:4px;font-size:9.5px;font-weight:900;color:#8A72C0;background:#F4EFFE;
   border-radius:999px;padding:1px 6px}
 .avtab i{font-style:normal;font-size:9px;font-weight:900;color:#B79BE0;margin-left:2px}
@@ -1527,11 +1537,11 @@ button.st{padding:0}
   .av-ptbar{padding:4px 8px;margin:1px 0 3px;border-radius:10px}
   .av-ptbig{font-size:12px}
   .av-ptnote{font-size:9px}
-  .av-card-img{height:56px}
-  .av-card-n{font-size:10.5px}
-  .av-buy{height:17px;font-size:9px}
-  .av-own{font-size:8.5px}
-  .av-refund{height:15px;font-size:8px}
+  .av-card-img{height:134px}
+  .av-card-n{font-size:14.5px}
+  .av-buy{height:28px;font-size:12px}
+  .av-own{font-size:11.5px}
+  .av-refund{height:24px;font-size:11px}
 }
 /* 390px 모바일 — 문제집 입력 줄이 잘리지 않게 두 줄 배치 */
 @media (max-width:430px){
@@ -6667,11 +6677,17 @@ function renderAvatarSheet(){
             '<span class="av-card-img"><span class="av-bgdot" style="background:' + bx.c + '"></span></span>', kid, av);
         }).join('') + '</div></div>';
   } else if (avatarTab === 'deco'){
+    /* 카드마다 고른 캐릭터에 그 꾸미기를 실제로 씌운 모습을 118px 프리뷰로 보여 줍니다 */
+    var pvPreset = av.preset || 'bun_ribbon', pvBg = avBgColor(av.bg);
     pane = '<div class="av-sec"><div class="av-lab">꾸미기를 골라요 · ' + (AV_DECOS.length - 1) + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
       + '<div class="av-grid">' + AV_DECOS.map(function(d){
-          var ico = (d.k === 'none') ? '—' : (d.n.split(' ')[0] || '✨');
           var lab = (d.k === 'none') ? '없음' : d.n.replace(/^\S+\s*/, '');
-          return avShopCard('deco', d.k, lab, '<span class="av-card-img av-card-emoji">' + ico + '</span>', kid, av);
+          var pv = (d.k === 'none')
+            ? '<span class="av-card-img"><span class="avw av-deco-pv av-deco-none">—</span></span>'
+            : '<span class="av-card-img"><span class="avw av-deco-pv" style="background:' + pvBg + '">'
+              + '<img src="' + avImgSrc(pvPreset) + '" alt="" draggable="false" decoding="async">'
+              + avDecoHtml(d.k) + '</span></span>';
+          return avShopCard('deco', d.k, lab, pv, kid, av);
         }).join('') + '</div></div>';
   } else if (avatarTab === 'build'){
     pane = '<div class="av-sec"><div class="av-lab">집·마을을 골라요 · ' + AV_BUILDS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
