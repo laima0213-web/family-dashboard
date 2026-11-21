@@ -12988,7 +12988,51 @@ async function finishBoot(){
       }
       return true;
     },
-    closeGallery: function(){ var b = document.getElementById('__gal'); if (b) b.remove(); return true; }
+    closeGallery: function(){ var b = document.getElementById('__gal'); if (b) b.remove(); return true; },
+    /* 놀이터 검증 도우미 — 씬 상태 확인·초기화·배치 */
+    pgState: function(){
+      var st = window.__pg.scene();
+      return { builds: Object.keys(st.builds).length, chars: Object.keys(st.chars||{}).length,
+               time: st.time, cam: [st.camera.position.x, st.camera.position.y, st.camera.position.z] };
+    },
+    pgDark: function(){
+      var st = window.__pg.scene();
+      st.renderer.render(st.scene, st.camera);
+      var gl = st.renderer.getContext(), w = gl.drawingBufferWidth, h = gl.drawingBufferHeight;
+      var px = new Uint8Array(w * h * 4);
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      var n = 0, dark = 0, sr = 0, sg = 0, sb = 0;
+      for (var i = 0; i < px.length; i += 4 * 53){
+        sr += px[i]; sg += px[i+1]; sb += px[i+2];
+        if (px[i] < 30 && px[i+1] < 30 && px[i+2] < 30) dark++;
+        n++;
+      }
+      return { dark: +(dark / n).toFixed(3), mean: [Math.round(sr/n), Math.round(sg/n), Math.round(sb/n)] };
+    },
+    pgClearBuilds: function(){
+      var st = window.__pg.scene();
+      Object.keys(st.builds).forEach(function(id){
+        var b = st.builds[id];
+        if (b && b.g && b.g.parent) b.g.parent.remove(b.g);
+        delete st.builds[id];
+      });
+      st.buildOrder = [];
+      var ap = window.__pg.app();
+      if (ap && ap.pgBuilds) ap.pgBuilds[st.kid] = [];
+      return Object.keys(st.builds).length;
+    },
+    pgRing: function(kinds, radius, faceOut){
+      var out = [];
+      var st = window.__pg.scene();
+      kinds.forEach(function(k, i){
+        var a = (i / kinds.length) * Math.PI * 2;
+        var x = Math.cos(a) * radius, z = Math.sin(a) * radius;
+        var rot = faceOut ? Math.atan2(x, z) : Math.atan2(-x, -z);
+        window.__pg.buildPlaceAt(k, Math.round(x * 100) / 100, Math.round(z * 100) / 100, Math.round(rot * 1000) / 1000);
+        out.push(k);
+      });
+      return Object.keys(st.builds).length;
+    }
   };
 })();
 </script>
