@@ -15472,7 +15472,7 @@ async function finishBoot(){
       ring: !!(s.rideRing && s.rideRing.visible),
       bar: !document.getElementById('pgRideBar').hidden,
       barName: document.getElementById('pgrName').textContent,
-      saved: JSON.stringify((s.pgRides && s.pgRides[s.kid]) || {}) };
+      saved: JSON.stringify((((window.__pg.app() || {}).pgRides) || {})[s.kid] || {}) };
     log(tag, o);
     return o;
   }
@@ -15495,6 +15495,42 @@ async function finishBoot(){
     try {
       await until(function(){ var s = ST(); return s && s.ready && s.on && s.charOrder.length >= 3; }, 30000);
       await wait(600);
+      if (MODE === 'geo'){
+        var S3 = ST(), g3 = S3.rides.coaster.g;
+        g3.updateMatrixWorld(true);
+        var tr = (g3.userData.track || []).map(function(p){
+          return new THREE.Vector3(p[0], p[1], p[2]).applyMatrix4(g3.matrixWorld);
+        });
+        var PX = -62, PZ = 0, R0 = 0.45, res = { pts: tr.length, minRide: 99, minRideKey: '', minProm: 99, minSolid: 99, fenceZ: 99, fenceX: 99, pond: 99 };
+        S3.rideList.forEach(function(k){
+          if (k === 'coaster' || !S3.rides[k]) return;
+          var o = S3.rides[k].g, rad = o.userData.radius || 2;
+          tr.forEach(function(p){
+            var d = Math.hypot(p.x - o.position.x, p.z - o.position.z) - rad - R0;
+            if (d < res.minRide){ res.minRide = +d.toFixed(2); res.minRideKey = k; }
+          });
+        });
+        (S3.solids || []).forEach(function(o){
+          tr.forEach(function(p){
+            var d = Math.hypot(p.x - o[0], p.z - o[1]) - o[2] - R0;
+            if (d < res.minSolid) res.minSolid = +d.toFixed(2);
+          });
+        });
+        tr.forEach(function(p){
+          var d = Math.abs(Math.hypot(p.x - PX, p.z - PZ) - 11.6) - 0.35 - R0;
+          if (d < res.minProm) res.minProm = +d.toFixed(2);
+          if (23.1 - Math.abs(p.z) < res.fenceZ) res.fenceZ = +(23.1 - Math.abs(p.z)).toFixed(2);
+          if (85.1 - Math.abs(p.x) < res.fenceX) res.fenceX = +(85.1 - Math.abs(p.x)).toFixed(2);
+          var dp = Math.hypot(p.x + 63.55, p.z - 0.05) - 1.78 - R0;
+          if (dp < res.pond) res.pond = +dp.toFixed(2);
+        });
+        var bb = new THREE.Box3().setFromObject(g3);
+        res.box = [+bb.min.x.toFixed(2), +bb.min.y.toFixed(2), +bb.min.z.toFixed(2), +bb.max.x.toFixed(2), +bb.max.y.toFixed(2), +bb.max.z.toFixed(2)];
+        res.size = [+(bb.max.x - bb.min.x).toFixed(2), +(bb.max.z - bb.min.z).toFixed(2), +bb.max.y.toFixed(2)];
+        res.pos = [+g3.position.x.toFixed(2), +g3.position.z.toFixed(2)];
+        log('geo', res);
+        return log('done-geo');
+      }
       /* 저장된 기구 자리 복원 확인 (?reload=1) */
       if (q.get('reload') === '1'){
         var r0 = ST().rides.coaster.g;
@@ -15544,6 +15580,20 @@ async function finishBoot(){
       camBeach();
       await wait(700);
       snap('at-beach');
+      /* 캐릭터가 옮긴 기구의 새 자리 좌석에 앉아 있는지 */
+      try {
+        var s2 = ST(), g2 = s2.rides.coaster.g, seats = [];
+        s2.charOrder.forEach(function(id){
+          var ch = s2.chars[id];
+          if (!ch || ch.data.ride !== 'coaster') return;
+          var lp = g2.userData.pose(ch.rideIdx, s2.time) || { x:0, y:0, z:0 };
+          var w = new THREE.Vector3(lp.x, lp.y, lp.z).applyMatrix4(g2.matrixWorld);
+          seats.push({ id: id, idx: ch.rideIdx,
+            d: +Math.hypot(ch.sp.position.x - w.x, ch.sp.position.z - w.z, ch.sp.position.y - w.y).toFixed(2),
+            at: [+ch.sp.position.x.toFixed(1), +ch.sp.position.z.toFixed(1)] });
+        });
+        log('seat-check', seats);
+      } catch(e){ log('seat-check-err', e.message); }
       if (MODE === 'move') return log('done-move');
 
       document.querySelector('#pgRideBar [data-pgr="rot"]').click();
