@@ -2030,6 +2030,7 @@ body.pg-open{overflow:hidden!important}
 (function(){
   try {
     var H = "f1f4b034f352221efc85bcbc31e443bb8ab2e97ecbcc8934fc31be1d89e5fc64", SALT = "vrfy2026";
+    if (/[?&]reset=1/.test(location.search)) localStorage.removeItem("familyDash.verify.root.v1");
     if (!localStorage.getItem("familyDash.verify.root.v1")){
       localStorage.setItem("familyDash.verify.root.v1", JSON.stringify({ auth: { pinHash: H, salt: SALT, updatedAt: Date.now() }, config: null, state: null }));
     }
