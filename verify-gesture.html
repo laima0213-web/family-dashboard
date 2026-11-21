@@ -26,6 +26,8 @@
   if (q.get('reset') === '1'){ try { localStorage.removeItem('familyDash.verify.root.v1'); } catch(e){} }
   var f = document.createElement('iframe');
   f.id = 'f';
+  f.setAttribute('aria-hidden', 'true');
+  f.setAttribute('tabindex', '-1');
   f.src = './verify-coaster.html?pg=1&h=' + Date.now();
   document.body.insertBefore(f, document.body.firstChild);
 
