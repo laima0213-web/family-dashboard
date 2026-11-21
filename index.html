@@ -701,6 +701,48 @@ button{font:inherit;color:inherit}
 @keyframes avdFlap{0%,100%{transform:rotate(-9deg) scaleY(.94)}50%{transform:rotate(9deg) scaleY(1.04)}}
 .avd-wt1{position:absolute;left:13px;top:38px;font-size:8px;animation:avdTw 1.8s ease-in-out infinite}
 .avd-wt2{position:absolute;right:13px;top:38px;font-size:8px;animation:avdTw 1.8s .6s ease-in-out infinite}
+/* v19 새 꾸미기 12종 */
+.avd-bb{position:absolute;left:50%;top:-2px;width:56px;height:40px;margin-left:-28px;
+  animation:avdBob2 2.6s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(190,150,170,.32))}
+.avd-bb svg{width:100%;height:100%;display:block}
+.avd-hg{position:absolute;left:50%;top:37%;width:46px;height:19px;margin-left:-23px;
+  animation:avdFloat 3.2s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(200,120,150,.3))}
+.avd-hg svg{width:100%;height:100%;display:block}
+.avd-py{position:absolute;left:2px;bottom:4px;font-size:17px;animation:avdSway2 3s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(120,90,70,.28))}
+.avd-py2{position:absolute;right:4px;bottom:3px;font-size:9px;opacity:.85;animation:avdTw 2.6s .8s ease-in-out infinite}
+.avd-cc{position:absolute;right:5px;bottom:16px;width:22px;height:21px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#FFF3F8 0 18%,#FFC2DA 62%,#F58FB4 100%);
+  box-shadow:inset -2px -3px 5px rgba(220,140,170,.4),0 2px 5px rgba(200,120,150,.22);
+  animation:avdBalloon 5s ease-in-out infinite}
+.avd-cc:after{content:'';position:absolute;left:50%;top:96%;width:2px;height:15px;border-radius:1px;
+  background:#D9B98C;transform:translateX(-50%)}
+.avd-cm{position:absolute;right:3px;bottom:6px;font-size:16px;animation:avdSway 3.4s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(90,80,70,.3))}
+.avd-cq{position:absolute;right:18px;top:43%;font-size:9px;animation:avdTw 2.1s ease-in-out infinite}
+.avd-bk{position:absolute;left:2px;bottom:2px;font-size:15px;animation:avdFloat 3.4s .3s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(90,80,70,.25))}
+.avd-pc{position:absolute;right:5px;top:11px;font-size:13px;transform:rotate(20deg);
+  animation:avdFloat 2.9s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(150,120,90,.28))}
+.avd-fb{position:absolute;right:2px;bottom:3px;font-size:16px;animation:avdSway 3.8s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(120,90,70,.25))}
+.avd-fb2{position:absolute;right:19px;bottom:20px;font-size:11px;animation:avdFloat 3.1s ease-in-out infinite}
+.avd-fb3{position:absolute;right:4px;bottom:24px;font-size:9px;animation:avdFloat 3.1s 1.1s ease-in-out infinite}
+.avd-sn{position:absolute;right:0px;bottom:4px;width:29px;height:37px;
+  animation:avdSway2 3.8s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(160,140,150,.22))}
+.avd-sn svg{width:100%;height:100%;display:block}
+.avd-nrb{position:absolute;right:4px;top:6px;font-size:14px;transform:rotate(-12deg);animation:avdFloat 3.2s ease-in-out infinite}
+.avd-nr1{position:absolute;left:5px;top:44%;font-size:11px;animation:avdFloat 2.6s ease-in-out infinite}
+.avd-nr2{position:absolute;left:12px;bottom:10px;font-size:9.5px;animation:avdFloat 2.6s 1s ease-in-out infinite}
+.avd-glow{position:absolute;left:-8px;right:-8px;top:-8px;bottom:-8px;border-radius:50%;z-index:0;
+  background:radial-gradient(circle,rgba(255,228,150,.52) 0 40%,rgba(255,214,236,.34) 62%,rgba(255,255,255,0) 78%);
+  animation:avdSun 4.2s ease-in-out infinite}
+.avd-gl1{position:absolute;left:4px;top:14px;font-size:10px;animation:avdTw 1.9s ease-in-out infinite}
+.avd-gl2{position:absolute;right:5px;top:26%;font-size:8.5px;animation:avdTw 1.9s .6s ease-in-out infinite}
+.avd-gl3{position:absolute;left:9px;bottom:12px;font-size:8px;animation:avdTw 1.9s 1.2s ease-in-out infinite}
+.avd-pp{position:absolute;right:-4px;top:7px;width:39px;height:31px;
+  animation:avdDrift 5.4s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(150,130,110,.25))}
+.avd-pp svg{width:100%;height:100%;display:block}
+.avd-cr{position:absolute;left:0px;top:1px;width:30px;height:30px;
+  animation:avdFloat 3.8s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(220,180,90,.42))}
+.avd-cr svg{width:100%;height:100%;display:block}
+@keyframes avdBob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
 /* 캐릭터 고르기 그리드 */
 .av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
 .av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:6px 4px 5px;display:flex;
@@ -3705,7 +3747,20 @@ var AV_PRESETS = [
   { k:'doctor_nurse',    n:'꼬마 의사' },
   { k:'skater_punk',     n:'스케이트보더' },
   { k:'snow_fairy',      n:'눈꽃 요정' },
-  { k:'cat_butler',      n:'고양이 집사' }
+  { k:'cat_butler',      n:'고양이 집사' },
+  /* v19 추가 12종 — 남아 5종(소방관·파일럿·야구·기사·해적) + 귀여운 7종 */
+  { k:'firefighter_boy', n:'꼬마 소방관' },
+  { k:'pilot_captain',   n:'파일럿 조종사' },
+  { k:'baseball_hero',   n:'야구 유니폼' },
+  { k:'royal_knight',    n:'왕실 기사' },
+  { k:'pirate_captain',  n:'해적 선장' },
+  { k:'butterfly_fairy', n:'나비 요정' },
+  { k:'melon_pajama',    n:'수박 파자마' },
+  { k:'snowman_cloak',   n:'눈사람 겨울 망토' },
+  { k:'frog_raincoat',   n:'개구리 우비' },
+  { k:'bunny_ribbon',    n:'토끼 리본 원피스' },
+  { k:'painter_beret',   n:'꼬마 화가' },
+  { k:'barista_apron',   n:'꼬마 바리스타' }
 ];
 var AV_BGS = [
   { k:'none',     n:'기본',   c:'#FAF6EC' },   /* 무료 기본 배경 — 판매 품목 아님 */
@@ -3734,7 +3789,20 @@ var AV_BGS = [
   { k:'coral_peach',  n:'코랄 복숭아', c:'linear-gradient(150deg,#FFE4D8 0%,#FFCDBD 47%,#FFDAE3 100%)' },
   { k:'milky_way',    n:'은하수',      c:'radial-gradient(circle at 71% 21%,#FFF8EA 0 2px,transparent 2.6px) 0 0/24px 24px,linear-gradient(160deg,#2F3258 0%,#4B4677 56%,#9182B8 100%)' },
   { k:'honey_butter', n:'꿀버터',      c:'linear-gradient(160deg,#FFF7DC 0%,#FFE9B8 50%,#FFDDA8 100%)' },
-  { k:'snow_flake',   n:'겨울 눈꽃',   c:'radial-gradient(circle at 30% 28%,#FFFFFF 0 1.3px,transparent 1.5px) 0 0/12px 12px,linear-gradient(160deg,#EBF6FC 0%,#DBECF8 100%)' }
+  { k:'snow_flake',   n:'겨울 눈꽃',   c:'radial-gradient(circle at 30% 28%,#FFFFFF 0 1.3px,transparent 1.5px) 0 0/12px 12px,linear-gradient(160deg,#EBF6FC 0%,#DBECF8 100%)' },
+  /* v19 추가 12종 — 파스텔 그라데이션 · 도트 · 스트라이프 · 격자 */
+  { k:'strawberry_milk', n:'딸기우유',     c:'linear-gradient(165deg,#FFF3F7 0%,#FFDCE8 52%,#FFC8DB 100%)' },
+  { k:'vanilla_latte',   n:'바닐라 라떼',   c:'linear-gradient(170deg,#FFFCF4 0%,#F8EAD3 54%,#EEDCBD 100%)' },
+  { k:'mint_choco_dot',  n:'민트초코 도트', c:'radial-gradient(circle,#B99A7E 1.3px,transparent 1.5px) 5px 5px/11px 11px,radial-gradient(circle,#8FD5BC 1.6px,transparent 1.8px) 0 0/11px 11px,#EDF9F2' },
+  { k:'lilac_garden',    n:'라일락 가든',   c:'radial-gradient(circle at 22% 18%,#FAF4FF 0%,#E6DAF9 46%,#D6C7EF 100%)' },
+  { k:'candy_stripe',    n:'캔디 스트라이프', c:'repeating-linear-gradient(135deg,#FFF4F8 0 10px,#FFDFEA 10px 20px)' },
+  { k:'sandy_beach',     n:'모래사장 바다', c:'linear-gradient(180deg,#DDF2FC 0%,#EAF7FC 44%,#FCEEDC 62%,#F6E2C4 100%)' },
+  { k:'winter_aurora',   n:'겨울 오로라',   c:'linear-gradient(150deg,#DCF6EF 0%,#D9E8FF 38%,#E7DEFF 68%,#FBEDFF 100%)' },
+  { k:'peach_soda',      n:'피치 소다',     c:'linear-gradient(160deg,#FFF0E3 0%,#FFD7C7 46%,#FFC2CF 100%)' },
+  { k:'pastel_grid',     n:'파스텔 격자',   c:'repeating-linear-gradient(0deg,#FFFDFB 0 2.5px,transparent 2.5px 20px),repeating-linear-gradient(90deg,#FFFDFB 0 2.5px,transparent 2.5px 20px),linear-gradient(160deg,#E3DCFA 0%,#CFE3F7 100%)' },
+  { k:'starlit_sea',     n:'별빛 바다',     c:'radial-gradient(circle at 74% 24%,#FFF6D8 0 1.6px,transparent 2px) 0 0/26px 26px,radial-gradient(circle at 20% 62%,#FFFFFF 0 1.2px,transparent 1.6px) 0 0/22px 22px,linear-gradient(170deg,#2F4B6C 0%,#42678E 52%,#82AAC6 100%)' },
+  { k:'sunny_meadow',    n:'햇살 풀밭',     c:'radial-gradient(circle at 78% 14%,#FFFDE8 0%,#FFF6C9 28%,#EAF7D3 66%,#D6F0C2 100%)' },
+  { k:'macaron_mosaic',  n:'마카롱 모자이크', c:'repeating-conic-gradient(from 45deg at 50% 50%,#FFE1EC 0 25%,#E6F6EE 0 50%,#FFF3DC 0 75%,#E7E9FB 0 100%) 0 0/46px 46px' }
 ];
 var AV_DECOS = [
   { k:'none',    n:'없음' },
@@ -3763,7 +3831,20 @@ var AV_DECOS = [
   { k:'sprout',    n:'🌱 새싹' },
   { k:'snowflake', n:'❄️ 눈결정' },
   { k:'raincloud', n:'🌦️ 무지개 구름' },
-  { k:'wing',      n:'🦋 반짝 날개' }
+  { k:'wing',      n:'🦋 반짝 날개' },
+  /* v19 추가 12종 */
+  { k:'bunny_band',     n:'🐰 토끼 머리띠' },
+  { k:'heart_glasses',  n:'💗 하트 선글라스' },
+  { k:'puppy',          n:'🐶 미니 강아지' },
+  { k:'cotton_candy',   n:'🍬 솜사탕' },
+  { k:'camera',         n:'📷 카메라' },
+  { k:'book_pencil',    n:'📚 책과 연필' },
+  { k:'flower_basket',  n:'🧺 꽃바구니' },
+  { k:'snow_friend',    n:'⛄ 눈사람 친구' },
+  { k:'note_ribbon',    n:'🎀 음표 리본' },
+  { k:'starglow',       n:'🌠 마법 별오라' },
+  { k:'paper_plane',    n:'✈️ 종이비행기' },
+  { k:'crescent',       n:'🌙 달빛 초승달' }
 ];
 /* v17 — 🏡 집·마을 : 상점에서 💎 1P로 사서 놀이터에 직접 짓는 12종 */
 var AV_BUILDS = [
@@ -3791,9 +3872,22 @@ var AV_BUILDS = [
   { k:'wish_well',      e:'🪣', n:'소원 우물' },
   { k:'farm_barn',      e:'🚜', n:'농장 헛간' },
   { k:'mini_station',   e:'🚂', n:'미니 기차역' },
-  { k:'rainbow_cottage',e:'🌈', n:'무지개 오두막' }
+  { k:'rainbow_cottage',e:'🌈', n:'무지개 오두막' },
+  /* v19 추가 12종 */
+  { k:'donut_shop',     e:'🍩', n:'도넛 가게' },
+  { k:'ramen_shop',     e:'🍜', n:'우동·라멘집' },
+  { k:'aquarium',       e:'🐠', n:'아쿠아리움 수족관' },
+  { k:'pink_castle',    e:'🏰', n:'핑크 미니 성' },
+  { k:'windmill_house', e:'🌬️', n:'풍차 집' },
+  { k:'bookstore',      e:'📖', n:'문구점 서점' },
+  { k:'beach_cafe',     e:'🏖️', n:'해변 파라솔 카페' },
+  { k:'campfire',       e:'🔥', n:'캠프파이어 통나무' },
+  { k:'flower_carriage',e:'💐', n:'꽃마차' },
+  { k:'hot_spring',     e:'♨️', n:'온천 노천탕' },
+  { k:'tree_deck',      e:'🌲', n:'2층 트리 전망대' },
+  { k:'bungeoppang',    e:'🐟', n:'붕어빵 포장마차' }
 ];
-var PG_BUILD_MAX = 24;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
+var PG_BUILD_MAX = 36;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
 function avBuildOf(k){ return (typeof AV_BUILDS === 'undefined' ? [] : AV_BUILDS).filter(function(b){ return b.k === k; })[0] || null; }
 function avBuildName(k){ var b = avBuildOf(k); return b ? b.n : k; }
 function avBuildIcon(k){ var b = avBuildOf(k); return b ? (b.e || '🏡') : '🏡'; }
@@ -4078,6 +4172,181 @@ function avBuildSvg(k){
       + '<rect x="16" y="52" width="32" height="2.6" rx="1.2" fill="#EFE3D2"/>'
       + '<g fill="#FFC3D6"><circle cx="13.4" cy="50" r="1.8"/><circle cx="17.4" cy="52.4" r="1.5"/><circle cx="50.6" cy="50" r="1.8"/><circle cx="46.6" cy="52.4" r="1.5"/></g>'
       + '<g fill="#FFE39B"><circle cx="13.4" cy="50" r=".7"/><circle cx="50.6" cy="50" r=".7"/></g>';
+  } else if (k === 'donut_shop'){
+    S += '<rect x="15" y="31.6" width="34" height="21.4" rx="3" fill="#FFF2F6" stroke="#F4DCE4" stroke-width="1.1"/>'
+      + '<rect x="13.4" y="28.4" width="37.2" height="4.6" rx="2.1" fill="#FFB6CB"/>'
+      + '<g fill="#FFF7FB"><rect x="16.8" y="28.4" width="5.2" height="4.6"/><rect x="27.2" y="28.4" width="5.2" height="4.6"/><rect x="37.6" y="28.4" width="5.2" height="4.6"/><rect x="48" y="28.4" width="2" height="4.6"/></g>'
+      + '<circle cx="32" cy="18.6" r="8.8" fill="#F7C9A2" stroke="#E9B489" stroke-width="1.1"/>'
+      + '<circle cx="32" cy="18.6" r="3.1" fill="#FFF6EA"/>'
+      + '<path d="M23.4 16.6 q2.4-6.6 8.6-6.6 q6.2 0 8.6 6.6 q-4.2-2.8-8.6-2.8 q-4.4 0-8.6 2.8z" fill="#FF9FB8"/>'
+      + '<g fill="#FFF6C9"><circle cx="27.2" cy="13.6" r=".8"/><circle cx="32" cy="12.4" r=".8"/><circle cx="36.8" cy="13.6" r=".8"/><circle cx="30" cy="15.8" r=".7"/><circle cx="34.4" cy="15.8" r=".7"/></g>'
+      + '<rect x="27.8" y="38.4" width="8.4" height="14.6" rx="2.2" fill="#E9B98C" stroke="#D9A877" stroke-width=".9"/>'
+      + '<circle cx="34.6" cy="45.6" r="1" fill="#FFE9A8"/>'
+      + '<rect x="18.2" y="35" width="7.2" height="7" rx="1.6" fill="#FFF6C9" stroke="#F3E2C9" stroke-width=".9"/>'
+      + '<rect x="38.6" y="35" width="7.2" height="7" rx="1.6" fill="#FFF6C9" stroke="#F3E2C9" stroke-width=".9"/>'
+      + '<rect x="17.2" y="43" width="9.2" height="3" rx="1.4" fill="#B98A5E"/><rect x="37.6" y="43" width="9.2" height="3" rx="1.4" fill="#B98A5E"/>'
+      + '<g fill="#FF9FB8"><circle cx="19.6" cy="41.6" r="1.2"/><circle cx="24" cy="41.6" r="1.2"/></g>'
+      + '<g fill="#FFE08A"><circle cx="40" cy="41.6" r="1.2"/><circle cx="44.4" cy="41.6" r="1.2"/></g>'
+      + '<rect x="15" y="52.6" width="34" height="2.6" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'ramen_shop'){
+    S += '<rect x="15.4" y="31" width="33.2" height="22" rx="3" fill="#FFF8EC" stroke="#F0E0C8" stroke-width="1.1"/>'
+      + '<path d="M12.6 31.4 L32 19.6 L51.4 31.4 Z" fill="#A7D8CE"/>'
+      + '<path d="M12.6 31.4 L32 19.6 L51.4 31.4" fill="none" stroke="#89C9BC" stroke-width="1.2"/>'
+      + '<rect x="25.8" y="24.6" width="12.4" height="6.6" rx="1.2" fill="#FFF4E2" stroke="#E7C39A" stroke-width=".9"/>'
+      + '<path d="M27.4 26.6 h9.2 M27.4 28.8 h9.2" stroke="#E8B87A" stroke-width=".7"/>'
+      + '<path d="M24.2 13.6 q7.8-3.6 15.6 0 l-1.8 4.8 q-6-2.6-12 0z" fill="#FFF6EA" stroke="#E7C39A" stroke-width="1"/>'
+      + '<path d="M26.2 12.2 q5.8-2.2 11.6 0" fill="none" stroke="#F0D08A" stroke-width="1.5"/>'
+      + '<path d="M34.4 6.6 l7.4 5.6" stroke="#C9A47C" stroke-width="1.3" stroke-linecap="round"/>'
+      + '<path d="M27.8 8.6 q1.8-2.4 0-4.4 M32 6.6 q1.8-2.4 0-4.4" fill="none" stroke="#D9E6E2" stroke-width="1.4" opacity=".9" stroke-linecap="round"/>'
+      + '<rect x="28.6" y="38.4" width="8" height="14.6" rx="2" fill="#D9A877" stroke="#C9A47C" stroke-width=".8"/>'
+      + '<circle cx="35.2" cy="45.6" r=".9" fill="#FFE9A8"/>'
+      + '<rect x="18.4" y="35" width="7.4" height="7" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="38.2" y="35" width="7.4" height="7" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<line x1="18.4" y1="31.6" x2="18.4" y2="34.4" stroke="#C9A47C" stroke-width=".9"/>'
+      + '<circle cx="18.4" cy="37.4" r="2.9" fill="#FF8F7A" stroke="#E0705C" stroke-width=".9"/>'
+      + '<path d="M16.4 37.4 h4" stroke="#FFF0E2" stroke-width=".8"/>'
+      + '<line x1="47" y1="31.6" x2="47" y2="34.6" stroke="#C9A47C" stroke-width=".9"/>'
+      + '<circle cx="47" cy="37.6" r="2.7" fill="#FFC9DA" stroke="#EFAEC3" stroke-width=".9"/>'
+      + '<rect x="15.4" y="52.6" width="33.2" height="2.6" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'aquarium'){
+    S += '<rect x="13.6" y="25.4" width="36.8" height="27.4" rx="4" fill="#EAF8FE" stroke="#BEE4F2" stroke-width="1.3"/>'
+      + '<path d="M14.4 39.8 v-9.6 a3.6 3.6 0 0 1 3.6-3.6 h28 a3.6 3.6 0 0 1 3.6 3.6 v9.6z" fill="#A5DEF5" opacity=".82"/>'
+      + '<ellipse cx="23.6" cy="32.2" rx="4.4" ry="2.8" fill="#FFB88C"/><path d="M19.2 32.2 l-3 2 0-4z" fill="#FFA06E"/><circle cx="26.2" cy="31.4" r=".7" fill="#6B5B4B"/>'
+      + '<ellipse cx="39.8" cy="36" rx="3.6" ry="2.4" fill="#FFC9DA"/><path d="M43.4 36 l2.8 1.8 0-3.6z" fill="#FFB0C6"/><circle cx="37.8" cy="35.4" r=".6" fill="#6B5B4B"/>'
+      + '<ellipse cx="30.4" cy="34.4" rx="2.6" ry="1.7" fill="#FFE39B"/><path d="M27.8 34.4 l-2 1.4 0-2.8z" fill="#EFD07A"/>'
+      + '<g fill="#FFFFFF" opacity=".92"><circle cx="29.4" cy="28" r="1"/><circle cx="31" cy="24.8" r=".7"/><circle cx="44" cy="30.6" r=".9"/><circle cx="20.4" cy="36.6" r=".7"/></g>'
+      + '<path d="M27.6 52.8 v-8 a4.4 4.4 0 0 1 8.8 0 v8z" fill="#CFEAFB" stroke="#B4DDEE" stroke-width="1"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.4" fill="none"><path d="M18 51.8 q1.8-4.2-0.2-7.8"/><path d="M45.8 51.8 q-1.8-4.2 0.2-7.8"/></g>'
+      + '<rect x="25.4" y="17.8" width="13.2" height="5.4" rx="1.8" fill="#FFB6CB"/>'
+      + '<path d="M27.4 20.4 q1.4-1.6 2.8 0 q1.4 1.6 2.8 0 M35.4 20.4 q1.4-1.6 2.8 0" fill="none" stroke="#FFF0F5" stroke-width="1"/>'
+      + '<line x1="32" y1="17.8" x2="32" y2="14.4" stroke="#B4DDEE" stroke-width="1"/>'
+      + '<path d="M32 14.6 l4.4 1.4 -4.4 1.4z" fill="#A6E5CF"/>'
+      + '<rect x="13.6" y="52.6" width="36.8" height="2.6" rx="1.2" fill="#E7EDF0"/>';
+  } else if (k === 'pink_castle'){
+    S += '<rect x="19" y="29.6" width="26" height="23.2" rx="2.4" fill="#FFF5FA" stroke="#F0D6E4" stroke-width="1.1"/>'
+      + '<rect x="13" y="33.6" width="7" height="19.2" rx="1.6" fill="#FFE6EF" stroke="#F1CDDC" stroke-width="1"/>'
+      + '<rect x="44" y="33.6" width="7" height="19.2" rx="1.6" fill="#FFE6EF" stroke="#F1CDDC" stroke-width="1"/>'
+      + '<path d="M23.4 29.8 L32 20.4 L40.6 29.8 Z" fill="#FFC3D6"/>'
+      + '<path d="M11.6 33.8 L16.5 25.6 L21.4 33.8 Z" fill="#FF9FB8"/><path d="M42.6 33.8 L47.5 25.6 L52.4 33.8 Z" fill="#FF9FB8"/>'
+      + '<path d="M16.5 25.6 v-3.8 M47.5 25.6 v-3.8 M32 20.4 v-3.6" stroke="#C9A47C" stroke-width=".9"/>'
+      + '<path d="M16.5 22 l4.2 1.4 -4.2 1.4z" fill="#FFF0B8"/><path d="M47.5 22 l4.2 1.4 -4.2 1.4z" fill="#FFF0B8"/>'
+      + '<path d="M32 17 l4.2 1.4 -4.2 1.4z" fill="#FFF0B8"/>'
+      + '<path d="M27.6 52.8 v-8.6 a4.4 4.4 0 0 1 8.8 0 v8.6z" fill="#E9B98C" stroke="#D9A877" stroke-width="1"/>'
+      + '<path d="M28.8 44.4 q3.2-2.6 6.4 0" fill="none" stroke="#D9A877" stroke-width=".8"/>'
+      + '<circle cx="24" cy="35.6" r="1.9" fill="#FFF6C9" stroke="#EFDFA8" stroke-width=".6"/>'
+      + '<circle cx="40" cy="35.6" r="1.9" fill="#FFF6C9" stroke="#EFDFA8" stroke-width=".6"/>'
+      + '<rect x="16.2" y="38.4" width="2.8" height="4.6" rx="1.3" fill="#FFF6C9"/>'
+      + '<rect x="45" y="38.4" width="2.8" height="4.6" rx="1.3" fill="#FFF6C9"/>'
+      + '<circle cx="32" cy="46.6" r="1" fill="#FFC9DA"/>'
+      + '<g fill="#FFC3D6"><circle cx="12.6" cy="52.4" r="1.5"/><circle cx="51.4" cy="52.4" r="1.5"/><circle cx="15.4" cy="54.4" r="1.1"/><circle cx="48.6" cy="54.4" r="1.1"/></g>';
+  } else if (k === 'windmill_house'){
+    S += '<ellipse cx="32" cy="53.4" rx="20" ry="3.6" fill="#DFF3CC"/>'
+      + '<path d="M25.8 52.8 L28.6 28.6 h6.8 L38.2 52.8 Z" fill="#FFF3E2" stroke="#EEDCC4" stroke-width="1.1"/>'
+      + '<path d="M27.8 24.6 q4.2-6.4 8.4 0 z" fill="#EFB9A2"/>'
+      + '<g stroke="#E8C28A" stroke-width="2.2" stroke-linecap="round"><line x1="32" y1="20.4" x2="32" y2="11.4"/><line x1="32" y1="20.4" x2="41" y2="20.4"/><line x1="32" y1="20.4" x2="32" y2="29.4"/><line x1="32" y1="20.4" x2="23" y2="20.4"/></g>'
+      + '<g fill="#FFF9F0" stroke="#E8C28A" stroke-width=".8"><rect x="30.6" y="11.8" width="2.8" height="6.8" rx="1"/><rect x="33.2" y="19" width="6.8" height="2.8" rx="1"/><rect x="30.6" y="22.2" width="2.8" height="6.8" rx="1"/><rect x="24" y="19" width="6.8" height="2.8" rx="1"/></g>'
+      + '<circle cx="32" cy="20.4" r="1.8" fill="#C9A47C"/>'
+      + '<rect x="29.6" y="41.4" width="4.8" height="11.4" rx="1.6" fill="#D9A877" stroke="#C9A47C" stroke-width=".8"/>'
+      + '<circle cx="33.4" cy="47.4" r=".8" fill="#FFE9A8"/>'
+      + '<rect x="29.8" y="31.4" width="4.4" height="4.4" rx="1.2" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".8"/>'
+      + '<rect x="29.8" y="31" width="4.4" height=".9" fill="#E8C28A"/>'
+      + '<rect x="20.4" y="44" width="5.6" height="5" rx="1.2" fill="#FFC9DA" stroke="#EFAEC3" stroke-width=".8"/>'
+      + '<path d="M20.4 45.6 h5.6" stroke="#EFAEC3" stroke-width=".7"/>'
+      + '<circle cx="21.6" cy="48" r=".8" fill="#FF9FB8"/><circle cx="23.6" cy="48" r=".8" fill="#FFE08A"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.2"><line x1="42.4" y1="52.4" x2="42.4" y2="46.6"/><line x1="45" y1="52.4" x2="45" y2="48"/></g>'
+      + '<circle cx="42.4" cy="45.8" r="1.6" fill="#FFC3D6"/><circle cx="45" cy="47.2" r="1.3" fill="#FFF0B8"/>';
+  } else if (k === 'bookstore'){
+    S += '<rect x="15" y="31" width="34" height="22" rx="3" fill="#FFF8EE" stroke="#F0E0C8" stroke-width="1.1"/>'
+      + '<path d="M13.6 31.4 h36.8 l-2.4 5.4 h-32z" fill="#A6E5CF"/>'
+      + '<g fill="#FFFDF8"><path d="M20 31.4 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M31 31.4 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M42 31.4 l-1.6 5.4 h3.4 l1.6-5.4z"/></g>'
+      + '<path d="M32 20.4 q-5.6-2.8-9.6 0 v8 q4.2-2.6 9.6 0 z" fill="#FFFDF8" stroke="#D9C7A8" stroke-width="1"/>'
+      + '<path d="M32 20.4 q5.6-2.8 9.6 0 v8 q-4.2-2.6-9.6 0 z" fill="#FFFFFF" stroke="#D9C7A8" stroke-width="1"/>'
+      + '<path d="M32 20.6 v7.8" stroke="#D9C7A8" stroke-width=".9"/>'
+      + '<g stroke="#C9B69A" stroke-width=".6"><line x1="25" y1="22.6" x2="30.2" y2="22.8"/><line x1="25" y1="24.8" x2="30.2" y2="25"/><line x1="34" y1="22.8" x2="39.2" y2="22.6"/><line x1="34" y1="25" x2="39.2" y2="24.8"/></g>'
+      + '<rect x="18" y="38.6" width="13.4" height="9.6" rx="1.4" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<g><rect x="19.4" y="41.8" width="2" height="5.2" fill="#BFA9C9"/><rect x="21.8" y="42.6" width="1.8" height="4.4" fill="#FFB6CB"/><rect x="24" y="41.2" width="2.2" height="5.8" fill="#A6E5CF"/><rect x="26.6" y="42.4" width="1.9" height="4.6" fill="#FFE39B"/><rect x="28.9" y="41.6" width="1.7" height="5.4" fill="#CDE8FF"/></g>'
+      + '<rect x="35.4" y="37.8" width="9.6" height="15.2" rx="2.2" fill="#CFEAFB" stroke="#B4DDEE" stroke-width=".9"/>'
+      + '<circle cx="42.8" cy="45.4" r=".8" fill="#FFFDF8"/>'
+      + '<rect x="20.6" y="50.4" width="8" height="2.6" rx="1" fill="#E4C69E"/>'
+      + '<circle cx="32" cy="35.4" r="1.4" fill="#FFE39B" stroke="#EBCE86" stroke-width=".6"/>'
+      + '<rect x="15" y="52.6" width="34" height="2.6" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'beach_cafe'){
+    S += '<ellipse cx="32" cy="53.6" rx="22" ry="3.8" fill="#F6E2C4"/>'
+      + '<line x1="32" y1="13.4" x2="32" y2="47.4" stroke="#E8C28A" stroke-width="1.8"/>'
+      + '<path d="M12.4 30.6 L32 12.6 L51.6 30.6 Z" fill="#FFC9DA"/>'
+      + '<path d="M32 12.6 L20.6 30.6 h5.8 z" fill="#FFF9F2"/><path d="M32 12.6 L37.6 30.6 h5.8 z" fill="#FFF9F2"/>'
+      + '<path d="M12.4 30.6 q4.8 2.6 9.6 0 q4.8 2.6 9.6 0 q4.8 2.6 9.6 0 q4.8 2.6 10 0" fill="none" stroke="#FFF0F5" stroke-width="1.4"/>'
+      + '<rect x="18.6" y="32.4" width="26.8" height="2.6" rx="1.3" fill="#A6E5CF"/>'
+      + '<rect x="19.4" y="35" width="25.2" height="9.8" rx="2.2" fill="#FFF6E6" stroke="#EEDCC2" stroke-width="1"/>'
+      + '<path d="M21.4 44.8 v-3.2 M22.6 44.8 v-4.6 M23.8 44.8 v-2.6" stroke="#FFB88C" stroke-width="1.4" stroke-linecap="round"/>'
+      + '<rect x="30" y="36.4" width="3.4" height="4.2" rx=".9" fill="#FFB88C" stroke="#F0A06E" stroke-width=".7"/>'
+      + '<rect x="38" y="37" width="4.6" height="4.8" rx="1" fill="#CDE8FF" stroke="#A9D3EE" stroke-width=".7"/>'
+      + '<circle cx="24" cy="49.6" r="3.4" fill="#FFE39B" stroke="#EBCE86" stroke-width="1"/>'
+      + '<circle cx="40.4" cy="49.6" r="3.4" fill="#FFC9DA" stroke="#EFAEC3" stroke-width="1"/>'
+      + '<g fill="#FFFDF8" stroke="#E6DCCB" stroke-width=".6"><path d="M15.4 52.2 q2.2-2 3.6 -.6 q-1.4 2.4-3.6 .6z"/><path d="M46.6 52.6 q2.4 1.8 3.8 .2 q-1.6-2.2-3.8-.2z"/></g>'
+      + '<circle cx="13" cy="47.4" r="1.6" fill="#FFC3D6"/><circle cx="51.4" cy="48.2" r="1.4" fill="#FFF0B8"/>';
+  } else if (k === 'campfire'){
+    S += '<ellipse cx="32" cy="50.4" rx="18.4" ry="6.8" fill="#EADCC6"/>'
+      + '<g fill="#E3DCD0" stroke="#CFC7B9" stroke-width=".8"><ellipse cx="20.6" cy="47.6" rx="3.2" ry="2.1"/><ellipse cx="24.6" cy="51.8" rx="3.4" ry="2.2"/><ellipse cx="32" cy="53" rx="3.6" ry="2.2"/><ellipse cx="39.6" cy="51.8" rx="3.2" ry="2.1"/><ellipse cx="43.6" cy="47.6" rx="3" ry="2"/></g>'
+      + '<g fill="#C99B6B" stroke="#B6875C" stroke-width=".8"><rect x="23.4" y="44.4" width="17.2" height="3.4" rx="1.7" transform="rotate(16 32 46)"/><rect x="23.4" y="44.4" width="17.2" height="3.4" rx="1.7" transform="rotate(-16 32 46)"/></g>'
+      + '<path d="M32 24.6 q5.6 6.4 4.4 11.6 q-1 4.4-4.4 5.8 q-3.4-1.4-4.4-5.8 q-1.2-5.2 4.4-11.6z" fill="#FFA949"/>'
+      + '<path d="M32 30.6 q3.2 4 2.4 7 q-.6 2.6-2.4 3.4 q-1.8-.8-2.4-3.4 q-.8-3 2.4-7z" fill="#FFDE7A"/>'
+      + '<path d="M32 36.6 q1.4 1.8 1 3.2 q-.3 1.2-1 1.5 q-.7-.3-1-1.5 q-.4-1.4 1-3.2z" fill="#FFF7D6"/>'
+      + '<g fill="#FFE39B"><circle cx="26.4" cy="18.6" r="1"/><circle cx="37.6" cy="20" r=".9"/><circle cx="32" cy="14.4" r=".8"/><circle cx="40.4" cy="27.4" r=".7"/><circle cx="23.6" cy="26.6" r=".7"/></g>'
+      + '<g stroke="#C9A47C" stroke-width="1.3" stroke-linecap="round"><line x1="15.6" y1="34.4" x2="26.4" y2="40.4"/><line x1="48.4" y1="34.4" x2="37.6" y2="40.4"/></g>'
+      + '<circle cx="26.8" cy="40.8" r="2.2" fill="#FFF7EE" stroke="#E6D9C6" stroke-width=".8"/><circle cx="37.2" cy="40.8" r="2.2" fill="#FFF7EE" stroke="#E6D9C6" stroke-width=".8"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.1"><line x1="13.6" y1="52.6" x2="13.6" y2="49"/><line x1="50.4" y1="52.6" x2="50.4" y2="49.4"/></g>';
+  } else if (k === 'flower_carriage'){
+    S += '<path d="M15 38.6 h34 l-2.8 12.6 h-28.4z" fill="#FBEEDC" stroke="#EEDCC2" stroke-width="1.1"/>'
+      + '<rect x="13.6" y="36.4" width="36.8" height="2.8" rx="1.4" fill="#E9C4A0"/>'
+      + '<path d="M18.4 36.4 q13.6-12.4 27.2 0" fill="none" stroke="#7FBF6A" stroke-width="1.4"/>'
+      + '<g><circle cx="22" cy="30.6" r="2.6" fill="#FFC3D6"/><circle cx="27.4" cy="27.4" r="2.8" fill="#FFF0B8"/><circle cx="32.6" cy="25.6" r="3" fill="#FF9FB8"/><circle cx="38" cy="27.6" r="2.7" fill="#FFE08A"/><circle cx="42.6" cy="30.8" r="2.5" fill="#E6D2F6"/></g>'
+      + '<g fill="#7FBF6A"><ellipse cx="19.4" cy="33.4" rx="2.2" ry="1.2"/><ellipse cx="44.8" cy="33.6" rx="2" ry="1.1"/><ellipse cx="30" cy="30" rx="1.8" ry="1"/></g>'
+      + '<circle cx="22.4" cy="52" r="5.4" fill="#FFFDF8" stroke="#D9A877" stroke-width="1.4"/>'
+      + '<circle cx="41.6" cy="52" r="5.4" fill="#FFFDF8" stroke="#D9A877" stroke-width="1.4"/>'
+      + '<g stroke="#D9A877" stroke-width=".9"><line x1="22.4" y1="46.8" x2="22.4" y2="57.2"/><line x1="17.2" y1="52" x2="27.6" y2="52"/><line x1="41.6" y1="46.8" x2="41.6" y2="57.2"/><line x1="36.4" y1="52" x2="46.8" y2="52"/></g>'
+      + '<path d="M49.6 39.4 l4.2-3.6" stroke="#C9A47C" stroke-width="1.4" stroke-linecap="round"/>'
+      + '<path d="M18.6 43.4 h26.8" stroke="#EEDCC2" stroke-width=".9"/>'
+      + '<g fill="#FFC3D6"><circle cx="16.8" cy="46.4" r="1.4"/><circle cx="47.2" cy="46.6" r="1.3"/></g>';
+  } else if (k === 'hot_spring'){
+    S += '<ellipse cx="32" cy="47.4" rx="19.4" ry="8.8" fill="#EDE4D6"/>'
+      + '<ellipse cx="32" cy="46.8" rx="14.8" ry="6.8" fill="#CFEFF7" stroke="#A9DFEF" stroke-width="1.2"/>'
+      + '<path d="M19.4 45.4 q4-1.6 8 0 M34 48.4 q4-1.6 8 0" fill="none" stroke="#EAF9FD" stroke-width="1.2" stroke-linecap="round"/>'
+      + '<g fill="#DFD8CC" stroke="#CFC7B9" stroke-width=".9"><ellipse cx="15" cy="44.4" rx="4.6" ry="3.2"/><ellipse cx="49" cy="44.8" rx="4.2" ry="3"/><ellipse cx="23.6" cy="39.6" rx="3.4" ry="2.4"/><ellipse cx="40.4" cy="39.8" rx="3" ry="2.2"/></g>'
+      + '<path d="M25.4 34.4 q-2-3.6 .6-6.8 M32 31.6 q-2-4 .6-7.4 M38.6 34.4 q-2-3.6 .6-6.8" fill="none" stroke="#FFFFFF" stroke-width="1.7" opacity=".88" stroke-linecap="round"/>'
+      + '<g stroke="#B7C79A" stroke-width="1.7" stroke-linecap="round"><line x1="45.4" y1="52.4" x2="45.4" y2="38.6"/><line x1="49.4" y1="52.4" x2="49.4" y2="38.6"/><line x1="53.4" y1="52.4" x2="53.4" y2="38.6"/></g>'
+      + '<g stroke="#A9BF88" stroke-width="1.1"><line x1="44" y1="43" x2="54.8" y2="43"/><line x1="44" y1="48.4" x2="54.8" y2="48.4"/></g>'
+      + '<rect x="10.6" y="47.4" width="5.6" height="4.2" rx="1.1" fill="#E8C28A" stroke="#D9A877" stroke-width=".8"/>'
+      + '<path d="M11.6 47.4 q2-1.8 3.6 0" fill="none" stroke="#C9A47C" stroke-width=".8"/>'
+      + '<rect x="31" y="41.6" width="5.4" height="1.6" rx=".8" fill="#FFFDF8" stroke="#E6DCCB" stroke-width=".6"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.1"><line x1="13" y1="52.6" x2="13" y2="49.6"/><line x1="51" y1="52.6" x2="51" y2="50"/></g>';
+  } else if (k === 'tree_deck'){
+    S += '<path d="M28.8 52.8 L30.2 33.6 h3.6 L35.2 52.8 Z" fill="#B6875C"/>'
+      + '<g stroke="#C79A6A" stroke-width=".9"><line x1="30.4" y1="40" x2="34.8" y2="40"/><line x1="30.2" y1="45" x2="35" y2="45"/></g>'
+      + '<circle cx="21.4" cy="24" r="8.6" fill="#8FD077"/><circle cx="42.4" cy="22.4" r="8" fill="#A5DB8C"/><circle cx="32" cy="15" r="9.2" fill="#98D57E"/><circle cx="32" cy="25" r="8.8" fill="#A9DF92"/>'
+      + '<circle cx="26" cy="18" r="1.8" fill="#FF9FB8"/><circle cx="37.4" cy="20.4" r="1.6" fill="#FFF0B8"/><circle cx="24" cy="28.4" r="1.5" fill="#FFF0B8"/>'
+      + '<rect x="20.4" y="32.6" width="23.2" height="2.8" rx="1.3" fill="#E4C69E" stroke="#D9B98C" stroke-width=".7"/>'
+      + '<g stroke="#D9B98C" stroke-width="1.2" stroke-linecap="round"><line x1="20.8" y1="28.4" x2="43.2" y2="28.4"/><line x1="21.8" y1="32.4" x2="21.8" y2="28.4"/><line x1="28" y1="32.4" x2="28" y2="28.4"/><line x1="43" y1="32.4" x2="43" y2="28.4"/></g>'
+      + '<path d="M36.8 32.4 l-2.2-4.8" stroke="#9FB4C6" stroke-width="2" stroke-linecap="round"/>'
+      + '<circle cx="34.2" cy="26.8" r="1.5" fill="#CFEAFB" stroke="#9FB4C6" stroke-width=".8"/>'
+      + '<g stroke="#C9A47C" stroke-width="1.1"><line x1="24.6" y1="35.4" x2="22.6" y2="52.4"/><line x1="27" y1="35.4" x2="25" y2="52.4"/><line x1="24.4" y1="40" x2="26.6" y2="40"/><line x1="23.9" y1="44.6" x2="26.1" y2="44.6"/><line x1="23.4" y1="49" x2="25.6" y2="49"/></g>'
+      + '<line x1="41.6" y1="28.4" x2="41.6" y2="16.6" stroke="#C9A47C" stroke-width="1.1"/>'
+      + '<path d="M41.6 16.8 l5.2 1.6 -5.2 1.6z" fill="#FFB6CB"/>'
+      + '<ellipse cx="32" cy="53.4" rx="18" ry="3.2" fill="#DFF3CC"/>';
+  } else if (k === 'bungeoppang'){
+    S += '<rect x="16.8" y="36.6" width="30.4" height="12.4" rx="2.6" fill="#FFF6E6" stroke="#EEDCC2" stroke-width="1.1"/>'
+      + '<path d="M15.2 36.8 h33.6 l-3.8-8.8 h-26z" fill="#FF9FB8"/>'
+      + '<g fill="#FFF7FB"><path d="M20 28 l-1.4 8.8 h3.4 l1.4-8.8z"/><path d="M29 28 l-1.4 8.8 h3.4 l1.4-8.8z"/><path d="M38 28 l-1.4 8.8 h3.4 l1.4-8.8z"/></g>'
+      + '<rect x="20.6" y="30.6" width="22.8" height="5.8" rx="1.6" fill="#6E6157"/>'
+      + '<g fill="#E8B87A" stroke="#D9A877" stroke-width=".6"><ellipse cx="24.6" cy="33.4" rx="2.6" ry="1.5"/><ellipse cx="31" cy="33.4" rx="2.6" ry="1.5"/><ellipse cx="37.4" cy="33.4" rx="2.6" ry="1.5"/></g>'
+      + '<g fill="#C99B6B"><path d="M22.4 33.4 l-1.6 1 0-2z"/><path d="M28.8 33.4 l-1.6 1 0-2z"/><path d="M35.2 33.4 l-1.6 1 0-2z"/></g>'
+      + '<path d="M27.6 27.4 q1.8-2.6 0-4.6 M32.2 26 q1.8-2.6 0-4.6 M36.6 27.4 q1.8-2.6 0-4.6" fill="none" stroke="#EFE7DA" stroke-width="1.4" stroke-linecap="round"/>'
+      + '<rect x="34.6" y="22" width="9.4" height="4.2" rx="1.6" fill="#FFF0B8" stroke="#EBCE86" stroke-width=".8"/>'
+      + '<path d="M36.4 24.1 h6" stroke="#E0BE6E" stroke-width=".7"/>'
+      + '<circle cx="23" cy="52" r="4.8" fill="#FFFDF8" stroke="#D9A877" stroke-width="1.3"/>'
+      + '<circle cx="41" cy="52" r="4.8" fill="#FFFDF8" stroke="#D9A877" stroke-width="1.3"/>'
+      + '<g stroke="#D9A877" stroke-width=".8"><line x1="23" y1="47.4" x2="23" y2="56.6"/><line x1="18.4" y1="52" x2="27.6" y2="52"/><line x1="41" y1="47.4" x2="41" y2="56.6"/><line x1="36.4" y1="52" x2="45.6" y2="52"/></g>'
+      + '<rect x="17.8" y="49" width="28.4" height="1.4" rx=".7" fill="#E9C4A0"/>';
   } else {
     S += '<ellipse cx="32" cy="46" rx="19" ry="8.2" fill="#CDEBF6" stroke="#A7D9EC" stroke-width="1.2"/>'
       + '<ellipse cx="32" cy="46" rx="15.4" ry="6.2" fill="#9FDBF2"/>'
@@ -4154,6 +4423,50 @@ function avDecoHtml(kind){
     + '<path d="M23 44 a8 8 0 0 1 16 0" fill="none" stroke="#6FD3AE" stroke-width="4" stroke-linecap="round"/>'
     + '</svg></span>';
   if (kind === 'wing')     return '<span class="avd avd-wg avd-wg1"></span><span class="avd avd-wg avd-wg2"></span><span class="avd avd-wt1">✨</span><span class="avd avd-wt2">✨</span>';
+  /* v19 추가 12종 */
+  if (kind === 'bunny_band') return '<span class="avd avd-bb"><svg viewBox="0 0 48 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="15" cy="10.6" rx="5" ry="10" fill="#FFF7FB" stroke="#E4BFCC" stroke-width="1.2" transform="rotate(-14 15 10.6)"/>'
+    + '<ellipse cx="15" cy="11.6" rx="2.3" ry="6.4" fill="#FFC6D8" transform="rotate(-14 15 11.6)"/>'
+    + '<ellipse cx="33" cy="10.6" rx="5" ry="10" fill="#FFF7FB" stroke="#E4BFCC" stroke-width="1.2" transform="rotate(14 33 10.6)"/>'
+    + '<ellipse cx="33" cy="11.6" rx="2.3" ry="6.4" fill="#FFC6D8" transform="rotate(14 33 11.6)"/>'
+    + '<path d="M6.5 25.4 q17.5-12 35 0" fill="none" stroke="#FFC0D4" stroke-width="3.2" stroke-linecap="round"/>'
+    + '<path d="M6.5 25.4 q17.5-12 35 0" fill="none" stroke="#FFF1F6" stroke-width="1.1" stroke-linecap="round" opacity=".8"/>'
+    + '<circle cx="24" cy="19.6" r="2.7" fill="#FF9FBD" stroke="#F08AA8" stroke-width=".8"/>'
+    + '</svg></span>';
+  if (kind === 'heart_glasses') return '<span class="avd avd-hg"><svg viewBox="0 0 44 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M11 16 C3.6 16 2.2 9.4 5.2 5.8 C7.6 3 11.4 4 11.1 7.2 C10.9 4 14.6 3 17 5.8 C20 9.4 18.5 16 11 16 Z" fill="#FF9BB6" fill-opacity=".55" stroke="#E2738F" stroke-width="1.2" stroke-linejoin="round"/>'
+    + '<path d="M33 16 C25.6 16 24.2 9.4 27.2 5.8 C29.6 3 33.4 4 33.1 7.2 C32.9 4 36.6 3 39 5.8 C42 9.4 40.5 16 33 16 Z" fill="#FF9BB6" fill-opacity=".55" stroke="#E2738F" stroke-width="1.2" stroke-linejoin="round"/>'
+    + '<path d="M18.2 8.8 q3.8-2 7.6 0" fill="none" stroke="#E2738F" stroke-width="1.2" stroke-linecap="round"/>'
+    + '<circle cx="8.2" cy="7.6" r="1.5" fill="#FFFFFF" opacity=".75"/><circle cx="30.2" cy="7.6" r="1.5" fill="#FFFFFF" opacity=".75"/>'
+    + '</svg></span>';
+  if (kind === 'puppy')      return '<span class="avd avd-py">🐶</span><span class="avd avd-py2">🐾</span>';
+  if (kind === 'cotton_candy') return '<span class="avd avd-cc"></span>';
+  if (kind === 'camera')     return '<span class="avd avd-cm">📷</span><span class="avd avd-cq">✨</span>';
+  if (kind === 'book_pencil') return '<span class="avd avd-bk">📚</span><span class="avd avd-pc">✏️</span>';
+  if (kind === 'flower_basket') return '<span class="avd avd-fb">🧺</span><span class="avd avd-fb2">🌷</span><span class="avd avd-fb3">🌼</span>';
+  if (kind === 'snow_friend') return '<span class="avd avd-sn"><svg viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M3.4 23.4 l-3-2.6 M22.6 23.4 l3-2.6" stroke="#B79A7C" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<ellipse cx="13" cy="26.6" rx="9.2" ry="7" fill="#FFFFFF" stroke="#D3C6D1" stroke-width="1.2"/>'
+    + '<circle cx="13" cy="13.8" r="6.9" fill="#FFFFFF" stroke="#D3C6D1" stroke-width="1.2"/>'
+    + '<path d="M8.2 8.6 h9.6 l-1.7-3.6 h-6.2 z" fill="#A9CEEA" stroke="#8FB6D8" stroke-width="1" stroke-linejoin="round"/>'
+    + '<circle cx="10.6" cy="13" r="1.15" fill="#6B5B4B"/><circle cx="15.4" cy="13" r="1.15" fill="#6B5B4B"/>'
+    + '<path d="M11.6 19.4 q1.4 1.2 2.8 0" fill="none" stroke="#C9A0A6" stroke-width="1"/>'
+    + '<path d="M13 15.2 l3.6 1.3 -3.6 1.1 z" fill="#FFA45C"/>'
+    + '<circle cx="13" cy="22" r="1.15" fill="#CBB9C4"/><circle cx="13" cy="27" r="1.15" fill="#CBB9C4"/>'
+    + '</svg></span>';
+  if (kind === 'note_ribbon') return '<span class="avd avd-nrb">🎀</span><span class="avd avd-nr1">🎵</span><span class="avd avd-nr2">🎶</span>';
+  if (kind === 'starglow')   return '<span class="avd avd-glow"></span><span class="avd avd-gl1">✨</span><span class="avd avd-gl2">✨</span><span class="avd avd-gl3">⭐</span>';
+  if (kind === 'paper_plane') return '<span class="avd avd-pp"><svg viewBox="0 0 34 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M1.6 19.6 q6.4-8.4 12.6-6.2" fill="none" stroke="#C8B6A2" stroke-width="1" stroke-dasharray="2 2.4" opacity=".85"/>'
+    + '<path d="M31.6 4 L12.4 12.6 L19.8 15.6 L22.2 22.4 Z" fill="#FFFDF8" stroke="#BCAA96" stroke-width="1.1" stroke-linejoin="round"/>'
+    + '<path d="M31.6 4 L19.8 15.6" fill="none" stroke="#BCAA96" stroke-width="1"/>'
+    + '<path d="M22.2 22.4 L20.4 16.4" fill="none" stroke="#D9CBB8" stroke-width=".9"/>'
+    + '</svg></span>';
+  if (kind === 'crescent')   return '<span class="avd avd-cr"><svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M17.8 2.8 A10.2 10.2 0 1 0 17.8 23.2 A8.4 8.4 0 1 1 17.8 2.8 Z" fill="#FFE9A8" stroke="#EFD07A" stroke-width="1" stroke-linejoin="round"/>'
+    + '<path d="M19.4 8.6 q1.4 1.6 3.4.6" fill="none" stroke="#FFF6D0" stroke-width=".9" stroke-linecap="round" opacity=".9"/>'
+    + '<circle cx="21.6" cy="5.6" r="1.15" fill="#FFF6D0"/><circle cx="23.4" cy="13.6" r=".85" fill="#FFF6D0"/>'
+    + '</svg></span>';
   return '';
 }
 /* 전신 일러스트 + 배경 + 꾸미기 이펙트 */
@@ -8744,6 +9057,527 @@ async function finishBoot(){
     });
   }
 
+
+  /* 25. 🍩 도넛 가게 (v19) */
+  function pgbDonutShop(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.5, 1.5, 2.0, '#FFF4F8', 0, 0.86, 0));
+    g.add(pgBox(2.6, 0.26, 1.1, '#FFB6CB', 0, 1.72, 0.62));
+    for (var i = 0; i < 5; i++) g.add(pgBox(0.24, 0.27, 1.12, i % 2 ? '#FFF7FB' : '#FFB6CB', -1.0 + i * 0.5, 1.72, 0.62));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.72, 0.86, 4), pgM('#F7C9DA'));
+    roof.position.set(0, 2.24, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    /* 지붕 위 거대 도넛 — 천천히 돌아간다 */
+    var dn = new THREE.Group(); dn.position.set(0, 2.95, 0); g.add(dn);
+    var dough = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.17, 10, 22), pgM('#F0BE93'));
+    dough.rotation.x = -0.42; dn.add(dough);
+    var icing = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.115, 10, 22, Math.PI * 1.72), pgM('#FF9FB8'));
+    icing.rotation.x = -0.42; icing.rotation.z = 0.5; icing.position.y = 0.05; dn.add(icing);
+    var sp = ['#FFF6C9', '#A6E5CF', '#FFFDF8', '#C9B6F0'];
+    for (var k = 0; k < 10; k++){
+      var a = k / 10 * Math.PI * 2;
+      dn.add(pgSph(0.045, sp[k % 4], Math.cos(a) * 0.46, Math.sin(a) * 0.18 + 0.09, Math.sin(a) * 0.42, 6));
+    }
+    g.add(pgBox(2.2, 0.1, 1.8, '#FFE3EC', 0, 1.6, 0));
+    g.add(pgBox(0.62, 1.0, 0.1, '#D9A877', 0, 0.52, 1.0));
+    g.add(pgSph(0.035, '#FFE9A8', 0.2, 0.58, 1.06, 6));
+    pgbWindow(g, -0.78, 1.0, 1.02, 0.66, 0.5, 0xFFD9E4);
+    pgbWindow(g, 0.78, 1.0, 1.02, 0.66, 0.5, 0xFFD9E4);
+    pgbFlowerBox(g, -0.78, 0.62, 1.08, 0.72);
+    pgbFlowerBox(g, 0.78, 0.62, 1.08, 0.72);
+    var chalk = pgBox(0.7, 0.86, 0.08, '#6E6157', -1.6, 0.5, 0.9); g.add(chalk);
+    g.add(pgBox(0.52, 0.6, 0.03, '#8D8074', -1.6, 0.56, 0.95));
+    var spk = pgSph(0.05, '#FFFDF8', 0.5, 2.5, 0.4, 6);
+    spk.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.8 }); g.add(spk);
+    g.userData.tick = function(t){
+      dn.rotation.y = t * 0.42;
+      dough.position.y = Math.sin(t * 1.4) * 0.03;
+      icing.position.y = 0.05 + Math.sin(t * 1.4) * 0.03;
+      spk.material.opacity = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 2.1));
+      spk.position.x = 0.5 + Math.sin(t * 2.1) * 0.18;
+    };
+  }
+
+  /* 26. 🍜 우동·라멘집 (v19) */
+  function pgbRamenShop(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.5, 1.5, 2.0, '#FFF8EC', 0, 0.86, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.76, 0.92, 4), pgM('#A7D8CE'));
+    roof.position.set(0, 2.2, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.62, 0.09, 2.1, '#8ACBBB', 0, 1.68, 0));
+    /* 노렌 커튼 */
+    g.add(pgBox(1.9, 0.62, 0.07, '#FFF4E2', 0, 1.36, 1.02));
+    for (var i = 0; i < 4; i++) g.add(pgBox(0.03, 0.58, 0.09, '#E7C39A', -0.72 + i * 0.48, 1.36, 1.05));
+    g.add(pgBox(1.96, 0.08, 0.1, '#D9B98C', 0, 1.68, 1.02));
+    /* 지붕 위 라멘 그릇 간판 */
+    var bowl = pgCyl(0.46, 0.34, 0.3, '#FFF6EA', 0, 2.86, 0, 18); g.add(bowl);
+    g.add(pgTor(0.46, 0.045, '#E7C39A', 0, 3.01, 0));
+    var nood = pgTor(0.26, 0.05, '#F0D08A', 0, 3.03, 0); nood.rotation.x = Math.PI / 2; g.add(nood);
+    g.add(pgSph(0.09, '#FF9F8C', 0.18, 3.06, 0, 8));
+    g.add(pgSph(0.07, '#FFFDF8', -0.16, 3.06, 0.1, 8));
+    var chp1 = pgCyl(0.022, 0.022, 0.9, '#C9A47C', 0.3, 3.42, -0.1, 6); chp1.rotation.z = 0.5; g.add(chp1);
+    var chp2 = pgCyl(0.022, 0.022, 0.9, '#B98A5E', 0.42, 3.4, -0.1, 6); chp2.rotation.z = 0.5; g.add(chp2);
+    /* 등롱 */
+    var lan = new THREE.Group(); lan.position.set(-1.45, 1.9, 1.1); g.add(lan);
+    lan.add(pgCyl(0.02, 0.02, 0.3, '#C9A47C', 0, 0.15, 0, 5));
+    var lbody = pgCyl(0.19, 0.19, 0.34, '#FF8F7A', 0, -0.14, 0, 12); lan.add(lbody);
+    lan.add(pgTor(0.19, 0.02, '#E0705C', 0, 0.03, 0));
+    lan.add(pgSph(0.02, '#FFF0E2', 0, -0.32, 0, 5));
+    g.add(pgBox(0.62, 1.0, 0.1, '#D9A877', 0, 0.52, 1.0));
+    g.add(pgSph(0.035, '#FFE9A8', 0.2, 0.58, 1.06, 6));
+    pgbWindow(g, -0.78, 1.0, 1.02, 0.66, 0.5, 0xFFE7C4);
+    pgbFlowerBox(g, 0.78, 0.66, 1.06, 0.66);
+    pgbSmoke(g, 0.1, 3.35, 0, 3);
+    g.userData.tick = function(t){
+      lan.rotation.z = Math.sin(t * 1.5) * 0.16;
+      lan.rotation.x = Math.cos(t * 1.1) * 0.08;
+      nood.rotation.z = t * 0.3;
+    };
+  }
+
+  /* 27. 🐠 아쿠아리움 수족관 (v19) */
+  function pgbAquarium(g){
+    g.add(pgBox(3.0, 0.18, 2.2, C.stone2, 0, 0.09, 0));
+    g.add(pgBox(2.9, 0.14, 2.1, '#E7EDF0', 0, 0.25, 0));
+    /* 물 — 살짝 비쳐 보이게 */
+    var water = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.42, 1.6),
+      new THREE.MeshLambertMaterial({ color: new THREE.Color('#7ECEEA'), transparent: true, opacity: 0.5, depthWrite: false }));
+    water.position.set(0, 1.14, 0); g.add(water);
+    g.add(pgBox(2.42, 0.16, 1.62, '#9FDCF2', 0, 1.36, 0));
+    /* 모래바닥 · 해초 */
+    g.add(pgBox(2.3, 0.12, 1.5, '#F4DEB2', 0, 0.5, 0));
+    [-0.82, -0.3, 0.42, 0.92].forEach(function(sx, i){
+      var h2 = 0.4 + (i % 3) * 0.16;
+      g.add(pgCyl(0.05, 0.07, h2, i % 2 ? '#7FC56A' : '#98D57E', sx, 0.56 + h2 / 2, -0.5 + (i % 2) * 0.5, 6));
+    });
+    /* 헤엄치는 물고기들 (물보다 먼저 그려져 비친다) */
+    var fish = [];
+    [[0.3, '#FFB88C', 1.0], [0.25, '#FFC9DA', 0.8], [0.21, '#FFE39B', 1.25], [0.18, '#C9B6F0', 0.9]].forEach(function(f, i){
+      var fg = new THREE.Group();
+      var body = pgSph(f[0], f[1], 0, 0, 0, 10); body.scale.set(1.5, 1, 1); fg.add(body);
+      var tail = new THREE.Mesh(new THREE.ConeGeometry(f[0] * 0.62, f[0] * 1.1, 6), pgM(f[1]));
+      tail.rotation.z = Math.PI / 2; tail.position.x = -f[0] * 1.65; fg.add(tail);
+      fg.add(pgSph(f[0] * 0.17, '#4A3D31', f[0] * 0.6, f[0] * 0.16, f[0] * 0.42, 6));
+      fg.position.z = 0.72;
+      g.add(fg); fish.push({ g: fg, r: 0.52 + i * 0.12, sp: f[2], y: 0.92 + i * 0.28, ph: i * 1.7, zoff: 0.66 });
+    });
+    /* 수조 테두리 — 기둥 4개 · 위아래 테 */
+    [[-1.2, -0.8], [1.2, -0.8], [-1.2, 0.8], [1.2, 0.8]].forEach(function(p){
+      g.add(pgBox(0.12, 1.5, 0.12, '#BEE4F2', p[0], 1.14, p[1]));
+    });
+    g.add(pgBox(2.54, 0.12, 1.74, '#BEE4F2', 0, 1.9, 0));
+    g.add(pgBox(2.54, 0.12, 1.74, '#CDEDF8', 0, 0.38, 0));
+    /* 지붕 간판 (아치 + 물결) */
+    var arch = pgTor(1.16, 0.08, '#FFB6CB', 0, 1.94, 0, Math.PI); g.add(arch);
+    g.add(pgCyl(0.08, 0.08, 0.3, '#FFB6CB', -1.16, 1.79, 0, 8));
+    g.add(pgCyl(0.08, 0.08, 0.3, '#FFB6CB', 1.16, 1.79, 0, 8));
+    g.add(pgBox(1.5, 0.36, 0.12, '#FFB6CB', 0, 2.62, 0));
+    g.add(pgSph(0.09, '#FFF7FB', -0.44, 2.62, 0.08, 8));
+    g.add(pgSph(0.09, '#FFF7FB', 0, 2.62, 0.08, 8));
+    g.add(pgSph(0.09, '#FFF7FB', 0.44, 2.62, 0.08, 8));
+    g.add(pgCyl(0.03, 0.03, 0.5, '#B4DDEE', 0, 2.24, 0, 5));
+    var flag = pgFlag('#A6E5CF', 0.26, 0.18); flag.position.set(0.13, 2.46, 0); g.add(flag);
+    /* 물방울 */
+    var bubbles = [];
+    for (var b = 0; b < 5; b++){
+      var bb = pgSph(0.045, '#FFFFFF', 0, 0.5, 0, 6);
+      bb.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
+      g.add(bb); bubbles.push(bb);
+    }
+    g.userData.tick = function(t){
+      fish.forEach(function(f){
+        var a = f.ph + t * f.sp;
+        f.g.position.set(Math.cos(a) * f.r * 0.92, f.y + Math.sin(t * 1.6 + f.ph) * 0.07, f.zoff + Math.sin(a) * 0.06);
+        f.g.rotation.y = -a + Math.PI / 2;
+      });
+      bubbles.forEach(function(bb, i){
+        var u = (t * 0.34 + i * 0.2) % 1;
+        bb.position.set(-0.66 + i * 0.34 + Math.sin(t + i) * 0.05, 0.5 + u * 1.3, 0.5 - (i % 2) * 0.8);
+        bb.material.opacity = 0.45 * (1 - u);
+      });
+      flag.rotation.y = Math.sin(t * 1.8) * 0.3;
+    };
+  }
+
+  /* 28. 🏰 핑크 미니 성 (v19) */
+  function pgbPinkCastle(g){
+    g.add(pgBox(3.1, 0.18, 2.9, C.stone2, 0, 0.09, 0));
+    g.add(pgBox(1.9, 1.7, 1.7, '#FFF5FA', 0, 0.95, 0));
+    g.add(pgBox(2.0, 0.1, 1.8, '#FFE6EF', 0, 1.85, 0));
+    var corners = [[-1.15, -1.05], [1.15, -1.05], [-1.15, 1.05], [1.15, 1.05]];
+    var flags = [];
+    corners.forEach(function(p, i){
+      var tw = pgCyl(0.3, 0.34, 2.0, '#FFE6EF', p[0], 1.1, p[1], 12); g.add(tw);
+      g.add(pgTor(0.34, 0.04, '#F7C9DA', p[0], 2.06, p[1]));
+      var cone = new THREE.Mesh(new THREE.ConeGeometry(0.44, 0.72, 12), pgM(i % 2 ? '#FF9FB8' : '#FFC3D6'));
+      cone.position.set(p[0], 2.46, p[1]); g.add(cone);
+      var fl = pgFlag(i % 2 ? '#FFF0B8' : '#FFB6CB', 0.24, 0.16);
+      fl.position.set(p[0] + 0.14, 2.92, p[1]); g.add(fl); flags.push(fl);
+      g.add(pgCyl(0.012, 0.012, 0.35, '#E7C39A', p[0], 2.96, p[1], 4));
+    });
+    var keep = new THREE.Mesh(new THREE.ConeGeometry(1.02, 1.1, 4), pgM('#FFC3D6'));
+    keep.position.set(0, 2.4, 0); keep.rotation.y = Math.PI / 4; g.add(keep);
+    g.add(pgTor(1.02, 0.06, '#FFB6CB', 0, 1.94, 0));
+    var kflag = pgFlag('#FFE39B', 0.3, 0.2); kflag.position.set(0.18, 3.2, 0); g.add(kflag); flags.push(kflag);
+    g.add(pgCyl(0.015, 0.015, 0.4, '#E7C39A', 0, 3.12, 0, 4));
+    /* 성문 */
+    var gate = pgBox(0.86, 1.0, 0.12, '#E9B98C', 0, 0.62, 0.92); g.add(gate);
+    var arch = pgTor(0.43, 0.07, '#D9A877', 0, 1.1, 0.92, Math.PI); arch.rotation.y = Math.PI / 2; g.add(arch);
+    g.add(pgSph(0.04, '#FFE9A8', 0.26, 0.6, 0.99, 6));
+    pgbWindow(g, -0.52, 1.42, 0.86, 0.42, 0.44, 0xFFE3A8);
+    pgbWindow(g, 0.52, 1.42, 0.86, 0.42, 0.44, 0xFFE3A8);
+    pgbFlowerBox(g, -0.52, 1.06, 0.95, 0.5);
+    pgbFlowerBox(g, 0.52, 1.06, 0.95, 0.5);
+    g.add(pgSph(0.13, '#FFC3D6', -0.9, 0.16, 1.35, 8));
+    g.add(pgSph(0.11, '#FFE39B', 0.9, 0.14, 1.38, 8));
+    g.userData.tick = function(t){
+      flags.forEach(function(f, i){ f.rotation.y = Math.sin(t * 1.7 + i) * 0.35; });
+    };
+  }
+
+  /* 29. 🌬️ 풍차 집 (v19) */
+  function pgbWindmillHouse(g){
+    g.add(pgBox(3.0, 0.2, 2.6, '#DFF3CC', 0, 0.1, 0));
+    g.add(pgCyl(0.56, 0.95, 2.1, '#FFF3E2', 0, 1.15, 0, 16));
+    g.add(pgTor(0.95, 0.05, '#EEDCC4', 0, 0.16, 0));
+    var cap = new THREE.Mesh(new THREE.ConeGeometry(0.66, 0.7, 16), pgM('#EFB9A2'));
+    cap.position.set(0, 2.5, 0); g.add(cap);
+    g.add(pgSph(0.1, '#C9A47C', 0, 2.9, 0, 8));
+    /* 회전하는 날개 */
+    var blades = new THREE.Group(); blades.position.set(0, 2.56, 0.62); g.add(blades);
+    blades.add(pgSph(0.15, '#C9A47C', 0, 0, 0, 10));
+    for (var i = 0; i < 4; i++){
+      var a = i * Math.PI / 2;
+      var arm = pgBox(0.1, 1.15, 0.06, '#E8C28A', Math.cos(a) * 0.6, Math.sin(a) * 0.6, 0);
+      arm.rotation.z = a - Math.PI / 2; blades.add(arm);
+      var sail = pgBox(0.34, 0.92, 0.04, '#FFF9F0', Math.cos(a) * 0.86, Math.sin(a) * 0.86, 0.02);
+      sail.rotation.z = a - Math.PI / 2; blades.add(sail);
+    }
+    g.add(pgBox(0.66, 1.06, 0.1, '#D9A877', 0, 0.56, 0.95));
+    g.add(pgSph(0.04, '#FFE9A8', 0.22, 0.62, 1.0, 6));
+    pgbWindow(g, 0, 1.62, 0.82, 0.5, 0.48, 0xFFE7C4);
+    pgbWindow(g, -0.72, 0.9, 0.5, 0.4, 0.4, 0xFFE7C4);
+    pgbFlowerBox(g, 0.66, 0.5, 0.92, 0.6);
+    [[-1.1, 1.0, C.pink], [1.14, 0.9, C.lemon], [-0.9, -0.95, C.lav], [1.05, -0.9, C.mint]].forEach(function(p){
+      g.add(pgCyl(0.02, 0.03, 0.28, '#7FC56A', p[0], 0.34, p[1], 5));
+      g.add(pgSph(0.12, p[2], p[0], 0.5, p[1], 7));
+    });
+    g.userData.tick = function(t){
+      blades.rotation.z = -t * 0.85;
+    };
+  }
+
+  /* 30. 📖 문구점 서점 (v19) */
+  function pgbBookstore(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.5, 1.5, 2.0, '#FFF8EE', 0, 0.86, 0));
+    g.add(pgBox(2.6, 0.12, 2.1, '#EEDCC4', 0, 1.62, 0));
+    /* 민트 차양 */
+    var aw = new THREE.Group(); aw.position.set(0, 1.5, 0.92); aw.rotation.x = -0.28; g.add(aw);
+    aw.add(pgBox(2.3, 0.06, 0.62, '#A6E5CF', 0, 0, 0));
+    for (var i = 0; i < 4; i++) aw.add(pgBox(0.26, 0.07, 0.62, '#FFFDF8', -0.78 + i * 0.52, 0.01, 0));
+    /* 지붕 위 펼친 책 간판 */
+    var bk = new THREE.Group(); bk.position.set(0, 2.16, 0); bk.rotation.x = -0.42; g.add(bk);
+    var lp = pgBox(0.86, 0.5, 0.08, '#FFFDF8', -0.44, 0, 0); lp.rotation.z = 0.16; bk.add(lp);
+    var rp = pgBox(0.86, 0.5, 0.08, '#FFFFFF', 0.44, 0, 0); rp.rotation.z = -0.16; bk.add(rp);
+    bk.add(pgBox(0.06, 0.5, 0.1, '#E0D2BA', 0, 0, 0));
+    for (var l = 0; l < 3; l++){
+      bk.add(pgBox(0.56, 0.02, 0.02, '#DCCDB4', -0.42, 0.14 - l * 0.14, 0.06));
+      bk.add(pgBox(0.56, 0.02, 0.02, '#DCCDB4', 0.42, 0.14 - l * 0.14, 0.06));
+    }
+    g.add(pgCyl(0.05, 0.05, 0.5, '#C9A47C', 0, 1.86, 0, 6));
+    /* 진열창의 책들 */
+    var cols = ['#BFA9C9', '#FFB6CB', '#A6E5CF', '#FFE39B', '#CDE8FF', '#FFC9A3'];
+    for (var r = 0; r < 2; r++){
+      g.add(pgBox(1.1, 0.06, 0.35, '#E4C69E', -0.62, 0.62 + r * 0.44, 0.94));
+      for (var c = 0; c < 5; c++){
+        g.add(pgBox(0.13, 0.3, 0.24, cols[(c + r * 2) % 6], -1.06 + c * 0.22, 0.8 + r * 0.44, 0.94));
+      }
+    }
+    g.add(pgBox(0.6, 0.98, 0.08, '#CFEAFB', 0.8, 0.5, 0.99));
+    g.add(pgSph(0.035, '#FFE9A8', 0.96, 0.58, 1.03, 6));
+    pgbWindow(g, 0.62, 1.22, 0.98, 0.5, 0.4, 0xFFE7C4);
+    var lamp = pgSph(0.14, '#FFE9A8', -1.34, 1.06, 0.86, 8);
+    lamp.material = new THREE.MeshLambertMaterial({ color: 0xFFF3CE, emissive: new THREE.Color(0xFFCE63), emissiveIntensity: 0.5 });
+    g.add(lamp);
+    g.userData.tick = function(t){
+      bk.position.y = 2.16 + Math.sin(t * 1.2) * 0.05;
+      lamp.material.emissiveIntensity = 0.42 + 0.2 * (0.5 + 0.5 * Math.sin(t * 2.2));
+    };
+  }
+
+  /* 31. 🏖️ 해변 파라솔 카페 (v19) */
+  function pgbBeachCafe(g){
+    var sand = pgCyl(1.6, 1.72, 0.16, '#F4DEB2', 0, 0.08, 0, 24); g.add(sand);
+    [[-1.15, 0.9, '#FFFDF8'], [1.2, -0.8, '#FFC9DA'], [-0.5, -1.2, '#FFE39B']].forEach(function(s){
+      g.add(pgSph(0.09, s[2], s[0], 0.16, s[1], 7));
+    });
+    /* 카운터 */
+    g.add(pgBox(1.9, 0.86, 0.8, '#FFF6E6', 0, 0.5, 0));
+    g.add(pgBox(2.0, 0.1, 0.9, '#A6E5CF', 0, 0.96, 0));
+    g.add(pgBox(1.94, 0.08, 0.84, '#FFFDF8', 0, 0.28, 0));
+    g.add(pgBox(0.3, 0.34, 0.3, '#FFB88C', -0.5, 1.14, 0));
+    g.add(pgBox(0.26, 0.26, 0.26, '#CDE8FF', 0.1, 1.1, 0));
+    g.add(pgCyl(0.1, 0.08, 0.2, '#FFFDF8', 0.62, 1.1, 0, 8));
+    /* 의자 */
+    [-0.78, 0.78].forEach(function(sx, i){
+      g.add(pgCyl(0.24, 0.24, 0.08, i ? '#FFC9DA' : '#FFE39B', sx, 0.34, 1.32, 12));
+      g.add(pgCyl(0.04, 0.04, 0.32, '#C9A47C', sx, 0.16, 1.32, 6));
+    });
+    /* 파라솔 — 두 겹 우산이 천천히 돈다 */
+    var par = new THREE.Group(); par.position.set(0, 0, -0.2); g.add(par);
+    par.add(pgCyl(0.04, 0.04, 2.3, '#E8C28A', 0, 1.15, 0, 8));
+    var top = new THREE.Mesh(new THREE.ConeGeometry(1.28, 0.52, 12), pgM('#FFC9DA'));
+    top.position.set(0, 2.34, 0); par.add(top);
+    var top2 = new THREE.Mesh(new THREE.ConeGeometry(0.92, 0.4, 12), pgM('#FFF9F2'));
+    top2.position.set(0, 2.6, 0); par.add(top2);
+    par.add(pgCyl(0.03, 0.03, 0.16, '#E8C28A', 0, 2.76, 0, 6));
+    for (var i = 0; i < 6; i++){
+      var a = i / 6 * Math.PI * 2;
+      par.add(pgSph(0.06, i % 2 ? '#FFF9F2' : '#FFB6CB', Math.cos(a) * 1.22, 2.16, Math.sin(a) * 1.22, 6));
+    }
+    var glass = pgCyl(0.07, 0.06, 0.16, '#FFB88C', 0.62, 1.28, 0, 8); g.add(glass);
+    g.userData.tick = function(t){
+      par.rotation.y = t * 0.12;
+      top.position.y = 2.34 + Math.sin(t * 1.1) * 0.02;
+    };
+  }
+
+  /* 32. 🔥 캠프파이어 통나무 (v19) */
+  function pgbCampfire(g){
+    g.add(pgCyl(1.28, 1.38, 0.14, '#EADCC6', 0, 0.07, 0, 20));
+    for (var i = 0; i < 9; i++){
+      var a = i / 9 * Math.PI * 2;
+      g.add(pgSph(0.17, i % 2 ? '#DFD8CC' : '#CFC7B9', Math.cos(a) * 0.98, 0.16, Math.sin(a) * 0.98, 7));
+    }
+    /* 통나무 3개 */
+    [[0, 0.22], [Math.PI / 3, 0.2], [-Math.PI / 3, 0.2]].forEach(function(p){
+      var log = pgCyl(0.13, 0.13, 1.1, '#C99B6B', 0, 0.24, 0, 8);
+      log.rotation.z = Math.PI / 2; log.rotation.y = p[0]; g.add(log);
+      g.add(pgCyl(0.135, 0.135, 0.04, '#E4C69E', Math.cos(p[0]) * 0.54, 0.24, -Math.sin(p[0]) * 0.54, 8));
+    });
+    /* 불꽃 (천천히 살아 움직인다) */
+    var fire = new THREE.Group(); fire.position.set(0, 0.26, 0); g.add(fire);
+    var f1 = new THREE.Mesh(new THREE.ConeGeometry(0.46, 0.95, 12),
+      new THREE.MeshLambertMaterial({ color: 0xFFA949, emissive: new THREE.Color(0xFF7A2E), emissiveIntensity: 0.6 }));
+    f1.position.y = 0.46; fire.add(f1);
+    var f2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.72, 12),
+      new THREE.MeshLambertMaterial({ color: 0xFFDE7A, emissive: new THREE.Color(0xFFC13B), emissiveIntensity: 0.7 }));
+    f2.position.y = 0.36; fire.add(f2);
+    var f3 = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.42, 10),
+      new THREE.MeshLambertMaterial({ color: 0xFFF7D6, emissive: new THREE.Color(0xFFE9A8), emissiveIntensity: 0.8 }));
+    f3.position.y = 0.22; fire.add(f3);
+    /* 마시멜로 꼬치 */
+    var sticks = [];
+    [[-1, 0.9], [1.05, 0.7]].forEach(function(s, i){
+      var st = new THREE.Group(); st.position.set(s[0], 0, s[1]); g.add(st);
+      var rod = pgCyl(0.018, 0.02, 0.86, '#C9A47C', 0, 0.44, 0, 5); rod.rotation.z = s[0] > 0 ? 0.5 : -0.5; st.add(rod);
+      var mm = pgBox(0.14, 0.14, 0.14, '#FFF7EE', s[0] > 0 ? -0.2 : 0.2, 0.78, 0); st.add(mm);
+      sticks.push(mm);
+    });
+    var sparks = [];
+    for (var k = 0; k < 4; k++){
+      var sp = pgSph(0.035, '#FFE39B', 0, 0.8, 0, 6);
+      sp.material = new THREE.MeshBasicMaterial({ color: 0xFFE9A8, transparent: true, opacity: 0.8 });
+      g.add(sp); sparks.push(sp);
+    }
+    g.userData.tick = function(t){
+      var s1 = 1 + Math.sin(t * 3.1) * 0.09, s2 = 1 + Math.sin(t * 4.3 + 1) * 0.12;
+      f1.scale.set(s2, s1, s2); f2.scale.set(1 + Math.sin(t * 3.7 + 2) * 0.13, s2, 1);
+      f3.scale.set(s1, 1 + Math.sin(t * 5.1) * 0.16, s1);
+      f2.rotation.y = t * 0.7; f3.rotation.y = -t * 0.9;
+      f1.material.emissiveIntensity = 0.5 + 0.25 * (0.5 + 0.5 * Math.sin(t * 4));
+      sparks.forEach(function(sp, i){
+        var u = (t * 0.5 + i * 0.25) % 1;
+        sp.position.set(Math.sin(t * 1.7 + i * 2) * 0.22, 0.9 + u * 0.9, Math.cos(t * 1.3 + i) * 0.22);
+        sp.material.opacity = 0.75 * (1 - u);
+      });
+      sticks.forEach(function(mm, i){ mm.position.y = 0.78 + Math.sin(t * 2 + i) * 0.01; });
+    };
+  }
+
+  /* 33. 💐 꽃마차 (v19) */
+  function pgbFlowerCarriage(g){
+    g.add(pgBox(3.0, 0.12, 1.9, '#DFF3CC', 0, 0.06, 0));
+    g.add(pgBox(1.9, 0.62, 1.0, '#FBEEDC', 0, 0.76, 0));
+    g.add(pgBox(2.0, 0.1, 1.1, '#E9C4A0', 0, 1.1, 0));
+    g.add(pgBox(1.9, 0.1, 1.0, '#FFF7EE', 0, 0.44, 0));
+    /* 바퀴 (살짝씩 구른다) */
+    var wheels = [];
+    [-0.78, 0.78].forEach(function(sx){
+      var w = new THREE.Group(); w.position.set(sx, 0.5, 0.62); g.add(w);
+      var rim = pgCyl(0.5, 0.5, 0.1, '#FFFDF8', 0, 0, 0, 18); rim.rotation.x = Math.PI / 2; w.add(rim);
+      var ring = pgCyl(0.52, 0.52, 0.05, '#D9A877', 0, 0.01, 0, 18); ring.rotation.x = Math.PI / 2; w.add(ring);
+      for (var s = 0; s < 4; s++){
+        var spoke = pgBox(0.05, 0.86, 0.04, '#D9A877', 0, 0, 0.02); spoke.rotation.z = s * Math.PI / 4; w.add(spoke);
+      }
+      var w2 = w.clone(); w2.position.z = -0.62; g.add(w2);
+      wheels.push(w); wheels.push(w2);
+    });
+    /* 마차 위 꽃더미 */
+    var cols = ['#FFC3D6', '#FFF0B8', '#FF9FB8', '#FFE08A', '#E6D2F6', '#FFFFFF', '#A6E5CF'];
+    for (var i = 0; i < 34; i++){
+      var a = (i / 34) * Math.PI * 2;
+      var rr = 0.2 + (i % 5) * 0.09;
+      g.add(pgSph(0.085, cols[i % cols.length], Math.cos(a) * (0.6 + (i % 3) * 0.2), 1.2 + Math.sin(a * 3) * 0.07 + (i % 4) * 0.03, Math.sin(a) * rr * 1.7, 6));
+    }
+    for (var lv = 0; lv < 8; lv++){
+      var la = (lv / 8) * Math.PI * 2;
+      var leaf = pgSph(0.11, '#7FC56A', Math.cos(la) * (0.52 + (lv % 2) * 0.24), 1.1, Math.sin(la) * 0.62, 6);
+      leaf.scale.set(1.5, 0.45, 0.9); g.add(leaf);
+    }
+    g.add(pgCyl(0.06, 0.06, 0.5, '#7FC56A', 0.62, 1.36, 0.3, 6));
+    g.add(pgSph(0.18, '#FFC3D6', 0.62, 1.64, 0.3, 8));
+    /* 꽃 아치 */
+    var arch = pgTor(0.9, 0.05, '#7FC56A', 0, 1.16, 0, Math.PI); arch.rotation.y = Math.PI / 2; g.add(arch);
+    for (var j = 0; j < 7; j++){
+      var aa = Math.PI * (j / 6);
+      g.add(pgSph(0.09, cols[j % cols.length], Math.cos(aa + Math.PI) * 9e-17 + 0, 1.16 + Math.sin(aa) * 0.9, Math.cos(aa) * 0.9, 6));
+    }
+    g.add(pgBox(0.1, 0.58, 0.1, '#E4C69E', -1.0, 1.2, 0.7));
+    g.add(pgBox(0.1, 0.58, 0.1, '#E4C69E', -1.0, 1.2, -0.7));
+    g.add(pgCyl(0.04, 0.04, 0.6, '#C9A47C', -1.24, 1.3, 0, 6)); 
+    g.userData.tick = function(t){
+      wheels.forEach(function(w){ w.rotation.z = -t * 0.32; });
+    };
+  }
+
+  /* 34. ♨️ 온천 노천탕 (v19) */
+  function pgbHotSpring(g){
+    g.add(pgCyl(1.62, 1.72, 0.3, '#EDE4D6', 0, 0.15, 0, 26));
+    var water = new THREE.Mesh(new THREE.CylinderGeometry(1.34, 1.34, 0.1, 26),
+      new THREE.MeshLambertMaterial({ color: new THREE.Color('#8FD6F0'), transparent: true, opacity: 0.92 }));
+    water.position.set(0, 0.31, 0); g.add(water);
+    for (var i = 0; i < 12; i++){
+      var a = i / 12 * Math.PI * 2;
+      var r = 1.44 + (i % 2) * 0.12;
+      var st = pgSph(0.2, i % 2 ? '#DFD8CC' : '#CFC7B9', Math.cos(a) * r, 0.24, Math.sin(a) * r, 7);
+      st.scale.set(1, 0.78, 1); g.add(st);
+    }
+    /* 대나무 울타리 */
+    [-1, 1].forEach(function(sg){
+      for (var b = 0; b < 3; b++){
+        g.add(pgCyl(0.06, 0.07, 1.05, '#B7C79A', sg * (1.72 + b * 0.16), 0.56, -1.2 + b * 0.24, 6));
+      }
+      g.add(pgBox(0.7, 0.06, 0.06, '#A9BF88', sg * 1.86, 0.9, -0.9));
+    });
+    /* 목욕 바구니 · 타월 */
+    g.add(pgCyl(0.19, 0.15, 0.24, '#E8C28A', 1.1, 0.42, 1.0, 10));
+    g.add(pgTor(0.17, 0.02, '#D9A877', 1.1, 0.56, 1.0, Math.PI));
+    g.add(pgBox(0.34, 0.09, 0.24, '#FFFDF8', -1.0, 0.42, 1.14));
+    g.add(pgSph(0.1, '#FFC3D6', -1.34, 0.38, 0.9, 7));
+    /* 김이 피어오른다 */
+    var puffs = [];
+    for (var p = 0; p < 6; p++){
+      var pf = pgSph(0.22, '#FFFFFF', 0, 0.4, 0, 8);
+      pf.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.42 });
+      g.add(pf); puffs.push(pf);
+    }
+    g.add(pgBox(0.5, 0.5, 0.4, '#C99B6B', 1.5, 0.25, -0.9));
+    g.userData.tick = function(t){
+      puffs.forEach(function(pf, i){
+        var u = (t * 0.26 + i / puffs.length) % 1;
+        var a = i * 1.1;
+        pf.position.set(Math.cos(a) * (0.3 + u * 0.5), 0.42 + u * 1.4, Math.sin(a) * (0.3 + u * 0.5));
+        pf.material.opacity = 0.34 * (1 - u);
+        var s = 0.45 + u * 1.0; pf.scale.set(s, s, s);
+      });
+      water.position.y = 0.31 + Math.sin(t * 1.1) * 0.008;
+    };
+  }
+
+  /* 35. 🌲 2층 트리 전망대 (v19) */
+  function pgbTreeDeck(g){
+    g.add(pgCyl(1.5, 1.6, 0.14, '#DFF3CC', 0, 0.07, 0, 22));
+    g.add(pgCyl(0.24, 0.34, 2.9, '#B6875C', 0, 1.45, 0, 10));
+    /* 나뭇잎 */
+    [[0, 3.16, 0, 0.96], [0.7, 3.0, 0.22, 0.66], [-0.66, 3.06, -0.26, 0.62], [0.08, 3.72, -0.1, 0.62]].forEach(function(p){
+      g.add(pgSph(p[3], '#98D57E', p[0], p[1], p[2], 12));
+    });
+    g.add(pgSph(0.14, '#FF9FB8', -0.56, 2.98, 0.5, 7));
+    g.add(pgSph(0.12, '#FFF0B8', 0.64, 2.86, -0.42, 7));
+    /* 2층 전망 데크 */
+    var deck = pgCyl(1.02, 1.02, 0.1, '#E4C69E', 0, 1.62, 0, 16); g.add(deck);
+    g.add(pgTor(1.02, 0.05, '#D9B98C', 0, 1.6, 0));
+    for (var i = 0; i < 8; i++){
+      var a = i / 8 * Math.PI * 2 + 0.2;
+      g.add(pgCyl(0.035, 0.035, 0.44, '#D9B98C', Math.cos(a) * 0.94, 1.85, Math.sin(a) * 0.94, 5));
+    }
+    g.add(pgTor(0.94, 0.045, '#E4C69E', 0, 2.06, 0));
+    /* 망원경 */
+    var tel = new THREE.Group(); tel.position.set(0.46, 1.7, 0.4); g.add(tel);
+    tel.add(pgCyl(0.045, 0.045, 0.42, '#9FB4C6', 0, 0.2, 0, 8));
+    var tube = pgCyl(0.09, 0.07, 0.5, '#CFEAFB', 0, 0.44, 0, 10); tube.rotation.x = -0.7; tel.add(tube);
+    /* 사다리 */
+    [-0.1, 0.16].forEach(function(dx){
+      g.add(pgBox(0.06, 1.5, 0.06, '#C9A47C', -0.9 + dx, 0.78, 0.58));
+    });
+    for (var q = 0; q < 5; q++) g.add(pgBox(0.26, 0.04, 0.05, '#D9B98C', -0.87, 0.28 + q * 0.3, 0.58));
+    /* 깃발 · 등불 */
+    g.add(pgCyl(0.02, 0.02, 0.6, '#C9A47C', -0.7, 1.92, -0.7, 5));
+    var fl = pgFlag('#FFB6CB', 0.3, 0.2); fl.position.set(-0.54, 2.16, -0.7); g.add(fl);
+    var lamp = pgSph(0.12, '#FFE9A8', 0.9, 1.9, -0.5, 8);
+    lamp.material = new THREE.MeshLambertMaterial({ color: 0xFFF3CE, emissive: new THREE.Color(0xFFCE63), emissiveIntensity: 0.55 });
+    g.add(lamp);
+    g.userData.tick = function(t){
+      fl.rotation.y = Math.sin(t * 1.9) * 0.38;
+      tel.rotation.y = Math.sin(t * 0.4) * 0.5;
+      lamp.material.emissiveIntensity = 0.45 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4));
+    };
+  }
+
+  /* 36. 🐟 붕어빵 포장마차 (v19) */
+  function pgbBungeoppang(g){
+    g.add(pgBox(2.9, 0.12, 1.8, C.stone2, 0, 0.06, 0));
+    g.add(pgBox(2.0, 0.72, 1.0, '#FFF6E6', 0, 0.54, 0));
+    g.add(pgBox(2.06, 0.1, 1.06, '#E9C4A0', 0, 0.94, 0));
+    /* 차양 막대 */
+    [-0.92, 0.92].forEach(function(sx){
+      [-0.42, 0.42].forEach(function(sz){ g.add(pgCyl(0.04, 0.04, 1.1, '#C9A47C', sx, 1.42, sz, 6)); });
+    });
+    var aw = new THREE.Group(); aw.position.set(0, 1.98, 0); g.add(aw);
+    aw.add(pgBox(2.3, 0.08, 1.2, '#FF9FB8', 0, 0, 0));
+    for (var i = 0; i < 4; i++) aw.add(pgBox(0.26, 0.09, 1.22, '#FFF7FB', -0.86 + i * 0.56, 0.01, 0));
+    aw.add(pgBox(2.3, 0.16, 0.06, '#FFB6CB', 0, -0.1, 0.6));
+    /* 철판 + 붕어빵 */
+    g.add(pgBox(1.3, 0.1, 0.66, '#6E6157', 0, 1.02, 0.06));
+    var fishes = [];
+    for (var f = 0; f < 4; f++){
+      var fx = -0.45 + f * 0.3;
+      var body = pgSph(0.12, '#E8B87A', fx, 1.1, 0.06, 10); body.scale.set(1.55, 0.62, 0.86); g.add(body);
+      var tail = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.14, 6), pgM('#D9A877'));
+      tail.rotation.z = -Math.PI / 2; tail.position.set(fx - 0.2, 1.1, 0.06); g.add(tail);
+      g.add(pgSph(0.018, '#8A6A4A', fx + 0.13, 1.13, 0.13, 5));
+      fishes.push(body);
+    }
+    /* 간판 · 종이컵 */
+    g.add(pgBox(0.74, 0.32, 0.08, '#FFF0B8', 0.72, 1.5, 0.5));
+    g.add(pgBox(0.52, 0.06, 0.03, '#E0BE6E', 0.72, 1.5, 0.55));
+    [0, 1].forEach(function(k){
+      g.add(pgCyl(0.06, 0.05, 0.14, '#FFFDF8', -0.68 + k * 0.16, 1.14, 0.42, 8));
+    });
+    g.add(pgBox(0.36, 0.28, 0.26, '#D9A877', -0.8, 1.1, -0.34));
+    /* 바퀴 */
+    [-0.66, 0.66].forEach(function(sx){
+      var wh = pgCyl(0.28, 0.28, 0.08, '#FFFDF8', sx, 0.34, 0.56, 14); wh.rotation.x = Math.PI / 2; g.add(wh);
+      var hub = pgCyl(0.08, 0.08, 0.1, '#D9A877', sx, 0.34, 0.56, 8); hub.rotation.x = Math.PI / 2; g.add(hub);
+    });
+    var puffs = [];
+    for (var p = 0; p < 4; p++){
+      var pf = pgSph(0.13, '#FFFFFF', 0, 1.2, 0, 7);
+      pf.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.4 });
+      g.add(pf); puffs.push(pf);
+    }
+    g.userData.tick = function(t){
+      puffs.forEach(function(pf, i){
+        var u = (t * 0.4 + i / puffs.length) % 1;
+        pf.position.set(-0.4 + i * 0.26 + Math.sin(t * 1.4 + i) * 0.05, 1.2 + u * 0.8, 0.1);
+        pf.material.opacity = 0.38 * (1 - u);
+      });
+      aw.rotation.z = Math.sin(t * 1.1) * 0.012;
+      fishes.forEach(function(fb, i){ fb.position.y = 1.1 + Math.sin(t * 2 + i) * 0.004; });
+    };
+  }
+
   function pgBuildItemMesh(kind){
     var g = new THREE.Group();
     g.userData.buildKind = kind;
@@ -8771,6 +9605,18 @@ async function finishBoot(){
     else if (kind === 'farm_barn') pgbFarmBarn(g);
     else if (kind === 'mini_station') pgbMiniStation(g);
     else if (kind === 'rainbow_cottage') pgbRainbowCottage(g);
+    else if (kind === 'donut_shop') pgbDonutShop(g);
+    else if (kind === 'ramen_shop') pgbRamenShop(g);
+    else if (kind === 'aquarium') pgbAquarium(g);
+    else if (kind === 'pink_castle') pgbPinkCastle(g);
+    else if (kind === 'windmill_house') pgbWindmillHouse(g);
+    else if (kind === 'bookstore') pgbBookstore(g);
+    else if (kind === 'beach_cafe') pgbBeachCafe(g);
+    else if (kind === 'campfire') pgbCampfire(g);
+    else if (kind === 'flower_carriage') pgbFlowerCarriage(g);
+    else if (kind === 'hot_spring') pgbHotSpring(g);
+    else if (kind === 'tree_deck') pgbTreeDeck(g);
+    else if (kind === 'bungeoppang') pgbBungeoppang(g);
     else pgbCottagePink(g);
     return g;
   }
@@ -10208,7 +11054,20 @@ async function finishBoot(){
     doctor_nurse:    { ly:348, by:389, gs:205, ge:210, sx:207, lcx:193, rcx:225 },
     skater_punk:     { ly:356, by:390, gs:204, ge:209, sx:206, lcx:178, rcx:233 },
     snow_fairy:      { ly:358, by:390, gs:197, ge:209, sx:203, lcx:185, rcx:220 },
-    cat_butler:      { ly:350, by:389, gs:198, ge:203, sx:200, lcx:183, rcx:220 }
+    cat_butler:      { ly:350, by:389, gs:198, ge:203, sx:200, lcx:183, rcx:220 },
+    /* v19 추가 12종 — 400×400 원본 기준 직접 측정 */
+    firefighter_boy: { ly:349, by:392, gs:197, ge:213, sx:205, lcx:178, rcx:232 },
+    pilot_captain:   { ly:339, by:392, gs:202, ge:218, sx:210, lcx:189, rcx:230 },
+    baseball_hero:   { ly:362, by:392, gs:170, ge:226, sx:198, lcx:152, rcx:238 },
+    royal_knight:    { ly:362, by:392, gs:182, ge:196, sx:189, lcx:163, rcx:216 },
+    pirate_captain:  { ly:331, by:393, gs:197, ge:212, sx:204, lcx:180, rcx:229 },
+    butterfly_fairy: { ly:307, by:393, gs:197, ge:212, sx:205, lcx:185, rcx:224 },
+    melon_pajama:    { ly:345, by:393, gs:186, ge:199, sx:192, lcx:169, rcx:216 },
+    snowman_cloak:   { ly:330, by:392, gs:196, ge:203, sx:199, lcx:178, rcx:221 },
+    frog_raincoat:   { ly:322, by:392, gs:197, ge:219, sx:208, lcx:180, rcx:250 },
+    bunny_ribbon:    { ly:337, by:394, gs:191, ge:205, sx:198, lcx:179, rcx:216 },
+    painter_beret:   { ly:334, by:393, gs:191, ge:204, sx:197, lcx:180, rcx:215 },
+    barista_apron:   { ly:309, by:393, gs:192, ge:201, sx:196, lcx:181, rcx:212 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
   var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:8 };
@@ -10382,6 +11241,19 @@ async function finishBoot(){
     skater_punk:     { cx:206, hw:44, sy:222, len:52, w:18, ss:0, slv:'#C9BCE8', cuff:'#EFEAFA', skin:'#FADCC4' },
     snow_fairy:      { cx:203, hw:43, sy:226, len:51, w:17, ss:0, slv:'#DDEFF8', cuff:'#FAFDFF', skin:'#FBE3CF' },
     cat_butler:      { cx:200, hw:42, sy:228, len:50, w:17, ss:0, slv:'#CFE1EE', cuff:'#FFF6E4', skin:'#F9DCC4' },
+    /* v19 추가 12종 */
+    firefighter_boy: { cx:207, hw:44, sy:228, len:51, w:17, ss:0, slv:'#FBEFD9', cuff:'#F5C0B4', skin:'#F9DCC4' },
+    pilot_captain:   { cx:209, hw:42, sy:226, len:51, w:17, ss:1, slv:'#30507F', cuff:'#DCE8F6', skin:'#F9DBC3' },
+    baseball_hero:   { cx:198, hw:43, sy:228, len:51, w:17, ss:1, slv:'#FBF3E6', cuff:'#31405F', skin:'#F9DCC4' },
+    royal_knight:    { cx:187, hw:45, sy:220, len:52, w:18, ss:0, slv:'#C6D6E4', cuff:'#B0C4D6', skin:'#FBE3CF' },
+    pirate_captain:  { cx:205, hw:42, sy:228, len:51, w:17, ss:0, slv:'#FBF0DC', cuff:'#F7E6CE', skin:'#F9DCC4' },
+    butterfly_fairy: { cx:205, hw:38, sy:232, len:50, w:16, ss:1, slv:'#D9F0DC', cuff:'#F4FCF5', skin:'#FBDFC7' },
+    melon_pajama:    { cx:194, hw:43, sy:228, len:51, w:17, ss:0, slv:'#FCF0E4', cuff:'#CFE8C4', skin:'#F9DDC6' },
+    snowman_cloak:   { cx:200, hw:45, sy:226, len:51, w:18, ss:0, slv:'#82AADF', cuff:'#F0878F', skin:'#FBDEC9' },
+    frog_raincoat:   { cx:200, hw:46, sy:226, len:51, w:18, ss:0, slv:'#A9DEB5', cuff:'#E2F7E7', skin:'#FADFC8' },
+    bunny_ribbon:    { cx:198, hw:40, sy:232, len:50, w:16, ss:1, slv:'#FBD3DE', cuff:'#FFF0F5', skin:'#FBDFC7' },
+    painter_beret:   { cx:198, hw:43, sy:226, len:51, w:17, ss:0, slv:'#FCF3E3', cuff:'#EDDCC2', skin:'#F9DCC4' },
+    barista_apron:   { cx:196, hw:40, sy:228, len:51, w:16, ss:1, slv:'#FDFBF4', cuff:'#C3E2CB', skin:'#F9DCC6' },
   };
   var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:51, w:17, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
   function pgArmOf(k){ return PG_ARM[k] || PG_ARM_DEF; }
