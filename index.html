@@ -10354,8 +10354,14 @@ async function finishBoot(){
     var bal = new THREE.Group(); bal.position.set(0.24, 2.0, -0.1); g.add(bal);
     var env = pgSph(0.82, '#FFB6CB', 0, 0.72, 0, 20);
     env.scale.set(1, 1.12, 1); bal.add(env);
-    var seg1 = pgSph(0.7, '#FFE39B', 0, 0.72, 0.34, 16); seg1.scale.set(0.72, 1.1, 0.5); bal.add(seg1);
-    var seg2 = pgSph(0.7, '#A6E5CF', 0, 0.72, -0.34, 16); seg2.scale.set(0.72, 1.1, 0.5); bal.add(seg2);
+    var goreCols = ['#FFE39B', '#A6E5CF', '#FFF3E6', '#C9B6F0'];
+    for (var gi = 0; gi < 4; gi++){
+      var ga = gi * Math.PI / 2 + Math.PI / 4;
+      var seg = pgSph(0.52, goreCols[gi], Math.cos(ga) * 0.5, 0.7, Math.sin(ga) * 0.5, 14);
+      seg.scale.set(1.05, 1.22, 0.62);
+      seg.rotation.y = -ga;
+      bal.add(seg);
+    }
     bal.add(pgCyl(0.2, 0.26, 0.16, '#FF9FB8', 0, 1.62, 0, 12));
     [-0.24, 0.24].forEach(function(sx){ [-0.18, 0.18].forEach(function(sz){
       bal.add(pgCyl(0.012, 0.012, 0.42, '#D9A877', sx, -0.16, sz, 5));
