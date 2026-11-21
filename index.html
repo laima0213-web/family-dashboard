@@ -1607,6 +1607,18 @@ body.pg-open{overflow:hidden!important}
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .pg-tools button.off{opacity:.55}
 .pg-tools button:active,.pg-switch button:active{transform:scale(.95)}
+.pg-nations{align-self:flex-start;display:flex;gap:4px;max-width:calc(100vw - 108px);overflow-x:auto;
+  padding:1px 2px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto}
+.pg-nations::-webkit-scrollbar{display:none}
+.pg-nations button{flex:0 0 auto;border:1px solid rgba(255,255,255,.95);background:rgba(255,255,255,.9);
+  border-radius:999px;height:27px;padding:0 10px;font-size:11px;font-weight:900;color:#4A6B4F;
+  font-family:inherit;white-space:nowrap;cursor:pointer;box-shadow:0 3px 12px rgba(60,110,70,.14);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pg-nations button.on{background:linear-gradient(160deg,#BEEBC9,#9FE0B4);color:#2F6B45;
+  box-shadow:0 3px 10px rgba(70,150,100,.3);border-color:#A8DFB8}
+.pg-nations button:active{transform:scale(.95)}
+.pg-lbl.nat{font-size:11px;padding:2px 9px;background:rgba(255,255,255,.92);color:#3C5C42;
+  border-color:rgba(255,255,255,1);box-shadow:0 3px 10px rgba(60,90,60,.2)}
 .pg-exit{margin-left:auto;flex:0 0 auto;height:42px;padding:0 15px;border-radius:15px;border:1.5px solid #F3C9C1;
   background:rgba(255,252,250,.96);color:#C4553F;font-size:14px;font-weight:900;font-family:inherit;
   cursor:pointer;letter-spacing:-.4px;box-shadow:0 4px 16px rgba(140,80,60,.2);white-space:nowrap}
@@ -1884,12 +1896,13 @@ body.pg-open{overflow:hidden!important}
         <button type="button" id="pgDecoBtn">🎨 꾸미기</button>
         <button type="button" id="pgLblBtn">🏷 이름표</button>
       </div>
+      <div class="pg-nations" id="pgNations"></div>
     </div>
     <button type="button" class="pg-exit" id="pgExit">✕ 나가기</button>
   </div>
 
   <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
-  <div class="pg-hint" id="pgHint">드래그로 회전 · ✋ 또는 두 손가락으로 이동·확대 · 캐릭터를 옮겨 보아요</div>
+  <div class="pg-hint" id="pgHint">드래그로 회전 · ✋ 또는 두 손가락으로 이동·확대 · 위 버튼으로 나라를 옮겨 보아요</div>
 
   <div class="pg-zoom">
     <button type="button" id="pgPanBtn" class="pg-pan-btn" aria-label="화면 이동 모드" aria-pressed="false" title="화면 이동/회전 전환">✋</button>
@@ -3025,7 +3038,7 @@ function normalizeState(raw){
     if (list.length) pgOut[id] = list;
   });
   out.playground = pgOut;
-  /* 🏡 놀이터에 지은 집·건물 — 아이별 [{ id, kind, x, z, rot }] (최대 16채, 섬 반경 13.6) */
+  /* 🏡 놀이터에 지은 집·건물 — 아이별 [{ id, kind, x, z, rot }] (5개 나라 월드 X -84..84 · Z -22..22) */
   var bldRaw = (r.pgBuilds && typeof r.pgBuilds === 'object') ? r.pgBuilds : {};
   var bldOut = {};
   KIDS.forEach(function(id){
@@ -3039,8 +3052,8 @@ function normalizeState(raw){
       var bx = Number(x.x), bz = Number(x.z);
       if (!isFinite(bx)) bx = 0;
       if (!isFinite(bz)) bz = 0;
-      var br = Math.sqrt(bx * bx + bz * bz);
-      if (br > 13.6){ bx = bx / br * 13.6; bz = bz / br * 13.6; }
+      if (bx < -84) bx = -84; else if (bx > 84) bx = 84;
+      if (bz < -22) bz = -22; else if (bz > 22) bz = 22;
       var br2 = Number(x.rot);
       if (!isFinite(br2)) br2 = 0;
       br2 = ((br2 % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -7993,15 +8006,58 @@ async function finishBoot(){
   ];
   var RIDES = ['slide','seesaw','jungle','ladder','bars','rope','horse','sand','zip','tramp','bench',
                'ferris','carousel','coaster','viking','teacup','drop','balloon','bumper','swing'];
-  var ISLAND_R = 17.9, CHAR_R = 16.9;   /* 범퍼카 경기장(바깥 17.16)이 울타리(17.7) 안에 여유롭게 들어오는 크기 */
-  var BUILD_R = 13.6;                    /* 🏡 집을 짓고 옮길 수 있는 섬 반경 (물에 잠기지 않는 안쪽) */
-  var BUMPER_A = 337.5, BUMPER_RR = 13.45, BUMPER_EDGE = 3.82;
+  /* ============================================================
+     🗺️ 5개 테마 나라 월드 — 가로 172m(X) × 세로 48m(Z)
+     서쪽 → 동쪽: ① 놀이공원 · ② 동화마을 · ③ 바닷가 · ④ 숲속캠핑 · ⑤ 겨울나라
+     ============================================================ */
+  var WX0 = -86, WX1 = 86, WZ0 = -24, WZ1 = 24, WR = 9;   /* 둥근 모서리 반지름 */
+  var NATIONS = [
+    { k:'park',    n:'놀이공원', ic:'🎡', x0:-86, x1:-38 },
+    { k:'village', n:'동화마을', ic:'🏡', x0:-38, x1:-2  },
+    { k:'beach',   n:'바닷가',   ic:'🏖️', x0:-2,  x1:30  },
+    { k:'forest',  n:'숲속캠핑', ic:'🌲', x0:30,  x1:58  },
+    { k:'winter',  n:'겨울나라', ic:'❄️', x0:58,  x1:86  }
+  ];
+  NATIONS.forEach(function(nn){ nn.cx = (nn.x0 + nn.x1) / 2; nn.cz = 0; });
+  var PARK = { x:-62, z:0 };                 /* ① 놀이공원 나라 중심 — 기존 원형 섬이 통째로 여기로 */
+  var SEA_SHORE = -14.6;                     /* ③ 바닷가 — z가 이보다 남쪽(작은 값)이면 바다 */
+  var STREAM = { x0:33.5, x1:54.5, z:14.2, w:2.6 };   /* ④ 숲속 개울 (z 14.2 ± 1.3) */
+  var ICE = { x:71.2, z:10.6, rx:5.6, rz:3.9 };        /* ⑤ 얼음 연못 */
+  var BUMPER_A = 337.5, BUMPER_RR = 15.4, BUMPER_EDGE = 3.82;
   /* 🚗 범퍼카 경기장 — 방향각·배치 반경·바닥+핑크 테두리 반경. 소품을 놓기 전에도 이 값으로 겹침을 확인한다. */
   var PG_BUILD_SCALE = 0.9;              /* 공원 기구와 나란히 놓였을 때 딱 좋은 크기 */
-  /* ---------- 🤸 자율 행동(혼자 걷고 기구 타기) ----------
-     · 위치는 화면 메모리(c.wx·c.wz·c.curRide)에서만 움직인다 — DB 저장 없음! */
-  var AI_R = 13.7;                      /* 섬 반경 15.0 안쪽 — 물에 빠지지 않는 산책 반경 */
-  var POND = { x:-1.55, z:0.05, r:1.78 };    /* 광장 연못 중심(-1.55,0.05) + 여유 — 이 안쪽은 우회 */
+  var CHAR_PAD = 1.5, BUILD_PAD = 2.0;   /* 울타리 안쪽 여유 */
+  var POND = { x: PARK.x - 1.55, z: PARK.z + 0.05, r: 1.78 };    /* 놀이공원 광장 연못 — 이 안쪽은 우회 */
+
+  /* 둥근 모서리 사각 월드 안으로 좌표를 당긴다 */
+  function pgInRect(x, z, pad){
+    var x0 = WX0 + pad, x1 = WX1 - pad, z0 = WZ0 + pad, z1 = WZ1 - pad;
+    var r = Math.max(0.4, WR - pad);
+    x = Math.max(x0, Math.min(x1, x)); z = Math.max(z0, Math.min(z1, z));
+    var qx = Math.max(x0 + r, Math.min(x1 - r, x));
+    var qz = Math.max(z0 + r, Math.min(z1 - r, z));
+    var dx = x - qx, dz = z - qz, d = Math.sqrt(dx * dx + dz * dz);
+    if (d > r && d > 1e-6){ x = qx + dx / d * r; z = qz + dz / d * r; }
+    return [x, z];
+  }
+  function pgNationAt(x){
+    for (var i = 0; i < NATIONS.length; i++) if (x < NATIONS[i].x1) return NATIONS[i];
+    return NATIONS[NATIONS.length - 1];
+  }
+  function pgNationKey(k){
+    for (var i = 0; i < NATIONS.length; i++) if (NATIONS[i].k === k) return NATIONS[i];
+    return null;
+  }
+  function pgInSea(x, z){ return z < SEA_SHORE && x > -2.8 && x < 30.8; }
+  function pgInStream(x, z){
+    return Math.abs(z - STREAM.z) <= STREAM.w / 2 && x > STREAM.x0 - 0.8 && x < STREAM.x1 + 0.8;
+  }
+  function pgInIce(x, z){
+    var dx = (x - ICE.x) / (ICE.rx + 0.5), dz = (z - ICE.z) / (ICE.rz + 0.5);
+    return dx * dx + dz * dz <= 1;
+  }
+  function pgWater(x, z){ return pgInSea(x, z) || pgInStream(x, z) || pgInIce(x, z); }
+  function pgOnProm(x, z){ return Math.abs(z) < 1.9; }     /* 메인 산책로 — 집은 비켜 세운다 */
   function pgAIrand(a, b){ return a + Math.random() * (b - a); }
 
   /* ---------- 색 ---------- */
@@ -8104,9 +8160,12 @@ async function finishBoot(){
     PG.on = true; PG.kid = kid;
     el.hidden = false;
     document.body.classList.add('pg-open');
-    if (PG.target) PG.target.set(0, 0.8, 0);        /* 🏠 열 때마다 가운데부터 */
+    if (PG.target) PG.target.set(0, 0.8, 0);        /* 🏠 열 때마다 전체 월드부터 */
+    PG.polar = 0.55; PG.azim = 0;
+    PG.camTween = null;
+    pgNationMark('all');
     pgPanSet(false, true);
-    pgTitle(); pgSwitch(); pgRenderDeco();
+    pgTitle(); pgSwitch(); pgRenderNations(); pgRenderDeco();
     var hint = document.getElementById('pgHint');
     if (hint){ hint.classList.add('on'); clearTimeout(PG.hintTimer); PG.hintTimer = setTimeout(function(){ hint.classList.remove('on'); }, 6000); }
     if (PG.ready){
@@ -8184,12 +8243,13 @@ async function finishBoot(){
 
     var sc = new THREE.Scene();
     sc.background = pgSkyTexture();
-    sc.fog = new THREE.Fog(0xE8F6FF, 62, 128);
+    sc.fog = new THREE.Fog(0xE8F6FF, 260, 1500);
     PG.scene = sc;
     PG.target = new THREE.Vector3(0, 0.8, 0);
-    PG.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 220);
+    PG.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1800);
     var asp0 = (stage.clientWidth || window.innerWidth) / (stage.clientHeight || window.innerHeight);
-    PG.dist = PG.distGoal = (asp0 < 0.72) ? 38 : 34;
+    PG.dist = PG.distGoal = pgAllDist(asp0);
+    PG.polar = 0.62;
     PG.ray = new THREE.Raycaster();
     PG.ndc = new THREE.Vector2();
     PG.vec = new THREE.Vector3();
@@ -8233,7 +8293,7 @@ async function finishBoot(){
   }
 
   /* ---------- 공원 길 · 소품 ---------- */
-  var ROAD = { plaza:4.4, inner:7.0, prom:9.3, outer:12.0 };
+  var ROAD = { plaza:5.0, inner:8.6, prom:11.6, outer:15.4 };
 
   function pgTileTexture(){
     if (PG.pathTex) return PG.pathTex;
@@ -8255,29 +8315,140 @@ async function finishBoot(){
     PG.pathTex = tx;
     return tx;
   }
-  function pgTileMat(rx, ry){
-    var tx = pgTileTexture().clone();
-    tx.needsUpdate = true;
-    tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
-    tx.repeat.set(Math.max(0.6, rx), Math.max(0.6, ry));
-    return new THREE.MeshLambertMaterial({ map: tx });
+  /* 문양 텍스처는 하나만 만들어 모두 함께 쓴다 (기기 메모리·속도) — 반복 횟수는 도형 UV에 굽는다 */
+  function pgTileMaterial(){
+    if (!PG.tileMat){
+      var tx = pgTileTexture();
+      tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+      tx.repeat.set(1, 1);
+      PG.tileMat = new THREE.MeshLambertMaterial({ map: tx });
+    }
+    return PG.tileMat;
   }
+  function pgUvScale(geo, sx, sy){
+    var uv = geo.attributes.uv;
+    if (!uv) return geo;
+    for (var i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * sx, uv.getY(i) * sy);
+    uv.needsUpdate = true;
+    return geo;
+  }
+  function pgTileMat(rx, ry){ return pgTileMaterial(); }
   function pgPathDisc(r, y){
-    var m = new THREE.Mesh(new THREE.CircleGeometry(r, 96), pgTileMat(r, r));
+    var m = new THREE.Mesh(pgUvScale(new THREE.CircleGeometry(r, 96), r, r), pgTileMaterial());
     m.rotation.x = -Math.PI / 2; m.position.y = y || 0.015;
     return m;
   }
   function pgPathRing(r, w, y){
-    var m = new THREE.Mesh(new THREE.RingGeometry(r - w / 2, r + w / 2, 128), pgTileMat(r * 2, r * 2));
+    var m = new THREE.Mesh(pgUvScale(new THREE.RingGeometry(r - w / 2, r + w / 2, 128), r * 2, r * 2), pgTileMaterial());
     m.rotation.x = -Math.PI / 2; m.position.y = y || 0.02;
     return m;
   }
-  function pgPathSpur(a, r0, r1, w, y){
+  function pgPathSpur(a, r0, r1, w, y, ox, oz){
     var len = Math.max(0.2, r1 - r0), mid = (r0 + r1) / 2;
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.07, len), pgTileMat(w, len));
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(w, 0.07, len), w, len), pgTileMaterial());
     m.rotation.y = Math.PI / 2 - a;
-    m.position.set(Math.cos(a) * mid, (y || 0.022) - 0.035, Math.sin(a) * mid);
+    m.position.set((ox || 0) + Math.cos(a) * mid, (y || 0.022) - 0.035, (oz || 0) + Math.sin(a) * mid);
     return m;
+  }
+  /* 메인 산책로 — X축으로 쭉 뻗은 길 */
+  function pgPathBar(x0, x1, z, w, y){
+    var len = Math.max(0.2, x1 - x0);
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(len, 0.07, w), len / 2, w / 2), pgTileMaterial());
+    m.position.set((x0 + x1) / 2, (y || 0.022) - 0.035, z || 0);
+    return m;
+  }
+  /* 둥근 모서리 사각 패치 — 나라별 바닥색 (matOrColor: 색 문자열 또는 Material) */
+  function pgPatch(x0, x1, z0, z1, rNW, rNE, rSE, rSW, y, matOrColor){
+    var sy0 = -z1, sy1 = -z0;                 /* shape y = -world z */
+    var sh = new THREE.Shape();
+    sh.moveTo(x0 + rSW, sy0);
+    sh.lineTo(x1 - rSE, sy0);
+    if (rSE) sh.quadraticCurveTo(x1, sy0, x1, sy0 + rSE); else sh.lineTo(x1, sy0);
+    sh.lineTo(x1, sy1 - rNE);
+    if (rNE) sh.quadraticCurveTo(x1, sy1, x1 - rNE, sy1); else sh.lineTo(x1, sy1);
+    sh.lineTo(x0 + rNW, sy1);
+    if (rNW) sh.quadraticCurveTo(x0, sy1, x0, sy1 - rNW); else sh.lineTo(x0, sy1);
+    sh.lineTo(x0, sy0 + rSW);
+    if (rSW) sh.quadraticCurveTo(x0, sy0, x0 + rSW, sy0); else sh.lineTo(x0, sy0);
+    var geo = new THREE.ShapeGeometry(sh, 6);
+    geo.rotateX(-Math.PI / 2);
+    var mat = (typeof matOrColor === 'string')
+      ? new THREE.MeshLambertMaterial({ color: new THREE.Color(matOrColor) }) : matOrColor;
+    if (mat && mat.userData && mat.userData.uvScale) pgUvScale(geo, mat.userData.uvScale, mat.userData.uvScale);
+    var m = new THREE.Mesh(geo, mat);
+    m.position.y = y || 0.006;
+    return m;
+  }
+  /* 둥근 모서리 대륙 슬라브 (위 y = top, 두께 depth) */
+  function pgSlab(color, inset, top, depth){
+    var w = (WX1 - WX0) - inset * 2, d = (WZ1 - WZ0) - inset * 2;
+    var rr = Math.max(1.5, WR - inset);
+    var sh = new THREE.Shape();
+    var hw = w / 2, hd = d / 2;
+    sh.moveTo(-hw + rr, -hd);
+    sh.lineTo(hw - rr, -hd); sh.quadraticCurveTo(hw, -hd, hw, -hd + rr);
+    sh.lineTo(hw, hd - rr);  sh.quadraticCurveTo(hw, hd, hw - rr, hd);
+    sh.lineTo(-hw + rr, hd); sh.quadraticCurveTo(-hw, hd, -hw, hd - rr);
+    sh.lineTo(-hw, -hd + rr); sh.quadraticCurveTo(-hw, -hd, -hw + rr, -hd);
+    var geo = new THREE.ExtrudeGeometry(sh, { depth: depth, bevelEnabled: false, curveSegments: 8 });
+    geo.rotateX(-Math.PI / 2);
+    var m = new THREE.Mesh(geo, pgM(color));
+    m.position.y = top - depth;
+    return m;
+  }
+  /* 나라별 바닥 무늬 텍스처 — 파스텔 보도블록 / 모래 / 이끼 / 눈 */
+  function pgGroundTex(kind){
+    if (PG.gtex && PG.gtex[kind]) return PG.gtex[kind];
+    PG.gtex = PG.gtex || {};
+    var cv = document.createElement('canvas'); cv.width = cv.height = 64;
+    var g = cv.getContext('2d');
+    if (kind === 'pastel'){
+      var pc = ['#FBEEDD', '#F6E2EE', '#E9F3E2', '#EDE7F8', '#FFF4E6', '#E6F2F7'];
+      for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++){
+        g.fillStyle = pc[(i * 4 + j) % pc.length];
+        g.fillRect(i * 16, j * 16, 16, 16);
+      }
+      g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.4;
+      for (var q = 0; q <= 4; q++){
+        g.beginPath(); g.moveTo(q * 16, 0); g.lineTo(q * 16, 64); g.stroke();
+        g.beginPath(); g.moveTo(0, q * 16); g.lineTo(64, q * 16); g.stroke();
+      }
+    } else if (kind === 'sand'){
+      g.fillStyle = '#F4DEB2'; g.fillRect(0, 0, 64, 64);
+      for (var s = 0; s < 90; s++){
+        g.fillStyle = s % 3 ? 'rgba(255,248,229,.55)' : 'rgba(222,196,148,.5)';
+        g.fillRect(Math.random() * 64, Math.random() * 64, 1.6, 1.6);
+      }
+    } else if (kind === 'moss'){
+      g.fillStyle = '#8FC97E'; g.fillRect(0, 0, 64, 64);
+      for (var m2 = 0; m2 < 70; m2++){
+        g.fillStyle = m2 % 2 ? 'rgba(124,180,106,.5)' : 'rgba(163,210,138,.45)';
+        g.beginPath(); g.arc(Math.random() * 64, Math.random() * 64, 1.8 + Math.random() * 2.4, 0, 6.283); g.fill();
+      }
+    } else {
+      g.fillStyle = '#F4FBFF'; g.fillRect(0, 0, 64, 64);
+      for (var w2 = 0; w2 < 40; w2++){
+        g.fillStyle = w2 % 2 ? 'rgba(226,241,252,.8)' : 'rgba(255,255,255,.9)';
+        g.beginPath(); g.arc(Math.random() * 64, Math.random() * 64, 2 + Math.random() * 3, 0, 6.283); g.fill();
+      }
+    }
+    var tx = new THREE.CanvasTexture(cv);
+    tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+    if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
+    tx.anisotropy = 4;
+    PG.gtex[kind] = tx;
+    return tx;
+  }
+  function pgGroundMat(kind, perUnit){
+    PG.gmat = PG.gmat || {};
+    if (!PG.gmat[kind]){
+      var tx = pgGroundTex(kind);
+      tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+      tx.repeat.set(1, 1);
+      PG.gmat[kind] = new THREE.MeshLambertMaterial({ map: tx });
+      PG.gmat[kind].userData = { uvScale: (perUnit || 0.3) * 2.6 };
+    }
+    return PG.gmat[kind];
   }
   function pgBeam(p1, p2, r, col, seg){
     var va = new THREE.Vector3(p1[0], p1[1], p1[2]);
@@ -8411,9 +8582,9 @@ async function finishBoot(){
     });
     return g;
   }
-  function pgPond(yard){
+  function pgPond(yard, px, pz){
     var pond = new THREE.Group();
-    pond.position.set(POND.x - 0, 0, POND.z);
+    pond.position.set(px || 0, 0, pz || 0);
     yard.add(pond);
     var rim = pgTor(1.55, 0.12, C.stone2, 0, 0.05, 0);
     rim.rotation.x = Math.PI / 2; pond.add(rim);
@@ -10705,16 +10876,577 @@ async function finishBoot(){
     return g;
   }
 
+  /* ============================================================
+     🌍 5개 테마 나라 월드 — 바닥 · 길 · 게이트 · 나라별 소품
+     · 서쪽에서 동쪽으로 ① 놀이공원 ② 동화마을 ③ 바닷가 ④ 숲속캠핑 ⑤ 겨울나라
+     ============================================================ */
+  var PG_RSEED = 20261122;
+  function pgRnd(){                                   /* 늘 같은 배치가 나오는 고정 난수 */
+    PG_RSEED = (PG_RSEED * 1103515245 + 12345) % 2147483648;
+    return PG_RSEED / 2147483648;
+  }
+  function pgSolid(x, z, r){ (PG.solids = PG.solids || []).push([x, z, r]); }
+  /* 나라 소품을 놓아도 되는 빈 자리인가 (물·산책로·기존 소품·놀이기구 제외) */
+  function pgPropFree(x, z, m){
+    if (pgWater(x, z) || pgOnProm(x, z)) return false;
+    var obs = PG.solids || [], i;
+    for (i = 0; i < obs.length; i++){
+      if (Math.sqrt(Math.pow(x - obs[i][0], 2) + Math.pow(z - obs[i][1], 2)) < obs[i][2] + m) return false;
+    }
+    for (i = 0; i < PG.rideList.length; i++){
+      var G = PG.rides[PG.rideList[i]].g;
+      if (Math.sqrt(Math.pow(x - G.position.x, 2) + Math.pow(z - G.position.z, 2)) < (G.userData.radius || 2) + m) return false;
+    }
+    return true;
+  }
+  /* ---------- 바닥 ---------- */
+  function pgWorldGround(yard){
+    /* 대륙 슬라브 — 잔디 윗면 + 흙 받침 (디오라마) */
+    yard.add(pgSlab(C.grass, 0, 0, 0.55));
+    yard.add(pgSlab(C.earth, 0.45, -0.5, 1.5));
+    yard.add(pgSlab(C.earth2, 1.2, -1.95, 0.6));
+
+    /* ② 🏡 동화마을 — 알록달록 파스텔 보도블록 */
+    yard.add(pgPatch(-37.8, -2.2, -16.4, 16.4, 3.4, 3.4, 3.4, 3.4, 0.012, pgGroundMat('pastel', 0.11)));
+    /* ③ 🏖️ 바닷가 — 황금 모래사장 + 젖은 모래 + 에메랄드 바다 */
+    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.22)));
+    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE - 2.1, SEA_SHORE + 0.06, 0, 0, 0, 0, 0.014, '#E6CDA0'));
+    var seaMat = new THREE.MeshLambertMaterial({ color: 0x8FD6F0, transparent: true, opacity: 0.92 });
+    yard.add(pgPatch(-2.6, 30.6, -24.3, SEA_SHORE - 0.08, 8.2, 8.2, 6.0, 6.0, 0.032, seaMat));
+    var foam = pgBox(31.4, 0.02, 0.55, '#FFFFFF', 14, 0.046, SEA_SHORE - 0.5);
+    foam.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
+    yard.add(foam);
+    var foam2 = pgBox(31.4, 0.02, 0.3, '#FFFFFF', 14, 0.044, SEA_SHORE - 1.4);
+    foam2.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.3 });
+    yard.add(foam2);
+    PG.dyn.push(function(t){
+      foam.position.z = SEA_SHORE - 0.5 + Math.sin(t * 0.75) * 0.3;
+      foam.material.opacity = 0.36 + 0.16 * (0.5 + 0.5 * Math.sin(t * 0.9));
+      foam2.position.z = SEA_SHORE - 1.4 + Math.sin(t * 0.55 + 1.2) * 0.4;
+    });
+
+    /* ④ 🌲 숲속 개울 — 살랑 굽이치는 물길 + 물가 돌 */
+    var ss = new THREE.Shape(), SN = 30;
+    for (var si = 0; si <= SN; si++){
+      var su2 = si / SN, spx = STREAM.x0 + (STREAM.x1 - STREAM.x0) * su2;
+      var spz = STREAM.z + Math.sin(su2 * 5.2) * 0.42 - STREAM.w / 2;
+      if (si === 0) ss.moveTo(spx, -spz); else ss.lineTo(spx, -spz);
+    }
+    for (var sj = SN; sj >= 0; sj--){
+      var su3 = sj / SN, spx2 = STREAM.x0 + (STREAM.x1 - STREAM.x0) * su3;
+      var spz2 = STREAM.z + Math.sin(su3 * 5.2) * 0.42 + STREAM.w / 2;
+      ss.lineTo(spx2, -spz2);
+    }
+    var sgeo = new THREE.ShapeGeometry(ss, 4);
+    sgeo.rotateX(-Math.PI / 2);
+    var streamMesh = new THREE.Mesh(sgeo, new THREE.MeshLambertMaterial({ color: 0x8FD6F0 }));
+    streamMesh.position.y = 0.028;
+    yard.add(streamMesh);
+    for (var sb = 0; sb < 26; sb++){
+      var bx = STREAM.x0 + (STREAM.x1 - STREAM.x0) * (sb / 26);
+      var bz = STREAM.z + Math.sin((sb / 26) * 5.2) * 0.42 + (sb % 2 ? 1 : -1) * (STREAM.w / 2 + 0.12);
+      var bk = pgSph(0.13 + pgRnd() * 0.1, sb % 2 ? C.stone : C.stone2, bx, 0.07, bz, 6);
+      bk.scale.y = 0.6; yard.add(bk);
+    }
+    /* ④ 🌲 숲속캠핑 — 이끼 낀 진초록 땅 */
+    yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.16)));
+    /* ⑤ ❄️ 겨울나라 — 눈밭 + 얼음 연못 */
+    yard.add(pgPatch(57.8, 85.3, -23.7, 23.7, 8.0, 8.0, 8.0, 0, 0.012, pgGroundMat('snow', 0.16)));
+    var ice = new THREE.Mesh(new THREE.CircleGeometry(1, 44), new THREE.MeshLambertMaterial({ color: 0xDCF3FF }));
+    ice.rotation.x = -Math.PI / 2; ice.scale.set(ICE.rx, ICE.rz, 1);
+    ice.position.set(ICE.x, 0.028, ICE.z); yard.add(ice);
+    var iceRim = pgTor(1, 0.14, '#FFFFFF', 0, 0.05, 0);
+    iceRim.rotation.x = -Math.PI / 2; iceRim.scale.set(ICE.rx, ICE.rz, 1);
+    iceRim.position.set(ICE.x, 0.03, ICE.z); yard.add(iceRim);
+    for (var ic = 0; ic < 4; ic++){
+      var cr = pgBox(0.05, 0.01, 3.2 + pgRnd() * 2.2, '#B9E3F7', ICE.x + (pgRnd() - 0.5) * 7, 0.04, ICE.z + (pgRnd() - 0.5) * 4);
+      cr.rotation.y = pgRnd() * 3.14; cr.material = new THREE.MeshBasicMaterial({ color: 0xB9E3F7, transparent: true, opacity: 0.75 });
+      yard.add(cr);
+    }
+  }
+  /* ---------- 길 ---------- */
+  function pgWorldRoads(yard){
+    /* 🛤 메인 산책로 — 동화마을부터 겨울나라 끝까지 X축으로 쭉 */
+    yard.add(pgPathBar(-38.4, 84.3, 0, 3.4, 0.026));
+    /* 놀이공원 ↔ 동화마을 연결 (광장 동쪽 가장자리까지) */
+    yard.add(pgPathBar(-61.6, -37.8, 0, 3.4, 0.026));
+    /* 🏖️ 바닷가 나무 데크 — 산책로에서 바다 쪽으로 */
+    var deck = pgBox(3.6, 0.12, 17.4, '#DDBB8C', 14, 0.06, -8.5);
+    yard.add(deck);
+    for (var d = 0; d < 16; d++) yard.add(pgBox(3.62, 0.02, 0.12, '#C79A6B', 14, 0.13, -0.5 - d * 1.05));
+    [-1.72, 1.72].forEach(function(dx){ yard.add(pgBox(0.1, 0.42, 17.4, '#C79A6B', 14 + dx, 0.24, -8.5)); });
+    /* 🌲 숲속 흙길 */
+    yard.add(pgBox(1.8, 0.08, 14.6, '#D3B389', 44, 0.03, 9.3));
+    yard.add(pgBox(1.8, 0.08, 2.6, '#D3B389', 44, 0.03, -3.3));
+  }
+  function pgPathBarZ(z0, z1, x, w, y){
+    var len = Math.max(0.2, z1 - z0);
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(w, 0.07, len), w, len), pgTileMaterial());
+    m.position.set(x || 0, (y || 0.022) - 0.035, (z0 + z1) / 2);
+    return m;
+  }
+  /* ---------- 나라 입구 게이트 아치 ---------- */
+  function pgNationGate(yard, x, kind){
+    var g = new THREE.Group();
+    g.position.set(x, 0, 0);
+    yard.add(g);
+    var post = '#F5E3CB', top = C.mint, trim = C.pink;
+    if (kind === 'beach'){ post = '#E3C59B'; top = '#6FCBC4'; trim = '#FFF1D6'; }
+    else if (kind === 'forest'){ post = '#B78B62'; top = '#6FB65E'; trim = '#E4C69E'; }
+    else if (kind === 'winter'){ post = '#E6F5FF'; top = '#9BD3F0'; trim = '#C9B6F0'; }
+    [-2.55, 2.55].forEach(function(dz){
+      g.add(pgCyl(0.15, 0.19, 3.0, post, 0, 1.5, dz, 10));
+      g.add(pgSph(0.23, trim, 0, 3.14, dz, 10));
+      g.add(pgCyl(0.24, 0.28, 0.16, trim, 0, 0.08, dz, 10));
+    });
+    var arch = pgTor(2.55, 0.16, top, 0, 2.92, 0, Math.PI);
+    arch.rotation.y = Math.PI / 2;
+    g.add(arch);
+    g.add(pgBox(0.12, 0.42, 2.3, '#FFF8EA', 0, 3.28, 0));
+    g.add(pgBox(0.14, 0.08, 2.4, trim, 0, 3.06, 0));
+    g.add(pgBox(0.14, 0.08, 2.4, trim, 0, 3.5, 0));
+    pgSolid(x, 2.55, 0.5); pgSolid(x, -2.55, 0.5);
+  }
+  function pgWorldGates(yard){
+    pgNationGate(yard, -38, 'village');
+    pgNationGate(yard, -2, 'beach');
+    pgNationGate(yard, 30, 'forest');
+    pgNationGate(yard, 58, 'winter');
+  }
+  /* ---------- 🪧 나라 이름 표지판 ---------- */
+  function pgWorldSigns(yard){
+    NATIONS.forEach(function(n){
+      var x = n.cx, z = 5.6;
+      var g = new THREE.Group(); g.position.set(x, 0, z); yard.add(g);
+      g.add(pgCyl(0.09, 0.12, 2.3, C.woodD, 0, 1.15, 0, 8));
+      g.add(pgBox(2.25, 0.6, 0.13, '#FFF6E4', 0, 2.28, 0));
+      var bar = n.k === 'beach' ? C.teal : n.k === 'winter' ? C.sky : n.k === 'forest' ? C.leafG
+              : n.k === 'village' ? C.pink : C.mint;
+      g.add(pgBox(2.32, 0.1, 0.15, bar, 0, 2.0, 0));
+      g.add(pgBox(2.32, 0.1, 0.15, bar, 0, 2.56, 0));
+      [-0.7, 0.7].forEach(function(dx){ g.add(pgSph(0.07, bar, dx, 2.28, 0.09, 7)); });
+      var dot = new THREE.Object3D();
+      dot.position.set(x, 3.05, z);
+      PG.scene.add(dot);
+      PG.labels.push({ key:'nat:' + n.k, g: dot, el:null, y: 0 });
+      pgSolid(x, z, 0.75);
+    });
+  }
+  /* ---------- 🪵 외곽 통나무 울타리 (둥근 모서리 사각 월드 경계) ---------- */
+  function pgWorldFence(yard){
+    var ins = 0.9, r = WR - ins;
+    var x0 = WX0 + ins, x1 = WX1 - ins, z0 = WZ0 + ins, z1 = WZ1 - ins;
+    var pts = [];
+    function edge(ax, az, bx, bz, step){
+      var len = Math.sqrt(Math.pow(bx - ax, 2) + Math.pow(bz - az, 2));
+      var n = Math.max(1, Math.round(len / step));
+      for (var i = 0; i < n; i++) pts.push([ax + (bx - ax) * i / n, az + (bz - az) * i / n]);
+    }
+    function arc(cx, cz, a0, a1){
+      var n = Math.max(2, Math.round(Math.abs(a1 - a0) * r / 4.8));
+      for (var i = 0; i < n; i++){
+        var a = a0 + (a1 - a0) * i / n;
+        pts.push([cx + Math.cos(a) * r, cz + Math.sin(a) * r]);
+      }
+    }
+    edge(x0 + r, z0, x1 - r, z0, 4.8);
+    arc(x1 - r, z0 + r, -Math.PI / 2, 0);
+    edge(x1, z0 + r, x1, z1 - r, 4.8);
+    arc(x1 - r, z1 - r, 0, Math.PI / 2);
+    edge(x1 - r, z1, x0 + r, z1, 4.8);
+    arc(x0 + r, z1 - r, Math.PI / 2, Math.PI);
+    edge(x0, z1 - r, x0, z0 + r, 4.8);
+    arc(x0 + r, z0 + r, Math.PI, Math.PI * 1.5);
+    pts.push(pts[0]);
+    var lastPt = null;
+    pts.forEach(function(p){
+      /* 바다 쪽은 울타리를 세우지 않는다 (모래사장 → 바다로 자연스럽게) */
+      var openSea = (p[1] < SEA_SHORE + 2.2 && p[0] > -4 && p[0] < 32);
+      if (!openSea){
+        var post = pgCyl(0.09, 0.12, 0.86, C.wood, p[0], 0.43, p[1], 6);
+        yard.add(post);
+        yard.add(pgCone(0.12, 0.14, C.woodL, p[0], 0.94, p[1], 6));
+      }
+      if (lastPt){
+        var skip = (p[1] < SEA_SHORE + 2.2 && lastPt[1] < SEA_SHORE + 2.2 && p[0] > -4 && p[0] < 32);
+        if (!skip){
+          [0.34, 0.68].forEach(function(hy){
+            yard.add(pgBeam([lastPt[0], hy, lastPt[1]], [p[0], hy, p[1]], 0.045, C.woodL, 5));
+          });
+        }
+      }
+      lastPt = p;
+    });
+  }
+  /* ---------- ☁️ 구름 · 🍃 잎 · 🦋 나비 · ✨ 반짝이 ---------- */
+  function pgWorldSky(sc, yard){
+    for (var cl = 0; cl < 10; cl++){
+      var cg = new THREE.Group();
+      var ca = (cl / 10) * Math.PI * 2 + 0.4;
+      var cr = 46 + (cl % 4) * 13;
+      cg.position.set(Math.cos(ca) * cr * 1.9, 10 + (cl % 3) * 1.8, Math.sin(ca) * cr * 0.75);
+      [[0, 0, 0, 1], [0.85, -0.12, 0.1, 0.75], [-0.8, -0.1, -0.1, 0.7], [0.3, 0.35, 0, 0.62]].forEach(function(p){
+        var puff = pgSph(0.85 * p[3], C.white, p[0], p[1], p[2], 10);
+        puff.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, emissive: new THREE.Color(0xEFF8FF), emissiveIntensity: 0.25 });
+        cg.add(puff);
+      });
+      cg.userData.a = ca; cg.userData.sp = 0.006 + cl * 0.0012; cg.userData.r = cr;
+      yard.add(cg);
+      (function(cc){
+        PG.dyn.push(function(t){
+          var a = cc.userData.a + t * cc.userData.sp;
+          cc.position.x = Math.cos(a) * cc.userData.r * 1.9;
+          cc.position.z = Math.sin(a) * cc.userData.r * 0.75;
+        });
+      })(cg);
+    }
+    /* 떨어지는 잎 · 벚꽃잎 — 나라마다 조금씩 다르게 */
+    var leafCols = [C.leafO, C.leafR, C.leafG2, C.lemon, '#FFC9DA', '#FFD9E6'];
+    for (var lf = 0; lf < 34; lf++){
+      var leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshLambertMaterial({
+        color: new THREE.Color(leafCols[lf % leafCols.length]), side: THREE.DoubleSide
+      }));
+      var la = pgRnd() * Math.PI * 2, lr = 4 + pgRnd() * 70;
+      leaf.userData.a = la; leaf.userData.r = lr;
+      leaf.userData.y0 = 1.6 + pgRnd() * 6.0;
+      leaf.userData.sp = 0.09 + pgRnd() * 0.12;
+      leaf.userData.ph = pgRnd() * Math.PI * 2;
+      yard.add(leaf);
+      (function(lf2){
+        PG.dyn.push(function(t){
+          var u = lf2.userData;
+          var fall = (t * u.sp + u.ph) % 1;
+          lf2.position.set(
+            Math.cos(u.a) * (u.r + Math.sin(t * 0.6 + u.ph) * 0.6),
+            Math.max(0.05, u.y0 * (1 - fall)),
+            Math.sin(u.a) * (u.r * 0.28 + Math.cos(t * 0.5 + u.ph) * 0.5)
+          );
+          lf2.lookAt(PG.camera.position);
+        });
+      })(leaf);
+    }
+    /* 나비 — 나라마다 한 마리 */
+    NATIONS.forEach(function(nn, bi){
+      var bg = new THREE.Group();
+      var wingA = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.16), new THREE.MeshLambertMaterial({ color: new THREE.Color(bi % 2 ? C.pink : C.lav), side: THREE.DoubleSide }));
+      wingA.position.x = -0.11;
+      var wingB = wingA.clone(); wingB.position.x = 0.11;
+      bg.add(wingA, wingB);
+      bg.userData.ph = bi * 1.7;
+      sc.add(bg);
+      (function(bb, wA, wB, nn, i){
+        PG.dyn.push(function(t){
+          var ph = bb.userData.ph;
+          if (!bb.userData.x0) bb.userData.x0 = nn.cx;
+          bb.position.set(bb.userData.x0 + Math.cos(t * 0.5 + ph) * 7.5, 1.2 + Math.sin(t * 1.6 + ph) * 0.4,
+                          Math.sin(t * 0.5 + ph) * 6.5);
+          bb.rotation.y = Math.cos(t * 0.5 + ph);
+          wA.rotation.y = Math.sin(t * 9 + ph) * 0.8;
+          wB.rotation.y = -Math.sin(t * 9 + ph) * 0.8;
+        });
+      })(bg, wingA, wingB, nn, bi);
+    });
+  }
+  /* ---------- 🌴 야자수 · 🌲 소나무 · 🪨 바위 · ⛄ 눈사람 · ⛱️ 파라솔 ---------- */
+  function pgPalm(x, z, s){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 6.283;
+    var h = 2.3 * s;
+    var trunk = pgCyl(0.1 * s, 0.17 * s, h, '#D8B98A', 0, h / 2, 0, 8);
+    trunk.rotation.z = 0.06; g.add(trunk);
+    for (var i = 0; i < 6; i++){
+      var a = i / 6 * 6.283;
+      var leaf = pgBox(1.0 * s, 0.06, 0.3 * s, i % 2 ? '#7FC56A' : '#98D57E',
+                       Math.cos(a) * 0.45 * s, h + 0.06, Math.sin(a) * 0.45 * s);
+      leaf.rotation.y = -a; leaf.rotation.z = -0.4; g.add(leaf);
+    }
+    [[0.9, 0.8], [-0.85, -0.7]].forEach(function(p){
+      var nut = pgSph(0.1 * s, '#C9A57A', p[0] * s * 0.2, h - 0.1, p[1] * s * 0.2, 7);
+      g.add(nut);
+    });
+    g.userData.tick = function(t){ g.rotation.z = Math.sin(t * 0.7 + x) * 0.012; };
+    return g;
+  }
+  function pgPine(x, z, s, col, snow){
+    s = s || 1;
+    col = col || '#5E9E64';
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 6.283;
+    g.add(pgCyl(0.09 * s, 0.13 * s, 1.0 * s, C.trunk, 0, 0.5 * s, 0, 6));
+    [[0.86, 1.05, 1.35], [0.66, 0.86, 1.95], [0.44, 0.66, 2.5]].forEach(function(p){
+      g.add(pgCone(p[0] * s, p[1] * s, col, 0, p[2] * s, 0, 9));
+      if (snow) g.add(pgCone(p[0] * s * 0.52, p[1] * s * 0.36, '#FFFFFF', 0, (p[2] + p[1] * 0.52) * s, 0, 9));
+    });
+    return g;
+  }
+  function pgRock(x, z, s){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 6.283;
+    var m = pgSph(0.5 * s, C.stone, 0, 0.22 * s, 0, 7);
+    m.scale.set(1.2, 0.72, 0.95); g.add(m);
+    var m2 = pgSph(0.3 * s, C.stone2, 0.42 * s, 0.16 * s, 0.2 * s, 6);
+    m2.scale.set(1, 0.8, 1); g.add(m2);
+    return g;
+  }
+  function pgSnowman(x, z, s){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 6.283;
+    g.add(pgSph(0.42 * s, '#FFFFFF', 0, 0.4 * s, 0, 12));
+    g.add(pgSph(0.31 * s, '#FFFFFF', 0, 0.95 * s, 0, 12));
+    g.add(pgSph(0.22 * s, '#FFFFFF', 0, 1.34 * s, 0, 12));
+    var nose = pgCone(0.07 * s, 0.3 * s, C.coral, 0, 1.34 * s, 0.24 * s, 6);
+    nose.rotation.x = Math.PI / 2; g.add(nose);
+    [-0.09, 0.09].forEach(function(dx){ g.add(pgSph(0.035 * s, '#4A4A4A', dx * s, 1.42 * s, 0.19 * s, 6)); });
+    g.add(pgCyl(0.26 * s, 0.26 * s, 0.06, C.lav, 0, 1.5 * s, 0, 12));
+    g.add(pgCyl(0.16 * s, 0.17 * s, 0.3, C.lav, 0, 1.66 * s, 0, 12));
+    g.add(pgTor(0.24 * s, 0.06, C.coral, 0, 1.16 * s, 0, 6.283));
+    g.add(pgBox(0.34 * s, 0.24 * s, 0.06, C.coral, 0, 1.05 * s, 0.2 * s));
+    return g;
+  }
+  function pgParasol(x, z, col, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    g.add(pgCyl(0.035, 0.035, 1.75, '#C9A57A', 0, 0.87, 0, 6));
+    g.add(pgCone(0.95, 0.4, col, 0, 1.78, 0, 12));
+    for (var i = 0; i < 6; i++){
+      var a = i / 6 * 6.283;
+      g.add(pgCone(0.95, 0.4, i % 2 ? '#FFFFFF' : col, Math.cos(a) * 0.0001, 1.78, Math.sin(a) * 0.0001, 3));
+    }
+    g.add(pgBox(0.62, 0.1, 1.4, '#FFFDF8', 1.05, 0.24, 0.1));
+    g.add(pgBox(0.58, 0.12, 1.3, '#FFE9D8', 1.05, 0.33, 0.1));
+    g.add(pgBox(0.5, 0.06, 0.3, '#BFE6FA', 1.05, 0.42, -0.3));
+    return g;
+  }
+  /* ---------- 🏡 동화마을 나라 ---------- */
+  function pgBuildVillage(yard){
+    /* 분수 광장 — 산책로 북쪽 넓은 마당 */
+    pgFountain(yard, -20, 8.6);
+    pgSolid(-20, 8.6, 1.5);
+    [-0.5, 0.5].forEach(function(k){
+      pgBenchDeco(yard, -20 + k * 4.2, 8.6, k > 0 ? -Math.PI / 2 : Math.PI / 2, C.woodL);
+      pgSolid(-20 + k * 4.2, 8.6, 0.9);
+    });
+    pgFlowerBed(yard, -25.4, 8.6, 1.0, 'tulip');
+    pgFlowerBed(yard, -14.6, 8.6, 1.0, 'hyd');
+    pgSolid(-25.4, 8.6, 1.1); pgSolid(-14.6, 8.6, 1.1);
+    /* 가로등 — 산책로 양옆 */
+    for (var i = 0; i < 10; i++){
+      var lx = -36 + i * 3.8;
+      [-2.9, 2.9].forEach(function(dz){
+        if (lx > -38 && lx < -2) { pgLamp(yard, lx, dz, 1.7); pgSolid(lx, dz, 0.4); }
+      });
+    }
+    /* 꽃길 — 산책로 가장자리 꽃 테두리 */
+    for (var f = 0; f < 22; f++){
+      var fx = -36 + f * 1.55, fz = (f % 2 ? 2.35 : -2.35);
+      var col = [C.pink, C.lemon, C.white, C.lav, C.coral][f % 5];
+      yard.add(pgSph(0.1, col, fx, 0.2, fz, 6));
+      if (f % 2) yard.add(pgCyl(0.012, 0.014, 0.22, C.leafG2, fx + 0.18, 0.11, fz, 5));
+    }
+    /* 벚꽃나무 · 잔디 마당 둘레 */
+    [[-34, -13.6], [-28.5, -14.2], [-16.5, -14.6], [-8, -13.8], [-33, 14.4],
+     [-26, 14.8], [-13, 14.2], [-6.5, 14.6]].forEach(function(p, k, arr){
+      yard.add(pgCherry(p[0], p[1], 1.1 + (k % 3) * 0.12));
+      pgSolid(p[0], p[1], 0.7);
+    });
+    [[-31, -6.5], [-9.5, -6.2], [-31.5, 2.6], [-8.5, 3.0]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.7)){ pgShrub(yard, p[0], p[1], 1.0, C.leafG2); pgSolid(p[0], p[1], 0.55); }
+    });
+    /* 파스텔 울타리 화단 — 마을 지구 경계 표시 */
+    for (var e = 0; e < 8; e++){
+      yard.add(pgBox(0.5, 0.34, 0.16, e % 2 ? '#FFD9E6' : '#E9F3E2', -34.4 + e * 4.4, 0.17, e % 2 ? -17.2 : 17.2));
+    }
+  }
+  /* ---------- 🏖️ 바닷가 나라 ---------- */
+  function pgBuildBeach(yard){
+    /* 데크 기둥 + 난간 (바다 쪽) */
+    for (var d = 0; d < 7; d++){
+      [-1.7, 1.7].forEach(function(dx){
+        yard.add(pgCyl(0.1, 0.12, 1.0, '#B08A61', 14 + dx, 0.42, -1.5 - d * 2.4, 6));
+      });
+    }
+    [-1.76, 1.76].forEach(function(dx){
+      yard.add(pgBox(0.09, 0.09, 17.0, '#C79A6B', 14 + dx, 0.86, -8.5));
+      for (var k = 0; k < 9; k++) yard.add(pgCyl(0.05, 0.05, 0.5, '#C79A6B', 14 + dx, 0.62, -0.3 - k * 2.0, 5));
+    });
+    /* 야자수 */
+    [[1.6, -11.4, 1.1], [27.4, -10.8, 1.15], [3.4, 12.6, 1.0], [22.2, 15.4, 1.05]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.8)){ yard.add(pgPalm(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.6); }
+    });
+    /* 파라솔 · 선베드 */
+    [[5.5, -7.4, C.pink, 0.3], [23.2, -5.6, C.sky, -0.4], [8.6, 9.8, C.lemon, 0.7], [25.6, 8.4, C.mint, -0.2]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.1)){ yard.add(pgParasol(p[0], p[1], p[2], p[3])); pgSolid(p[0], p[1], 1.0); }
+    });
+    /* 조개 · 불가사리 · 모래성 */
+    for (var s = 0; s < 16; s++){
+      var sx = -1 + pgRnd() * 30, sz = -12.5 + pgRnd() * 34;
+      if (pgWater(sx, sz) || Math.abs(sz) < 2.6) continue;
+      var shell = pgSph(0.1 + pgRnd() * 0.06, [C.white, '#FFE3EF', '#FFEFC8', '#F6C9B8'][s % 4], sx, 0.06, sz, 7);
+      shell.scale.y = 0.55; yard.add(shell);
+    }
+    /* 모래성 */
+    var sc = new THREE.Group(); sc.position.set(19.5, 0, -9.6); yard.add(sc);
+    sc.add(pgCyl(0.5, 0.62, 0.36, '#E8CE9E', 0, 0.18, 0, 10));
+    sc.add(pgCyl(0.3, 0.36, 0.44, '#EBD3A4', 0, 0.5, 0, 10));
+    sc.add(pgCone(0.3, 0.34, '#F2DDB4', 0, 0.86, 0, 10));
+    [[0.62, 0.3], [-0.62, -0.2]].forEach(function(p){ sc.add(pgCyl(0.16, 0.2, 0.5, '#E8CE9E', p[0], 0.25, p[1], 8)); });
+    pgSolid(19.5, -9.6, 0.9);
+    /* 작은 나룻배 */
+    var boat = new THREE.Group(); boat.position.set(25.5, 0.16, -11.2); boat.rotation.y = 0.5; yard.add(boat);
+    boat.add(pgBox(1.0, 0.28, 2.2, '#FFFFFF', 0, 0.1, 0));
+    boat.add(pgBox(0.86, 0.1, 2.0, '#E8C9A0', 0, 0.22, 0));
+    boat.add(pgBox(1.02, 0.08, 2.22, C.coral, 0, 0.04, 0));
+    pgSolid(25.5, -11.2, 1.0);
+    /* 해변 표지판 */
+    yard.add(pgCyl(0.07, 0.09, 1.8, C.woodD, 9.2, 0.9, -12.2, 6));
+    yard.add(pgBox(1.3, 0.42, 0.1, '#FFF6E4', 9.2, 1.72, -12.2));
+    pgSolid(9.2, -12.2, 0.6);
+  }
+  /* ---------- 🌲 숲속 캠핑 나라 ---------- */
+  function pgBuildForest(yard){
+    /* 숲길 옆 바위 · 그루터기 */
+    [[33.5, -16.5, 1.0], [52, -18.5, 1.2], [36.5, 18.2, 0.9], [54.5, 10.5, 1.1]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.1)){ yard.add(pgRock(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.8); }
+    });
+    /* 캠프파이어 자리 */
+    var cg = new THREE.Group(); cg.position.set(36, 0, -9); yard.add(cg);
+    for (var i = 0; i < 9; i++){
+      var a = i / 9 * 6.283;
+      cg.add(pgSph(0.16, i % 2 ? C.stone : C.stone2, Math.cos(a) * 0.78, 0.1, Math.sin(a) * 0.78, 7));
+    }
+    [0, 1.05, 2.1, 3.14].forEach(function(a){
+      var log = pgCyl(0.09, 0.09, 1.1, '#9A7148', Math.cos(a) * 0.3, 0.1, Math.sin(a) * 0.3, 6);
+      log.rotation.z = Math.PI / 2; log.rotation.y = a; cg.add(log);
+    });
+    var flame = new THREE.Group(); flame.position.y = 0.18; cg.add(flame);
+    for (var f2 = 0; f2 < 3; f2++){
+      var fc = pgCone(0.22 - f2 * 0.05, 0.6 - f2 * 0.12, f2 === 1 ? '#FFD36B' : '#FF9F5A', 0, 0.3 - f2 * 0.08, 0, 7);
+      flame.add(fc);
+    }
+    var fl = new THREE.PointLight(0xFFB066, 0.9, 9);
+    fl.position.set(36, 1.1, -9); yard.add(fl);
+    PG.dyn.push(function(t){
+      var s = 0.85 + Math.sin(t * 7.3) * 0.12 + Math.sin(t * 3.1) * 0.06;
+      flame.scale.set(1, s, 1); fl.intensity = 0.75 + Math.sin(t * 6.1) * 0.16;
+    });
+    pgSolid(36, -9, 1.2);
+    /* 통나무 의자 */
+    [[38.4, -9.6, 0.4], [34.0, -7.4, 2.4]].forEach(function(p){
+      var st = pgCyl(0.24, 0.24, 0.9, '#A9814F', p[0], 0.24, p[1], 8);
+      st.rotation.z = Math.PI / 2; st.rotation.y = p[2]; yard.add(st);
+      pgSolid(p[0], p[1], 0.6);
+    });
+    /* 개울 다리 */
+    var br = new THREE.Group(); br.position.set(44, 0, STREAM.z); yard.add(br);
+    br.add(pgBox(2.3, 0.1, 3.6, '#C9A57A', 0, 0.34, 0));
+    [-1.0, 1.0].forEach(function(dx){
+      br.add(pgBox(0.1, 0.12, 3.6, '#B08A61', dx, 0.72, 0));
+      [-1.6, 0, 1.6].forEach(function(dz){ br.add(pgCyl(0.06, 0.07, 0.75, '#B08A61', dx, 0.36, dz, 5)); });
+    });
+    br.add(pgBox(2.5, 0.08, 0.4, '#B08A61', 0, 0.06, 1.95));
+    br.add(pgBox(2.5, 0.08, 0.4, '#B08A61', 0, 0.06, -1.95));
+    pgSolid(44, STREAM.z, 1.4);
+    /* 개울 돌 · 수초 */
+    for (var r2 = 0; r2 < 10; r2++){
+      var rx = STREAM.x0 + pgRnd() * (STREAM.x1 - STREAM.x0);
+      var rz = STREAM.z + (pgRnd() - 0.5) * STREAM.w * 0.8;
+      var rk = pgSph(0.14 + pgRnd() * 0.12, r2 % 2 ? C.stone : C.stone2, rx, 0.09, rz, 7);
+      rk.scale.y = 0.6; yard.add(rk);
+    }
+    /* 반딧불이 */
+    for (var ff = 0; ff < 10; ff++){
+      var fly = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5),
+        new THREE.MeshBasicMaterial({ color: 0xFFF3A8, transparent: true, opacity: 0.85 }));
+      fly.userData.ph = pgRnd() * 6.283;
+      fly.userData.x0 = 32 + pgRnd() * 24; fly.userData.z0 = -18 + pgRnd() * 32;
+      yard.add(fly);
+      (function(m){
+        PG.dyn.push(function(t){
+          var ph = m.userData.ph;
+          m.position.set(m.userData.x0 + Math.sin(t * 0.6 + ph) * 1.6,
+                         0.7 + Math.sin(t * 1.3 + ph) * 0.35,
+                         m.userData.z0 + Math.cos(t * 0.5 + ph) * 1.6);
+          m.material.opacity = 0.35 + 0.5 * (0.5 + 0.5 * Math.sin(t * 2.2 + ph));
+        });
+      })(fly);
+    }
+  }
+  /* ---------- ❄️ 겨울·별빛 나라 ---------- */
+  function pgBuildWinter(yard){
+    /* 별빛 아치 */
+    var arc = new THREE.Group(); arc.position.set(70, 0, -6.5); yard.add(arc);
+    [[-1.6, 0], [1.6, 0]].forEach(function(p){
+      arc.add(pgCyl(0.11, 0.14, 3.1, '#E6F5FF', p[0], 1.55, 0, 10));
+    });
+    var top = pgTor(1.6, 0.12, '#BFE6FA', 0, 3.0, 0, Math.PI);
+    arc.add(top);
+    for (var s = 0; s < 7; s++){
+      var a = s / 6 * Math.PI;
+      var star = pgSph(0.11, s % 2 ? C.lemon : '#FFFFFF', Math.cos(a) * 1.82, 3.0 + Math.sin(a) * 1.82, 0, 6);
+      star.material = new THREE.MeshLambertMaterial({ color: 0xFFF6D0, emissive: new THREE.Color(0xFFE27A), emissiveIntensity: 0.7 });
+      arc.add(star);
+    }
+    pgSolid(70, -6.5, 1.7);
+    /* 눈사람 */
+    [[61.5, -7.5, 1.0], [66.5, 16.5, 0.9], [81, 4.5, 0.95]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.0)){ yard.add(pgSnowman(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.8); }
+    });
+    /* 얼음 결정 · 눈더미 */
+    for (var i = 0; i < 10; i++){
+      var cx2 = 59 + pgRnd() * 26, cz2 = (pgRnd() - 0.5) * 42;
+      if (!pgPropFree(cx2, cz2, 0.9)) continue;
+      var pile = pgSph(0.55 + pgRnd() * 0.4, '#FFFFFF', cx2, 0.1, cz2, 9);
+      pile.scale.set(1.3, 0.34, 1.1); yard.add(pile);
+      pgSolid(cx2, cz2, 0.55);
+    }
+    for (var c2 = 0; c2 < 5; c2++){
+      var ix = 62 + c2 * 5.2, iz = -12 - (c2 % 2) * 4;
+      var cry = pgCone(0.22, 1.0 + (c2 % 3) * 0.3, c2 % 2 ? '#CFEBFF' : '#EAF7FF', ix, 0.55, iz, 5);
+      cry.material = new THREE.MeshLambertMaterial({ color: 0xDDF2FF, transparent: true, opacity: 0.9 });
+      yard.add(cry);
+      pgSolid(ix, iz, 0.45);
+    }
+    /* 눈 내리기 */
+    var flakes = [];
+    for (var f = 0; f < 26; f++){
+      var fl = new THREE.Mesh(new THREE.SphereGeometry(0.05 + pgRnd() * 0.03, 5, 4),
+        new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.9 }));
+      fl.userData = { x0: 58 + pgRnd() * 27, z0: (pgRnd() - 0.5) * 45,
+                      y0: 2 + pgRnd() * 8, sp: 0.35 + pgRnd() * 0.3, ph: pgRnd() * 6.283 };
+      yard.add(fl); flakes.push(fl);
+    }
+    PG.dyn.push(function(t){
+      flakes.forEach(function(m){
+        var u = m.userData;
+        var fall = (t * u.sp * 0.12 + u.ph) % 1;
+        m.position.set(u.x0 + Math.sin(t * 0.7 + u.ph) * 0.5, Math.max(0.06, u.y0 * (1 - fall)), u.z0);
+      });
+    });
+  }
+
   function pgBuildGarden(sc){
     var yard = new THREE.Group();
     sc.add(yard);
     PG.yard = yard;
+    PG.solids = [];
 
-    /* 1) 섬 — 잔디 원판 + 흙 받침 (디오라마) */
-    pgAt(yard, pgMesh(new THREE.CylinderGeometry(ISLAND_R, ISLAND_R + 0.06, 0.55, 96), C.grass, 0, -0.28, 0));
-    pgAt(yard, pgMesh(new THREE.CylinderGeometry(ISLAND_R + 0.06, ISLAND_R - 0.25, 1.6, 96), C.earth, 0, -1.35, 0));
-    pgAt(yard, pgMesh(new THREE.CylinderGeometry(ISLAND_R - 0.25, ISLAND_R - 0.8, 0.6, 96), C.earth2, 0, -2.45, 0));
+    pgWorldGround(yard);          /* 🌍 대륙 슬라브 + 나라별 바닥 */
+    pgWorldRoads(yard);           /* 🛤 메인 산책로 + 나라별 길 */
+    pgWorldGates(yard);           /* 🏛 나라 입구 게이트 아치 */
+    pgBuildVillage(yard);         /* 🏡 동화마을 나라 */
+    pgBuildBeach(yard);           /* 🏖️ 바닷가 나라 */
+    pgBuildForest(yard);          /* 🌲 숲속 캠핑 나라 */
+    pgBuildWinter(yard);          /* ❄️ 겨울·별빛 나라 */
 
+    /* 🎡 놀이공원 나라 — 기존 원형 파크를 통째로 PARK 중심으로 옮긴다 */
+    var parkG = new THREE.Group();
+    parkG.position.set(PARK.x, 0, PARK.z);
+    yard.add(parkG);
+    pgBuildPark(parkG);
+
+    pgWorldSky(sc, yard);         /* ☁️ 구름 · 🍃 잎 · 🦋 나비 */
+    pgWorldFence(yard);           /* 🪵 외곽 통나무 울타리 */
+    pgWorldSigns(yard);           /* 🪧 나라 이름 표지판 */
+  }
+  function pgBuildPark(yard){
     /* 2) 길 — 중앙 광장 · 순환 산책로 · 방사형 산책길 · 놀이기구 입구 길 */
     yard.add(pgPathDisc(ROAD.plaza, 0.016));
     var pEdge = pgMesh(new THREE.RingGeometry(ROAD.plaza, ROAD.plaza + 0.2, 120), '#FFDCC8', 0, 0.03, 0);
@@ -10726,7 +11458,7 @@ async function finishBoot(){
     });
     /* 순환로 → 대형 놀이기구 입구 */
     [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].forEach(function(d){
-      yard.add(pgPathSpur(d * Math.PI / 180, ROAD.prom + 0.32, 10.5, 0.5, 0.024));
+      yard.add(pgPathSpur(d * Math.PI / 180, ROAD.prom + 0.32, ROAD.outer - 0.5, 0.5, 0.024));
     });
     /* 산책길 가장자리 꽃 테두리 */
     [18, 90, 162, 234, 306].forEach(function(d, k){
@@ -10743,8 +11475,8 @@ async function finishBoot(){
     var promEdge = pgMesh(new THREE.RingGeometry(ROAD.prom + 0.35, ROAD.prom + 0.42, 128), '#9BD37C', 0, 0.008, 0);
     promEdge.rotation.x = -Math.PI / 2; yard.add(promEdge);
 
-    /* 3) 광장 소품 — 연못(나무 아치 다리) · 분수 */
-    pgPond(yard);
+    /* 3) 광장 소품 — 연못(나무 아치 다리) · 분수 (파크 로컬 좌표) */
+    pgPond(yard, POND.x - PARK.x, POND.z - PARK.z);
     pgFountain(yard, 1.8, -0.15);
 
     /* 4) 꽃밭 · 벤치 · 가로등 · 가랜드 */
@@ -10769,14 +11501,14 @@ async function finishBoot(){
     /* 순환 산책로 가로등 · 벤치 (범퍼카 경기장 자리는 비운다) */
     [0, 45, 90, 135, 180, 225, 270, 315].forEach(function(d){
       var a = (d + 33.75) * Math.PI / 180;
-      var lx = Math.cos(a) * 9.92, lz = Math.sin(a) * 9.92;
-      if (!pgArenaFree(lx, lz, 0.18)) return;
+      var lx = Math.cos(a) * 12.55, lz = Math.sin(a) * 12.55;
+      if (!pgArenaFreeL(lx, lz, 0.18)) return;
       pgLamp(yard, lx, lz, 1.7);
     });
     [0, 45, 90, 135, 180, 225, 270, 315].forEach(function(d){
       var a = (d + 11.25) * Math.PI / 180;
-      var bx2 = Math.cos(a) * 9.95, bz2 = Math.sin(a) * 9.95;
-      if (!pgArenaFree(bx2, bz2, 0.8)) return;
+      var bx2 = Math.cos(a) * 12.62, bz2 = Math.sin(a) * 12.62;
+      if (!pgArenaFreeL(bx2, bz2, 0.8)) return;
       pgBenchDeco(yard, bx2, bz2, Math.atan2(-Math.cos(a), -Math.sin(a)), '#F3E3C8');
     });
 
@@ -10784,17 +11516,17 @@ async function finishBoot(){
 
     /* 6) 입구 아치 · 수레 */
     pgArch(yard, 0, 4.72, Math.PI);
-    pgCart(yard, Math.cos(45 * Math.PI / 180) * 10.45, Math.sin(45 * Math.PI / 180) * 10.45, -45 * Math.PI / 180, 'balloon');
-    pgCart(yard, Math.cos(225 * Math.PI / 180) * 10.45, Math.sin(225 * Math.PI / 180) * 10.45, -225 * Math.PI / 180, 'candy');
-    pgCart(yard, Math.cos(315 * Math.PI / 180) * 10.45, Math.sin(315 * Math.PI / 180) * 10.45, -315 * Math.PI / 180, 'pop');
+    pgCart(yard, Math.cos(45 * Math.PI / 180) * 12.6, Math.sin(45 * Math.PI / 180) * 12.6, -45 * Math.PI / 180, 'balloon');
+    pgCart(yard, Math.cos(225 * Math.PI / 180) * 12.6, Math.sin(225 * Math.PI / 180) * 12.6, -225 * Math.PI / 180, 'candy');
+    pgCart(yard, Math.cos(315 * Math.PI / 180) * 12.6, Math.sin(315 * Math.PI / 180) * 12.6, -315 * Math.PI / 180, 'pop');
 
     /* 7) 🏡 오두막 · 🧁 디저트 카페 */
-    yard.add(pgCottage(Math.cos(Math.PI / 2) * 12.15, Math.sin(Math.PI / 2) * 12.15, Math.PI));
-    yard.add(pgCafe(Math.cos(-Math.PI / 2) * 12.15, Math.sin(-Math.PI / 2) * 12.15, 0));
+    yard.add(pgCottage(0, 18.6, Math.PI));
+    yard.add(pgCafe(0, -18.6, 0));
 
-    /* 8) 소풍 돗자리 */
+    /* 8) 소풍 돗자리 — 파크 바깥 잔디 */
     var mat2 = new THREE.Group();
-    mat2.position.set(-6.9, 0, 6.2);
+    mat2.position.set(-16.5, 0, -13.5);
     mat2.rotation.y = -0.6;
     var cvs = document.createElement('canvas'); cvs.width = 16; cvs.height = 16;
     var cg2 = cvs.getContext('2d');
@@ -10812,87 +11544,6 @@ async function finishBoot(){
     mat2.add(pgCyl(0.06, 0.05, 0.09, C.white, -0.3, 0.06, -0.35, 8));
     yard.add(mat2);
 
-    /* 9) 구름 */
-    for (var cl = 0; cl < 6; cl++){
-      var cg = new THREE.Group();
-      var ca = (cl / 6) * Math.PI * 2 + 0.5;
-      cg.position.set(Math.cos(ca) * (27 + cl * 2), 8.5 + (cl % 3) * 1.4, Math.sin(ca) * (27 + cl * 2));
-      [[0, 0, 0, 1], [0.85, -0.12, 0.1, 0.75], [-0.8, -0.1, -0.1, 0.7], [0.3, 0.35, 0, 0.62]].forEach(function(p){
-        var puff = pgSph(0.75 * p[3], C.white, p[0], p[1], p[2], 10);
-        puff.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, emissive: new THREE.Color(0xEFF8FF), emissiveIntensity: 0.25 });
-        cg.add(puff);
-      });
-      cg.userData.a = ca; cg.userData.sp = 0.008 + cl * 0.0015; cg.userData.r = 27 + cl * 2;
-      yard.add(cg);
-      (function(cc){
-        PG.dyn.push(function(t){
-          cc.position.x = Math.cos(cc.userData.a + t * cc.userData.sp) * cc.userData.r;
-          cc.position.z = Math.sin(cc.userData.a + t * cc.userData.sp) * cc.userData.r;
-        });
-      })(cg);
-    }
-
-    /* 10) 떨어지는 잎 · 벚꽃잎 */
-    var leafCols = [C.leafO, C.leafR, C.leafG2, C.lemon, '#FFC9DA', '#FFD9E6'];
-    for (var lf = 0; lf < 22; lf++){
-      var leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshLambertMaterial({
-        color: new THREE.Color(leafCols[lf % leafCols.length]), side: THREE.DoubleSide
-      }));
-      var la = Math.random() * Math.PI * 2, lr = 2.0 + Math.random() * 10.0;
-      leaf.userData.a = la; leaf.userData.r = lr;
-      leaf.userData.y0 = 1.6 + Math.random() * 5.0;
-      leaf.userData.sp = 0.09 + Math.random() * 0.12;
-      leaf.userData.ph = Math.random() * Math.PI * 2;
-      yard.add(leaf);
-      (function(lf2){
-        PG.dyn.push(function(t){
-          var u = lf2.userData;
-          var fall = (t * u.sp + u.ph) % 1;
-          lf2.position.set(
-            Math.cos(u.a + t * 0.15) * (u.r + Math.sin(t * 0.6 + u.ph) * 0.4),
-            Math.max(0.05, u.y0 * (1 - fall)),
-            Math.sin(u.a + t * 0.15) * (u.r + Math.cos(t * 0.5 + u.ph) * 0.4)
-          );
-          lf2.lookAt(PG.camera.position);
-        });
-      })(leaf);
-    }
-    /* 11) 나비 */
-    for (var bf = 0; bf < 3; bf++){
-      var bg = new THREE.Group();
-      var wingA = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.16), new THREE.MeshLambertMaterial({ color: new THREE.Color(bf ? C.pink : C.lav), side: THREE.DoubleSide }));
-      wingA.position.x = -0.11;
-      var wingB = wingA.clone(); wingB.position.x = 0.11;
-      bg.add(wingA, wingB);
-      bg.userData.ph = bf * 2.4;
-      sc.add(bg);
-      (function(bb, wA, wB){
-        PG.dyn.push(function(t){
-          var ph = bb.userData.ph;
-          bb.position.set(Math.cos(t * 0.5 + ph) * 5.2, 1.2 + Math.sin(t * 1.6 + ph) * 0.4, Math.sin(t * 0.5 + ph) * 4.8);
-          bb.rotation.y = Math.cos(t * 0.5 + ph);
-          wA.rotation.y = Math.sin(t * 9 + ph) * 0.8;
-          wB.rotation.y = -Math.sin(t * 9 + ph) * 0.8;
-        });
-      })(bg, wingA, wingB);
-    }
-    /* 12) 외곽 통나무 울타리 — ISLAND_R에 연동 (범퍼카 경기장 바깥 테두리 17.11을 침범하지 않게) */
-    var fenceR = ISLAND_R - 0.2;
-    var fposts = 60;
-    PG.fenceR = fenceR;
-    for (var i2 = 0; i2 < fposts; i2++){
-      var a2 = (i2 / fposts) * Math.PI * 2;
-      var px2 = Math.cos(a2) * fenceR, pz2 = Math.sin(a2) * fenceR;
-      var post = pgCyl(0.09, 0.11, 0.8, C.wood, px2, 0.4, pz2, 6);
-      post.rotation.y = a2;
-      yard.add(post);
-      yard.add(pgCone(0.12, 0.15, C.woodL, px2, 0.86, pz2, 6));
-    }
-    [0.3, 0.6].forEach(function(hy){
-      var rail = pgTor(fenceR, 0.05, C.woodL, 0, hy, 0);
-      rail.rotation.x = -Math.PI / 2;
-      yard.add(rail);
-    });
   }
   /* 5) 나무 · 벚꽃 · 덤불 — ⚠️ 반드시 pgBuildRides() 뒤에 호출한다.
      먼저 부르면 PG.rideList가 비어 있어 pgFreeSpot이 모든 자리를 통과시켜
@@ -10908,36 +11559,86 @@ async function finishBoot(){
   /* 🚗 범퍼카 경기장(바닥 3.45 + 핑크 패드·테두리 3.82) 바깥인지 확인 — 놀이기구를 세우기 전에도 쓸 수 있다 */
   function pgArenaFree(x, z, m){
     var a = BUMPER_A * Math.PI / 180;
-    var ax = Math.cos(a) * BUMPER_RR, az = Math.sin(a) * BUMPER_RR;
-    return Math.hypot(x - ax, z - az) > BUMPER_EDGE + (m || 0);
+    var ax = PARK.x + Math.cos(a) * BUMPER_RR, az = PARK.z + Math.sin(a) * BUMPER_RR;
+    return Math.sqrt(Math.pow(x - ax, 2) + Math.pow(z - az, 2)) > BUMPER_EDGE + (m || 0);
   }
+  /* 파크 로컬 좌표용 (공원 소품 배치 때) */
+  function pgArenaFreeL(lx, lz, m){ return pgArenaFree(PARK.x + lx, PARK.z + lz, m); }
+  /* 5) 나무 · 벚꽃 · 덤불 — ⚠️ 반드시 pgBuildRides() 뒤에 호출한다.
+     먼저 부르면 PG.rideList가 비어 있어 pgFreeSpot이 모든 자리를 통과시켜
+     범퍼카 경기장 바닥 안에 덤불이 박히게 된다. */
   function pgBuildTrees(yard){
     yard = yard || PG.yard || PG.scene;
-    [[45, 13.95, 1.25, 'g'], [135, 13.95, 1.3, 'g'], [225, 13.95, 1.25, 'o'], [315, 13.95, 1.3, 'g']].forEach(function(t){
+    /* ① 🎡 놀이공원 — 순환로 바깥 둘레 큰 나무 · 벚꽃 · 덤불 */
+    [[45, 20.6, 1.3, 'g'], [135, 20.6, 1.35, 'g'], [225, 20.6, 1.3, 'o'], [315, 20.6, 1.35, 'g'],
+     [95, 21.4, 1.25, 'g'], [265, 21.2, 1.3, 'o'], [160, 21.6, 1.2, 'g'], [20, 21.4, 1.25, 'g'],
+     [200, 22.0, 1.2, 'o'], [340, 21.8, 1.25, 'g']].forEach(function(t){
       var a = t[0] * Math.PI / 180;
-      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
-      if (!pgFreeSpot(x, z, 0.9)) return;
+      var x = PARK.x + Math.cos(a) * t[1], z = PARK.z + Math.sin(a) * t[1];
+      if (!pgPropFree(x, z, 0.9)) return;
       var col = t[3] === 'o' ? C.leafO : C.leafG;
       yard.add(pgTree(x, z, t[2], col, t[3] === 'o' ? C.leafO : C.leafG2));
+      pgSolid(x, z, 0.6);
     });
-    [[0, 15.9, 1.25], [180, 15.9, 1.3]].forEach(function(t){
+    [[150, 21.8, 1.3], [30, 21.9, 1.25]].forEach(function(t){
       var a = t[0] * Math.PI / 180;
-      var x = Math.cos(a) * t[1], z = Math.sin(a) * t[1];
-      if (!pgFreeSpot(x, z, 0.9)) return;
+      var x = PARK.x + Math.cos(a) * t[1], z = PARK.z + Math.sin(a) * t[1];
+      if (!pgPropFree(x, z, 0.9)) return;
       yard.add(pgCherry(x, z, t[2]));
+      pgSolid(x, z, 0.55);
     });
-    [[22.5, 14.3], [67.5, 14.3], [112.5, 14.3], [157.5, 14.3], [202.5, 14.3],
-     [247.5, 14.3], [292.5, 14.3], [337.5, 14.3]].forEach(function(t, i){
+    /* 큰 놀이기구 사이 덤불 */
+    [[22.5, 18.6], [67.5, 18.6], [112.5, 18.6], [157.5, 18.6], [202.5, 18.6],
+     [247.5, 18.6], [292.5, 18.6], [337.5, 18.6]].forEach(function(t, i){
       var a = t[0] * Math.PI / 180;
-      /* 큰 놀이기구 바로 뒤는 비어 있으니, 막히면 조금 바깥으로 밀어 덤불을 살린다 */
       var placed = false;
-      [t[1], 15.3, 15.9].forEach(function(rr2){
+      [t[1], 19.8, 20.6].forEach(function(rr2){
         if (placed) return;
-        var x = Math.cos(a) * rr2, z = Math.sin(a) * rr2;
-        if (!pgFreeSpot(x, z, 0.7) || !pgArenaFree(x, z, 0.8)) return;
-        pgShrub(yard, x, z, 0.95 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
+        var x = PARK.x + Math.cos(a) * rr2, z = PARK.z + Math.sin(a) * rr2;
+        if (!pgPropFree(x, z, 0.8)) return;
+        pgShrub(yard, x, z, 1.0 + (i % 3) * 0.15, i % 2 ? C.leafG2 : C.leafG);
+        pgSolid(x, z, 0.5);
         placed = true;
       });
+    });
+    /* ② 🏡 동화마을 — 마을 둘레 벚꽃 · 잔디 꽃나무 */
+    for (var v = 0; v < 10; v++){
+      var vx = -36 + v * 3.4 + pgRnd() * 1.2;
+      var vz = (v % 2 ? 1 : -1) * (18.2 + pgRnd() * 3.4);
+      if (!pgPropFree(vx, vz, 1.0)) continue;
+      if (v % 2) yard.add(pgCherry(vx, vz, 1.0 + pgRnd() * 0.25));
+      else yard.add(pgTree(vx, vz, 1.05, C.leafG, C.leafG2));
+      pgSolid(vx, vz, 0.6);
+    }
+    /* ③ 🏖️ 바닷가 — 모래 언덕 위 잔잔한 풀포기 */
+    for (var b = 0; b < 8; b++){
+      var bx = -1 + pgRnd() * 30, bz = -12 + pgRnd() * 34;
+      if (!pgPropFree(bx, bz, 0.9)) continue;
+      pgShrub(yard, bx, bz, 0.75 + pgRnd() * 0.2, '#B9D98C');
+      pgSolid(bx, bz, 0.45);
+    }
+    /* ④ 🌲 숲속캠핑 — 빽빽한 소나무 · 가을 단풍나무 */
+    var forestSpots = [[33, -20], [39, -18], [48, -20], [55, -16], [31, -11], [53, -6],
+                       [32, -2], [56, 2], [34, 6], [51, 8], [37, 11], [55, 18],
+                       [31, 18], [39, 20], [47, 20], [52, 16], [30.6, -16], [45, -16]];
+    forestSpots.forEach(function(t, i){
+      var jx = t[0] + (pgRnd() - 0.5) * 1.6, jz = t[1] + (pgRnd() - 0.5) * 1.6;
+      if (Math.abs(jx - 44) < 2.4) return;                        /* 숲길은 비운다 */
+      if (!pgPropFree(jx, jz, 1.1)) return;
+      if (i % 3 === 1) yard.add(pgTree(jx, jz, 1.1 + pgRnd() * 0.2, C.leafO, C.leafO));
+      else yard.add(pgPine(jx, jz, 1.1 + pgRnd() * 0.4, i % 2 ? '#4F8F58' : '#5E9E64', false));
+      pgSolid(jx, jz, 0.65);
+    });
+    /* ⑤ ❄️ 겨울나라 — 파스텔 소나무 */
+    var winterSpots = [[60, -18], [66, -19], [76, -18], [83, -12], [61, -2], [80, -3],
+                       [63, 4], [82, 6], [59.5, 12], [67, 18], [74, 19], [82, 16],
+                       [78, 12], [60, -8], [84, -18], [70, -13]];
+    winterSpots.forEach(function(t, i){
+      var jx = t[0] + (pgRnd() - 0.5) * 1.4, jz = t[1] + (pgRnd() - 0.5) * 1.4;
+      if (!pgPropFree(jx, jz, 0.9)) return;
+      var col = i % 3 === 0 ? '#A9CDBB' : (i % 3 === 1 ? '#E5C9DA' : '#C4DED6');
+      yard.add(pgPine(jx, jz, 1.0 + pgRnd() * 0.35, col, true));
+      pgSolid(jx, jz, 0.55);
     });
   }
   function pgTree(x, z, s, col, col2){
@@ -10976,11 +11677,11 @@ async function finishBoot(){
                  'sand', 'rope', 'horse', 'ladder', 'swing'];
     inner.forEach(function(k, ii){
       var a = (ii / inner.length) * Math.PI * 2;
-      var x = Math.cos(a) * ROAD.inner, z = Math.sin(a) * ROAD.inner;
+      var x = PARK.x + Math.cos(a) * ROAD.inner, z = PARK.z + Math.sin(a) * ROAD.inner;
       pgBuildOne(k);
       var g = PG.rides[k].g;
       g.position.set(x, 0, z);
-      g.rotation.y = Math.atan2(-x, -z);
+      g.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a));
       g.updateMatrixWorld(true);
     });
     /* 바깥 — 놀이공원 대형 기구 8종 */
@@ -10988,12 +11689,12 @@ async function finishBoot(){
                   teacup:202.5, drop:247.5, balloon:292.5, bumper:337.5 };
     Object.keys(outer).forEach(function(k){
       var a = outer[k] * Math.PI / 180;
-      var rr = (k === 'bumper') ? BUMPER_RR : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 (13.45±3.82 = 9.63~17.27) */
-      var x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+      var rr = (k === 'bumper') ? BUMPER_RR : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 */
+      var x = PARK.x + Math.cos(a) * rr, z = PARK.z + Math.sin(a) * rr;
       pgBuildOne(k);
       var g = PG.rides[k].g;
       g.position.set(x, 0, z);
-      g.rotation.y = Math.atan2(-x, -z);
+      g.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a));
       g.updateMatrixWorld(true);
     });
   /* ---------- 잔디 위 꽃 · 풀 포기 (빈草地 채우기) ---------- */
@@ -11005,23 +11706,23 @@ async function finishBoot(){
       var g = PG.rides[k].g;
       return [g.position.x, g.position.z, (g.userData.radius || 2) + 0.45];
     });
-    var bld = [[12.1, 0, 2.4], [-12.1, 0, 2.4]];
+    var bld = [[PARK.x, 18.6, 2.6], [PARK.x, -18.6, 2.6]];
     var cols = [C.pink, C.lemon, C.white, C.lav, C.coral, C.sky, C.mint];
     var made = 0, tries = 0;
-    while (made < 110 && tries < 900){
+    while (made < 150 && tries < 1200){
       tries++;
-      var r = 4.9 + Math.random() * 11.6;
-      var a = Math.random() * Math.PI * 2;
-      var x = Math.cos(a) * r, z = Math.sin(a) * r;
+      var r = 5.4 + pgRnd() * 16.4;
+      var a = pgRnd() * Math.PI * 2;
+      var x = PARK.x + Math.cos(a) * r, z = PARK.z + Math.sin(a) * r;
       if (Math.abs(r - ROAD.prom) < 0.62) continue;
       var ok = true, i;
       for (i = 0; i < avenues.length && ok; i++){
         var d1 = Math.abs(((a * 180 / Math.PI - avenues[i]) % 360 + 540) % 360 - 180);
-        if (r < 9.4 && r > 3.9 && (d1 < 180 && Math.sin(d1 * Math.PI / 180) * r < 0.5)) ok = false;
+        if (r < 11.9 && r > 4.4 && (d1 < 180 && Math.sin(d1 * Math.PI / 180) * r < 0.5)) ok = false;
       }
       for (i = 0; i < entr.length && ok; i++){
         var d2 = Math.abs(((a * 180 / Math.PI - entr[i]) % 360 + 540) % 360 - 180);
-        if (r > 9.0 && r < 10.7 && Math.sin(d2 * Math.PI / 180) * r < 0.45) ok = false;
+        if (r > 11.7 && r < 15.1 && Math.sin(d2 * Math.PI / 180) * r < 0.45) ok = false;
       }
       for (i = 0; i < ridePos.length && ok; i++){
         if (Math.hypot(x - ridePos[i][0], z - ridePos[i][1]) < ridePos[i][2]) ok = false;
@@ -11061,8 +11762,8 @@ async function finishBoot(){
     /* 벤치 — 산책로 옆 그늘 */
     pgBuildOne('bench');
     var b = PG.rides.bench.g;
-    var ba = 135 * Math.PI / 180, br = 10.45;
-    b.position.set(Math.cos(ba) * br, 0, Math.sin(ba) * br);
+    var ba = 135 * Math.PI / 180, br = 12.4;
+    b.position.set(PARK.x + Math.cos(ba) * br, 0, PARK.z + Math.sin(ba) * br);
     b.rotation.y = Math.atan2(-Math.cos(ba), -Math.sin(ba)) + Math.PI;
     b.updateMatrixWorld(true);
     /* 빈 잔디에 꽃 · 풀 포기 */
@@ -12050,13 +12751,19 @@ async function finishBoot(){
     box.innerHTML = '';
     PG.labels.forEach(function(L){
       var el = document.createElement('span');
-      el.className = 'pg-lbl';
-      el.textContent = pgLabelText(L.key);
+    var lbl = pgLabelText(L.key);
+      el.className = 'pg-lbl' + (L.key.indexOf('nat:') === 0 ? ' nat' : '');
+      el.textContent = lbl;
       box.appendChild(el);
       L.el = el;
     });
   }
   function pgLabelText(k){
+    if (k.indexOf('nat:') === 0){
+      var nn = pgNationKey(k.slice(4));
+      if (!nn) return k.slice(4);
+      return nn.ic + ' ' + nn.n + (nn.n.slice(-2) === '나라' ? '' : ' 나라');
+    }
     var names = { slide:'🛝 미끄럼틀', seesaw:'⚖️ 시소', jungle:'🧗 정글짐', ladder:'☁️ 구름사다리',
       bars:'🤸 철봉', rope:'🪢 줄넘기', horse:'🐴 흔들말', sand:'🏰 모래놀이',
       zip:'🌲 짚라인', tramp:'🫧 방방이', bench:'🪑 그늘 벤치',
@@ -12070,8 +12777,11 @@ async function finishBoot(){
     var box = document.getElementById('pgLabels');
     if (!box || box.hidden) return;
     var w = PG.renderer.domElement.clientWidth, h = PG.renderer.domElement.clientHeight;
+    var farView = PG.dist > 56;              /* 멀리서 볼 땐 기구 이름표를 숨긴다 (나라 이름표는 계속) */
+    var mapView = PG.dist > 200;             /* 아주 멀리서(전체 지도)는 이름표를 모두 숨긴다 */
     PG.labels.forEach(function(L){
       if (!L.el) return;
+      if (mapView || (farView && L.key.indexOf('nat:') !== 0)){ L.el.style.display = 'none'; return; }
       var v = PG.vec.set(L.g.position.x, L.g.position.y + L.y, L.g.position.z);
       v.project(PG.camera);
       if (v.z > 1){ L.el.style.display = 'none'; return; }
@@ -12794,25 +13504,32 @@ async function finishBoot(){
       var g = PG.rides[k].g;
       obs.push([g.position.x, g.position.z, Math.max(1.5, (g.userData.radius || 2.0) * 0.66)]);
     });
-    obs.push([POND.x, POND.z, 1.9]);                              /* 광장 연못 + 나무다리 */
-    obs.push([1.8, -0.15, 1.25]);                                 /* 광장 분수 */
-    obs.push([0, 12.15, 1.95], [0, -12.15, 1.95]);                /* 기본 오두막·카페 */
-    obs.push([-6.9, 6.2, 1.25]);                                  /* 소풍 돗자리 (그루터기 의자) */
-    obs.push([0, 4.72, 1.0]);                                     /* 입구 아치 기둥 */
-    [[45, 13.95], [135, 13.95], [225, 13.95], [315, 13.95]].forEach(function(t){ var a = t[0] * Math.PI / 180; obs.push([Math.cos(a) * t[1], Math.sin(a) * t[1], 0.55]); });
-    [[0, 13.9], [180, 13.9]].forEach(function(t){ var a = t[0] * Math.PI / 180; obs.push([Math.cos(a) * t[1], Math.sin(a) * t[1], 0.5]); });
+    obs.push([POND.x, POND.z, 2.1]);                               /* 광장 연못 + 나무다리 */
+    obs.push([PARK.x + 1.8, PARK.z - 0.15, 1.25]);                 /* 광장 분수 */
+    obs.push([PARK.x, PARK.z + 18.6, 2.0], [PARK.x, PARK.z - 18.6, 2.0]);  /* 기본 오두막·카페 */
+    obs.push([PARK.x - 16.5, PARK.z - 13.5, 1.3]);                 /* 소풍 돗자리 */
+    obs.push([PARK.x, PARK.z + 4.72, 1.1]);                        /* 입구 아치 */
+    (PG.solids || []).forEach(function(o){ obs.push(o); });
     PG.staticObs = obs;
     return obs;
   }
-  function pgSpotFree(x, z, R){
-    var rr = Math.sqrt(x * x + z * z);
-    if (rr > BUILD_R) return false;
-    if (rr < 4.9) return false;                                   /* 중앙 광장은 비워 둔다 */
-    if (Math.abs(rr - 9.3) < 0.72) return false;                  /* 순환 산책로 위에는 세우지 않기 */
+  /* 🏡 집을 세울 수 있는 땅인가 — 월드 경계·물·산책로·기존 소품·지은 집 확인 */
+  function pgSpotFree(x, z, R, minZ){
+    var p = pgInRect(x, z, BUILD_PAD + R * 0.5);
+    if (Math.abs(p[0] - x) > 0.02 || Math.abs(p[1] - z) > 0.02) return false;
+    if (pgWater(x, z)) return false;
+    if (Math.abs(z) < Math.max(1.85 + R * 0.45, minZ || 0)) return false;   /* 메인 산책로는 비워 둔다 */
+    var nat = pgNationAt(x);
+    if (nat.k === 'park'){
+      var dx = x - PARK.x, dz = z - PARK.z;
+      var rr = Math.sqrt(dx * dx + dz * dz);
+      if (rr < ROAD.plaza + 1.1) return false;                     /* 중앙 광장 */
+      if (Math.abs(rr - ROAD.prom) < 0.9 + R * 0.2) return false;  /* 순환 산책로 */
+    }
     var obs = pgStaticObstacles();
     for (var i = 0; i < obs.length; i++){
-      var dx = x - obs[i][0], dz = z - obs[i][1];
-      if (Math.sqrt(dx * dx + dz * dz) < R + obs[i][2] + 0.1) return false;
+      var ox = x - obs[i][0], oz = z - obs[i][1];
+      if (Math.sqrt(ox * ox + oz * oz) < R + obs[i][2] + 0.1) return false;
     }
     for (var k = 0; k < PG.buildOrder.length; k++){
       var b = PG.builds[PG.buildOrder[k]];
@@ -12822,33 +13539,70 @@ async function finishBoot(){
     }
     return true;
   }
-  /* ＋ 짓기 — 기존 기구·연못·이미 지은 집과 겹치지 않는 빈 자리를 자동으로 찾는다 */
+  /* ＋ 짓기 — 지금 카메라가 보고 있는 나라 안의 빈자리를 먼저 찾는다 */
   function pgBuildFreeSpot(kind){
     var R = pgBuildFootprint(kind);
-    /* 바깥 둘레 → 안쪽 잔디 순으로 촘촘하게 훑어 빈틈을 찾는다 */
-    var radii = [];
-    for (var rr = 10.2; rr <= 13.35; rr += 0.25) radii.push(rr);
-    for (var ri2 = 5.0; ri2 <= 8.6; ri2 += 0.4) radii.push(ri2);
-    var angles = [42];
-    for (var d = 2; d <= 180; d += 2) angles.push(42 + d, 42 - d);
-    for (var ai = 0; ai < angles.length; ai++){
-      var a = angles[ai] * Math.PI / 180;
-      for (var ri = 0; ri < radii.length; ri++){
-        var x = Math.cos(a) * radii[ri], z = Math.sin(a) * radii[ri];
-        if (pgSpotFree(x, z, R)) return { x: x, z: z, rot: Math.atan2(x, z) };   /* 앞면은 바깥(카메라 쪽)을 바라봄 */
+    var here = pgNationAt(PG.target ? PG.target.x : 0);
+    var list = [here];
+    NATIONS.forEach(function(n){ if (n.k !== here.k) list.push(n); });
+    for (var li = 0; li < list.length; li++){
+      var nn = list[li];
+      var cx = nn.cx, cz = 0;
+      if (li === 0 && PG.target){
+        cx = Math.max(nn.x0 + 3.4, Math.min(nn.x1 - 3.4, PG.target.x));
+        cz = Math.max(WZ0 + 3.4, Math.min(WZ1 - 3.4, PG.target.z));
+      }
+      /* 1차 — 산책로에서 넉넉히 떨어진 자리부터, 2차 — 그래도 없으면 가까이 */
+      var passes = [5.4, 0];
+      for (var pi = 0; pi < passes.length; pi++){
+        for (var rad = 0; rad <= 30; rad += 1.15){
+          var steps = rad < 0.1 ? 1 : Math.max(10, Math.round(rad * 5.6));
+          for (var st = 0; st < steps; st++){
+            var a = (st / steps) * 6.2832 + rad * 0.62;
+            var x = cx + Math.cos(a) * rad, z = cz + Math.sin(a) * rad;
+            if (x < nn.x0 + 2.2 || x > nn.x1 - 2.2) continue;
+            if (pgSpotFree(x, z, R, passes[pi])) return { x: x, z: z, rot: 0 };
+          }
+        }
       }
     }
     return null;
   }
+  /* 저장된 옛 좌표도 안전한 땅으로 (물·산책로 위에 걸리면 옆으로 비켜 준다) */
+  function pgLandSpot(x, z, R){
+    var p = pgInRect(x, z, BUILD_PAD + R * 0.5);
+    x = p[0]; z = p[1];
+    if (pgInSea(x, z)) z = SEA_SHORE + 0.8 + R * 0.5;
+    if (pgInStream(x, z)) z = STREAM.z + (z >= STREAM.z ? 1 : -1) * (STREAM.w / 2 + 0.6 + R * 0.5);
+    if (pgInIce(x, z)) z = ICE.z + (z >= ICE.z ? 1 : -1) * (ICE.rz + 1.2 + R * 0.5);
+    var dx = x - POND.x, dz = z - POND.z, pd = Math.sqrt(dx * dx + dz * dz);
+    if (pd < POND.r + 0.5 + R * 0.5){
+      var k2 = (POND.r + 0.7 + R * 0.5);
+      x = POND.x + (pd > 0.01 ? dx / pd : 1) * k2;
+      z = POND.z + (pd > 0.01 ? dz / pd : 0) * k2;
+    }
+    if (Math.abs(z) < 2.45 + R * 0.4) z = (z < 0 ? -1 : 1) * (2.6 + R * 0.4);
+    return pgInRect(x, z, BUILD_PAD + R * 0.5);
+  }
   function pgAddBuild(rec, pop){
     if (!rec || !rec.id || PG.builds[rec.id] || !PG.scene) return null;
+    var foot = pgBuildFootprint(rec.kind);
+    /* 옛 섬 시절 좌표 호환 — 물·산책로·울타리 밖이면 안전한 땅으로 비켜 놓는다 (DB는 건드리지 않음) */
+    var ox = Number(rec.x) || 0, oz = Number(rec.z) || 0;
+    var lp = pgLandSpot(ox, oz, foot);
+    if (Math.abs(lp[0] - ox) > 0.02 || Math.abs(lp[1] - oz) > 0.02){
+      rec = Object.assign({}, rec, {
+        x: Math.round(lp[0] * 100) / 100,
+        z: Math.round(lp[1] * 100) / 100
+      });
+    }
     var g = pgBuildItemMesh(rec.kind);
     g.position.set(Number(rec.x) || 0, 0, Number(rec.z) || 0);
     g.rotation.y = Number(rec.rot) || 0;
     g.userData.__pgTag = { type:'build', id: rec.id };
     PG.scene.add(g);
     var b = { id: rec.id, rec: rec, g: g, held: false, lift: 0,
-              popAt: pop ? PG.time : -9, foot: pgBuildFootprint(rec.kind) };
+              popAt: pop ? PG.time : -9, foot: foot };
     PG.builds[rec.id] = b;
     PG.buildOrder.push(rec.id);
     return b;
@@ -13043,6 +13797,11 @@ async function finishBoot(){
      · 양 끝 0.18 · 꼭대기 0.78 · 입구 계단 0.18~0.10 · 바깥은 땅(0) */
   var BR_W = 0.54, BR_HALF = 2.04, BR_RUN = 1.70, BR_RAIL = 0.36;
   function pgBridgeY(x, z){
+    /* 🌉 숲속 개울 나무다리 */
+    if (Math.abs(x - 44) <= 1.08 && Math.abs(z - STREAM.z) <= 1.95){
+      var su = Math.abs(z - STREAM.z) / 1.95;
+      return 0.34 + Math.cos(Math.min(1, su) * 1.1) * 0.07;
+    }
     var lx = x - POND.x, lz = z - POND.z;
     var ax = Math.abs(lx), az = Math.abs(lz);
     if (ax > BR_W || az > BR_HALF) return 0;
@@ -13059,7 +13818,6 @@ async function finishBoot(){
     return Math.abs(lx) <= BR_W && Math.abs(lz) <= 2.12;
   }
   function pgAIClamp(x, z, prevX, prevZ){
-    /* 연못 안쪽은 가장자리로 밀어내되, 🌉 다리 통로는 걸어서 지나갈 수 있게 열어 둔다 */
     var dx = x - POND.x, dz = z - POND.z;
     var pd = Math.sqrt(dx * dx + dz * dz);
     if (pd < POND.r){
@@ -13091,8 +13849,14 @@ async function finishBoot(){
         z = b.rec.z + bz / bl * rad;
       }
     }
-    var r = Math.sqrt(x * x + z * z);
-    if (r > AI_R){ x = x / r * AI_R; z = z / r * AI_R; }
+    /* 🗺️ 월드(둥근 모서리 사각) 경계 */
+    var wp = pgInRect(x, z, CHAR_PAD);
+    x = wp[0]; z = wp[1];
+    /* 🌊 바다 · 개울은 들어가지 않는다 (개울은 🌉 나무다리로만 건넌다) */
+    if (pgInSea(x, z)) z = SEA_SHORE + 0.9;
+    if (pgInStream(x, z) && Math.abs(x - 44) > 1.08){
+      z = STREAM.z + (z >= STREAM.z ? 1 : -1) * (STREAM.w / 2 + 0.35);
+    }
     /* 집에 밀려 다시 연못에 들어갔으면 한 번 더 밖으로 (다리 위는 통과) */
     var gx2 = x - POND.x, gz2 = z - POND.z;
     var gd2 = Math.sqrt(gx2 * gx2 + gz2 * gz2);
@@ -13116,19 +13880,20 @@ async function finishBoot(){
     /* 🌉 다리 위에 있으면 — 지금 서 있는 쪽 반대편 끝으로 걸어 내려간다 */
     if (pgBridgeY(c.wx, c.wz) > 0.02){
       c.aiBridge = 0; c.aiAim = ''; c.aiHome = false;
-      c.tx = POND.x; c.tz = POND.z + (c.wz >= POND.z ? 2.35 : -2.35);
+      if (Math.abs(c.wx - 44) <= 1.08){ c.tx = 44; c.tz = STREAM.z + (c.wz >= STREAM.z ? 2.15 : -2.15); }
+      else { c.tx = POND.x; c.tz = POND.z + (c.wz >= POND.z ? 2.35 : -2.35); }
       return;
     }
-    /* 16% — 연못 나무 다리를 건너 반대편까지 (입구에 닿으면 이어서 건너간다) */
-    if (Math.random() < 0.16){
+    /* 10% — 연못 나무 다리를 건너 반대편까지 */
+    if (Math.random() < 0.10){
       var side = (c.wz > POND.z) ? 1 : -1;
       c.aiBridge = -side; c.aiAim = ''; c.aiHome = false;
       c.tx = POND.x; c.tz = POND.z + side * 2.42;
       return;
     }
     c.aiBridge = 0;
-    /* 25% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 */
-    if (PG.buildOrder.length && Math.random() < 0.25){
+    /* 18% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 (어느 나라든) */
+    if (PG.buildOrder.length && Math.random() < 0.18){
       var bb = PG.builds[PG.buildOrder[Math.floor(Math.random() * PG.buildOrder.length)]];
       if (bb){
         var rotB = Number(bb.rec.rot) || 0;
@@ -13139,8 +13904,8 @@ async function finishBoot(){
       }
     }
     c.aiHome = false;
-    /* 70% — 다른 기구로 걸어가서 타기 */
-    if (keys.length && Math.random() < 0.7){
+    /* 42% — 놀이공원 기구로 걸어가서 타기 */
+    if (keys.length && Math.random() < 0.42){
       var pool = keys.filter(function(k){ return k !== c.curRide; });
       if (!pool.length) pool = keys;
       var k = pool[Math.floor(Math.random() * pool.length)];
@@ -13153,12 +13918,14 @@ async function finishBoot(){
       c.tx = p[0]; c.tz = p[1]; c.aiAim = k;
       return;
     }
-    /* 30% — 잔디·돗자리·꽃밭 쪽으로 잠깐 산책 */
+    /* 30% — 다른 나라로 산책! 메인 산책로를 따라 다섯 나라를 가로지른다 */
     c.aiAim = '';
-    for (var i = 0; i < 12; i++){
-      var a = Math.random() * 6.283, rr = 1.0 + Math.random() * (AI_R - 1.2);
-      var t = pgAIClamp(Math.cos(a) * rr, Math.sin(a) * rr);
-      if (Math.abs(t[0] - c.wx) + Math.abs(t[1] - c.wz) > 1.3){ c.tx = t[0]; c.tz = t[1]; return; }
+    for (var i = 0; i < 16; i++){
+      var nn = NATIONS[Math.floor(Math.random() * NATIONS.length)];
+      var wx2 = nn.x0 + 3 + Math.random() * (nn.x1 - nn.x0 - 6);
+      var wz2 = (Math.random() - 0.5) * 30;
+      var t = pgAIClamp(wx2, wz2);
+      if (Math.abs(t[0] - c.wx) + Math.abs(t[1] - c.wz) > 3.0){ c.tx = t[0]; c.tz = t[1]; return; }
     }
     c.tx = c.wx; c.tz = c.wz;
   }
@@ -13383,6 +14150,59 @@ async function finishBoot(){
     );
     cam.lookAt(PG.target);
   }
+  /* ---------- 🗺️ 전체 조망 · 나라 이동 카메라 ---------- */
+  function pgAllDist(asp){
+    var fov = (asp < 0.72) ? 58 : 48;
+    var vHalf = Math.tan(fov * Math.PI / 360);
+    var hHalf = vHalf * asp;
+    var dW = ((WX1 - WX0) + 7) / 2 / hHalf;
+    var dH = ((WZ1 - WZ0) + 10) / 2 / vHalf;
+    return Math.max(36, Math.min(520, Math.max(dW, dH) * 1.04));
+  }
+  function pgAspect(){
+    var el = PG.renderer && PG.renderer.domElement;
+    return (el && el.clientHeight) ? (el.clientWidth / el.clientHeight) : 0.5;
+  }
+  function pgNationDist(n){
+    var fov = pgAspect() < 0.72 ? 58 : 48;
+    var hHalf = Math.tan(fov * Math.PI / 360) * pgAspect();
+    var w = (n.x1 - n.x0) + 6;
+    return Math.max(26, Math.min(500, (w / 2) / hHalf * 1.04));
+  }
+  /* 버튼을 누르면 그 나라(또는 전체)로 부드럽게 날아간다 */
+  function pgGoNation(k){
+    var tx = 0, tz = 0, td, tp = 0.95;
+    if (!k || k === 'all'){
+      td = pgAllDist(pgAspect()); tp = 0.55; tx = 0; tz = 0;
+    } else {
+      var n = pgNationKey(k);
+      if (!n) return;
+      td = pgNationDist(n); tx = n.cx; tz = 0;
+    }
+    PG.camTween = { x0: PG.target.x, z0: PG.target.z, d0: PG.dist, p0: PG.polar, a0: PG.azim,
+                    x1: tx, z1: tz, d1: td, p1: tp, a1: 0, t: 0, dur: 1.05 };
+    PG.distGoal = td;
+    pgNationMark(k || 'all');
+    if (k && k !== 'all'){
+      var nn = pgNationKey(k);
+      if (nn) toast(nn.ic + ' ' + nn.n + ' 나라로 갔어요', 1400);
+    }
+  }
+  function pgNationMark(k){
+    var box = document.getElementById('pgNations');
+    if (!box) return;
+    var btns = box.querySelectorAll('[data-pgnat]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i].getAttribute('data-pgnat') === k);
+  }
+  function pgRenderNations(){
+    var box = document.getElementById('pgNations');
+    if (!box) return;
+    var html = '<button type="button" data-pgnat="all" class="on">🗺️ 전체</button>';
+    NATIONS.forEach(function(n){
+      html += '<button type="button" data-pgnat="' + n.k + '">' + n.ic + ' ' + esc(n.n) + '</button>';
+    });
+    box.innerHTML = html;
+  }
   function pgResize(){
     if (!PG.renderer) return;
     var stage = document.getElementById('pgStage');
@@ -13418,6 +14238,20 @@ async function finishBoot(){
     PG.lastT = t;
     PG.time += dt;
     PG.dist += (PG.distGoal - PG.dist) * Math.min(1, dt * 6);
+    if (PG.camTween){
+      var tw = PG.camTween;
+      tw.t += dt;
+      var tu = Math.min(1, tw.t / tw.dur);
+      var te = tu < 0.5 ? 2 * tu * tu : 1 - Math.pow(-2 * tu + 2, 2) / 2;
+      PG.target.x = tw.x0 + (tw.x1 - tw.x0) * te;
+      PG.target.z = tw.z0 + (tw.z1 - tw.z0) * te;
+      PG.target.y = 0.8;
+      PG.dist = tw.d0 + (tw.d1 - tw.d0) * te;
+      PG.distGoal = PG.dist;
+      PG.polar = tw.p0 + (tw.p1 - tw.p0) * te;
+      PG.azim = tw.a0 + (tw.a1 - tw.a0) * te;
+      if (tu >= 1) PG.camTween = null;
+    }
     pgCamera();
     pgAI(dt);
     pgPose(PG.time);
@@ -13498,11 +14332,11 @@ async function finishBoot(){
     var vk = 1 / Math.max(0.30, Math.sin(PG.polar));   /* 비스듬히 볼수록 화면 상하 이동이 짧아 보인다 */
     PG.target.x += (-rX * dxPx + fX * dyPx * vk) * scale;
     PG.target.z += (-rZ * dxPx + fZ * dyPx * vk) * scale;
-    /* 섬 밖으로 너무 나가지 않게 — 범퍼카·울타리 끝까지는 화면 가운데에 놓을 수 있다 */
-    var tr = Math.sqrt(PG.target.x * PG.target.x + PG.target.z * PG.target.z);
-    var tmax = ISLAND_R + 0.5;
-    if (tr > tmax){ PG.target.x = PG.target.x / tr * tmax; PG.target.z = PG.target.z / tr * tmax; }
+    /* 월드 밖으로 너무 나가지 않게 — 둥근 모서리 사각 경계 */
+    var tp2 = pgInRect(PG.target.x, PG.target.z, -2.2);
+    PG.target.x = tp2[0]; PG.target.z = tp2[1];
     PG.target.y = 0.8;
+    PG.camTween = null;
   }
   function pgPanSet(on, quiet){
     PG.panMode = (on === undefined) ? !PG.panMode : !!on;
@@ -13578,8 +14412,8 @@ async function finishBoot(){
       var g3 = pgGround(e, 0.6);
       if (g3){
         var bx2 = g3.x + PG.buildDrag.offx, bz2 = g3.z + PG.buildDrag.offz;
-        var br2 = Math.sqrt(bx2 * bx2 + bz2 * bz2);
-        if (br2 > BUILD_R){ bx2 = bx2 / br2 * BUILD_R; bz2 = bz2 / br2 * BUILD_R; }
+        var lp3 = pgLandSpot(bx2, bz2, bd2.foot);
+        bx2 = lp3[0]; bz2 = lp3[1];
         bd2.rec.x = bx2; bd2.rec.z = bz2;
         bd2.g.position.x = bx2; bd2.g.position.z = bz2;
         pgBuildRingShow(bx2, bz2, bd2.foot);
@@ -13594,8 +14428,8 @@ async function finishBoot(){
       var g = pgGround(e, 0.6);
       if (g){
         var nx = g.x + PG.drag.offx, nz = g.z + PG.drag.offz;
-        var r = Math.sqrt(nx * nx + nz * nz);
-        if (r > CHAR_R){ nx = nx / r * CHAR_R; nz = nz / r * CHAR_R; }
+        var cl = pgInRect(nx, nz, CHAR_PAD);
+        nx = cl[0]; nz = cl[1];
         c.data.x = nx; c.data.z = nz;
       }
       PG.drag.moved = Math.max(PG.drag.moved, Math.abs(e.clientX - PG.drag.sx) + Math.abs(e.clientY - PG.drag.sy));
@@ -13747,7 +14581,7 @@ async function finishBoot(){
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
     var g = PG.pinch.goal * (PG.pinch.d / d);
-    PG.distGoal = Math.max(6.5, Math.min(58, g));
+    PG.distGoal = Math.max(6.5, Math.min(520, g));
     /* 두 손가락을 모은 채 같이 움직이면 화면 이동(펜)도 같이 */
     var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
     if (PG.pinch.mx !== undefined){
@@ -13758,7 +14592,8 @@ async function finishBoot(){
   function pgWheel(e){
     if (!PG.on) return;
     e.preventDefault();
-    PG.distGoal = Math.max(6.5, Math.min(58, PG.distGoal + (e.deltaY > 0 ? 1.8 : -1.8)));
+    PG.distGoal = Math.max(6.5, Math.min(520, PG.distGoal * (e.deltaY > 0 ? 1.12 : 0.9)));
+    PG.camTween = null;
   }
 
   /* ============================================================
@@ -13959,9 +14794,11 @@ async function finishBoot(){
       return;
     }
     var zi = t.closest('#pgZoomIn');
-    if (zi){ PG.distGoal = Math.max(6.5, PG.distGoal - 3.0); return; }
+    if (zi){ PG.distGoal = Math.max(6.5, PG.distGoal * 0.78); PG.camTween = null; return; }
     var zo = t.closest('#pgZoomOut');
-    if (zo){ PG.distGoal = Math.min(58, PG.distGoal + 3.0); return; }
+    if (zo){ PG.distGoal = Math.min(520, PG.distGoal * 1.28); PG.camTween = null; return; }
+    var natb = t.closest('[data-pgnat]');
+    if (natb){ pgGoNation(natb.getAttribute('data-pgnat')); return; }
     var lb = t.closest('#pgLblBtn');
     if (lb){
       var box = document.getElementById('pgLabels');
@@ -13973,12 +14810,8 @@ async function finishBoot(){
     }
     var rs = t.closest('#pgReset');
     if (rs){
-      PG.azim = 0.62; PG.polar = 0.95;
-      var aspR = (PG.renderer && PG.renderer.domElement && PG.renderer.domElement.clientHeight)
-        ? PG.renderer.domElement.clientWidth / PG.renderer.domElement.clientHeight : 0.5;
-      PG.distGoal = PG.dist = (aspR < 0.72) ? 38 : 34;
-      if (PG.target) PG.target.set(0, 0.8, 0);
-      toast('🏠 처음 자리로 돌아왔어요', 1400);
+      pgGoNation('all');
+      toast('🏠 전체 월드로 돌아왔어요', 1400);
       return;
     }
     var pnb = t.closest('#pgPanBtn');
