@@ -8193,7 +8193,7 @@ async function finishBoot(){
     el.hidden = false;
     document.body.classList.add('pg-open');
     if (PG.target) PG.target.set(0, 0.8, 0);        /* 🏠 열 때마다 전체 월드부터 */
-    PG.polar = 0.62;
+    PG.polar = 0.55; PG.azim = 0;
     PG.camTween = null;
     pgNationMark('all');
     pgPanSet(false, true);
@@ -8275,7 +8275,7 @@ async function finishBoot(){
 
     var sc = new THREE.Scene();
     sc.background = pgSkyTexture();
-    sc.fog = new THREE.Fog(0xE8F6FF, 230, 1250);
+    sc.fog = new THREE.Fog(0xE8F6FF, 260, 1500);
     PG.scene = sc;
     PG.target = new THREE.Vector3(0, 0.8, 0);
     PG.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1800);
@@ -8464,6 +8464,7 @@ async function finishBoot(){
     tx.needsUpdate = true;
     tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
     tx.repeat.set((perUnit || 0.3) * 8, (perUnit || 0.3) * 8);
+    tx.userData = { k: kind };
     return new THREE.MeshLambertMaterial({ map: tx });
   }
   function pgBeam(p1, p2, r, col, seg){
@@ -10923,9 +10924,9 @@ async function finishBoot(){
     yard.add(pgSlab(C.earth2, 1.2, -1.95, 0.6));
 
     /* ② 🏡 동화마을 — 알록달록 파스텔 보도블록 */
-    yard.add(pgPatch(-37.8, -2.2, -16.4, 16.4, 3.4, 3.4, 3.4, 3.4, 0.012, pgGroundMat('pastel', 0.4)));
+    yard.add(pgPatch(-37.8, -2.2, -16.4, 16.4, 3.4, 3.4, 3.4, 3.4, 0.012, pgGroundMat('pastel', 0.075)));
     /* ③ 🏖️ 바닷가 — 황금 모래사장 + 젖은 모래 + 에메랄드 바다 */
-    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.55)));
+    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.16)));
     yard.add(pgPatch(-2.2, 30.2, SEA_SHORE - 2.1, SEA_SHORE + 0.06, 0, 0, 0, 0, 0.014, '#E6CDA0'));
     var seaMat = new THREE.MeshLambertMaterial({ color: 0x8FD6F0, transparent: true, opacity: 0.92 });
     yard.add(pgPatch(-2.6, 30.6, -24.3, SEA_SHORE - 0.08, 8.2, 8.2, 0, 0, 0.032, seaMat));
@@ -10942,9 +10943,9 @@ async function finishBoot(){
     });
 
     /* ④ 🌲 숲속캠핑 — 이끼 낀 진초록 땅 */
-    yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.45)));
+    yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.1)));
     /* ⑤ ❄️ 겨울나라 — 눈밭 + 얼음 연못 */
-    yard.add(pgPatch(57.8, 85.3, -23.7, 23.7, 8.0, 8.0, 8.0, 0, 0.012, pgGroundMat('snow', 0.4)));
+    yard.add(pgPatch(57.8, 85.3, -23.7, 23.7, 8.0, 8.0, 8.0, 0, 0.012, pgGroundMat('snow', 0.1)));
     var ice = new THREE.Mesh(new THREE.CircleGeometry(1, 44), new THREE.MeshLambertMaterial({ color: 0xDCF3FF }));
     ice.rotation.x = -Math.PI / 2; ice.scale.set(ICE.rx, ICE.rz, 1);
     ice.position.set(ICE.x, 0.028, ICE.z); yard.add(ice);
@@ -14158,14 +14159,14 @@ async function finishBoot(){
   function pgGoNation(k){
     var tx = 0, tz = 0, td, tp = 0.95;
     if (!k || k === 'all'){
-      td = pgAllDist(pgAspect()); tp = 0.62; tx = 0; tz = 0;
+      td = pgAllDist(pgAspect()); tp = 0.55; tx = 0; tz = 0;
     } else {
       var n = pgNationKey(k);
       if (!n) return;
       td = pgNationDist(n); tx = n.cx; tz = 0;
     }
-    PG.camTween = { x0: PG.target.x, z0: PG.target.z, d0: PG.dist, p0: PG.polar,
-                    x1: tx, z1: tz, d1: td, p1: tp, t: 0, dur: 1.05 };
+    PG.camTween = { x0: PG.target.x, z0: PG.target.z, d0: PG.dist, p0: PG.polar, a0: PG.azim,
+                    x1: tx, z1: tz, d1: td, p1: tp, a1: 0, t: 0, dur: 1.05 };
     PG.distGoal = td;
     pgNationMark(k || 'all');
     if (k && k !== 'all'){
@@ -14234,6 +14235,7 @@ async function finishBoot(){
       PG.dist = tw.d0 + (tw.d1 - tw.d0) * te;
       PG.distGoal = PG.dist;
       PG.polar = tw.p0 + (tw.p1 - tw.p0) * te;
+      PG.azim = tw.a0 + (tw.a1 - tw.a0) * te;
       if (tu >= 1) PG.camTween = null;
     }
     pgCamera();
