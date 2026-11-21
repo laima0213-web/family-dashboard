@@ -11007,8 +11007,8 @@ async function finishBoot(){
     for (var d = 0; d < 16; d++) yard.add(pgBox(3.62, 0.02, 0.12, '#C79A6B', 14, 0.13, -0.5 - d * 1.05));
     [-1.72, 1.72].forEach(function(dx){ yard.add(pgBox(0.1, 0.42, 17.4, '#C79A6B', 14 + dx, 0.24, -8.5)); });
     /* 🌲 숲속 흙길 */
-    yard.add(pgBox(1.8, 0.08, 14.6, '#D3B389', 44, 0.03, 7.1));
-    yard.add(pgBox(1.8, 0.08, 4.0, '#D3B389', 44, 0.03, -2.1));
+    yard.add(pgBox(1.8, 0.08, 14.6, '#D3B389', 44, 0.03, 9.3));
+    yard.add(pgBox(1.8, 0.08, 2.6, '#D3B389', 44, 0.03, -3.3));
   }
   function pgPathBarZ(z0, z1, x, w, y){
     var len = Math.max(0.2, z1 - z0);
@@ -11411,7 +11411,7 @@ async function finishBoot(){
     arc.add(top);
     for (var s = 0; s < 7; s++){
       var a = s / 6 * Math.PI;
-      var star = pgSph(0.1, s % 2 ? C.lemon : '#FFFFFF', Math.cos(a) * 1.62, 3.0 + Math.sin(a) * 1.62, 0, 6);
+      var star = pgSph(0.11, s % 2 ? C.lemon : '#FFFFFF', Math.cos(a) * 1.82, 3.0 + Math.sin(a) * 1.82, 0, 6);
       star.material = new THREE.MeshLambertMaterial({ color: 0xFFF6D0, emissive: new THREE.Color(0xFFE27A), emissiveIntensity: 0.7 });
       arc.add(star);
     }
