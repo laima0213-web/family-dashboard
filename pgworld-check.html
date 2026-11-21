@@ -8347,26 +8347,37 @@ async function finishBoot(){
     PG.pathTex = tx;
     return tx;
   }
-  function pgTileMat(rx, ry){
-    var tx = pgTileTexture().clone();
-    tx.needsUpdate = true;
-    tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
-    tx.repeat.set(Math.max(0.6, rx), Math.max(0.6, ry));
-    return new THREE.MeshLambertMaterial({ map: tx });
+  /* 문양 텍스처는 하나만 만들어 모두 함께 쓴다 (기기 메모리·속도) — 반복 횟수는 도형 UV에 굽는다 */
+  function pgTileMaterial(){
+    if (!PG.tileMat){
+      var tx = pgTileTexture();
+      tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+      tx.repeat.set(1, 1);
+      PG.tileMat = new THREE.MeshLambertMaterial({ map: tx });
+    }
+    return PG.tileMat;
   }
+  function pgUvScale(geo, sx, sy){
+    var uv = geo.attributes.uv;
+    if (!uv) return geo;
+    for (var i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * sx, uv.getY(i) * sy);
+    uv.needsUpdate = true;
+    return geo;
+  }
+  function pgTileMat(rx, ry){ return pgTileMaterial(); }
   function pgPathDisc(r, y){
-    var m = new THREE.Mesh(new THREE.CircleGeometry(r, 96), pgTileMat(r, r));
+    var m = new THREE.Mesh(pgUvScale(new THREE.CircleGeometry(r, 96), r, r), pgTileMaterial());
     m.rotation.x = -Math.PI / 2; m.position.y = y || 0.015;
     return m;
   }
   function pgPathRing(r, w, y){
-    var m = new THREE.Mesh(new THREE.RingGeometry(r - w / 2, r + w / 2, 128), pgTileMat(r * 2, r * 2));
+    var m = new THREE.Mesh(pgUvScale(new THREE.RingGeometry(r - w / 2, r + w / 2, 128), r * 2, r * 2), pgTileMaterial());
     m.rotation.x = -Math.PI / 2; m.position.y = y || 0.02;
     return m;
   }
   function pgPathSpur(a, r0, r1, w, y, ox, oz){
     var len = Math.max(0.2, r1 - r0), mid = (r0 + r1) / 2;
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.07, len), pgTileMat(w, len));
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(w, 0.07, len), w, len), pgTileMaterial());
     m.rotation.y = Math.PI / 2 - a;
     m.position.set((ox || 0) + Math.cos(a) * mid, (y || 0.022) - 0.035, (oz || 0) + Math.sin(a) * mid);
     return m;
@@ -8374,7 +8385,7 @@ async function finishBoot(){
   /* 메인 산책로 — X축으로 쭉 뻗은 길 */
   function pgPathBar(x0, x1, z, w, y){
     var len = Math.max(0.2, x1 - x0);
-    var m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.07, w), pgTileMat(len, w));
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(len, 0.07, w), len / 2, w / 2), pgTileMaterial());
     m.position.set((x0 + x1) / 2, (y || 0.022) - 0.035, z || 0);
     return m;
   }
@@ -8395,6 +8406,7 @@ async function finishBoot(){
     geo.rotateX(-Math.PI / 2);
     var mat = (typeof matOrColor === 'string')
       ? new THREE.MeshLambertMaterial({ color: new THREE.Color(matOrColor) }) : matOrColor;
+    if (mat && mat.userData && mat.userData.uvScale) pgUvScale(geo, mat.userData.uvScale, mat.userData.uvScale);
     var m = new THREE.Mesh(geo, mat);
     m.position.y = y || 0.006;
     return m;
@@ -8460,12 +8472,15 @@ async function finishBoot(){
     return tx;
   }
   function pgGroundMat(kind, perUnit){
-    var tx = pgGroundTex(kind).clone();
-    tx.needsUpdate = true;
-    tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
-    tx.repeat.set((perUnit || 0.3) * 8, (perUnit || 0.3) * 8);
-    tx.userData = { k: kind };
-    return new THREE.MeshLambertMaterial({ map: tx });
+    PG.gmat = PG.gmat || {};
+    if (!PG.gmat[kind]){
+      var tx = pgGroundTex(kind);
+      tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+      tx.repeat.set(1, 1);
+      PG.gmat[kind] = new THREE.MeshLambertMaterial({ map: tx });
+      PG.gmat[kind].userData = { uvScale: (perUnit || 0.3) * 2.6 };
+    }
+    return PG.gmat[kind];
   }
   function pgBeam(p1, p2, r, col, seg){
     var va = new THREE.Vector3(p1[0], p1[1], p1[2]);
@@ -10924,9 +10939,9 @@ async function finishBoot(){
     yard.add(pgSlab(C.earth2, 1.2, -1.95, 0.6));
 
     /* ② 🏡 동화마을 — 알록달록 파스텔 보도블록 */
-    yard.add(pgPatch(-37.8, -2.2, -16.4, 16.4, 3.4, 3.4, 3.4, 3.4, 0.012, pgGroundMat('pastel', 0.075)));
+    yard.add(pgPatch(-37.8, -2.2, -16.4, 16.4, 3.4, 3.4, 3.4, 3.4, 0.012, pgGroundMat('pastel', 0.11)));
     /* ③ 🏖️ 바닷가 — 황금 모래사장 + 젖은 모래 + 에메랄드 바다 */
-    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.16)));
+    yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.22)));
     yard.add(pgPatch(-2.2, 30.2, SEA_SHORE - 2.1, SEA_SHORE + 0.06, 0, 0, 0, 0, 0.014, '#E6CDA0'));
     var seaMat = new THREE.MeshLambertMaterial({ color: 0x8FD6F0, transparent: true, opacity: 0.92 });
     yard.add(pgPatch(-2.6, 30.6, -24.3, SEA_SHORE - 0.08, 8.2, 8.2, 0, 0, 0.032, seaMat));
@@ -10943,9 +10958,9 @@ async function finishBoot(){
     });
 
     /* ④ 🌲 숲속캠핑 — 이끼 낀 진초록 땅 */
-    yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.1)));
+    yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.16)));
     /* ⑤ ❄️ 겨울나라 — 눈밭 + 얼음 연못 */
-    yard.add(pgPatch(57.8, 85.3, -23.7, 23.7, 8.0, 8.0, 8.0, 0, 0.012, pgGroundMat('snow', 0.1)));
+    yard.add(pgPatch(57.8, 85.3, -23.7, 23.7, 8.0, 8.0, 8.0, 0, 0.012, pgGroundMat('snow', 0.16)));
     var ice = new THREE.Mesh(new THREE.CircleGeometry(1, 44), new THREE.MeshLambertMaterial({ color: 0xDCF3FF }));
     ice.rotation.x = -Math.PI / 2; ice.scale.set(ICE.rx, ICE.rz, 1);
     ice.position.set(ICE.x, 0.028, ICE.z); yard.add(ice);
@@ -10975,7 +10990,7 @@ async function finishBoot(){
   }
   function pgPathBarZ(z0, z1, x, w, y){
     var len = Math.max(0.2, z1 - z0);
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.07, len), pgTileMat(w, len));
+    var m = new THREE.Mesh(pgUvScale(new THREE.BoxGeometry(w, 0.07, len), w, len), pgTileMaterial());
     m.position.set(x || 0, (y || 0.022) - 0.035, (z0 + z1) / 2);
     return m;
   }
