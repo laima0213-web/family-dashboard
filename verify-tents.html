@@ -11225,10 +11225,16 @@ async function finishBoot(){
     var tun = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 2.24, 18), pgM('#F8EDD9'));
     tun.rotation.z = Math.PI / 2; tun.position.set(0, 0.94, -0.08); g.add(tun);
     var ridge = pgBox(2.2, 0.07, 0.4, '#E6CFA9', 0, 1.8, -0.08); g.add(ridge);
-    g.add(pgBox(2.16, 0.1, 0.14, '#E6CFA9', 0, 0.5, 0.76));
+    g.add(pgBox(2.16, 0.1, 0.14, '#E6CFA9', 0, 0.5, 0.86));
     [-0.62, 0.2].forEach(function(dx){
-      g.add(pgBox(0.46, 0.34, 0.06, '#EAF1E4', dx, 1.06, 0.74));
-      g.add(pgBox(0.5, 0.04, 0.07, '#DCC4A0', dx, 0.88, 0.75));
+      g.add(pgBox(0.44, 0.3, 0.05, '#DCEBE2', dx, 1.02, 0.85));
+      g.add(pgBox(0.48, 0.045, 0.06, '#DCC4A0', dx, 0.85, 0.86));
+      g.add(pgBox(0.045, 0.3, 0.06, '#DCC4A0', dx, 1.02, 0.86));
+    });
+    var dframe = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.045, 6, 16, Math.PI), pgM('#E6CFA9'));
+    dframe.rotation.y = Math.PI / 2; dframe.position.set(1.1, 0.12, -0.08); g.add(dframe);
+    [[-1.0, 0.5], [1.0, 0.5], [-1.0, -0.6], [1.0, -0.6]].forEach(function(p){
+      g.add(pgBeam([p[0] * 0.78, 1.42, p[1] * 0.9], [p[0] * 1.28, 0.03, p[1] * 1.6], 0.014, '#E7D3B2', 4));
     });
     [-0.82, 0.72].forEach(function(dx){
       var ring = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.022, 5, 18), pgM('#E7D3B2'));
@@ -16293,25 +16299,25 @@ async function finishBoot(){
     if (document.querySelector('#app').hidden) return;
     clearInterval(t);
     setTimeout(function(){
+      var list = AV_BUILDS.slice(48);
       var head = document.createElement('div');
-      head.style.cssText = 'padding:8px 6px 4px;font:900 12px/1.4 sans-serif;color:#4A4034';
-      head.textContent = '🏡 집·마을 ' + AV_BUILDS.length + '종 (새 22종 = 49~70번) · 카드 미리보기 검사용';
+      head.style.cssText = 'padding:9px 8px 3px;font:900 11.5px/1.35 sans-serif;color:#4A4034';
+      head.textContent = '🏡 집·마을 새 ' + list.length + '종 (49~' + AV_BUILDS.length + '번) 카드 그림 검사';
       var wrap = document.createElement('div');
-      wrap.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:#FFFDF7';
-      AV_BUILDS.forEach(function(b, i){
+      wrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px 5px 8px;background:#FFFDF7';
+      list.forEach(function(b, i){
         var cell = document.createElement('div');
-        cell.style.cssText = 'border:1px solid #EFE2D0;border-radius:8px;background:#FFF;padding:2px;text-align:center;overflow:hidden';
+        cell.style.cssText = 'border:1px solid #EFE2D0;border-radius:9px;background:#FFF;padding:2px 1px 3px;text-align:center;overflow:hidden;box-shadow:0 1px 3px rgba(120,100,70,.07)';
         var n = document.createElement('div');
-        n.style.cssText = 'font:800 7.5px/1.2 sans-serif;color:' + (i >= 48 ? '#C4553F' : '#8A7A66') + ';height:20px;overflow:hidden';
-        n.textContent = (i + 1) + '. ' + b.n;
+        n.style.cssText = 'font:800 8px/1.25 sans-serif;color:#C4553F;height:20px;overflow:hidden';
+        n.textContent = (49 + i) + '. ' + b.n;
         var pic = document.createElement('div');
-        pic.style.cssText = 'height:52px;display:flex;align-items:center;justify-content:center';
+        pic.style.cssText = 'height:74px;display:flex;align-items:center;justify-content:center';
         pic.innerHTML = avBuildSvg(b.k);
         var svg = pic.querySelector('svg');
-        if (svg){ svg.style.width = '42px'; svg.style.height = '48px'; }
+        if (svg){ svg.style.width = '58px'; svg.style.height = '70px'; }
         cell.appendChild(n); cell.appendChild(pic); wrap.appendChild(cell);
       });
-      var bar = document.getElementById('app') || document.body;
       document.body.innerHTML = '';
       document.body.style.background = '#FFFDF7';
       document.body.appendChild(head);
