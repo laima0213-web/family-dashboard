@@ -9137,54 +9137,60 @@ async function finishBoot(){
   /* 27. 🐠 아쿠아리움 수족관 (v19) */
   function pgbAquarium(g){
     g.add(pgBox(3.0, 0.18, 2.2, C.stone2, 0, 0.09, 0));
-    g.add(pgBox(2.8, 0.16, 2.0, '#E7EDF0', 0, 0.26, 0));
-    g.add(pgBox(2.5, 1.5, 1.7, '#8FD6F0', 0, 1.12, 0));
-    var glass = new THREE.Mesh(new THREE.BoxGeometry(2.62, 1.58, 1.8),
-      new THREE.MeshLambertMaterial({ color: new THREE.Color('#CFEAFB'), transparent: true, opacity: 0.4 }));
-    glass.position.set(0, 1.12, 0); g.add(glass);
-    g.add(pgBox(2.66, 0.12, 1.84, '#BEE4F2', 0, 1.94, 0));
-    g.add(pgBox(2.66, 0.12, 1.84, '#BEE4F2', 0, 0.34, 0));
-    [-1.34, 1.34].forEach(function(sx){ g.add(pgBox(0.1, 1.7, 1.84, '#BEE4F2', sx, 1.12, 0)); });
-    g.add(pgBox(0.1, 1.7, 1.84, '#BEE4F2', 0, 1.12, 0));
+    g.add(pgBox(2.9, 0.14, 2.1, '#E7EDF0', 0, 0.25, 0));
+    /* 물 — 살짝 비쳐 보이게 */
+    var water = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.42, 1.6),
+      new THREE.MeshLambertMaterial({ color: new THREE.Color('#8FD6F0'), transparent: true, opacity: 0.62, depthWrite: false }));
+    water.position.set(0, 1.14, 0); g.add(water);
     /* 모래바닥 · 해초 */
-    g.add(pgBox(2.46, 0.12, 1.66, '#F4DEB2', 0, 0.4, 0));
-    [-0.9, -0.3, 0.5, 1.0].forEach(function(sx, i){
-      var h = 0.42 + (i % 3) * 0.16;
-      g.add(pgCyl(0.05, 0.07, h, i % 2 ? '#7FC56A' : '#98D57E', sx, 0.46 + h / 2, -0.55 + (i % 2) * 0.5, 6));
+    g.add(pgBox(2.3, 0.12, 1.5, '#F4DEB2', 0, 0.5, 0));
+    [-0.82, -0.3, 0.42, 0.92].forEach(function(sx, i){
+      var h2 = 0.4 + (i % 3) * 0.16;
+      g.add(pgCyl(0.05, 0.07, h2, i % 2 ? '#7FC56A' : '#98D57E', sx, 0.56 + h2 / 2, -0.5 + (i % 2) * 0.5, 6));
     });
-    /* 헤엄치는 물고기들 */
+    /* 헤엄치는 물고기들 (물보다 먼저 그려져 비친다) */
     var fish = [];
-    [[0.32, '#FFB88C', 1.0], [0.26, '#FFC9DA', 0.8], [0.22, '#FFE39B', 1.25], [0.18, '#C9B6F0', 0.9]].forEach(function(f, i){
+    [[0.3, '#FFB88C', 1.0], [0.25, '#FFC9DA', 0.8], [0.21, '#FFE39B', 1.25], [0.18, '#C9B6F0', 0.9]].forEach(function(f, i){
       var fg = new THREE.Group();
       var body = pgSph(f[0], f[1], 0, 0, 0, 10); body.scale.set(1.5, 1, 1); fg.add(body);
       var tail = new THREE.Mesh(new THREE.ConeGeometry(f[0] * 0.62, f[0] * 1.1, 6), pgM(f[1]));
       tail.rotation.z = Math.PI / 2; tail.position.x = -f[0] * 1.65; fg.add(tail);
-      fg.add(pgSph(f[0] * 0.16, '#4A3D31', f[0] * 0.62, f[0] * 0.16, f[0] * 0.42, 6));
-      g.add(fg); fish.push({ g: fg, r: 0.62 + i * 0.13, sp: f[2], y: 0.95 + i * 0.26, ph: i * 1.7 });
+      fg.add(pgSph(f[0] * 0.17, '#4A3D31', f[0] * 0.6, f[0] * 0.16, f[0] * 0.42, 6));
+      g.add(fg); fish.push({ g: fg, r: 0.52 + i * 0.12, sp: f[2], y: 0.92 + i * 0.28, ph: i * 1.7 });
     });
-    /* 지붕 아치 간판 + 물방울 */
-    var arch = pgTor(1.34, 0.07, '#FFB6CB', 0, 1.94, 0, Math.PI); arch.rotation.y = Math.PI / 2; g.add(arch);
-    g.add(pgBox(1.5, 0.34, 0.1, '#FF9FB8', 0, 3.34, 0));
-    g.add(pgSph(0.09, '#FFF7FB', -0.42, 3.34, 0.06, 8));
-    g.add(pgSph(0.09, '#FFF7FB', 0, 3.34, 0.06, 8));
-    g.add(pgSph(0.09, '#FFF7FB', 0.42, 3.34, 0.06, 8));
+    /* 수조 테두리 — 기둥 4개 · 위아래 테 */
+    [[-1.2, -0.8], [1.2, -0.8], [-1.2, 0.8], [1.2, 0.8]].forEach(function(p){
+      g.add(pgBox(0.12, 1.5, 0.12, '#BEE4F2', p[0], 1.14, p[1]));
+    });
+    g.add(pgBox(2.54, 0.12, 1.74, '#BEE4F2', 0, 1.9, 0));
+    g.add(pgBox(2.54, 0.12, 1.74, '#CDEDF8', 0, 0.38, 0));
+    /* 지붕 간판 (아치 + 물결) */
+    var arch = pgTor(1.3, 0.07, '#FFB6CB', 0, 1.94, 0, Math.PI); arch.rotation.y = Math.PI / 2; g.add(arch);
+    g.add(pgBox(1.5, 0.36, 0.12, '#FFB6CB', 0, 2.62, 0));
+    g.add(pgSph(0.09, '#FFF7FB', -0.44, 2.62, 0.08, 8));
+    g.add(pgSph(0.09, '#FFF7FB', 0, 2.62, 0.08, 8));
+    g.add(pgSph(0.09, '#FFF7FB', 0.44, 2.62, 0.08, 8));
+    g.add(pgCyl(0.03, 0.03, 0.5, '#B4DDEE', 0, 2.24, 0, 5));
+    var flag = pgFlag('#A6E5CF', 0.26, 0.18); flag.position.set(0.13, 2.46, 0); g.add(flag);
+    /* 물방울 */
     var bubbles = [];
     for (var b = 0; b < 5; b++){
       var bb = pgSph(0.045, '#FFFFFF', 0, 0.5, 0, 6);
-      bb.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.55 });
+      bb.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
       g.add(bb); bubbles.push(bb);
     }
     g.userData.tick = function(t){
       fish.forEach(function(f){
         var a = f.ph + t * f.sp;
-        f.g.position.set(Math.cos(a) * f.r, f.y + Math.sin(t * 1.6 + f.ph) * 0.08, Math.sin(a) * f.r * 0.62);
+        f.g.position.set(Math.cos(a) * f.r, f.y + Math.sin(t * 1.6 + f.ph) * 0.07, Math.sin(a) * f.r * 0.55);
         f.g.rotation.y = -a + Math.PI / 2;
       });
       bubbles.forEach(function(bb, i){
         var u = (t * 0.34 + i * 0.2) % 1;
-        bb.position.set(-0.7 + i * 0.36 + Math.sin(t + i) * 0.06, 0.42 + u * 1.4, 0.5 - (i % 2) * 0.9);
-        bb.material.opacity = 0.5 * (1 - u);
+        bb.position.set(-0.66 + i * 0.34 + Math.sin(t + i) * 0.05, 0.5 + u * 1.3, 0.5 - (i % 2) * 0.8);
+        bb.material.opacity = 0.45 * (1 - u);
       });
+      flag.rotation.y = Math.sin(t * 1.8) * 0.3;
     };
   }
 
