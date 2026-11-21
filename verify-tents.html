@@ -11203,8 +11203,9 @@ async function finishBoot(){
     g.add(pgBox(2.3, 0.05, 1.9, '#EAF7F0', 0, 0.025, 0.1));
     var dome = new THREE.Mesh(new THREE.SphereGeometry(0.98, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), pgM('#A7E7D2'));
     dome.scale.set(1, 0.95, 1.04); dome.position.set(0, 0.05, -0.05); g.add(dome);
-    var band = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.045, 6, 26, Math.PI), pgM('#FFF6E4'));
-    band.position.set(0, 0.07, -0.05); band.scale.set(1.02, 0.95, 1); g.add(band);
+    var rib = new THREE.Mesh(new THREE.TorusGeometry(0.985, 0.02, 5, 24, Math.PI), pgM('#8AD8BF'));
+    rib.position.set(0, 0.06, -0.06); rib.rotation.y = Math.PI / 2; g.add(rib);
+    g.add(pgBox(0.05, 0.05, 1.9, '#FFF6E4', 0, 0.9, -0.05));
     var door = new THREE.Mesh(new THREE.CircleGeometry(0.44, 16, 0, Math.PI), pgM('#FFF6E4'));
     door.position.set(0, 0.12, 0.94); g.add(door);
     g.add(pgBox(0.035, 0.36, 0.03, '#DCCBAE', 0, 0.3, 0.96));
@@ -11221,9 +11222,18 @@ async function finishBoot(){
   /* 50. 🏕️ 패밀리 에어텐트 — 노스피크 A7 느낌 대형 터널형 */
   function pgbFamilyAirtent(g){
     g.add(pgBox(2.85, 0.09, 2.05, '#F3E9D4', 0, 0.045, 0));
-    var tun = new THREE.Mesh(new THREE.CylinderGeometry(0.96, 0.96, 2.3, 18), pgM('#F8EDD9'));
-    tun.rotation.z = Math.PI / 2; tun.position.set(0, 0.99, -0.08); g.add(tun);
-    var ridge = pgBox(2.24, 0.07, 0.42, '#E6CFA9', 0, 1.9, -0.08); g.add(ridge);
+    var tun = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 2.24, 18), pgM('#F8EDD9'));
+    tun.rotation.z = Math.PI / 2; tun.position.set(0, 0.94, -0.08); g.add(tun);
+    var ridge = pgBox(2.2, 0.07, 0.4, '#E6CFA9', 0, 1.8, -0.08); g.add(ridge);
+    g.add(pgBox(2.16, 0.1, 0.14, '#E6CFA9', 0, 0.5, 0.76));
+    [-0.62, 0.2].forEach(function(dx){
+      g.add(pgBox(0.46, 0.34, 0.06, '#EAF1E4', dx, 1.06, 0.74));
+      g.add(pgBox(0.5, 0.04, 0.07, '#DCC4A0', dx, 0.88, 0.75));
+    });
+    [-0.82, 0.72].forEach(function(dx){
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.022, 5, 18), pgM('#E7D3B2'));
+      ring.position.set(dx * 0.9, 0.94, -0.08); ring.rotation.y = Math.PI / 2; g.add(ring);
+    });
     [-0.78, 0.78].forEach(function(dx){
       var cap = new THREE.Mesh(new THREE.SphereGeometry(0.96, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), pgM('#F3E4C9'));
       cap.position.set(dx * 1.44, 0.99, -0.08); cap.scale.set(0.26, 1, 1); g.add(cap);
