@@ -12431,14 +12431,14 @@ async function finishBoot(){
       g.add(aim(new THREE.Mesh(tieGeo, i % 2 ? tieA : tieB), curve.getPointAt(tu), curve.getTangentAt(tu), 0.02));
     }
     /* ---------- ③ 지지 기둥 · 트러스 · 아치 ---------- */
-    for (i = 0; i < 20; i++){
-      var su = i / 20;
+    for (i = 0; i < 14; i++){
+      var su = i / 14;
       var pq = curve.getPointAt(su), tq = curve.getTangentAt(su);
       if (pq.y < 0.95) continue;
       var lx = new THREE.Vector3().crossVectors(tq, up).normalize();
       [-0.64, 0.64].forEach(function(sgn){
         var bx = pq.x + lx.x * sgn, bz = pq.z + lx.z * sgn;
-        g.add(pgBeam([bx, 0.05, bz], [bx, pq.y - 0.03, bz], 0.095, '#DCC09B', 6));
+        g.add(pgBeam([bx, 0.05, bz], [bx, pq.y - 0.03, bz], 0.115, '#DCC09B', 6));
         if (pq.y > 3.2){
           g.add(pgBeam([bx, 0.14, bz], [pq.x + lx.x * sgn * 0.10, pq.y - 0.12, pq.z + lx.z * sgn * 0.10], 0.042, '#EBD4B4', 5));
         }
@@ -12464,12 +12464,14 @@ async function finishBoot(){
     var st = new THREE.Group(); g.add(st);
     st.add(pgBox(5.0, 0.16, 1.20, '#FFF1DF', 0.35, 0.98, 4.55));
     st.add(pgBox(5.04, 0.06, 0.09, C.pink, 0.35, 1.07, 5.12));
-    [[-1.75, 4.06], [2.4, 4.06], [-1.75, 5.04], [2.4, 5.04]].forEach(function(p){
-      st.add(pgCyl(0.085, 0.10, 2.30, '#E8CDA9', p[0], 2.13, p[1], 7));
+    [[-1.85, 3.98], [2.45, 3.98], [-1.85, 5.16], [2.45, 5.16], [0.3, 5.16]].forEach(function(p){
+      st.add(pgCyl(0.105, 0.12, 2.35, '#E8CDA9', p[0], 2.16, p[1], 8));
     });
-    st.add(pgBox(5.4, 0.12, 1.72, '#FFE3EC', 0.35, 3.30, 4.55));
-    st.add(pgBox(5.42, 0.15, 0.20, C.mint, 0.35, 3.16, 3.72));
-    st.add(pgBox(5.42, 0.16, 0.16, C.mint, 0.35, 3.14, 5.36));
+    st.add(pgBox(5.5, 0.14, 1.05, '#FFE3EC', 0.35, 3.30, 4.20));
+    st.add(pgBox(5.5, 0.14, 1.05, '#FFF6E8', 0.35, 3.30, 4.95));
+    st.add(pgBox(5.52, 0.16, 0.14, C.mint, 0.35, 3.44, 4.57));
+    st.add(pgBox(5.54, 0.18, 0.16, C.mint, 0.35, 3.16, 3.72));
+    st.add(pgBox(5.54, 0.18, 0.16, C.pink, 0.35, 3.16, 5.42));
     [-1.9, 2.5].forEach(function(sx){
       st.add(pgBox(0.10, 0.62, 1.30, '#FFE3EC', sx, 1.34, 4.55));
     });
@@ -12504,16 +12506,16 @@ async function finishBoot(){
     for (i = 0; i < CARS; i++){
       var cg = new THREE.Group();
       var col = [C.sky, C.lemon, C.mint][i % 3];
-      cg.add(pgBox(0.98, 0.34, 1.30, col, 0, 0.30, 0));
-      cg.add(pgBox(1.04, 0.09, 1.34, '#FFFDF6', 0, 0.50, 0));
-      cg.add(pgBox(0.86, 0.30, 0.13, col, 0, 0.70, 0.55));
-      cg.add(pgBox(0.90, 0.09, 0.88, '#FFF3E4', 0, 0.55, -0.02));
+      cg.add(pgBox(1.12, 0.38, 1.48, col, 0, 0.32, 0));
+      cg.add(pgBox(1.18, 0.10, 1.52, '#FFFDF6', 0, 0.54, 0));
+      cg.add(pgBox(0.98, 0.34, 0.14, col, 0, 0.76, 0.62));
+      cg.add(pgBox(1.02, 0.10, 1.00, '#FFF3E4', 0, 0.60, -0.02));
       if (i === 0){
-        cg.add(pgBox(0.86, 0.26, 0.28, C.coral, 0, 0.30, -0.72));
-        cg.add(pgSph(0.07, '#FFFDF6', 0.30, 0.40, -0.82, 7));
-        cg.add(pgSph(0.07, '#FFFDF6', -0.30, 0.40, -0.82, 7));
-        cg.add(pgCyl(0.022, 0.022, 0.2, C.iron, 0, 0.58, -0.6, 5));
-        var cf = pgFlag(C.coral, 0.26, 0.22); cf.position.set(0, 0.7, -0.6); cg.add(cf);
+        cg.add(pgBox(0.98, 0.30, 0.32, C.coral, 0, 0.32, -0.82));
+        cg.add(pgSph(0.08, '#FFFDF6', 0.34, 0.44, -0.94, 7));
+        cg.add(pgSph(0.08, '#FFFDF6', -0.34, 0.44, -0.94, 7));
+        cg.add(pgCyl(0.025, 0.025, 0.24, C.iron, 0, 0.66, -0.7, 5));
+        var cf = pgFlag(C.coral, 0.30, 0.24); cf.position.set(0, 0.78, -0.7); cg.add(cf);
       }
       [[-0.46, 0.42], [0.46, 0.42], [-0.46, -0.42], [0.46, -0.42]].forEach(function(w){
         var wh = pgCyl(0.085, 0.085, 0.05, C.dark, w[0], 0.08, w[1], 8);
@@ -12533,7 +12535,7 @@ async function finishBoot(){
         var yA = new THREE.Vector3().crossVectors(zA, xA);
         cars[k].quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
         cars[k].position.copy(cp);
-        seat[k] = new THREE.Vector3(0, 0.44, -0.02).applyQuaternion(cars[k].quaternion).add(cp);
+        seat[k] = new THREE.Vector3(0, 0.48, -0.02).applyQuaternion(cars[k].quaternion).add(cp);
       }
     }
     placeCars(0);
