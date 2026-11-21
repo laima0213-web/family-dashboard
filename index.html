@@ -1721,6 +1721,9 @@ body.pg-open{overflow:hidden!important}
 .pg-bbar button.del{border-color:#F3C9C1;background:#FFF6F3;color:#C4553F}
 .pg-bbar button.x{width:28px;padding:0;border-color:#EADFCB;background:#FFF8EA;color:#8B7A63}
 .pg-bbar button:active{transform:scale(.95)}
+.pg-bbar.rbar{border-color:#C9E2F3}
+.pg-bbar.rbar button{border-color:#CFE3F5;background:#EFF7FF;color:#3F6E8F}
+.pg-bbar.rbar button.home{border-color:#F0DFC0;background:#FFF8EA;color:#8B6A3F}
 
 /* ---------- 상점 🏡 집·마을 탭 ---------- */
 .av-card-svg{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center}
@@ -1902,7 +1905,7 @@ body.pg-open{overflow:hidden!important}
   </div>
 
   <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
-  <div class="pg-hint" id="pgHint">손가락으로 자유롭게 이동 · 🔄 버튼으로 360° 회전 · 두 손가락 확대</div>
+  <div class="pg-hint" id="pgHint">손가락으로 자유롭게 이동 · 놀이기구는 꾹 누르면 들려요 · 두 손가락 확대</div>
 
   <div class="pg-zoom">
     <button type="button" id="pgPanBtn" class="pg-pan-btn on" aria-label="지금 손가락으로 화면 이동 중 · 누르면 360° 회전" aria-pressed="true" title="지금 손가락으로 화면 이동 중 · 누르면 360° 회전">✋</button>
@@ -1962,6 +1965,14 @@ body.pg-open{overflow:hidden!important}
     <button type="button" data-pgb="rot">↻ 45° 돌리기</button>
     <button type="button" data-pgb="del" class="del">🗑 빼기</button>
     <button type="button" data-pgb="close" class="x" aria-label="닫기">✕</button>
+  </div>
+
+  <!-- 🎡 놀이기구를 꾹 눌렀을 때 — 돌리기 · 원래 자리 (엄지 닿는 아래쪽) -->
+  <div class="pg-bbar rbar" id="pgRideBar" hidden>
+    <span class="pgb-name" id="pgrName">🎡 놀이기구</span>
+    <button type="button" data-pgr="rot">↻ 45° 돌리기</button>
+    <button type="button" data-pgr="home" class="home">🏠 원래 자리</button>
+    <button type="button" data-pgr="close" class="x" aria-label="닫기">✕</button>
   </div>
 </div>
 
@@ -3068,6 +3079,28 @@ function normalizeState(raw){
     if (listB.length) bldOut[id] = listB;
   });
   out.pgBuilds = bldOut;
+  /* 🎡 놀이터에서 옮겨 둔 놀이기구 — 아이별 { key: { x, z, rot } } */
+  var rdsRaw = (r.pgRides && typeof r.pgRides === 'object') ? r.pgRides : {};
+  var rdsOut = {};
+  KIDS.forEach(function(id){
+    var m2 = rdsRaw[id];
+    if (!m2 || typeof m2 !== 'object' || Array.isArray(m2)) return;
+    var oo = {};
+    Object.keys(m2).forEach(function(k){
+      if (!/^[a-z]{2,12}$/.test(k)) return;
+      var it = m2[k];
+      if (!it || typeof it !== 'object') return;
+      var rx2 = Number(it.x), rz2 = Number(it.z), rt2 = Number(it.rot);
+      if (!isFinite(rx2) || !isFinite(rz2)) return;
+      if (rx2 < -84) rx2 = -84; else if (rx2 > 84) rx2 = 84;
+      if (rz2 < -22) rz2 = -22; else if (rz2 > 22) rz2 = 22;
+      if (!isFinite(rt2)) rt2 = 0;
+      rt2 = ((rt2 % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      oo[k] = { x: Math.round(rx2 * 100) / 100, z: Math.round(rz2 * 100) / 100, rot: Math.round(rt2 * 1000) / 1000 };
+    });
+    if (Object.keys(oo).length) rdsOut[id] = oo;
+  });
+  out.pgRides = rdsOut;
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
   if (sc && sc.date === todayKey()){
     out.sched = { date: sc.date, items: normalizeList(sc.items, [], 's') };
@@ -7998,6 +8031,7 @@ async function finishBoot(){
     rideTex:{}, rideOrder:[], legLayers:{}, armPal:{},
     builds:{}, buildOrder:[], buildDrag:null, buildSel:'', buildBarAt:0, buildFoot:{},
     mode:'', ptrs:{}, orbit:null, drag:null, pinch:null, pan:null, panMode:false,
+    rideDrag:null, press:null, pressTimer:0, rideSel:'', rideRing:null, lastPt:null,
     time:0, lastT:0, decoOpen:false, decoTab:'char', lastSig:'', hintTimer:0
   };
   var CDN = [
@@ -8129,6 +8163,14 @@ async function finishBoot(){
   function pgBuildRecords(kid){
     var b = (state && state.pgBuilds && state.pgBuilds[kid]) || [];
     return Array.isArray(b) ? b : [];
+  }
+  /* ============================================================
+     🎡 놀이기구 위치 — state.pgRides[kid] = { coaster: { x, z, rot }, ... }
+     · 옮기거나 돌린 기구만 저장한다 (옮긴 적 없으면 기본 자리)
+     ============================================================ */
+  function pgRideRecords(kid){
+    var r = (state && state.pgRides && state.pgRides[kid]);
+    return (r && typeof r === 'object' && !Array.isArray(r)) ? r : {};
   }
   function pgBuildRec(kid, id){
     return pgBuildRecords(kid).filter(function(r){ return r && r.id === id; })[0] || null;
@@ -10894,8 +10936,10 @@ async function finishBoot(){
       if (Math.sqrt(Math.pow(x - obs[i][0], 2) + Math.pow(z - obs[i][1], 2)) < obs[i][2] + m) return false;
     }
     for (i = 0; i < PG.rideList.length; i++){
-      var G = PG.rides[PG.rideList[i]].g;
-      if (Math.sqrt(Math.pow(x - G.position.x, 2) + Math.pow(z - G.position.z, 2)) < (G.userData.radius || 2) + m) return false;
+      var hs = pgRideHits(PG.rides[PG.rideList[i]].g);
+      for (var hi = 0; hi < hs.length; hi++){
+        if (Math.sqrt(Math.pow(x - hs[hi].x, 2) + Math.pow(z - hs[hi].z, 2)) < hs[hi].r + m) return false;
+      }
     }
     return true;
   }
@@ -11456,8 +11500,8 @@ async function finishBoot(){
     [18, 90, 162, 234, 306].forEach(function(d){
       yard.add(pgPathSpur(d * Math.PI / 180, ROAD.plaza - 0.3, ROAD.prom + 0.1, 0.55, 0.024));
     });
-    /* 순환로 → 대형 놀이기구 입구 */
-    [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].forEach(function(d){
+    /* 순환로 → 대형 놀이기구 입구 (🎢 롤러코스터는 90° 정북, 회전목마·바이킹은 52°·128°) */
+    [22.5, 52, 112.5, 128, 202.5, 247.5, 292.5, 337.5].forEach(function(d){
       yard.add(pgPathSpur(d * Math.PI / 180, ROAD.prom + 0.32, ROAD.outer - 0.5, 0.5, 0.024));
     });
     /* 산책길 가장자리 꽃 테두리 */
@@ -11516,12 +11560,12 @@ async function finishBoot(){
 
     /* 6) 입구 아치 · 수레 */
     pgArch(yard, 0, 4.72, Math.PI);
-    pgCart(yard, Math.cos(45 * Math.PI / 180) * 12.6, Math.sin(45 * Math.PI / 180) * 12.6, -45 * Math.PI / 180, 'balloon');
+    pgCart(yard, Math.cos(30 * Math.PI / 180) * 12.6, Math.sin(30 * Math.PI / 180) * 12.6, -30 * Math.PI / 180, 'balloon');
     pgCart(yard, Math.cos(225 * Math.PI / 180) * 12.6, Math.sin(225 * Math.PI / 180) * 12.6, -225 * Math.PI / 180, 'candy');
     pgCart(yard, Math.cos(315 * Math.PI / 180) * 12.6, Math.sin(315 * Math.PI / 180) * 12.6, -315 * Math.PI / 180, 'pop');
 
     /* 7) 🏡 오두막 · 🧁 디저트 카페 */
-    yard.add(pgCottage(0, 18.6, Math.PI));
+    yard.add(pgCottage(-11, 17.6, Math.PI * 0.72));   /* 🎢 트랙 타원 안에 갇히지 않게 서쪽 잔디로 */
     yard.add(pgCafe(0, -18.6, 0));
 
     /* 8) 소풍 돗자리 — 파크 바깥 잔디 */
@@ -11550,11 +11594,25 @@ async function finishBoot(){
      범퍼카 경기장 바닥 안에 덤불이 박히게 된다. */
   function pgFreeSpot(x, z, m){
     for (var q = 0; q < PG.rideList.length; q++){
-      var G = PG.rides[PG.rideList[q]].g;
-      var rad = (G.userData.radius || 2) + (m || 0.6);
-      if (Math.hypot(x - G.position.x, z - G.position.z) < rad) return false;
+      var hs = pgRideHits(PG.rides[PG.rideList[q]].g);
+      for (var h = 0; h < hs.length; h++){
+        if (Math.hypot(x - hs[h].x, z - hs[h].z) < hs[h].r + (m || 0.6)) return false;
+      }
     }
     return true;
+  }
+  /* 🎡 기구의 실제 발자국 — 큰 기구는 타원 트랙을 덮는 여러 히트서클로 (없으면 반경 하나) */
+  function pgRideHits(g){
+    var h = g && g.userData && g.userData.hit, out = [];
+    if (h && h.length){
+      var c = Math.cos(g.rotation.y || 0), sn = Math.sin(g.rotation.y || 0);
+      for (var i = 0; i < h.length; i++){
+        out.push({ x: g.position.x + h[i].x * c + h[i].z * sn,
+                   z: g.position.z - h[i].x * sn + h[i].z * c, r: h[i].r });
+      }
+    }
+    if (!out.length && g) out.push({ x: g.position.x, z: g.position.z, r: g.userData.radius || 2 });
+    return out;
   }
   /* 🚗 범퍼카 경기장(바닥 3.45 + 핑크 패드·테두리 3.82) 바깥인지 확인 — 놀이기구를 세우기 전에도 쓸 수 있다 */
   function pgArenaFree(x, z, m){
@@ -11659,6 +11717,7 @@ async function finishBoot(){
   function pgRide(key, label, build){
     var g = new THREE.Group();
     g.userData.ride = key;
+    g.userData.__pgRide = key;
     g.userData.radius = 2.1;
     g.userData.spots = [];
     g.userData.parts = {};
@@ -11682,19 +11741,24 @@ async function finishBoot(){
       var g = PG.rides[k].g;
       g.position.set(x, 0, z);
       g.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a));
+      g.userData.home = { x: x, z: z, rot: g.rotation.y };
       g.updateMatrixWorld(true);
     });
-    /* 바깥 — 놀이공원 대형 기구 8종 */
-    var outer = { ferris:22.5, carousel:67.5, coaster:112.5, viking:157.5,
+    /* 바깥 — 놀이공원 대형 기구 8종
+       🎢 롤러코스터(가로 14m)는 정북(90°)에 랜드마크로 세우고, 양옆 회전목마·바이킹을
+       52°·128°로 살짝 비겨 세워 트랙 끝과 부딪히지 않게 한다. */
+    var outer = { ferris:22.5, carousel:52, coaster:90, viking:128,
                   teacup:202.5, drop:247.5, balloon:292.5, bumper:337.5 };
     Object.keys(outer).forEach(function(k){
       var a = outer[k] * Math.PI / 180;
-      var rr = (k === 'bumper') ? BUMPER_RR : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 */
+      var rr = (k === 'bumper') ? BUMPER_RR : (k === 'coaster' ? 17.4 : ROAD.outer);
+      /* 범퍼카는 넓은 경기장, 🎢 롤러코스터는 8m 높이의 큰 트랙이라 조금 더 바깥에 */
       var x = PARK.x + Math.cos(a) * rr, z = PARK.z + Math.sin(a) * rr;
       pgBuildOne(k);
       var g = PG.rides[k].g;
       g.position.set(x, 0, z);
       g.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a));
+      g.userData.home = { x: x, z: z, rot: g.rotation.y };
       g.updateMatrixWorld(true);
     });
   /* ---------- 잔디 위 꽃 · 풀 포기 (빈草地 채우기) ---------- */
@@ -11702,9 +11766,9 @@ async function finishBoot(){
     var yard = PG.yard || PG.scene;
     var avenues = [18, 90, 162, 234, 306];
     var entr = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
-    var ridePos = PG.rideList.map(function(k){
-      var g = PG.rides[k].g;
-      return [g.position.x, g.position.z, (g.userData.radius || 2) + 0.45];
+    var ridePos = [];
+    PG.rideList.forEach(function(k){
+      pgRideHits(PG.rides[k].g).forEach(function(h){ ridePos.push([h.x, h.z, h.r + 0.45]); });
     });
     var bld = [[PARK.x, 18.6, 2.6], [PARK.x, -18.6, 2.6]];
     var cols = [C.pink, C.lemon, C.white, C.lav, C.coral, C.sky, C.mint];
@@ -11765,6 +11829,7 @@ async function finishBoot(){
     var ba = 135 * Math.PI / 180, br = 12.4;
     b.position.set(PARK.x + Math.cos(ba) * br, 0, PARK.z + Math.sin(ba) * br);
     b.rotation.y = Math.atan2(-Math.cos(ba), -Math.sin(ba)) + Math.PI;
+    b.userData.home = { x: b.position.x, z: b.position.z, rot: b.rotation.y };
     b.updateMatrixWorld(true);
     /* 빈 잔디에 꽃 · 풀 포기 */
     try { pgScatterFlowers(); } catch(e){ console.warn('[playground] scatter:', e && e.message); }
@@ -12270,70 +12335,217 @@ async function finishBoot(){
     g.userData.spots = [{ x:0, y:1.1, z:0 }];
   }
 
+  /* 🎢 롤러코스터 — 놀이공원의 압도적인 랜드마크
+     · 가로(X) 약 14m · 세로(Z) 약 7.9m · 최고 언덕 8.1m (예전 2.65m의 3배)
+     · 위에서 보면 가로로 긴 타원 + 서쪽·동쪽 두 개의 큰 언덕(2연속 빅힐)
+     · 로컬 +z = 놀이공원 중심 방향(다른 기구와 같은 규칙) → 승강장은 산책로 쪽 */
+  var CO_RX = 6.7, CO_RZ = 3.95;
+  var CO_TAB = [
+    [0.00, 1.12], [0.06, 1.14], [0.10, 1.55], [0.15, 3.10], [0.20, 5.60],
+    [0.25, 7.60], [0.28, 8.10], [0.33, 7.20], [0.38, 5.00], [0.43, 3.10],
+    [0.48, 2.35], [0.52, 2.30], [0.57, 3.40], [0.62, 5.40], [0.67, 7.00],
+    [0.70, 7.35], [0.75, 6.30], [0.80, 4.40], [0.85, 2.90], [0.90, 2.05],
+    [0.94, 1.45], [0.97, 1.18], [1.00, 1.12]
+  ];
+  /* 승강장(u=0)에서 출발해 두 번 크게 오르내리는 높이 곡선 (Hermite) */
+  function pgCoY(u){
+    u = u - Math.floor(u);
+    var i = 0;
+    while (i < CO_TAB.length - 2 && u > CO_TAB[i + 1][0]) i++;
+    var u1 = CO_TAB[i][0], u2 = CO_TAB[i + 1][0], h = (u2 - u1) || 1;
+    var t = Math.max(0, Math.min(1, (u - u1) / h));
+    function sl(k){
+      var a = CO_TAB[Math.max(0, k - 1)], b = CO_TAB[Math.min(CO_TAB.length - 1, k + 1)];
+      return (b[1] - a[1]) / ((b[0] - a[0]) || 1);
+    }
+    var m1 = sl(i), m2 = sl(i + 1), t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * CO_TAB[i][1] + (t3 - 2 * t2 + t) * h * m1
+         + (-2 * t3 + 3 * t2) * CO_TAB[i + 1][1] + (t3 - t2) * h * m2;
+  }
   function pgCoaster(g){
-    var pts = [], N = 18;
-    for (var i = 0; i < N; i++){
-      var a = i / N * Math.PI * 2;
-      var rr = 2.2 + Math.sin(a * 2 + 0.3) * 0.28;
-      var hill = Math.max(0, Math.sin(a * 2 + 0.75));
-      var yy = 0.6 + Math.pow(hill, 1.25) * 2.05;
-      pts.push(new THREE.Vector3(Math.cos(a) * rr * 1.05, yy, Math.sin(a) * rr * 0.9));
+    var N = 96, i;
+    var up = new THREE.Vector3(0, 1, 0);
+    var pts = [];
+    for (i = 0; i < N; i++){
+      var a = i / N * Math.PI * 2;                                  /* 90° = 승강장 */
+      var u = ((a - Math.PI / 2) / (Math.PI * 2) + 1) % 1;          /* 0 = 승강장 */
+      var rx = CO_RX + Math.cos(a * 2 + 0.4) * 0.28;
+      pts.push(new THREE.Vector3(Math.cos(a) * rx, pgCoY(u), Math.sin(a) * CO_RZ));
     }
     var curve = new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0.5);
-    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 180, 0.07, 6, true), pgM('#FF8FA3')));
-    var rail2 = new THREE.Mesh(new THREE.TubeGeometry(curve, 180, 0.032, 5, true), pgM('#FFF6E8'));
-    rail2.position.y = 0.09; g.add(rail2);
-    /* 침목 · 지지대 */
-    for (var p = 0; p < 36; p++){
-      var pt = curve.getPointAt(p / 36);
-      var tg = curve.getTangentAt(p / 36);
-      var tie = pgBox(0.34, 0.05, 0.1, '#FFE0E8', pt.x, pt.y - 0.02, pt.z);
-      tie.rotation.y = -Math.atan2(tg.x, tg.z);
-      g.add(tie);
+    /* ---------- ① 바닥 패드 ---------- */
+    var pad = pgMesh(new THREE.CylinderGeometry(1, 1.03, 0.14, 46), '#FFF3E4', 0, 0.06, 0);
+    pad.scale.set(7.5, 1, 4.85); g.add(pad);
+    var rim = pgMesh(new THREE.TorusGeometry(1, 0.022, 6, 72), C.pink, 0, 0.145, 0);
+    rim.scale.set(7.5, 4.85, 1); rim.rotation.x = -Math.PI / 2; g.add(rim);
+    /* ---------- ② 더블 레일 + 스파인 + 침목 ---------- */
+    function railCurve(off){
+      var rp = [];
+      for (var s = 0; s < N; s++){
+        var uu = s / N;
+        var p = curve.getPointAt(uu);
+        var tg = curve.getTangentAt(uu).normalize();
+        var sd = new THREE.Vector3().crossVectors(tg, up).normalize();
+        rp.push(p.clone().addScaledVector(sd, off));
+      }
+      return new THREE.CatmullRomCurve3(rp, true, 'catmullrom', 0.5);
     }
-    for (var q = 0; q < 30; q++){
-      var pq = curve.getPointAt((q / 30) % 1);
-      if (pq.y > 0.5){
-        g.add(pgBeam([pq.x, 0.04, pq.z], [pq.x, pq.y, pq.z], 0.07, '#DCC09B', 6));
+    [-0.40, 0.40].forEach(function(off){
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(railCurve(off), 300, 0.062, 6, true), pgM('#FF8FA3')));
+    });
+    var spinePts = [];
+    for (i = 0; i < N; i++){
+      var sp = curve.getPointAt(i / N);
+      spinePts.push(new THREE.Vector3(sp.x, sp.y - 0.17, sp.z));
+    }
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(spinePts, true, 'catmullrom', 0.5), 300, 0.085, 6, true), pgM('#E4778D')));
+    /* 침목 — 트랙을 따라 기울며 놓인다 */
+    var tieGeo = new THREE.BoxGeometry(1.08, 0.06, 0.22);
+    var tieA = pgM('#FFF6EA'), tieB = pgM('#FFE0E8');
+    function aim(obj, p, tg, dy){
+      obj.position.set(p.x, p.y + (dy || 0), p.z);
+      var zA = tg.clone().normalize();
+      var xA = new THREE.Vector3().crossVectors(up, zA).normalize();
+      var yA = new THREE.Vector3().crossVectors(zA, xA);
+      obj.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
+      return obj;
+    }
+    for (i = 0; i < 60; i++){
+      var tu = i / 60;
+      g.add(aim(new THREE.Mesh(tieGeo, i % 2 ? tieA : tieB), curve.getPointAt(tu), curve.getTangentAt(tu), 0.02));
+    }
+    /* ---------- ③ 지지 기둥 · 트러스 · 아치 ---------- */
+    for (i = 0; i < 14; i++){
+      var su = i / 14;
+      var pq = curve.getPointAt(su), tq = curve.getTangentAt(su);
+      if (pq.y < 0.95) continue;
+      var lx = new THREE.Vector3().crossVectors(tq, up).normalize();
+      [-0.64, 0.64].forEach(function(sgn){
+        var bx = pq.x + lx.x * sgn, bz = pq.z + lx.z * sgn;
+        g.add(pgBeam([bx, 0.05, bz], [bx, pq.y - 0.03, bz], 0.115, '#DCC09B', 6));
+        if (pq.y > 3.2){
+          g.add(pgBeam([bx, 0.14, bz], [pq.x + lx.x * sgn * 0.10, pq.y - 0.12, pq.z + lx.z * sgn * 0.10], 0.042, '#EBD4B4', 5));
+        }
+      });
+      if (pq.y > 1.2){
+        [0.42, 0.74].forEach(function(kk){
+          if (pq.y * kk < 1.0) return;
+          var hy = pq.y * kk;
+          g.add(pgBeam([pq.x + lx.x * 0.64, hy, pq.z + lx.z * 0.64],
+                       [pq.x - lx.x * 0.64, hy, pq.z - lx.z * 0.64], 0.05, '#E2C8A4', 5));
+        });
+      }
+      if (pq.y > 5.2){
+        /* 높은 언덕 — 아치형 트러스 보강 */
+        var ay = pq.y - 0.55;
+        g.add(pgBeam([pq.x + lx.x * 0.64, ay, pq.z + lx.z * 0.64],
+                     [pq.x, pq.y - 0.28, pq.z], 0.05, '#E8D0AE', 5));
+        g.add(pgBeam([pq.x - lx.x * 0.64, ay, pq.z - lx.z * 0.64],
+                     [pq.x, pq.y - 0.28, pq.z], 0.05, '#E8D0AE', 5));
       }
     }
-    /* 승강장 */
-    g.add(pgBox(1.0, 0.12, 0.8, '#FFF1DF', 0, 0.06, 2.0));
-    g.add(pgBox(0.9, 0.4, 0.08, C.mint, 0, 0.26, 2.34));
-    var cars = [];
-    for (var c = 0; c < 2; c++){
+    /* ---------- ④ 승강장 — 캐노피 지붕 · 계단 · 꽃 화단 ---------- */
+    var st = new THREE.Group(); g.add(st);
+    st.add(pgBox(5.0, 0.16, 1.20, '#FFF1DF', 0.35, 0.98, 4.55));
+    st.add(pgBox(5.04, 0.06, 0.09, C.pink, 0.35, 1.07, 5.12));
+    [[-1.85, 3.98], [2.45, 3.98], [-1.85, 5.16], [2.45, 5.16], [0.3, 5.16]].forEach(function(p){
+      st.add(pgCyl(0.105, 0.12, 2.35, '#E8CDA9', p[0], 2.16, p[1], 8));
+    });
+    st.add(pgBox(5.5, 0.14, 1.05, '#FFE3EC', 0.35, 3.30, 4.20));
+    st.add(pgBox(5.5, 0.14, 1.05, '#FFF6E8', 0.35, 3.30, 4.95));
+    st.add(pgBox(5.52, 0.16, 0.14, C.mint, 0.35, 3.44, 4.57));
+    st.add(pgBox(5.54, 0.18, 0.16, C.mint, 0.35, 3.16, 3.72));
+    st.add(pgBox(5.54, 0.18, 0.16, C.pink, 0.35, 3.16, 5.42));
+    [-1.9, 2.5].forEach(function(sx){
+      st.add(pgBox(0.10, 0.62, 1.30, '#FFE3EC', sx, 1.34, 4.55));
+    });
+    st.add(pgBox(5.0, 0.09, 0.07, C.mint, 0.35, 1.66, 5.14));
+    st.add(pgBox(0.07, 0.09, 1.16, C.mint, -1.95, 1.66, 4.55));
+    for (var rf = 0; rf < 7; rf++){
+      st.add(pgSph(0.13, rf % 2 ? C.lemon : '#FFFFFF', -1.85 + rf * 0.74, 3.43, 4.55, 7));
+    }
+    /* 승강장 간판 */
+    st.add(pgCyl(0.05, 0.06, 1.5, '#D9BE99', 2.62, 1.75, 5.14, 6));
+    st.add(pgBox(1.4, 0.50, 0.07, '#FFF6E6', 2.62, 2.60, 5.14));
+    st.add(pgSph(0.12, C.coral, 2.30, 2.60, 5.18, 8));
+    st.add(pgSph(0.10, C.lemon, 2.62, 2.60, 5.18, 8));
+    st.add(pgSph(0.10, C.mint, 2.94, 2.60, 5.18, 8));
+    /* 계단 — 서쪽으로 내려간다 (순환 산책로 쪽) */
+    var steps = 6, sx0 = -1.95, sx1 = -3.95;
+    for (var si = 0; si < steps; si++){
+      var hh = 0.16 + (steps - 1 - si) * 0.153;
+      st.add(pgBox(0.34, hh, 1.10, '#F3E3C8', sx0 + (sx1 - sx0) * (si + 0.5) / steps, hh / 2, 4.55));
+    }
+    [-1, 1].forEach(function(sd){
+      st.add(pgBeam([sx0 + 0.2, 1.14, 4.55 + sd * 0.52], [sx1 - 0.1, 0.24, 4.55 + sd * 0.52], 0.032, '#D9BE99', 5));
+    });
+    /* 승강장 꽃 화단 — 동쪽 끝 */
+    st.add(pgBox(1.0, 0.2, 0.4, '#C9A57A', 3.5, 0.1, 4.55));
+    for (var fl = 0; fl < 4; fl++){
+      st.add(pgSph(0.08, [C.pink, C.lemon, C.white, C.lav][fl % 4], 3.14 + fl * 0.24, 0.26, 4.55, 6));
+    }
+    /* ---------- ⑤ 3량 열차 ---------- */
+    var CARS = 3, du = 1.45 / 36.6;
+    var cars = [], seat = [];
+    for (i = 0; i < CARS; i++){
       var cg = new THREE.Group();
-      var col = c ? C.lemon : C.sky;
-      cg.add(pgBox(0.56, 0.3, 0.68, col, 0, 0.1, 0));
-      cg.add(pgBox(0.6, 0.09, 0.5, '#FFFDF6', 0, 0.27, -0.02));
-      cg.add(pgSph(0.1, '#FFFFFF', 0, 0.14, 0.34, 7));
-      cg.add(pgCyl(0.022, 0.022, 0.18, C.iron, 0, 0.36, 0.16, 5));
-      cg.add(pgSph(0.045, C.coral, 0, 0.45, 0.16, 6));
-      [[-0.22, 0.2], [0.22, 0.2], [-0.22, -0.2], [0.22, -0.2]].forEach(function(w){
-        var wh = pgCyl(0.08, 0.08, 0.05, C.dark, w[0], 0.02, w[1], 8);
+      var col = [C.sky, C.lemon, C.mint][i % 3];
+      cg.add(pgBox(1.12, 0.38, 1.48, col, 0, 0.32, 0));
+      cg.add(pgBox(1.18, 0.10, 1.52, '#FFFDF6', 0, 0.54, 0));
+      cg.add(pgBox(0.98, 0.34, 0.14, col, 0, 0.76, 0.62));
+      cg.add(pgBox(1.02, 0.10, 1.00, '#FFF3E4', 0, 0.60, -0.02));
+      if (i === 0){
+        cg.add(pgBox(0.98, 0.30, 0.32, C.coral, 0, 0.32, -0.82));
+        cg.add(pgSph(0.08, '#FFFDF6', 0.34, 0.44, -0.94, 7));
+        cg.add(pgSph(0.08, '#FFFDF6', -0.34, 0.44, -0.94, 7));
+        cg.add(pgCyl(0.025, 0.025, 0.24, C.iron, 0, 0.66, -0.7, 5));
+        var cf = pgFlag(C.coral, 0.30, 0.24); cf.position.set(0, 0.78, -0.7); cg.add(cf);
+      }
+      [[-0.46, 0.42], [0.46, 0.42], [-0.46, -0.42], [0.46, -0.42]].forEach(function(w){
+        var wh = pgCyl(0.085, 0.085, 0.05, C.dark, w[0], 0.08, w[1], 8);
         wh.rotation.z = Math.PI / 2; cg.add(wh);
       });
       g.add(cg); cars.push(cg);
     }
-    var upV = new THREE.Vector3(0, 0, 1);
-    function place(t){
-      for (var k = 0; k < 2; k++){
-        var u = (t * 0.075 + k * 0.024) % 1;
-        var pp = curve.getPointAt(u);
-        var tg2 = curve.getTangentAt(u).normalize();
-        cars[k].position.set(pp.x, pp.y + 0.02, pp.z);
-        cars[k].quaternion.setFromUnitVectors(upV, tg2);
+    var lastT = -1;
+    function placeCars(t){
+      if (t === lastT && seat.length === CARS) return;
+      lastT = t;
+      for (var k = 0; k < CARS; k++){
+        var uu = (t * 0.042 - k * du) % 1; if (uu < 0) uu += 1;
+        var cp = curve.getPointAt(uu), ct = curve.getTangentAt(uu).normalize();
+        var zA = ct.clone();
+        var xA = new THREE.Vector3().crossVectors(up, zA).normalize();
+        var yA = new THREE.Vector3().crossVectors(zA, xA);
+        cars[k].quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
+        cars[k].position.copy(cp);
+        seat[k] = new THREE.Vector3(0, 0.48, -0.02).applyQuaternion(cars[k].quaternion).add(cp);
       }
     }
-    PG.dyn.push(place);
+    placeCars(0);
+    PG.dyn.push(placeCars);
     g.userData.pose = function(idx, t){
-      var u = (t * 0.075 + (idx % 2) * 0.024) % 1;
-      var pp = curve.getPointAt(u);
-      return { x: pp.x, y: pp.y + 0.24, z: pp.z };
+      placeCars(t);
+      var s = seat[idx % CARS] || { x: 0, y: 1.12, z: 0 };
+      return { x: s.x, y: s.y, z: s.z };
     };
-    g.userData.labelY = 3.0;
-    g.userData.radius = 2.7;
-    g.userData.spots = [{ x:0, y:0.25, z:0 }];
+    g.userData.labelY = 9.35;
+    g.userData.radius = 7.05;
+    /* 타원 트랙을 덮는 다중 히트서클 (나무·덤불·집이 트랙 안으로 파고들지 않게) */
+    g.userData.hit = [
+      { x: -5.5, z: 0, r: 2.70 }, { x: -2.9, z: 0, r: 3.70 }, { x: 0, z: 0, r: 4.05 },
+      { x: 2.9, z: 0, r: 3.70 }, { x: 5.5, z: 0, r: 2.70 },
+      { x: 0, z: 3.95, r: 1.6 }, { x: 0, z: -3.95, r: 1.6 }
+    ];
+    g.userData.spots = [{ x: 0, y: 0.44, z: 0 }, { x: 0, y: 0.44, z: 0 }, { x: 0, y: 0.44, z: 0 }];
+    /* 검증용 트랙 좌표(로컬) — 겹침 0건 실측에 쓴다 */
+    var trk = [];
+    for (i = 0; i < 96; i++){
+      var tp = curve.getPointAt(i / 96);
+      trk.push([Math.round(tp.x * 100) / 100, Math.round(tp.y * 100) / 100, Math.round(tp.z * 100) / 100]);
+    }
+    g.userData.track = trk;
   }
 
   function pgViking(g){
@@ -13445,6 +13657,7 @@ async function finishBoot(){
     PG.charOrder = PG.charOrder.filter(function(x){ return x !== id; });
   }
   function pgRefreshChars(){
+    pgRideApplyAll();
     PG.charOrder.slice().forEach(pgRemoveCharObj);
     pgPlaced(PG.kid).forEach(function(rec){ pgAddChar(rec); });
     pgRefreshBuilds();
@@ -13502,11 +13715,16 @@ async function finishBoot(){
     var obs = [];
     PG.rideList.forEach(function(k){
       var g = PG.rides[k].g;
-      obs.push([g.position.x, g.position.z, Math.max(1.5, (g.userData.radius || 2.0) * 0.66)]);
+      var hs = pgRideHits(g);
+      if (hs.length > 1){
+        hs.forEach(function(h){ obs.push([h.x, h.z, Math.max(1.0, h.r * 0.86)]); });
+      } else {
+        obs.push([g.position.x, g.position.z, Math.max(1.5, (g.userData.radius || 2.0) * 0.66)]);
+      }
     });
     obs.push([POND.x, POND.z, 2.1]);                               /* 광장 연못 + 나무다리 */
     obs.push([PARK.x + 1.8, PARK.z - 0.15, 1.25]);                 /* 광장 분수 */
-    obs.push([PARK.x, PARK.z + 18.6, 2.0], [PARK.x, PARK.z - 18.6, 2.0]);  /* 기본 오두막·카페 */
+    obs.push([PARK.x - 11, PARK.z + 17.6, 2.0], [PARK.x, PARK.z - 18.6, 2.0]);  /* 기본 오두막·카페 */
     obs.push([PARK.x - 16.5, PARK.z - 13.5, 1.3]);                 /* 소풍 돗자리 */
     obs.push([PARK.x, PARK.z + 4.72, 1.1]);                        /* 입구 아치 */
     (PG.solids || []).forEach(function(o){ obs.push(o); });
@@ -13691,6 +13909,7 @@ async function finishBoot(){
     if (!el) return;
     var nm = document.getElementById('pgbName');
     if (nm) nm.textContent = pgBuildIcon(b.rec.kind) + ' ' + pgBuildName(b.rec.kind);
+    pgHideRideBar(); PG.rideSel = ''; pgSelRingHide();
     el.hidden = false;
     PG.buildSel = b.id;
     pgBuildRingShow(b.rec.x, b.rec.z, b.foot);
@@ -13699,6 +13918,208 @@ async function finishBoot(){
     var el = document.getElementById('pgBuildBar');
     if (el) el.hidden = true;
   }
+  /* ============================================================
+     🎡 놀이기구 꾹 눌러 옮기기 · 돌리기 · 원래 자리
+     · 기본 1손가락 화면 이동과 공존하기 위해 380ms 롱프레스 뒤에만 집어 든다
+     · 옮기거나 돌린 기구만 state.pgRides[kid] 에 저장한다
+     ============================================================ */
+  function pgRideApplyAll(){
+    if (!PG.ready || !PG.rideList.length) return;
+    var recs = pgRideRecords(PG.kid);
+    PG.rideList.forEach(function(k){
+      var R = PG.rides[k];
+      if (!R) return;
+      var g = R.g, h = g.userData.home;
+      var rec = recs[k];
+      if (h && rec && typeof rec === 'object' && isFinite(Number(rec.x)) && isFinite(Number(rec.z))){
+        g.position.x = Number(rec.x);
+        g.position.z = Number(rec.z);
+        g.rotation.y = isFinite(Number(rec.rot)) ? Number(rec.rot) : h.rot;
+      } else if (h){
+        g.position.x = h.x; g.position.z = h.z; g.rotation.y = h.rot;
+      }
+      g.position.y = g.userData.lift || 0;
+      g.updateMatrixWorld(true);
+    });
+    PG.staticObs = null;              /* 새 자리를 집 짓기·나무 배치에도 반영 */
+  }
+  function pgRideSave(key){
+    if (!PG.rides[key] || !state) return;
+    var g = PG.rides[key].g;
+    var h = g.userData.home || { x: g.position.x, z: g.position.z, rot: g.rotation.y };
+    var kid = PG.kid;
+    var x = Math.round(g.position.x * 100) / 100, z = Math.round(g.position.z * 100) / 100;
+    var rot = ((g.rotation.y % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    rot = Math.round(rot * 1000) / 1000;
+    var dRot = Math.abs(((rot - h.rot + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+    var home = Math.abs(x - h.x) < 0.06 && Math.abs(z - h.z) < 0.06 && dRot < 0.02;
+    mutate(function(s){
+      s.pgRides = s.pgRides || {};
+      var m = Object.assign({}, s.pgRides[kid] || {});
+      if (home) delete m[key];
+      else m[key] = { x: x, z: z, rot: rot };
+      if (Object.keys(m).length) s.pgRides[kid] = m;
+      else delete s.pgRides[kid];
+    });
+    PG.lastSig = pgSig();
+  }
+  /* 🎡 선택 링 — 기구 크기에 맞춰 바닥에 켜진다 */
+  function pgSelRing(){
+    if (PG.rideRing) return PG.rideRing;
+    var m = new THREE.Mesh(new THREE.RingGeometry(0.90, 1.0, 64),
+      new THREE.MeshBasicMaterial({ color: 0x7FB8E8, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2; m.position.y = 0.24; m.visible = false; m.renderOrder = 3;
+    PG.scene.add(m);
+    PG.rideRing = m;
+    return m;
+  }
+  function pgSelRingShow(x, z, R){
+    if (!PG.scene) return;
+    var ring = pgSelRing();
+    if (x === null || x === undefined){ ring.visible = false; return; }
+    var rad = (R && R.g && R.g.userData.radius) || (R && R.g ? 2.2 : 1.2);
+    var s = Math.max(0.8, rad * 0.8);
+    ring.scale.set(s, s, 1);
+    ring.position.set(x, 0.24, z);
+    ring.visible = true;
+  }
+  function pgSelRingHide(){ if (PG.rideRing) PG.rideRing.visible = false; }
+  function pgRideBarShow(key){
+    var el = document.getElementById('pgRideBar');
+    if (!el || !key) return;
+    var nm = document.getElementById('pgrName');
+    if (nm) nm.textContent = pgLabelText(key);
+    pgHideBuildBar();
+    el.hidden = false;
+    PG.rideSel = key;
+  }
+  function pgHideRideBar(){
+    var el = document.getElementById('pgRideBar');
+    if (el) el.hidden = true;
+  }
+  function pgRideRot(key){
+    var R = PG.rides[key];
+    if (!R || !state) return;
+    R.g.rotation.y = ((R.g.rotation.y + Math.PI / 4) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    R.g.updateMatrixWorld(true);
+    PG.staticObs = null;
+    pgRideSave(key);
+    pgSelRingShow(R.g.position.x, R.g.position.z, R);
+    pgRideBarShow(key);
+    toast('↻ ' + pgLabelText(key) + ' 45° 돌렸어요', 1400);
+  }
+  function pgRideHome(key){
+    var R = PG.rides[key];
+    if (!R || !state) return;
+    var h = R.g.userData.home;
+    if (!h) return;
+    mutate(function(s){
+      if (!s.pgRides || !s.pgRides[PG.kid]) return;
+      var m = Object.assign({}, s.pgRides[PG.kid]);
+      delete m[key];
+      if (Object.keys(m).length) s.pgRides[PG.kid] = m;
+      else delete s.pgRides[PG.kid];
+    });
+    R.g.position.set(h.x, 0, h.z);
+    R.g.rotation.y = h.rot;
+    R.g.userData.lift = 0;
+    R.g.updateMatrixWorld(true);
+    PG.staticObs = null;
+    PG.lastSig = pgSig();
+    pgSelRingShow(h.x, h.z, R);
+    pgRideBarShow(key);
+    toast('🏠 ' + pgLabelText(key) + ' 원래 자리로 돌아갔어요', 2000);
+  }
+  /* 안전한 땅 — 바다·개울·얼음연못·광장 연못·울타리 밖으로는 못 간다 */
+  function pgRideLandSpot(x, z, key){
+    var R = key && PG.rides[key];
+    var rad = (R && R.g.userData.radius) || 2.2;
+    var pad = BUILD_PAD + rad * 0.55;
+    x = Number(x) || 0; z = Number(z) || 0;
+    for (var i = 0; i < PG.rideList.length; i++){
+      var k = PG.rideList[i];
+      if (k === key || !PG.rides[k]) continue;
+      var O = PG.rides[k].g;
+      var need = rad * 0.30 + (O.userData.radius || 2.2) * 0.55;
+      var dx = x - O.position.x, dz = z - O.position.z;
+      var dd = Math.sqrt(dx * dx + dz * dz);
+      if (dd < need){
+        if (dd < 0.001){ dx = 1; dz = 0; dd = 1; }
+        x = O.position.x + dx / dd * need;
+        z = O.position.z + dz / dd * need;
+      }
+    }
+    var p = pgInRect(x, z, pad);
+    x = p[0]; z = p[1];
+    if (pgInSea(x, z)) z = SEA_SHORE + 0.9 + rad * 0.45;
+    if (pgInStream(x, z)) z = STREAM.z + (z >= STREAM.z ? 1 : -1) * (STREAM.w / 2 + 0.8 + rad * 0.45);
+    if (pgInIce(x, z)) z = ICE.z + (z >= ICE.z ? 1 : -1) * (ICE.rz + 1.2 + rad * 0.45);
+    var pdx = x - POND.x, pdz = z - POND.z, pd = Math.sqrt(pdx * pdx + pdz * pdz);
+    if (pd < POND.r + 0.6 + rad * 0.45){
+      var pr = POND.r + 0.8 + rad * 0.45;
+      x = POND.x + (pd > 0.01 ? pdx / pd : 1) * pr;
+      z = POND.z + (pd > 0.01 ? pdz / pd : 0) * pr;
+    }
+    return pgInRect(x, z, pad);
+  }
+  /* 380ms 꾹 — 기구를 살짝 들어 올린다 */
+  function pgRideLift(key){
+    var R = PG.rides[key];
+    if (!R || !PG.press) return;
+    var g = R.g, pr = PG.press;
+    var gb = pgGround({ clientX: pr.x, clientY: pr.y }, 0.6);
+    PG.rideDrag = { key: key,
+                    offx: gb ? g.position.x - gb.x : 0,
+                    offz: gb ? g.position.z - gb.z : 0,
+                    sx: pr.x, sy: pr.y, moved: 0 };
+    PG.lastPt = { x: pr.x, y: pr.y };
+    PG.pressTimer = 0; PG.press = null;
+    PG.mode = 'rdrag';
+    PG.rideSel = key;
+    pgHideBuildBar();
+    pgSelRingShow(g.position.x, g.position.z, R);
+    try { navigator.vibrate && navigator.vibrate(25); } catch(e){}
+    toast(pgLabelText(key) + '를 들었어요 · 원하는 곳으로 옮겨 보세요!', 2400);
+  }
+  function pgRideDragAt(cx, cy){
+    var d = PG.rideDrag;
+    if (!d) return;
+    var R = PG.rides[d.key];
+    if (!R) return;
+    var gp = pgGround({ clientX: cx, clientY: cy }, 0.6);
+    if (!gp) return;
+    var p = pgRideLandSpot(gp.x + d.offx, gp.z + d.offz, d.key);
+    R.g.position.x = p[0]; R.g.position.z = p[1];
+    R.g.updateMatrixWorld(true);
+    pgSelRingShow(p[0], p[1], R);
+  }
+  function pgRideDrop(){
+    var d = PG.rideDrag;
+    PG.rideDrag = null;
+    PG.mode = '';
+    PG.press = null;
+    if (!d) return;
+    var R = PG.rides[d.key];
+    if (!R) return;
+    pgRideSave(d.key);
+    pgRideBarShow(d.key);
+    pgSelRingShow(R.g.position.x, R.g.position.z, R);
+    if (d.moved < 10) toast('📍 ' + pgLabelText(d.key) + ' 자리를 잡았어요', 1600);
+  }
+  /* 건물을 끌 때도 화면 끝에서 카메라가 따라가도록 — 같은 자리 재계산 */
+  function pgBuildDragAt(cx, cy){
+    var d = PG.buildDrag;
+    if (!d) return;
+    var bd = PG.builds[d.id];
+    if (!bd) return;
+    var g3 = pgGround({ clientX: cx, clientY: cy }, 0.6);
+    if (!g3) return;
+    var lp3 = pgLandSpot(g3.x + d.offx, g3.z + d.offz, bd.foot);
+    bd.rec.x = lp3[0]; bd.rec.z = lp3[1];
+    bd.g.position.x = lp3[0]; bd.g.position.z = lp3[1];
+    pgBuildRingShow(lp3[0], lp3[1], bd.foot);
+  }
+
   /* ＋ 짓기 */
   function pgBuildAdd(kind){
     if (!PG.kid) return;
@@ -13768,7 +14189,8 @@ async function finishBoot(){
   function pgSig(){
     return JSON.stringify([
       pgPlaced(PG.kid),
-      pgBuildRecords(PG.kid).map(function(r){ return [r.id, r.kind, r.x, r.z, r.rot]; })
+      pgBuildRecords(PG.kid).map(function(r){ return [r.id, r.kind, r.x, r.z, r.rot]; }),
+      pgRideRecords(PG.kid)
     ]);
   }
 
@@ -14225,7 +14647,9 @@ async function finishBoot(){
     PG.raf = 0;
     PG.mode = ''; PG.ptrs = {}; PG.drag = null; PG.orbit = null; PG.pinch = null; PG.pan = null;
     PG.buildDrag = null; PG.buildSel = '';
-    pgHideBuildBar();
+    if (PG.pressTimer){ clearTimeout(PG.pressTimer); PG.pressTimer = 0; }
+    PG.press = null; PG.rideDrag = null; PG.rideSel = ''; PG.lastPt = null;
+    pgHideBuildBar(); pgHideRideBar(); pgSelRingHide();
     Object.keys(PG.chars).forEach(function(id){ if (PG.chars[id]) PG.chars[id].held = false; });
     Object.keys(PG.builds).forEach(function(id){ if (PG.builds[id]) PG.builds[id].held = false; });
   }
@@ -14256,6 +14680,28 @@ async function finishBoot(){
     pgAI(dt);
     pgPose(PG.time);
     pgBuildPose(dt);
+    /* 들고 있는 기구는 살짝 떠오르고, 화면 좌우 끝에 손가락이 머물면 카메라도 따라간다 */
+    PG.rideList.forEach(function(k){
+      var Rk = PG.rides[k];
+      if (!Rk || !Rk.g) return;
+      var goal = (PG.rideDrag && PG.rideDrag.key === k) ? 0.34 : 0;
+      var cur = Rk.g.userData.lift || 0;
+      cur += (goal - cur) * Math.min(1, dt * 10);
+      if (cur < 0.004) cur = 0;
+      Rk.g.userData.lift = cur;
+      Rk.g.position.y = cur;
+    });
+    if ((PG.mode === 'rdrag' || PG.mode === 'bdrag') && PG.lastPt && PG.renderer && PG.renderer.domElement){
+      var cvw = PG.renderer.domElement.clientWidth || 0;
+      var ex = cvw * 0.12, dir = 0;
+      if (cvw && PG.lastPt.x < ex) dir = 1;
+      else if (cvw && PG.lastPt.x > cvw - ex) dir = -1;
+      if (dir){
+        pgPan(dir * (PG.renderer.domElement.clientHeight || 800) * 0.32 * dt, 0);
+        if (PG.mode === 'rdrag') pgRideDragAt(PG.lastPt.x, PG.lastPt.y);
+        else pgBuildDragAt(PG.lastPt.x, PG.lastPt.y);
+      }
+    }
     PG.dyn.forEach(function(fn){ try { fn(PG.time); } catch(e){} });
     /* 기구 움직임 */
     var ss = PG.rides.seesaw;
@@ -14314,6 +14760,20 @@ async function finishBoot(){
         if (o && o.userData && o.userData.__pgTag){
           var bb = PG.builds[o.userData.__pgTag.id];
           if (bb) best = { type:'build', b: bb };
+        }
+      }
+    }
+    /* 🎡 놀이기구 — 캐릭터·지은 집보다 뒤, 화면을 빈 곳으로 밀 때는 잡히지 않게 */
+    if (PG.rideList.length && (!best || best.type !== 'char')){
+      var rgs = [];
+      PG.rideList.forEach(function(k){ if (PG.rides[k] && PG.rides[k].g) rgs.push(PG.rides[k].g); });
+      var hr = PG.ray.intersectObjects(rgs, true);
+      if (hr.length && hr[0].distance < bestD){
+        var o2 = hr[0].object;
+        while (o2 && !(o2.userData && o2.userData.__pgRide)) o2 = o2.parent;
+        if (o2 && o2.userData && o2.userData.__pgRide){
+          best = { type:'ride', key: o2.userData.__pgRide, g: o2 };
+          bestD = hr[0].distance;
         }
       }
     }
@@ -14396,6 +14856,19 @@ async function finishBoot(){
       };
       PG.mode = 'drag';
       pgCountRides();
+    } else if (hit && hit.type === 'ride'){
+      /* 🎡 기구 — 380ms 꾹 누르면 들린다. 그 전에 10px 넘게 움직이면 화면 이동/회전으로 */
+      var basePan = PG.panMode || e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey;
+      PG.mode = 'rpending';
+      PG.press = { id: e.pointerId, key: hit.key, x: e.clientX, y: e.clientY, pan: basePan };
+      PG.pan = { x: e.clientX, y: e.clientY };
+      PG.orbit = { x: e.clientX, y: e.clientY };
+      if (PG.pressTimer) clearTimeout(PG.pressTimer);
+      PG.pressTimer = setTimeout(function(){
+        if (PG.mode === 'rpending' && PG.press) pgRideLift(PG.press.key);
+      }, 380);
+      if (PG.buildSel){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
+      if (PG.rideSel && PG.rideSel !== hit.key){ PG.rideSel = ''; pgHideRideBar(); pgSelRingHide(); }
     } else {
       var wantPan = PG.panMode || e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey;
       if (wantPan){
@@ -14413,7 +14886,23 @@ async function finishBoot(){
   function pgMove(e){
     if (!PG.on || !PG.ready) return;
     if (PG.ptrs[e.pointerId]){ PG.ptrs[e.pointerId].x = e.clientX; PG.ptrs[e.pointerId].y = e.clientY; }
+    PG.lastPt = { x: e.clientX, y: e.clientY };
     if (PG.mode === 'pinch'){ pgPinchMove(); e.preventDefault(); return; }
+    if (PG.mode === 'rpending' && PG.press){
+      if (Math.abs(e.clientX - PG.press.x) + Math.abs(e.clientY - PG.press.y) > 10){
+        /* 꾹 누르기 전에 손가락이 움직였다 — 기구는 그대로 두고 화면 이동/회전으로 */
+        if (PG.pressTimer){ clearTimeout(PG.pressTimer); PG.pressTimer = 0; }
+        PG.mode = PG.press.pan ? 'pan' : 'orbit';
+        PG.press = null;
+      } else { e.preventDefault(); return; }
+    }
+    if (PG.mode === 'rdrag' && PG.rideDrag){
+      PG.rideDrag.moved = Math.max(PG.rideDrag.moved,
+        Math.abs(e.clientX - PG.rideDrag.sx) + Math.abs(e.clientY - PG.rideDrag.sy));
+      pgRideDragAt(e.clientX, e.clientY);
+      e.preventDefault();
+      return;
+    }
     if (PG.mode === 'bdrag' && PG.buildDrag){
       var bd2 = PG.builds[PG.buildDrag.id];
       if (!bd2){ PG.mode = ''; PG.buildDrag = null; return; }
@@ -14462,6 +14951,15 @@ async function finishBoot(){
   function pgUp(e){
     if (!PG.on) return;
     if (PG.ptrs[e.pointerId]) delete PG.ptrs[e.pointerId];
+    if (PG.mode === 'rpending'){
+      if (PG.pressTimer){ clearTimeout(PG.pressTimer); PG.pressTimer = 0; }
+      PG.press = null; PG.mode = ''; PG.pan = null; PG.orbit = null; PG.lastPt = null;
+      return;
+    }
+    if (PG.mode === 'rdrag'){
+      pgRideDrop(); PG.lastPt = null;
+      return;
+    }
     var mode = PG.mode;
     if (mode === 'pinch'){
       var rest = Object.keys(PG.ptrs);
@@ -14572,6 +15070,9 @@ async function finishBoot(){
   function pgStartPinch(){
     var ids = Object.keys(PG.ptrs);
     if (ids.length < 2) return;
+    if (PG.pressTimer){ clearTimeout(PG.pressTimer); PG.pressTimer = 0; }
+    PG.press = null;
+    if (PG.rideDrag) pgRideDrop();
     if (PG.drag){ /* 끌던 캐릭터는 제자리에 내려놓는다 */ 
       var c = PG.chars[PG.drag.id];
       if (c){ c.held = false; c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3); }
@@ -14648,7 +15149,8 @@ async function finishBoot(){
     if (open){
       /* 패널을 열면 건물 조작 바·선택 링은 잠시 숨긴다 */
       PG.buildSel = '';
-      pgHideBuildBar();
+      PG.rideSel = '';
+      pgHideBuildBar(); pgHideRideBar(); pgSelRingHide();
       if (PG.selRing) PG.selRing.visible = false;
       pgRenderDeco();
     }
@@ -14819,6 +15321,15 @@ async function finishBoot(){
       else if (bAct === 'close'){ PG.buildSel = ''; pgHideBuildBar(); pgBuildRingShow(null); }
       return;
     }
+    var rbar = t.closest('#pgRideBar [data-pgr]');
+    if (rbar){
+      var rAct = rbar.getAttribute('data-pgr');
+      var rSel = PG.rideSel;
+      if (rAct === 'rot' && rSel) pgRideRot(rSel);
+      else if (rAct === 'home' && rSel) pgRideHome(rSel);
+      else if (rAct === 'close'){ PG.rideSel = ''; pgHideRideBar(); pgSelRingHide(); }
+      return;
+    }
     var bshop = t.closest('#pgdBldShop');
     if (bshop){
       var kidB = PG.kid;
@@ -14869,6 +15380,19 @@ async function finishBoot(){
     buildAdd: pgBuildAdd, buildDel: pgBuildDelete, buildRot: pgBuildSaveRot, buildSave: pgBuildSavePos,
     buildPlace: pgBuildPlaceAt, buildSel: function(id){ var b = PG.builds[id]; if (b) pgBuildBarShow(b); return !!b; },
     buildFree: pgBuildFreeSpot, buildMesh: pgBuildItemMesh, decoTab: pgDecoTab,
+    rideApply: pgRideApplyAll, rideSave: pgRideSave, rideRot: pgRideRot, rideHome: pgRideHome,
+    rideLift: pgRideLift, rideDrop: pgRideDrop, rideLand: pgRideLandSpot, rideHits: pgRideHits,
+    pick: pgPick, ground: pgGround, pan: pgPan, goNation: pgGoNation, setMode: function(m){ PG.mode = m; },
+    geo: function(){ return { rides: PG.rideList.map(function(k){
+        var g = PG.rides[k].g;
+        return { k: k, x: g.position.x, z: g.position.z, rot: g.rotation.y,
+                 radius: g.userData.radius, hit: pgRideHits(g), home: g.userData.home };
+      }), trees: PG.treePts || [], solids: PG.solids || [], prom: ROAD.prom, park: PARK,
+      bounds: { x0: WX0, x1: WX1, z0: WZ0, z1: WZ1 }, pond: POND,
+      coasterTrack: (function(){
+        var R = PG.rides.coaster; if (!R || !R.g.userData.track) return [];
+        return R.g.userData.track;
+      })() }; },
     app: function(){ return state; } };
 })();
 
