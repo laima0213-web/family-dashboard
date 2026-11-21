@@ -600,6 +600,78 @@ button{font:inherit;color:inherit}
 .upitem.today .upbadge{background:#FFE9B8;color:#A9801F}
 .upempty{font-size:11px;color:var(--faint);font-weight:700;text-align:center;padding:10px 6px;
   background:#FFFCF6;border:1px dashed #EEE2D0;border-radius:11px;line-height:1.5}
+/* ---------- 1P 선물 상자 언박싱 연출 ---------- */
+.gft{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 44%,#FFE3A8 0%,#FFC96F 40%,#F2A63C 100%);
+  opacity:0;transition:opacity .26s ease;overflow:hidden;font-family:inherit;
+  -webkit-tap-highlight-color:transparent}
+.gft.on{opacity:1}
+.gft-rays{position:absolute;left:50%;top:44%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.30) 0 6deg,rgba(255,255,255,0) 6deg 19deg);
+  -webkit-mask-image:radial-gradient(circle,rgba(0,0,0,1) 0 14%,rgba(0,0,0,.7) 30%,rgba(0,0,0,0) 52%);
+  mask-image:radial-gradient(circle,rgba(0,0,0,1) 0 14%,rgba(0,0,0,.7) 30%,rgba(0,0,0,0) 52%);
+  animation:gftSpin 30s linear infinite;pointer-events:none}
+@keyframes gftSpin{to{transform:rotate(360deg)}}
+.gft-in{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:24px 18px 30px;max-width:520px;width:100%}
+.gft-pill{background:#fff;border-radius:999px;padding:9px 20px;font-size:13.5px;font-weight:900;color:#B4611A;
+  box-shadow:0 7px 18px rgba(150,90,20,.22);max-width:94%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gft-title{margin:16px 0 6px;font-size:clamp(20px,5.4vmin,30px);font-weight:900;color:#fff;letter-spacing:-.6px;line-height:1.36;
+  text-shadow:0 2px 0 rgba(176,104,26,.45),0 8px 18px rgba(150,90,20,.4)}
+.gft-stage{position:relative;width:100%;height:clamp(190px,48vmin,270px);display:grid;place-items:center;margin:4px 0 0}
+.gft-burst{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.gft-burst i{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:2px;opacity:0;
+  animation:gftFly 2.4s cubic-bezier(.22,.72,.32,1) forwards;animation-delay:var(--d,0s)}
+@keyframes gftFly{0%{opacity:1;transform:translate(-50%,-50%) scale(.45) rotate(0deg)}
+  62%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--x,0px)),calc(-50% + var(--y,0px))) scale(1) rotate(var(--r,200deg))}}
+.gft-boxwrap{position:relative;z-index:2;display:grid;place-items:center;
+  transition:transform .3s ease,opacity .3s ease}
+.gft-box{width:clamp(132px,30vmin,196px);height:clamp(132px,30vmin,196px);display:block;animation:gftWobble 1.9s ease-in-out infinite;
+  filter:drop-shadow(0 14px 18px rgba(150,78,20,.32))}
+@keyframes gftWobble{0%,100%{transform:rotate(-4deg) translateY(0) scale(1)}50%{transform:rotate(4deg) translateY(-7px) scale(1.04)}}
+.gft.opened .gft-boxwrap{transform:translateY(-30px) scale(.62);opacity:0}
+.gft-item{position:absolute;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none;
+  opacity:0;transform:scale(.45) rotate(-6deg);
+  transition:opacity .3s ease,transform .46s cubic-bezier(.2,1.5,.4,1)}
+.gft.opened .gft-item{opacity:1;transform:scale(1) rotate(0deg)}
+.gft-item img.gft-av{width:clamp(160px,38vmin,232px);height:clamp(160px,38vmin,232px);object-fit:contain;display:block;
+  filter:drop-shadow(0 10px 16px rgba(150,80,20,.26))}
+.gft-sw{position:relative;width:clamp(152px,36vmin,222px);height:clamp(152px,36vmin,222px);border-radius:34px;border:4px solid #fff;
+  box-shadow:0 12px 22px rgba(150,80,20,.3);overflow:hidden;display:grid;place-items:center}
+.gft-sw img{width:92%;height:92%;object-fit:contain}
+.gft-avw{position:relative;width:clamp(146px,34vmin,206px);height:clamp(146px,34vmin,206px);border-radius:30px;overflow:hidden;
+  border:4px solid #fff;box-shadow:0 12px 22px rgba(150,80,20,.3);display:grid;place-items:center;
+  background:#FAF6EC}
+.gft-avw > img{width:97%;height:97%;object-fit:contain;position:relative;z-index:1}
+.gft-build{width:clamp(160px,38vmin,232px);height:clamp(160px,38vmin,232px);border-radius:30px;background:#FFFDF6;border:4px solid #fff;
+  box-shadow:0 12px 22px rgba(150,80,20,.3);display:grid;place-items:center;padding:8px}
+.gft-build svg{width:100%;height:100%;display:block}
+.gft-spk{position:absolute;font-style:normal;font-size:15px;opacity:0;pointer-events:none;
+  filter:drop-shadow(0 1px 3px rgba(255,200,90,.9))}
+.gft.opened .gft-spk{opacity:1;animation:avdTw 1.7s ease-in-out infinite}
+.gft-spk1{left:12%;top:16%;font-size:17px}
+.gft-spk2{right:13%;top:22%;font-size:14px;animation-delay:.35s}
+.gft-spk3{left:16%;bottom:20%;font-size:13px;animation-delay:.7s}
+.gft-spk4{right:16%;bottom:16%;font-size:16px;animation-delay:1s}
+.gft-spk5{left:50%;top:2%;margin-left:-8px;font-size:13px;animation-delay:.55s}
+.gft-spk6{left:50%;bottom:4%;margin-left:-6px;font-size:12px;animation-delay:1.25s}
+.gft-name{margin:8px 0 0;font-size:clamp(16px,4vmin,22px);font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(176,104,26,.45),0 6px 14px rgba(140,80,18,.45);
+  opacity:0;transform:translateY(8px);transition:opacity .3s .12s ease,transform .3s .12s ease}
+.gft.opened .gft-name{opacity:1;transform:translateY(0)}
+.gft-ok{margin-top:14px;border:0;border-radius:999px;padding:13px 34px;font-family:inherit;font-size:15px;
+  font-weight:900;color:#9C4A12;background:#FFF7E4;box-shadow:0 8px 18px rgba(150,80,20,.28);cursor:pointer;
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .3s .18s ease,transform .3s .18s ease}
+.gft.opened .gft-ok{opacity:1;transform:translateY(0);pointer-events:auto}
+.gft-hint{margin-top:14px;font-size:13.5px;font-weight:900;color:#FFF6DE;letter-spacing:-.2px;
+  background:rgba(150,82,18,.26);border-radius:999px;padding:7px 15px;
+  text-shadow:0 1px 2px rgba(110,58,10,.5);animation:gftHint 1.8s ease-in-out infinite}
+@keyframes gftHint{0%,100%{opacity:.7}50%{opacity:1}}
+.gft.opened .gft-hint{display:none}
+@media (max-height:640px){
+  .gft-stage{height:186px} .gft-box{width:132px;height:132px} .gft-item img.gft-av{width:150px;height:150px}
+  .gft-title{font-size:19px} .gft-sw,.gft-avw,.gft-build{width:144px;height:144px}
+}
 /* ---------- 캐릭터 꾸미기 시트 ---------- */
 .av-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 /* 마이홈 일러스트 뷰 */
@@ -743,6 +815,61 @@ button{font:inherit;color:inherit}
   animation:avdFloat 3.8s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(220,180,90,.42))}
 .avd-cr svg{width:100%;height:100%;display:block}
 @keyframes avdBob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+/* v20 추가 꾸미기 12종 */
+.avd-catband{position:absolute;left:50%;top:-4px;width:70px;height:34px;margin-left:-35px;
+  animation:avdBob2 2.8s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(190,150,170,.3))}
+.avd-catband svg{width:100%;height:100%;display:block}
+.avd-halo{position:absolute;left:50%;top:0;width:46px;height:15px;margin-left:-23px;
+  animation:avdHalo 3s ease-in-out infinite;filter:drop-shadow(0 0 5px rgba(255,204,110,.8))}
+.avd-halo svg{width:100%;height:100%;display:block}
+@keyframes avdHalo{0%,100%{transform:translateY(0) scale(1);opacity:.94}50%{transform:translateY(-2px) scale(1.05);opacity:1}}
+.avd-cup{position:absolute;right:2px;bottom:4px;width:27px;height:31px;animation:avdBob2 3s ease-in-out infinite;
+  filter:drop-shadow(0 1px 2px rgba(180,130,150,.28))}
+.avd-cup svg{width:100%;height:100%;display:block}
+.avd-gift{position:absolute;left:2px;bottom:3px;width:28px;height:28px;animation:avdSway2 3.4s ease-in-out infinite;
+  filter:drop-shadow(0 1px 2px rgba(190,140,150,.28))}
+.avd-gift svg{width:100%;height:100%;display:block}
+.avd-rbb{position:absolute;right:2px;top:4px;width:33px;height:46px;animation:avdBalloon 5.4s ease-in-out infinite;
+  filter:drop-shadow(0 2px 3px rgba(170,140,160,.28))}
+.avd-rbb svg{width:100%;height:100%;display:block}
+.avd-bfly{position:absolute;left:1px;top:22px;width:34px;height:28px;animation:avdFloat 3.2s ease-in-out infinite;
+  filter:drop-shadow(0 1px 3px rgba(180,140,170,.3))}
+.avd-bfly svg{width:100%;height:100%;display:block}
+.avd-bfly svg .wl,.avd-bfly svg .wr{transform-box:fill-box;animation:avdFlap2 1.15s ease-in-out infinite}
+.avd-bfly svg .wl{transform-origin:100% 50%}
+.avd-bfly svg .wr{transform-origin:0% 50%;animation-delay:.18s}
+@keyframes avdFlap2{0%,100%{transform:rotate(-9deg) scaleX(.94)}50%{transform:rotate(11deg) scaleX(1.06)}}
+.avd-gw{position:absolute;top:36px;width:30px;height:48px;z-index:0;opacity:.96}
+.avd-gw svg{width:100%;height:100%;display:block}
+.avd-gw1{left:-3px;transform-origin:right center;animation:avdFlap3 3.4s ease-in-out infinite}
+.avd-gw2{right:-3px;transform-origin:left center;animation:avdFlap3 3.4s .4s ease-in-out infinite}
+@keyframes avdFlap3{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+.avd-gs1{position:absolute;left:9px;top:32px;font-size:9px;animation:avdTw 2.2s ease-in-out infinite}
+.avd-gs2{position:absolute;right:10px;top:66px;font-size:8px;animation:avdTw 2.2s .9s ease-in-out infinite}
+.avd-gpin{position:absolute;left:6px;top:6px;width:38px;height:26px;animation:avdBob2 3.2s ease-in-out infinite;
+  filter:drop-shadow(0 1px 2px rgba(200,160,90,.45))}
+.avd-gpin svg{width:100%;height:100%;display:block}
+.avd-mcat{position:absolute;right:3px;bottom:2px;width:25px;height:29px;animation:avdSway2 3.4s ease-in-out infinite;
+  filter:drop-shadow(0 1px 2px rgba(150,110,80,.3))}
+.avd-mcat svg{width:100%;height:100%;display:block}
+.avd-mug{position:absolute;left:2px;bottom:3px;width:27px;height:29px;animation:avdFloat 3.6s ease-in-out infinite;
+  filter:drop-shadow(0 1px 2px rgba(160,120,90,.3))}
+.avd-mug svg{width:100%;height:100%;display:block}
+.avd-mug svg .stm{transform-box:fill-box;animation:avdSteam 2.8s ease-in-out infinite}
+.avd-mug svg .stm2{animation-delay:1.1s}
+@keyframes avdSteam{0%{opacity:0;transform:translateY(2px)}30%{opacity:.85}100%{opacity:0;transform:translateY(-7px)}}
+.avd-hball{position:absolute;right:3px;top:2px;width:33px;height:43px;animation:avdBalloon 5s .8s ease-in-out infinite;
+  filter:drop-shadow(0 2px 3px rgba(190,130,150,.3))}
+.avd-hball svg{width:100%;height:100%;display:block}
+.avd-sfr{position:absolute;width:16px;height:16px;animation:avdTw 2.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 3px rgba(255,210,120,.75))}
+.avd-sfr svg{width:100%;height:100%;display:block}
+.avd-sfr1{left:3px;top:3px}
+.avd-sfr2{right:3px;top:4px;animation-delay:.4s;width:13px;height:13px}
+.avd-sfr3{left:4px;bottom:14px;animation-delay:.8s;width:12px;height:12px}
+.avd-sfr4{right:5px;bottom:20px;animation-delay:1.2s;width:14px;height:14px}
+.avd-sfr5{left:50%;top:-4px;margin-left:-6px;animation-delay:1.6s;width:13px;height:13px}
+.avd-sfr6{left:50%;bottom:2px;margin-left:-5px;animation-delay:2s;width:11px;height:11px}
 /* 캐릭터 고르기 그리드 */
 .av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
 .av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:6px 4px 5px;display:flex;
@@ -3649,6 +3776,143 @@ function avItemLabel(kind, key){
   if (kind === 'build') return avBuildFull(key);
   return hit.n;
 }
+/* ============================================================
+   🎁 1P 선물 상자 언박싱 — 띠링~✨ 사운드 + 컨페티 + 아이템 공개
+   · 새로 1P로 살 때만 뜬다 (구매 취소·보유 아이템 착용에는 뜨지 않음)
+   ============================================================ */
+var gftAudioCtx = null;
+function gftAc(){
+  try {
+    if (!gftAudioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      gftAudioCtx = new AC();
+    }
+    if (gftAudioCtx.state === 'suspended' && gftAudioCtx.resume) gftAudioCtx.resume();
+    return gftAudioCtx;
+  } catch(e){ return null; }
+}
+function gftNote(freq, at, dur, type, vol, detune){
+  var ac = gftAc(); if (!ac) return;
+  try {
+    var t0 = ac.currentTime + at;
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || 'triangle';
+    o.frequency.setValueAtTime(freq, t0);
+    if (detune) o.detune.setValueAtTime(detune, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, vol || 0.12), t0 + 0.018);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  } catch(e){}
+}
+/* 뾰롱 — 상자가 나타날 때의 가벼운 두 음 */
+function gftPop(){ try {
+  gftNote(784, 0, 0.14, 'sine', 0.10);
+  gftNote(1174.7, 0.075, 0.2, 'sine', 0.09);
+  gftNote(1568, 0.15, 0.16, 'sine', 0.05);
+} catch(e){} }
+/* 띠링~✨ — 상자를 열 때의 4음 차임 + 반짝이 */
+function gftChime(){ try {
+  var seq = [[1046.5, 0, 0.42, 0.15], [1318.5, 0.085, 0.46, 0.15], [1568, 0.17, 0.5, 0.15], [2093, 0.26, 0.62, 0.12]];
+  for (var i = 0; i < seq.length; i++) gftNote(seq[i][0], seq[i][1], seq[i][2], 'triangle', seq[i][3]);
+  for (var j = 0; j < seq.length; j++) gftNote(seq[j][0] * 2, seq[j][1] + 0.005, seq[j][2] * 0.55, 'sine', 0.045);
+  gftNote(2637, 0.36, 0.5, 'sine', 0.05);
+  gftNote(3136, 0.44, 0.42, 'sine', 0.035);
+} catch(e){} }
+function gftBoxSvg(){
+  return '<svg class="gft-box" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="60" cy="112" rx="34" ry="5" fill="#B4611A" opacity=".22"/>'
+    + '<rect x="25" y="62" width="70" height="46" rx="7" fill="#EF4141" stroke="#7E1F1F" stroke-width="4.5"/>'
+    + '<rect x="21" y="45" width="78" height="20" rx="7" fill="#F85555" stroke="#7E1F1F" stroke-width="4.5"/>'
+    + '<rect x="54" y="62" width="13" height="46" fill="#FFC93C" stroke="#7E1F1F" stroke-width="3.6"/>'
+    + '<rect x="54" y="45" width="13" height="20" fill="#FFC93C" stroke="#7E1F1F" stroke-width="3.6"/>'
+    + '<path d="M59 45 q-24-3-26-13 q-1.6-9.4 8.6-7.6 q10.4 1.8 17.4 20.6z" fill="#FFD34E" stroke="#7E1F1F" stroke-width="3.6" stroke-linejoin="round"/>'
+    + '<path d="M61 45 q24-3 26-13 q1.6-9.4-8.6-7.6 q-10.4 1.8-17.4 20.6z" fill="#FFD34E" stroke="#7E1F1F" stroke-width="3.6" stroke-linejoin="round"/>'
+    + '<circle cx="60" cy="45" r="6.4" fill="#FFE07A" stroke="#7E1F1F" stroke-width="3.4"/>'
+    + '<rect x="31" y="69" width="7" height="13" rx="3.5" fill="#FFFFFF" opacity=".45"/>'
+    + '</svg>';
+}
+function gftName(kind, key){
+  if (kind === 'build') return avBuildName(key);
+  return avItemLabel(kind, key);
+}
+function gftVisual(kid, kind, key){
+  var rec = avRec(kid) || {};
+  if (kind === 'preset') return '<img class="gft-av" src="' + avImgSrc(key) + '" alt="" draggable="false">';
+  if (kind === 'bg') return '<div class="gft-sw" style="background:' + avBgColor(key) + '">'
+    + (rec.preset ? '<img src="' + avImgSrc(rec.preset) + '" alt="" draggable="false">' : '') + '</div>';
+  if (kind === 'deco') return '<div class="gft-avw" style="background:' + avBgColor(rec.bg || 'none') + '">'
+    + (rec.preset ? '<img src="' + avImgSrc(rec.preset) + '" alt="" draggable="false">' : '')
+    + avDecoHtml(key) + '</div>';
+  return '<div class="gft-build">' + avBuildSvg(key) + '</div>';
+}
+function giftClose(){
+  var old = document.getElementById('gft');
+  if (!old) return;
+  old.classList.remove('on');
+  setTimeout(function(){ try { if (old.parentNode) old.parentNode.removeChild(old); } catch(e){} }, 280);
+}
+function giftOpen(kid, kind, key){
+  try {
+    giftClose();
+    var fam = (typeof FAMILY !== 'undefined' && FAMILY[kid]) ? FAMILY[kid] : {};
+    var who = fam.name || '우리 아이';
+    var el = document.createElement('div');
+    el.className = 'gft';
+    el.id = 'gft';
+    el.innerHTML = '<div class="gft-rays"></div>'
+      + '<div class="gft-in">'
+      + '<div class="gft-pill">🎁 ' + esc(who) + ' · 1P 선물 도착!</div>'
+      + '<div class="gft-title">🎉 축하해요! 선물이 도착했어요! 🎉</div>'
+      + '<div class="gft-stage">'
+      + '<div class="gft-burst"></div>'
+      + '<div class="gft-boxwrap">' + gftBoxSvg() + '</div>'
+      + '<div class="gft-item">' + gftVisual(kid, kind, key)
+      + '<i class="gft-spk gft-spk1">✨</i><i class="gft-spk gft-spk2">✨</i><i class="gft-spk gft-spk3">✨</i>'
+      + '<i class="gft-spk gft-spk4">✨</i><i class="gft-spk gft-spk5">✨</i><i class="gft-spk gft-spk6">✨</i></div>'
+      + '</div>'
+      + '<div class="gft-name">“' + esc(gftName(kind, key)) + '” 획득! 💎</div>'
+      + '<button type="button" class="gft-ok">좋아요!</button>'
+      + '<div class="gft-hint">👆 선물 상자를 터치해서 열어보세요!</div>'
+      + '</div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('on'); });
+    gftPop();
+    el.addEventListener('click', function(ev){
+      if (el.classList.contains('opened')){
+        var t = ev.target;
+        if (t && t.className && String(t.className).indexOf('gft-ok') >= 0){ giftClose(); }
+        return;
+      }
+      gftReveal(el, kid, kind, key);
+    });
+  } catch(e){ console.warn('[dashboard] 선물 연출:', e && e.message); }
+}
+function gftReveal(el, kid, kind, key){
+  if (!el || el.classList.contains('opened')) return;
+  el.classList.add('opened');
+  gftChime();
+  try {
+    var burst = el.querySelector('.gft-burst');
+    var cols = ['#FF6B6B', '#FFD34E', '#7FD6CE', '#FFB6CB', '#C9B6F0', '#FFFFFF', '#FFA45C'];
+    for (var i = 0; i < 30; i++){
+      var p = document.createElement('i');
+      var a = Math.random() * Math.PI * 2, d = 70 + Math.random() * 120;
+      p.style.setProperty('--x', (Math.cos(a) * d).toFixed(0) + 'px');
+      p.style.setProperty('--y', (Math.sin(a) * d - 20).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random() * 540 - 270).toFixed(0) + 'deg');
+      p.style.setProperty('--d', (Math.random() * 0.14).toFixed(2) + 's');
+      p.style.background = cols[i % cols.length];
+      p.style.width = (6 + Math.random() * 7).toFixed(0) + 'px';
+      p.style.height = (6 + Math.random() * 7).toFixed(0) + 'px';
+      p.style.borderRadius = (Math.random() < 0.34 ? '50%' : '2px');
+      burst.appendChild(p);
+    }
+  } catch(e){}
+  setTimeout(function(){ try { if (typeof confetti === 'function') confetti(26); } catch(e){} }, 60);
+}
 /* ↩ 구매 취소(삭제) — 1P 환불 + 착용·놀이터 배치까지 함께 정리 (호출 전 부모 PIN 통과 필요) */
 function avRefund(kid, kind, key){
   if (!state) return false;
@@ -3760,7 +4024,20 @@ var AV_PRESETS = [
   { k:'frog_raincoat',   n:'개구리 우비' },
   { k:'bunny_ribbon',    n:'토끼 리본 원피스' },
   { k:'painter_beret',   n:'꼬마 화가' },
-  { k:'barista_apron',   n:'꼬마 바리스타' }
+  { k:'barista_apron',   n:'꼬마 바리스타' },
+  /* v20 추가 12종 — 남아 5종(경찰·태권도·농구·록스타·마법학원) + 사랑스러운 7종 */
+  { k:'police_officer',   n:'경찰관' },
+  { k:'taekwondo_dobok',  n:'태권도 도복' },
+  { k:'basketball_jersey',n:'농구 유니폼' },
+  { k:'rock_guitar',      n:'기타 록스타' },
+  { k:'magic_academy',    n:'마법 학원 교복' },
+  { k:'penguin_padding',  n:'펭귄 패딩' },
+  { k:'sailor_girl',      n:'마린 세일러 소녀' },
+  { k:'cake_dress',       n:'딸기 케이크 드레스' },
+  { k:'cherry_fairy',     n:'벚꽃 요정' },
+  { k:'bear_sweater',     n:'곰돌이 스웨터' },
+  { k:'space_pajama',     n:'우주별 파자마' },
+  { k:'hamster_hood',     n:'햄스터 후드' }
 ];
 var AV_BGS = [
   { k:'none',     n:'기본',   c:'#FAF6EC' },   /* 무료 기본 배경 — 판매 품목 아님 */
@@ -3802,7 +4079,20 @@ var AV_BGS = [
   { k:'pastel_grid',     n:'파스텔 격자',   c:'repeating-linear-gradient(0deg,#FFFDFB 0 2.5px,transparent 2.5px 20px),repeating-linear-gradient(90deg,#FFFDFB 0 2.5px,transparent 2.5px 20px),linear-gradient(160deg,#E3DCFA 0%,#CFE3F7 100%)' },
   { k:'starlit_sea',     n:'별빛 바다',     c:'radial-gradient(circle at 74% 24%,#FFF6D8 0 1.6px,transparent 2px) 0 0/26px 26px,radial-gradient(circle at 20% 62%,#FFFFFF 0 1.2px,transparent 1.6px) 0 0/22px 22px,linear-gradient(170deg,#2F4B6C 0%,#42678E 52%,#82AAC6 100%)' },
   { k:'sunny_meadow',    n:'햇살 풀밭',     c:'radial-gradient(circle at 78% 14%,#FFFDE8 0%,#FFF6C9 28%,#EAF7D3 66%,#D6F0C2 100%)' },
-  { k:'macaron_mosaic',  n:'마카롱 모자이크', c:'repeating-conic-gradient(from 45deg at 50% 50%,#FFE1EC 0 25%,#E6F6EE 0 50%,#FFF3DC 0 75%,#E7E9FB 0 100%) 0 0/46px 46px' }
+  { k:'macaron_mosaic',  n:'마카롱 모자이크', c:'repeating-conic-gradient(from 45deg at 50% 50%,#FFE1EC 0 25%,#E6F6EE 0 50%,#FFF3DC 0 75%,#E7E9FB 0 100%) 0 0/46px 46px' },
+  /* v20 추가 12종 — 파스텔 그라데이션 · 체크 · 물결 · 별빛 */
+  { k:'cream_soda',     n:'크림 소다',       c:'linear-gradient(165deg,#FFFDF2 0%,#FFF3D9 48%,#FFE8C4 100%)' },
+  { k:'cocoa_latte',    n:'코코아 라떼',     c:'linear-gradient(170deg,#F9EFE3 0%,#EAD5BF 52%,#D9BDA4 100%)' },
+  { k:'rainbow_check',  n:'레인보우 체크',   c:'repeating-linear-gradient(0deg,#FFDDE8 0 7px,#EAF6FF 7px 14px),repeating-linear-gradient(90deg,#FFF0C9 0 7px,rgba(255,255,255,0) 7px 14px),#E9FBF2' },
+  { k:'cherry_snow',    n:'벚꽃 눈송이',     c:'radial-gradient(circle at 26% 22%,#FFFFFF 0 3px,transparent 3.4px) 0 0/18px 18px,radial-gradient(circle at 70% 62%,#FFAECB 0 2.4px,transparent 2.8px) 0 0/18px 18px,linear-gradient(160deg,#FFF0F7 0%,#FFCCDF 100%)' },
+  { k:'mint_stripe',    n:'민트초코 스트라이프', c:'repeating-linear-gradient(135deg,#F2FBF4 0 9px,#CFEEDD 9px 18px),#FDFBF6' },
+  { k:'summer_wave',    n:'여름 파도',       c:'repeating-radial-gradient(circle at 50% 120%,#EAF8FF 0 8px,#A8DCF7 8px 19px)' },
+  { k:'honey_grape',    n:'꿀자몽 그라데이션', c:'linear-gradient(160deg,#FFF6D8 0%,#FFCFA3 46%,#FFA9B8 100%)' },
+  { k:'autumn_maple',   n:'가을 단풍빛',     c:'linear-gradient(165deg,#FFF0D6 0%,#FFC98F 46%,#E99A7A 100%)' },
+  { k:'snow_globe',     n:'스노우볼 밤',     c:'radial-gradient(circle at 74% 20%,#FFF8DC 0 1.7px,transparent 2.1px) 0 0/24px 24px,radial-gradient(circle at 22% 66%,#FFFFFF 0 1.2px,transparent 1.6px) 0 0/19px 19px,linear-gradient(168deg,#2C3558 0%,#4A5490 52%,#93A6CF 100%)' },
+  { k:'fairy_forest',   n:'요정 숲빛',       c:'radial-gradient(circle at 30% 24%,#F3FFE9 0%,#CFF2D4 44%,#A8E3C6 100%)' },
+  { k:'rose_quartz',    n:'로즈쿼츠',        c:'radial-gradient(circle at 32% 22%,#FFF6F9 0%,#FBDCE7 46%,#F3C4D8 100%)' },
+  { k:'pastel_zodiac',  n:'파스텔 별자리',   c:'radial-gradient(circle at 30% 26%,#FFFFFF 0 1.6px,transparent 2px) 0 0/22px 22px,radial-gradient(circle at 66% 62%,#FFF3C4 0 1.3px,transparent 1.7px) 0 0/16px 16px,linear-gradient(165deg,#EDE6FF 0%,#D9DFFB 48%,#F7E4FF 100%)' }
 ];
 var AV_DECOS = [
   { k:'none',    n:'없음' },
@@ -3844,7 +4134,20 @@ var AV_DECOS = [
   { k:'note_ribbon',    n:'🎀 음표 리본' },
   { k:'starglow',       n:'🌠 마법 별오라' },
   { k:'paper_plane',    n:'✈️ 종이비행기' },
-  { k:'crescent',       n:'🌙 달빛 초승달' }
+  { k:'crescent',       n:'🌙 달빛 초승달' },
+  /* v20 추가 12종 */
+  { k:'cat_ears_band',  n:'🐱 고양이 귀 머리띠' },
+  { k:'halo_ring',      n:'😇 천사 링' },
+  { k:'cupcake',        n:'🧁 컵케이크' },
+  { k:'gift_box',       n:'🎁 선물 상자' },
+  { k:'rainbow_balloon',n:'🎈 무지개 풍선' },
+  { k:'butterfly_friend', n:'🦋 나비 친구' },
+  { k:'fairy_gold_wing',n:'🧚 요정 골드 날개' },
+  { k:'star_pin',       n:'⭐ 별 머리핀' },
+  { k:'mini_cat',       n:'🐈 미니 고양이' },
+  { k:'cocoa_mug',      n:'☕ 코코아 머그컵' },
+  { k:'heart_balloon',  n:'💗 하트 풍선' },
+  { k:'star_frame',     n:'✨ 반짝 별프레임' }
 ];
 /* v17 — 🏡 집·마을 : 상점에서 💎 1P로 사서 놀이터에 직접 짓는 12종 */
 var AV_BUILDS = [
@@ -3885,9 +4188,22 @@ var AV_BUILDS = [
   { k:'flower_carriage',e:'💐', n:'꽃마차' },
   { k:'hot_spring',     e:'♨️', n:'온천 노천탕' },
   { k:'tree_deck',      e:'🌲', n:'2층 트리 전망대' },
-  { k:'bungeoppang',    e:'🐟', n:'붕어빵 포장마차' }
+  { k:'bungeoppang',    e:'🐟', n:'붕어빵 포장마차' },
+  /* v20 추가 12종 */
+  { k:'sushi_train_shop', e:'🍣', n:'회전초밥집' },
+  { k:'macaron_house',  e:'🍪', n:'마카롱 하우스' },
+  { k:'candy_shop',     e:'🍬', n:'캔디 숍' },
+  { k:'mushroom_house', e:'🍄', n:'버섯 요정 집' },
+  { k:'toy_shop',       e:'🧸', n:'장난감 가게' },
+  { k:'fire_station',   e:'🚒', n:'소방서' },
+  { k:'post_office',    e:'📮', n:'우체국' },
+  { k:'snow_igloo',     e:'❄️', n:'눈사람 이글루' },
+  { k:'bamboo_teahouse',e:'🍵', n:'대나무 찻집' },
+  { k:'pirate_ship',    e:'🏴', n:'해적선 놀이터' },
+  { k:'balloon_stop',   e:'🎈', n:'열기구 정류장' },
+  { k:'pool_villa',     e:'🏊', n:'미니 수영장 풀빌라' }
 ];
-var PG_BUILD_MAX = 36;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
+var PG_BUILD_MAX = 48;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
 function avBuildOf(k){ return (typeof AV_BUILDS === 'undefined' ? [] : AV_BUILDS).filter(function(b){ return b.k === k; })[0] || null; }
 function avBuildName(k){ var b = avBuildOf(k); return b ? b.n : k; }
 function avBuildIcon(k){ var b = avBuildOf(k); return b ? (b.e || '🏡') : '🏡'; }
@@ -4347,6 +4663,192 @@ function avBuildSvg(k){
       + '<circle cx="41" cy="52" r="4.8" fill="#FFFDF8" stroke="#D9A877" stroke-width="1.3"/>'
       + '<g stroke="#D9A877" stroke-width=".8"><line x1="23" y1="47.4" x2="23" y2="56.6"/><line x1="18.4" y1="52" x2="27.6" y2="52"/><line x1="41" y1="47.4" x2="41" y2="56.6"/><line x1="36.4" y1="52" x2="45.6" y2="52"/></g>'
       + '<rect x="17.8" y="49" width="28.4" height="1.4" rx=".7" fill="#E9C4A0"/>';
+  } else if (k === 'sushi_train_shop'){
+    S += '<rect x="14.6" y="30.4" width="34.8" height="21.6" rx="3" fill="#FFF8EC" stroke="#EBDAC2" stroke-width="1.1"/>'
+      + '<path d="M12.6 30.8 L32 21.8 L51.4 30.8 Z" fill="#8FA9C9"/>'
+      + '<path d="M12.6 30.8 L32 21.8 L51.4 30.8" fill="none" stroke="#7A93B4" stroke-width="1.1"/>'
+      + '<rect x="15.4" y="30.6" width="33.2" height="4" rx="1.2" fill="#3E4E6E"/>'
+      + '<g fill="#FFFDF8" opacity=".85"><rect x="17.4" y="30.8" width="4.2" height="3.6"/><rect x="25.2" y="30.8" width="4.2" height="3.6"/><rect x="33" y="30.8" width="4.2" height="3.6"/><rect x="40.8" y="30.8" width="4.2" height="3.6"/></g>'
+      + '<rect x="26.4" y="22.8" width="11.2" height="5.4" rx="1.4" fill="#FFF4E2" stroke="#EBCE9C" stroke-width=".9"/>'
+      + '<path d="M29.4 25.4 q2.6-2.2 5.2 0 q-2.6 2-5.2 0z" fill="#FFB88C"/><circle cx="33.4" cy="25.4" r=".55" fill="#6B5B4B"/>'
+      + '<path d="M35.4 25.4 l2 1 -2 1z" fill="#FFA06E"/>'
+      + '<rect x="19.4" y="37.4" width="25.2" height="4.6" rx="2.3" fill="#DCE8F2" stroke="#C3D4E2" stroke-width=".8"/>'
+      + '<g><ellipse cx="23.6" cy="39.7" rx="2.9" ry="1.5" fill="#FFFDF8"/><ellipse cx="23.6" cy="38.9" rx="2.4" ry="1.1" fill="#FFB88C"/>'
+      + '<ellipse cx="31.2" cy="39.7" rx="2.9" ry="1.5" fill="#FFFDF8"/><ellipse cx="31.2" cy="38.9" rx="2.4" ry="1.1" fill="#FFF0C9"/>'
+      + '<ellipse cx="38.8" cy="39.7" rx="2.9" ry="1.5" fill="#FFFDF8"/><ellipse cx="38.8" cy="38.9" rx="2.4" ry="1.1" fill="#B6E3C6"/></g>'
+      + '<g fill="#C9A47C"><circle cx="23.6" cy="38.9" r=".5"/><circle cx="31.2" cy="38.9" r=".5"/><circle cx="38.8" cy="38.9" r=".5"/></g>'
+      + '<rect x="28.6" y="44.6" width="7.4" height="7.4" rx="2" fill="#E9C4A0" stroke="#D9A877" stroke-width=".9"/>'
+      + '<rect x="17.8" y="45.4" width="7.6" height="6.6" rx="1.4" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".8"/>'
+      + '<rect x="39" y="45.4" width="7.6" height="6.6" rx="1.4" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".8"/>'
+      + '<g fill="#FF9FB8"><circle cx="18.6" cy="52.2" r="1.5"/><circle cx="24.4" cy="52.2" r="1.5"/><circle cx="40" cy="52.2" r="1.5"/><circle cx="45.8" cy="52.2" r="1.5"/></g>'
+      + '<rect x="14.6" y="52.8" width="34.8" height="2.4" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'macaron_house'){
+    S += '<rect x="18.4" y="34.6" width="27.2" height="17.4" rx="2.6" fill="#FFFBF6" stroke="#F0E4D6" stroke-width="1.1"/>'
+      + '<path d="M14.2 34.8 q0-11.2 17.8-11.2 q17.8 0 17.8 11.2z" fill="#F9C3D2"/>'
+      + '<path d="M14.2 34.8 q0-11.2 17.8-11.2 q17.8 0 17.8 11.2" fill="none" stroke="#EFB0C4" stroke-width="1.1"/>'
+      + '<rect x="14.2" y="34.4" width="35.6" height="3.4" rx="1.7" fill="#FFF2E2"/>'
+      + '<path d="M16.6 37.6 h30.8" stroke="#F0DCC6" stroke-width=".8"/>'
+      + '<g fill="#EFB0C4" opacity=".55"><circle cx="21" cy="29" r="1.1"/><circle cx="27.4" cy="26.6" r=".9"/><circle cx="43" cy="29" r="1.1"/><circle cx="37" cy="26.6" r=".9"/></g>'
+      + '<path d="M27.6 52 v-8.2 a4.4 4.4 0 0 1 8.8 0 v8.2z" fill="#E9B98C" stroke="#D9A877" stroke-width=".9"/>'
+      + '<circle cx="34.8" cy="47.6" r=".9" fill="#FFE9A8"/>'
+      + '<rect x="20.4" y="40.4" width="6.4" height="6" rx="1.4" fill="#FFF6C9" stroke="#EBD9BE" stroke-width=".8"/>'
+      + '<rect x="37" y="40.4" width="6.4" height="6" rx="1.4" fill="#FFF6C9" stroke="#EBD9BE" stroke-width=".8"/>'
+      + '<path d="M40.6 40.4 v6 M37 43.4 h6.4" stroke="#EBD9BE" stroke-width=".7"/>'
+      + '<g fill="#FFC3D6"><circle cx="17.4" cy="51.4" r="1.7"/><circle cx="21" cy="53" r="1.3"/><circle cx="46.6" cy="51.4" r="1.7"/><circle cx="43" cy="53" r="1.3"/></g>'
+      + '<rect x="18.4" y="52.8" width="27.2" height="2.4" rx="1.2" fill="#F0E4D6"/>';
+  } else if (k === 'candy_shop'){
+    S += '<rect x="15.4" y="31.4" width="33.2" height="20.6" rx="3" fill="#EFFBF4" stroke="#D2EDDD" stroke-width="1.1"/>'
+      + '<rect x="13.8" y="27.6" width="36.4" height="5.4" rx="2.4" fill="#FFB6CB"/>'
+      + '<g fill="#FFF7FB"><path d="M17 27.6 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M24.4 27.6 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M31.8 27.6 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M39.2 27.6 l-1.6 5.4 h3.4 l1.6-5.4z"/><path d="M46.6 27.6 l-1.6 5.4 h3.4 l1.6-5.4z"/></g>'
+      + '<rect x="26.6" y="34.4" width="10.8" height="5" rx="1.4" fill="#FFF6C9" stroke="#EBCE86" stroke-width=".9"/>'
+      + '<path d="M28.4 36.9 h7.2" stroke="#E8B87A" stroke-width=".8"/>'
+      + '<rect x="18.6" y="41.4" width="9.4" height="7.4" rx="1.6" fill="#FFF8E4" stroke="#E9DCC2" stroke-width=".9"/>'
+      + '<g><circle cx="21.4" cy="45.4" r="1.5" fill="#FF9FB8"/><circle cx="25" cy="44.4" r="1.2" fill="#A6E5CF"/><circle cx="24.2" cy="47.4" r="1.1" fill="#C9B6F0"/></g>'
+      + '<rect x="36" y="41.4" width="9.4" height="7.4" rx="1.6" fill="#FFF8E4" stroke="#E9DCC2" stroke-width=".9"/>'
+      + '<g><circle cx="38.8" cy="44.4" r="1.3" fill="#FFE39B"/><circle cx="42.4" cy="45.6" r="1.5" fill="#FFB6CB"/><circle cx="41" cy="47.4" r="1" fill="#A6E5CF"/></g>'
+      + '<rect x="28.8" y="43.6" width="6.4" height="8.4" rx="1.8" fill="#E9C4A0" stroke="#D9A877" stroke-width=".9"/>'
+      + '<g><line x1="16.4" y1="52.6" x2="16.4" y2="41.6" stroke="#FFFDF8" stroke-width="1.8"/><line x1="16.4" y1="52.6" x2="16.4" y2="41.6" stroke="#EBD6C2" stroke-width=".6"/>'
+      + '<circle cx="16.4" cy="40" r="3.4" fill="#FFC9DA" stroke="#EFAEC3" stroke-width=".9"/><path d="M16.4 36.8 a3.2 3.2 0 0 1 0 6.4 a3.2 3.2 0 0 1 0-6.4z" fill="none" stroke="#FF9FB8" stroke-width="1.1"/>'
+      + '<line x1="47.6" y1="52.6" x2="47.6" y2="42.4" stroke="#FFFDF8" stroke-width="1.8"/><line x1="47.6" y1="52.6" x2="47.6" y2="42.4" stroke="#EBD6C2" stroke-width=".6"/>'
+      + '<circle cx="47.6" cy="40.8" r="3.2" fill="#A6E5CF" stroke="#84D2B2" stroke-width=".9"/><path d="M47.6 37.8 a3 3 0 0 1 0 6 a3 3 0 0 1 0-6z" fill="none" stroke="#74C7A6" stroke-width="1.1"/></g>'
+      + '<rect x="15.4" y="52.8" width="33.2" height="2.4" rx="1.2" fill="#D2EDDD"/>';
+  } else if (k === 'mushroom_house'){
+    S += '<rect x="21.4" y="32.4" width="21.2" height="19.6" rx="3.4" fill="#FFF7EA" stroke="#EEDCC2" stroke-width="1.1"/>'
+      + '<path d="M12.6 33.2 q1.4-13.4 19.4-13.4 q18 0 19.4 13.4z" fill="#F08A8A"/>'
+      + '<path d="M12.6 33.2 q1.4-13.4 19.4-13.4 q18 0 19.4 13.4" fill="none" stroke="#DE7373" stroke-width="1.1"/>'
+      + '<g fill="#FFF6EA"><ellipse cx="22.4" cy="28" rx="3" ry="2.2"/><ellipse cx="32" cy="23.4" rx="3.4" ry="2.5"/><ellipse cx="41.6" cy="28" rx="3" ry="2.2"/><ellipse cx="27" cy="31.2" rx="2.2" ry="1.6"/><ellipse cx="37.2" cy="31.2" rx="2.2" ry="1.6"/></g>'
+      + '<path d="M27.8 52 v-9 a4.2 4.2 0 0 1 8.4 0 v9z" fill="#C9A47C" stroke="#B08A61" stroke-width=".9"/>'
+      + '<circle cx="34.6" cy="46.6" r=".9" fill="#FFE9A8"/>'
+      + '<circle cx="32" cy="38.8" r="3.6" fill="#CBE9F8" stroke="#A7D9EC" stroke-width="1"/>'
+      + '<path d="M28.4 38.8 h7.2 M32 35.2 v7.2" stroke="#A7D9EC" stroke-width=".8"/>'
+      + '<g stroke="#7FBF6A" stroke-width="1.5" fill="none"><path d="M15.6 52 q-1.6-4.4 0-8.6"/><path d="M49 52 q1.6-4.4 0-8.6"/></g>'
+      + '<circle cx="16" cy="42.4" r="1.8" fill="#C9B6F0"/><circle cx="49.4" cy="42.4" r="1.8" fill="#FFB6CB"/>'
+      + '<g fill="#FFFDF8"><circle cx="19.4" cy="52.4" r="1.5"/><circle cx="23.4" cy="53.4" r="1.1"/><circle cx="44.4" cy="52.4" r="1.5"/><circle cx="40.4" cy="53.4" r="1.1"/></g>'
+      + '<rect x="21.4" y="52.8" width="21.2" height="2.4" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'toy_shop'){
+    S += '<rect x="15.4" y="30.6" width="33.2" height="21.4" rx="3" fill="#FFF9E8" stroke="#F0E4C8" stroke-width="1.1"/>'
+      + '<rect x="14" y="26.8" width="36" height="5.2" rx="2.4" fill="#8FCBEE"/>'
+      + '<g fill="#FFFDF8"><circle cx="18.4" cy="29.4" r="1.6"/><circle cx="24" cy="29.4" r="1.6"/><circle cx="29.6" cy="29.4" r="1.6"/><circle cx="35.2" cy="29.4" r="1.6"/><circle cx="40.8" cy="29.4" r="1.6"/><circle cx="46.4" cy="29.4" r="1.6"/></g>'
+      + '<rect x="25" y="20.4" width="14" height="7.2" rx="2.2" fill="#FFF6C9" stroke="#EBCE86" stroke-width=".9"/>'
+      + '<g fill="#D9A877"><circle cx="29.4" cy="23.2" r="1.5"/><circle cx="34.6" cy="23.2" r="1.5"/></g>'
+      + '<circle cx="29.4" cy="20.8" r="1.3" fill="#D9A877"/><circle cx="34.6" cy="20.8" r="1.3" fill="#D9A877"/>'
+      + '<ellipse cx="32" cy="25.4" rx="1.5" ry="1.1" fill="#F0C9A8"/>'
+      + '<rect x="18.6" y="38.6" width="9.6" height="8.4" rx="1.6" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".9"/>'
+      + '<g><rect x="19.8" y="43.4" width="3.6" height="3.4" rx=".8" fill="#FF9FB8"/><rect x="23.8" y="40.2" width="3.2" height="3" rx=".7" fill="#FFE39B"/><circle cx="24.8" cy="46.6" r="1.2" fill="#A6E5CF"/></g>'
+      + '<rect x="35.8" y="38.6" width="9.6" height="8.4" rx="1.6" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".9"/>'
+      + '<g><circle cx="38.4" cy="42.6" r="1.6" fill="#FFB6CB"/><rect x="40.8" y="43.2" width="3.4" height="3.2" rx=".8" fill="#C9B6F0"/><circle cx="42.4" cy="40.8" r="1.1" fill="#FFE39B"/></g>'
+      + '<rect x="28.8" y="42.6" width="6.4" height="9.4" rx="2" fill="#E9B98C" stroke="#D9A877" stroke-width=".9"/>'
+      + '<circle cx="34.6" cy="47.4" r=".9" fill="#FFE9A8"/>'
+      + '<rect x="15.4" y="52.8" width="33.2" height="2.4" rx="1.2" fill="#F0E4C8"/>';
+  } else if (k === 'fire_station'){
+    S += '<rect x="14.6" y="29.4" width="34.8" height="22.6" rx="2.6" fill="#FFF4EF" stroke="#F0DAD2" stroke-width="1.1"/>'
+      + '<rect x="13.4" y="26.8" width="37.2" height="4.4" rx="2" fill="#E4665E"/>'
+      + '<g fill="#F6D9A8"><rect x="16.4" y="35.4" width="13.4" height="14.4" rx="1.8"/><rect x="34.2" y="35.4" width="13.4" height="14.4" rx="1.8"/></g>'
+      + '<g stroke="#D9B98C" stroke-width=".7"><line x1="23.1" y1="35.4" x2="23.1" y2="49.8"/><line x1="16.4" y1="40.2" x2="29.8" y2="40.2"/><line x1="16.4" y1="44.6" x2="29.8" y2="44.6"/></g>'
+      + '<g stroke="#D9B98C" stroke-width=".7"><line x1="40.9" y1="35.4" x2="40.9" y2="49.8"/><line x1="34.2" y1="40.2" x2="47.6" y2="40.2"/><line x1="34.2" y1="44.6" x2="47.6" y2="44.6"/></g>'
+      + '<rect x="26.4" y="19.6" width="11.2" height="7.2" rx="1.6" fill="#FBDDE0" stroke="#EFC6CB" stroke-width=".9"/>'
+      + '<circle cx="32" cy="23.2" r="2.6" fill="#E4665E"/><circle cx="32" cy="23.2" r="1.1" fill="#FFF2D8"/>'
+      + '<rect x="19.4" y="13.6" width="25.2" height="3" rx="1.4" fill="#F0C9A8"/>'
+      + '<path d="M22.6 13.6 v-6 M32 13.6 v-5.4 M41.4 13.6 v-6" stroke="#D9A877" stroke-width="1.1" stroke-linecap="round"/>'
+      + '<g stroke="#B98A5E" stroke-width="1.1"><line x1="26.6" y1="50" x2="26.6" y2="56"/><line x1="37.4" y1="50" x2="37.4" y2="56"/><line x1="26.6" y1="52.4" x2="37.4" y2="52.4"/><line x1="26.6" y1="54.4" x2="37.4" y2="54.4"/></g>'
+      + '<path d="M18.6 52.6 a3.4 3.4 0 1 1 6.8 0z" fill="#E4665E" opacity=".9"/>'
+      + '<rect x="14.6" y="52.8" width="34.8" height="2.4" rx="1.2" fill="#EFE3D2"/>';
+  } else if (k === 'post_office'){
+    S += '<rect x="15.4" y="30.4" width="33.2" height="21.6" rx="2.8" fill="#FFFBF2" stroke="#EEE4D2" stroke-width="1.1"/>'
+      + '<path d="M13 30.8 L32 22.4 L51 30.8 Z" fill="#A9C4E0"/>'
+      + '<path d="M13 30.8 L32 22.4 L51 30.8" fill="none" stroke="#93B0CE" stroke-width="1.1"/>'
+      + '<rect x="25.4" y="22.2" width="13.2" height="6" rx="1.4" fill="#FFF6E6" stroke="#E7D6BC" stroke-width=".9"/>'
+      + '<path d="M25.4 22.4 l6.6 4.2 l6.6-4.2" fill="none" stroke="#D9A877" stroke-width=".9" stroke-linejoin="round"/>'
+      + '<path d="M18.6 36.2 h10 v12.8 h-10z" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".9"/>'
+      + '<path d="M23.6 36.2 v12.8 M18.6 42.6 h10" stroke="#C3D9E6" stroke-width=".7"/>'
+      + '<path d="M35.4 36.2 h10 v12.8 h-10z" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".9"/>'
+      + '<path d="M40.4 36.2 v12.8 M35.4 42.6 h10" stroke="#C3D9E6" stroke-width=".7"/>'
+      + '<rect x="28.2" y="40" width="7.6" height="12" rx="1.6" fill="#D9A877" stroke="#C9A47C" stroke-width=".9"/>'
+      + '<circle cx="34.4" cy="46" r=".8" fill="#FFE9A8"/>'
+      + '<rect x="20.6" y="52.2" width="9.4" height="6.4" rx="1.4" fill="#E4665E" stroke="#CE544C" stroke-width=".9"/>'
+      + '<rect x="22" y="51" width="6.6" height="1.8" rx=".9" fill="#CE544C"/>'
+      + '<path d="M23 54.4 h4.6" stroke="#FFF0EC" stroke-width=".8"/>'
+      + '<rect x="15.4" y="52.8" width="33.2" height="2.4" rx="1.2" fill="#EEE4D2"/>';
+  } else if (k === 'snow_igloo'){
+    S += '<path d="M15 52.4 a17 17 0 0 1 34 0z" fill="#F4FBFF" stroke="#CFE6F2" stroke-width="1.2"/>'
+      + '<g stroke="#DDEFF8" stroke-width=".9" fill="none"><path d="M18 47.6 h28"/><path d="M21 43 h22"/><path d="M25.4 39 h13.2"/>'
+      + '<path d="M23.4 52.4 v-4.6 M32 52.4 v-8.8 M40.6 52.4 v-4.6 M27.6 47.6 v-4.6 M36.4 47.6 v-4.6"/></g>'
+      + '<path d="M25.8 52.4 v-4.6 a6.2 6.2 0 0 1 12.4 0 v4.6z" fill="#BFE0F2" stroke="#A7D3EA" stroke-width="1"/>'
+      + '<path d="M28 47.8 a4.4 4.4 0 0 1 8 0" fill="none" stroke="#D9EEF8" stroke-width=".9"/>'
+      + '<circle cx="44" cy="38.6" r="6.4" fill="#FFFDF8" stroke="#D8E6EF" stroke-width="1.1"/>'
+      + '<circle cx="44" cy="30.6" r="4.6" fill="#FFFDF8" stroke="#D8E6EF" stroke-width="1.1"/>'
+      + '<circle cx="42.6" cy="30" r=".7" fill="#6B5B4B"/><circle cx="45.6" cy="30" r=".7" fill="#6B5B4B"/>'
+      + '<path d="M44 31.6 l1.8 1 -1.8 .9z" fill="#FFA45C"/>'
+      + '<path d="M39.4 27.4 h9.2 l-1.4-3.2 h-6.4z" fill="#6E9BC6"/>'
+      + '<rect x="38.6" y="33" width="10.8" height="2.4" rx="1.2" fill="#FF9FB8"/>'
+      + '<path d="M38.6 34.2 l-3 2.8 2.6 1 1.6-2.4z" fill="#FF9FB8"/>'
+      + '<g fill="#FFFFFF"><circle cx="19.4" cy="22.6" r="1.2"/><circle cx="25" cy="16.4" r=".9"/><circle cx="33" cy="19.4" r="1.1"/><circle cx="47" cy="18.4" r="1"/><circle cx="50.4" cy="26.6" r=".8"/><circle cx="13.4" cy="30.4" r=".9"/></g>'
+      + '<rect x="15" y="52.4" width="34" height="2.4" rx="1.2" fill="#E2EFF6"/>';
+  } else if (k === 'bamboo_teahouse'){
+    S += '<rect x="19.4" y="33.4" width="25.2" height="18.6" rx="2.4" fill="#FFF7E6" stroke="#EEDCC2" stroke-width="1.1"/>'
+      + '<path d="M17 33.8 q3.2-9.6 15-9.6 q11.8 0 15 9.6z" fill="#9BD3A6"/>'
+      + '<path d="M17 33.8 q3.2-9.6 15-9.6 q11.8 0 15 9.6" fill="none" stroke="#7FBF8C" stroke-width="1.1"/>'
+      + '<rect x="17" y="33.4" width="30" height="2.8" rx="1.4" fill="#C9A47C"/>'
+      + '<rect x="24.4" y="37.4" width="15.2" height="6.8" rx="1.4" fill="#EAF6EE" stroke="#CDE3D2" stroke-width=".8"/>'
+      + '<path d="M24.4 40.8 h15.2 M32 37.4 v6.8" stroke="#CDE3D2" stroke-width=".7"/>'
+      + '<rect x="29.4" y="44.8" width="5.6" height="7.2" rx="1.4" fill="#C9A47C" stroke="#B08A61" stroke-width=".8"/>'
+      + '<g stroke="#7FBF6A" stroke-width="2.2" stroke-linecap="round" fill="none"><path d="M14.6 54 v-19"/><path d="M49.4 54 v-19"/></g>'
+      + '<g stroke="#8ED19C" stroke-width="1.6" stroke-linecap="round"><path d="M14.6 41.4 l-3-2.4 M14.6 46.4 l3 -2.2"/><path d="M49.4 38.4 l3-2.2 M49.4 44 l-3-2"/></g>'
+      + '<rect x="20.6" y="24.4" width="8.4" height="4.4" rx="1.4" fill="#FFF4E2" stroke="#E7C39A" stroke-width=".8"/>'
+      + '<path d="M23 24.4 a2.2 2.2 0 0 1 0-4.4" fill="none" stroke="#E7C39A" stroke-width=".9"/>'
+      + '<path d="M26.4 22.6 q1.4-2 0-3.6" fill="none" stroke="#E2E9E4" stroke-width="1" stroke-linecap="round"/>'
+      + '<circle cx="46" cy="26.6" r="2.6" fill="#FFCE8F" stroke="#EFB877" stroke-width=".8"/>'
+      + '<path d="M46 24 v5.2" stroke="#EFB877" stroke-width=".7"/>'
+      + '<rect x="19.4" y="52.8" width="25.2" height="2.2" rx="1.1" fill="#EFE3D2"/>';
+  } else if (k === 'pirate_ship'){
+    S += '<path d="M14.6 44.4 h34.8 l-4.4 8.2 h-26z" fill="#C9A47C" stroke="#B08A61" stroke-width="1.1"/>'
+      + '<path d="M17.4 47.4 h29.2 M18.6 50 h26.8" stroke="#B08A61" stroke-width=".7"/>'
+      + '<g fill="#FFE39B"><circle cx="20" cy="48.6" r=".7"/><circle cx="27" cy="48.6" r=".7"/><circle cx="34" cy="48.6" r=".7"/><circle cx="41" cy="48.6" r=".7"/></g>'
+      + '<line x1="32" y1="44" x2="32" y2="14.6" stroke="#B08A61" stroke-width="1.6"/>'
+      + '<path d="M33.4 16.4 q7.2 3.4 0 9.4 q6 1.2 0 9.4z" fill="#FFFDF6" stroke="#E7DCC8" stroke-width=".9"/>'
+      + '<path d="M30.6 17.4 q-6.4 3.6 0 9.6 q-5.4 1.2 0 9z" fill="#FFF7E8" stroke="#E7DCC8" stroke-width=".9"/>'
+      + '<path d="M32 14.6 l5.6 1.8 -5.6 1.8z" fill="#3E4E6E"/>'
+      + '<rect x="26.6" y="41.6" width="10.8" height="3" rx="1.4" fill="#D9A877"/>'
+      + '<circle cx="24.4" cy="42.4" r="2.4" fill="#E9C4A0" stroke="#D9A877" stroke-width=".8"/>'
+      + '<g stroke="#D9A877" stroke-width=".7"><line x1="24.4" y1="40" x2="24.4" y2="44.8"/><line x1="22" y1="42.4" x2="26.8" y2="42.4"/></g>'
+      + '<path d="M42 41.4 l2.6-2.2 M42 41.4 l3 1" stroke="#FFFDF8" stroke-width="1.6" stroke-linecap="round"/>'
+      + '<g stroke="#8FD6EA" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M15 54.4 q3-2.4 6 0 q3 2.4 6 0"/><path d="M30 54.4 q3-2.4 6 0 q3 2.4 6 0"/></g>'
+      + '<rect x="14.6" y="52.6" width="34.8" height="2.2" rx="1.1" fill="#DDEFF6"/>';
+  } else if (k === 'balloon_stop'){
+    S += '<path d="M24 44 h16 v8 h-16z" fill="#FFF6E6" stroke="#EBD9BE" stroke-width="1"/>'
+      + '<path d="M24 44 h16 M24 48 h16" stroke="#EBD9BE" stroke-width=".7"/>'
+      + '<g stroke="#C9A47C" stroke-width="1.2"><line x1="21" y1="44" x2="21" y2="52.6"/><line x1="43" y1="44" x2="43" y2="52.6"/></g>'
+      + '<path d="M16.4 34.8 a8.4 9.6 0 1 0 16.8 0 a8.4 9.6 0 1 0-16.8 0" fill="#FFB6CB"/>'
+      + '<path d="M24.8 25.6 a9.6 9.6 0 0 1 0 18.8 a6 9.6 0 0 1 0-18.8z" fill="#FFE39B"/>'
+      + '<path d="M33 25.6 a9.6 9.6 0 0 0 0 18.8 a6 9.6 0 0 0 0-18.8z" fill="#A6E5CF"/>'
+      + '<path d="M24.8 44.4 l1.2 3 h-2.4z" fill="#FF9FB8" opacity=".9"/>'
+      + '<path d="M22.6 44.2 l1.8 2.6 M27 44.2 l-1.8 2.6" stroke="#D9A877" stroke-width=".8"/>'
+      + '<rect x="22.8" y="47.6" width="7.8" height="4.8" rx="1.2" fill="#D9A877" stroke="#C9A47C" stroke-width=".8"/>'
+      + '<g stroke="#B98A5E" stroke-width=".8"><line x1="24.4" y1="47.6" x2="24.4" y2="44.8"/><line x1="29" y1="47.6" x2="29" y2="44.8"/></g>'
+      + '<rect x="36.6" y="36.4" width="7.6" height="8.4" rx="1.4" fill="#EAF6EE" stroke="#CDE3D2" stroke-width=".9"/>'
+      + '<path d="M40.4 36.4 v8.4" stroke="#CDE3D2" stroke-width=".7"/>'
+      + '<path d="M39 39.6 h3.2" stroke="#8ED19C" stroke-width="1"/>'
+      + '<path d="M44.4 52.6 v-8.2" stroke="#C9A47C" stroke-width="1.4"/>'
+      + '<g fill="#FFFDF8"><circle cx="17.4" cy="52.4" r="1.4"/><circle cx="21" cy="53.4" r="1"/><circle cx="46.6" cy="52.4" r="1.3"/></g>'
+      + '<rect x="14.6" y="52.8" width="34.8" height="2.2" rx="1.1" fill="#EFE3D2"/>';
+  } else if (k === 'pool_villa'){
+    S += '<rect x="17.4" y="26.4" width="21.4" height="15.4" rx="2.2" fill="#FFFDF6" stroke="#E9E0CE" stroke-width="1.1"/>'
+      + '<rect x="15.6" y="23.6" width="25" height="3.4" rx="1.6" fill="#F0DCC6"/>'
+      + '<rect x="19.4" y="30.4" width="8.4" height="7" rx="1.2" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".8"/>'
+      + '<path d="M23.6 30.4 v7 M19.4 33.9 h8.4" stroke="#C3D9E6" stroke-width=".6"/>'
+      + '<rect x="29.6" y="30.4" width="7" height="7" rx="1.2" fill="#EAF6FE" stroke="#C3D9E6" stroke-width=".8"/>'
+      + '<path d="M33.1 30.4 v7 M29.6 33.9 h7" stroke="#C3D9E6" stroke-width=".6"/>'
+      + '<rect x="22.6" y="40" width="5.6" height="8.6" rx="1.2" fill="#E9C4A0" stroke="#D9A877" stroke-width=".8"/>'
+      + '<path d="M33.4 52.4 a10.4 5.4 0 0 1 20.8 0z" fill="#BFE6FA" stroke="#9FD6F2" stroke-width="1"/>'
+      + '<path d="M35.6 49.6 q2.6-1.6 5.2 0 q2.6 1.6 5.2 0 q2.6-1.6 5.2 0" fill="none" stroke="#DFF3FD" stroke-width="1"/>'
+      + '<g stroke="#B4DCEE" stroke-width="1.2"><line x1="38" y1="52.4" x2="38" y2="48.4"/><line x1="41" y1="52.4" x2="41" y2="48.4"/><line x1="38" y1="48.4" x2="41" y2="48.4"/></g>'
+      + '<path d="M48.4 51.4 v-6.6 l4.4 1.4 -4.4 1.6" fill="#FFC9DA" stroke="#EFAEC3" stroke-width=".8" stroke-linejoin="round"/>'
+      + '<g stroke="#B98A5E" stroke-width=".9"><line x1="17.4" y1="41.8" x2="17.4" y2="52.6"/></g>'
+      + '<path d="M12 41.8 q5.4-3.4 10.8 0z" fill="#FF9FB8"/>'
+      + '<path d="M12 41.8 q5.4-3.4 10.8 0" fill="none" stroke="#EF8AA8" stroke-width=".9"/>'
+      + '<rect x="10.4" y="45.4" width="3.6" height="2" rx=".9" fill="#FFE39B"/>'
+      + '<g fill="#FFFDF8"><circle cx="22.4" cy="53" r="1.3"/><circle cx="27" cy="53.4" r=".9"/></g>'
+      + '<rect x="14.6" y="52.8" width="17" height="2.2" rx="1.1" fill="#EFE3D2"/>';
   } else {
     S += '<ellipse cx="32" cy="46" rx="19" ry="8.2" fill="#CDEBF6" stroke="#A7D9EC" stroke-width="1.2"/>'
       + '<ellipse cx="32" cy="46" rx="15.4" ry="6.2" fill="#9FDBF2"/>'
@@ -4467,6 +4969,114 @@ function avDecoHtml(kind){
     + '<path d="M19.4 8.6 q1.4 1.6 3.4.6" fill="none" stroke="#FFF6D0" stroke-width=".9" stroke-linecap="round" opacity=".9"/>'
     + '<circle cx="21.6" cy="5.6" r="1.15" fill="#FFF6D0"/><circle cx="23.4" cy="13.6" r=".85" fill="#FFF6D0"/>'
     + '</svg></span>';
+  if (kind === 'cat_ears_band') return '<span class="avd avd-catband"><svg viewBox="0 0 70 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M9 27 Q35 5 61 27" fill="none" stroke="#FFB6CB" stroke-width="4.4" stroke-linecap="round"/>'
+    + '<path d="M9 27 Q35 5 61 27" fill="none" stroke="#FFF1F6" stroke-width="1.4" stroke-linecap="round" opacity=".85"/>'
+    + '<path d="M10 23 L12.4 3.4 L27.4 15.4 Z" fill="#FFF7FB" stroke="#E4BFCC" stroke-width="1.3" stroke-linejoin="round"/>'
+    + '<path d="M14.2 19.4 L15.4 9 L22.6 15.2 Z" fill="#FFC6D8"/>'
+    + '<path d="M60 23 L57.6 3.4 L42.6 15.4 Z" fill="#FFF7FB" stroke="#E4BFCC" stroke-width="1.3" stroke-linejoin="round"/>'
+    + '<path d="M55.8 19.4 L54.6 9 L47.4 15.2 Z" fill="#FFC6D8"/>'
+    + '<circle cx="35" cy="16.4" r="2.6" fill="#FF9FBD" stroke="#F08AA8" stroke-width=".8"/>'
+    + '<circle cx="31" cy="20" r="1.9" fill="#FFC6D8"/><circle cx="39" cy="20" r="1.9" fill="#FFC6D8"/>'
+    + '</svg></span>';
+  if (kind === 'halo_ring') return '<span class="avd avd-halo"><svg viewBox="0 0 46 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="23" cy="8.6" rx="17.4" ry="5" fill="none" stroke="#F7CE5E" stroke-width="4.4"/>'
+    + '<ellipse cx="23" cy="8.6" rx="17.4" ry="5" fill="none" stroke="#FFE9A8" stroke-width="2.2"/>'
+    + '<ellipse cx="23" cy="7.4" rx="14" ry="2.6" fill="none" stroke="#FFF8DC" stroke-width=".9" opacity=".9"/>'
+    + '</svg></span>';
+  if (kind === 'cupcake') return '<span class="avd avd-cup"><svg viewBox="0 0 27 31" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M5.6 15.4 h15.8 l-2.4 12.2 h-11z" fill="#F7C9A2" stroke="#E0A877" stroke-width="1.1" stroke-linejoin="round"/>'
+    + '<path d="M9.4 16.6 l-1.4 10.4 M13.5 16.6 v10.4 M17.6 16.6 l1.4 10.4" stroke="#E0A877" stroke-width=".85"/>'
+    + '<circle cx="9.8" cy="12.8" r="4.7" fill="#FFC9DA" stroke="#EFAEC3" stroke-width="1"/>'
+    + '<circle cx="17.2" cy="12.8" r="4.7" fill="#FFC9DA" stroke="#EFAEC3" stroke-width="1"/>'
+    + '<circle cx="13.5" cy="9.2" r="4.4" fill="#FFD9E4" stroke="#EFAEC3" stroke-width="1"/>'
+    + '<circle cx="13.5" cy="5.4" r="2.5" fill="#E4665E" stroke="#CE544C" stroke-width=".8"/>'
+    + '<path d="M13.5 3.2 q1.8-2 3.2-.6" fill="none" stroke="#8AC97F" stroke-width="1.1" stroke-linecap="round"/>'
+    + '<circle cx="11.6" cy="4.4" r=".5" fill="#FFF3C4"/>'
+    + '</svg></span>';
+  if (kind === 'gift_box') return '<span class="avd avd-gift"><svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<rect x="3.4" y="9.6" width="21.2" height="15" rx="2" fill="#FFC9DA" stroke="#E79FB6" stroke-width="1.1"/>'
+    + '<rect x="1.8" y="6.6" width="24.4" height="4.2" rx="1.6" fill="#FF9FB8" stroke="#E088A4" stroke-width="1"/>'
+    + '<rect x="11.9" y="6.6" width="4.2" height="18" fill="#FFE39B" stroke="#E8C46A" stroke-width=".8"/>'
+    + '<path d="M14 6.2 q-6.4-4.6-6.6.6 q-.1 3.2 6.6.4" fill="#FFE39B" stroke="#E8C46A" stroke-width=".8" stroke-linejoin="round"/>'
+    + '<path d="M14 6.2 q6.4-4.6 6.6.6 q.1 3.2-6.6.4" fill="#FFE39B" stroke="#E8C46A" stroke-width=".8" stroke-linejoin="round"/>'
+    + '<circle cx="14" cy="6.6" r="1.9" fill="#FFD45C" stroke="#E8C46A" stroke-width=".7"/>'
+    + '<g fill="#FFF6E6"><circle cx="7" cy="17" r="1"/><circle cx="21" cy="17" r="1"/><circle cx="7" cy="21.4" r="1"/><circle cx="21" cy="21.4" r="1"/></g>'
+    + '</svg></span>';
+  if (kind === 'rainbow_balloon') return '<span class="avd avd-rbb"><svg viewBox="0 0 28 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="14" cy="13.4" rx="10.4" ry="12.4" fill="#FFB6CB" stroke="#E9909F" stroke-width="1.1"/>'
+    + '<ellipse cx="14" cy="13.4" rx="6.2" ry="12.2" fill="#FFE39B"/>'
+    + '<ellipse cx="14" cy="13.4" rx="2.9" ry="12" fill="#A6E5CF"/>'
+    + '<path d="M14 25.8 l-2.2 2.6 h4.4z" fill="#E9909F"/>'
+    + '<path d="M14 28.4 q4 6-1 12" fill="none" stroke="#C0A88E" stroke-width="1.1" stroke-linecap="round"/>'
+    + '<ellipse cx="10.2" cy="8.6" rx="2.4" ry="3.4" fill="#FFF6FA" opacity=".8" transform="rotate(-22 10.2 8.6)"/>'
+    + '</svg></span>';
+  if (kind === 'butterfly_friend') return '<span class="avd avd-bfly"><svg viewBox="0 0 34 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<g class="wl">'
+    + '<path d="M16.2 12 q-7-8.6-11.4-5 q-3.6 3.2 2.2 8 q3 2.6 9.2 1.4z" fill="#FFD3E2" stroke="#E79FB6" stroke-width="1.1" stroke-linejoin="round"/>'
+    + '<path d="M16 15.6 q-6.6 1.6-8.4 5.6 q-1.2 3.2 2.6 2.6 q3.4-.6 5.8-4.4z" fill="#FFE7EF" stroke="#E79FB6" stroke-width="1" stroke-linejoin="round"/>'
+    + '<circle cx="10.4" cy="10.6" r="2" fill="#FF9FB8" opacity=".7"/></g>'
+    + '<g class="wr">'
+    + '<path d="M17.8 12 q7-8.6 11.4-5 q3.6 3.2-2.2 8 q-3 2.6-9.2 1.4z" fill="#FFD3E2" stroke="#E79FB6" stroke-width="1.1" stroke-linejoin="round"/>'
+    + '<path d="M18 15.6 q6.6 1.6 8.4 5.6 q1.2 3.2-2.6 2.6 q-3.4-.6-5.8-4.4z" fill="#FFE7EF" stroke="#E79FB6" stroke-width="1" stroke-linejoin="round"/>'
+    + '<circle cx="23.6" cy="10.6" r="2" fill="#FF9FB8" opacity=".7"/></g>'
+    + '<ellipse cx="17" cy="15" rx="1.9" ry="7" fill="#C9A47A"/>'
+    + '<circle cx="17" cy="7.2" r="2.2" fill="#D9B285"/>'
+    + '<path d="M15.8 5.6 q-1.6-3.4-3.6-3.8 M18.2 5.6 q1.6-3.4 3.6-3.8" fill="none" stroke="#C9A47A" stroke-width=".9" stroke-linecap="round"/>'
+    + '</svg></span>';
+  if (kind === 'fairy_gold_wing'){
+    var wg = '<g fill="#FBE7B4" stroke="#E2B356" stroke-width="1.1" stroke-linejoin="round">'
+      + '<ellipse cx="16.4" cy="11.6" rx="10.4" ry="4.4" transform="rotate(14 16.4 11.6)"/>'
+      + '<ellipse cx="15.2" cy="18.4" rx="10.8" ry="4.6" transform="rotate(40 15.2 18.4)"/>'
+      + '<ellipse cx="16.4" cy="25.8" rx="10" ry="4.4" transform="rotate(64 16.4 25.8)"/>'
+      + '<ellipse cx="19.8" cy="33.2" rx="8.6" ry="4" transform="rotate(84 19.8 33.2)"/>'
+      + '</g>'
+      + '<circle cx="26" cy="9.4" r="2.6" fill="#FFF6D8" stroke="#E2B356" stroke-width=".9"/>'
+      + '<path d="M23.4 12.6 q-7 4.4-9 12" fill="none" stroke="#FFF3C8" stroke-width="1" stroke-linecap="round" opacity=".95"/>';
+    return '<span class="avd avd-gw avd-gw1"><svg viewBox="0 0 30 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+      + wg + '</svg></span>'
+      + '<span class="avd avd-gw avd-gw2"><svg viewBox="0 0 30 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+      + '<g transform="translate(30 0) scale(-1 1)">' + wg + '</g></svg></span>'
+      + '<span class="avd avd-gs1">✨</span><span class="avd avd-gs2">✨</span>';
+  }
+  if (kind === 'mini_cat') return '<span class="avd avd-mcat"><svg viewBox="0 0 25 29" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M19.6 25.4 q5.4-.4 3.6-6.6 q-.6-1.8-2-2.4" fill="none" stroke="#D9A877" stroke-width="2.2" stroke-linecap="round"/>'
+    + '<path d="M5.2 27.2 q0-7.6 7.2-7.6 q7.2 0 7.2 7.6z" fill="#F7D9BC" stroke="#D9A877" stroke-width="1.1" stroke-linejoin="round"/>'
+    + '<path d="M7.4 8.4 l1-5.4 4.2 2.8z" fill="#F7D9BC" stroke="#D9A877" stroke-width="1" stroke-linejoin="round"/>'
+    + '<path d="M8.4 7.2 l.5-2.6 2 1.4z" fill="#FFC6D8"/>'
+    + '<path d="M17.4 8.4 l-1-5.4 -4.2 2.8z" fill="#F7D9BC" stroke="#D9A877" stroke-width="1" stroke-linejoin="round"/>'
+    + '<path d="M16.4 7.2 l-.5-2.6 -2 1.4z" fill="#FFC6D8"/>'
+    + '<circle cx="12.4" cy="11.2" r="6.8" fill="#FCE6CF" stroke="#D9A877" stroke-width="1.1"/>'
+    + '<ellipse cx="10" cy="11.4" rx="1" ry="1.2" fill="#6B4A38"/><ellipse cx="14.8" cy="11.4" rx="1" ry="1.2" fill="#6B4A38"/>'
+    + '<path d="M12.4 13.4 l-1.1 .9 h2.2z" fill="#EFAEC3"/>'
+    + '<path d="M12.4 14.3 q-.9 .9-1.9 .3 M12.4 14.3 q.9 .9 1.9 .3" fill="none" stroke="#C99A82" stroke-width=".7" stroke-linecap="round"/>'
+    + '<g stroke="#D9B49A" stroke-width=".6"><path d="M8.6 12.8 l-3.4 .4 M8.6 14.2 l-3.2 1.4 M16.2 12.8 l3.4 .4 M16.2 14.2 l3.2 1.4"/></g>'
+    + '<path d="M9.6 18.4 q2.8 1.6 5.6 0" fill="none" stroke="#E7C7AE" stroke-width="1"/>'
+    + '</svg></span>';
+  if (kind === 'cocoa_mug') return '<span class="avd avd-mug"><svg viewBox="0 0 27 29" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path class="stm" d="M10 10 q1.8-2.6 0-5.2" fill="none" stroke="#D9BFC4" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<path class="stm stm2" d="M15.4 9.6 q1.8-2.6 0-5.2" fill="none" stroke="#D9BFC4" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<path d="M19 15 q4.8 2.6 0 5.6" fill="none" stroke="#E0C9B2" stroke-width="2.2" stroke-linecap="round"/>'
+    + '<rect x="4.4" y="11.4" width="14.6" height="12.6" rx="3.2" fill="#FFFDF8" stroke="#DEC7B0" stroke-width="1.1"/>'
+    + '<rect x="5.6" y="12.6" width="12.2" height="4.2" rx="2" fill="#B57A50"/>'
+    + '<path d="M11.6 14.4 q-1.8-2.6.9-3.4 q2.7.8.9 3.4z" fill="#FFF3E4"/>'
+    + '<ellipse cx="11.7" cy="24.8" rx="9" ry="2.2" fill="#F3E4D2" stroke="#DEC7B0" stroke-width=".9"/>'
+    + '<path d="M7.4 17.4 q1.6 3.4 0 6.6" fill="none" stroke="#F0E2D2" stroke-width="1.6" stroke-linecap="round"/>'
+    + '</svg></span>';
+  if (kind === 'heart_balloon') return '<span class="avd avd-hball"><svg viewBox="0 0 29 39" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M14.5 33.4 C3.4 25 2.2 13.4 8.4 9.2 C12.6 6.4 14.5 9.4 14.5 12 C14.5 9.4 16.4 6.4 20.6 9.2 C26.8 13.4 25.6 25 14.5 33.4 Z" fill="#FF9FB8" stroke="#E47E9C" stroke-width="1.2" stroke-linejoin="round"/>'
+    + '<path d="M14.5 33.4 C8.6 29 5.6 22.6 5.6 17" fill="none" stroke="#FFD3E2" stroke-width="1.4" opacity=".9" stroke-linecap="round"/>'
+    + '<ellipse cx="9.6" cy="14" rx="2.2" ry="3" fill="#FFF0F5" opacity=".85" transform="rotate(-24 9.6 14)"/>'
+    + '<path d="M14.5 33.6 q3.6 3-1.4 4.6" fill="none" stroke="#C0A88E" stroke-width="1.1" stroke-linecap="round"/>'
+    + '</svg></span>';
+  if (kind === 'star_frame'){
+    var sp = '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+      + '<path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="#FFE08A" stroke="#E8B23E" stroke-width=".7" stroke-linejoin="round"/>'
+      + '<circle cx="10" cy="10" r="1.7" fill="#FFFDF0"/></svg>';
+    return '<span class="avd avd-sfr avd-sfr1">' + sp + '</span><span class="avd avd-sfr avd-sfr2">' + sp + '</span>'
+      + '<span class="avd avd-sfr avd-sfr3">' + sp + '</span><span class="avd avd-sfr avd-sfr4">' + sp + '</span>'
+      + '<span class="avd avd-sfr avd-sfr5">' + sp + '</span><span class="avd avd-sfr avd-sfr6">' + sp + '</span>';
+  }
   return '';
 }
 /* 전신 일러스트 + 배경 + 꾸미기 이펙트 */
@@ -6179,8 +6789,9 @@ document.addEventListener('click', function(ev){
     avatarDraft.av[bKind] = bKey;
     if (bKind === 'build') delete avatarDraft.av.build;   /* 집은 착용 개념이 없음 — 구매만 */
     renderAvatarSheet(); renderKids();
-    if (typeof confetti === 'function') confetti(18);
-    toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
+    /* 새로 산 순간에만 선물 상자 언박싱 연출 (구매 취소·보유 아이템 착용에는 뜨지 않음) */
+    if (typeof giftOpen === 'function') giftOpen(bKid, bKind, bKey);
+    else toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
     return;
   }
   if (act === 'av-refund'){
@@ -9578,6 +10189,451 @@ async function finishBoot(){
     };
   }
 
+  /* 37. 🍣 회전초밥집 (v20) */
+  function pgbSushiTrainShop(g){
+    g.add(pgBox(3.0, 0.16, 2.5, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.5, 1.5, 2.0, '#FFF8EC', 0, 0.86, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.78, 0.86, 4), pgM('#8FA9C9'));
+    roof.position.set(0, 2.2, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.62, 0.1, 2.1, '#7A93B4', 0, 1.64, 0));
+    /* 노렌 */
+    g.add(pgBox(2.3, 0.42, 0.08, '#3E4E6E', 0, 1.28, 1.02));
+    for (var i = 0; i < 5; i++) g.add(pgBox(0.2, 0.36, 0.04, '#FFFDF8', -0.86 + i * 0.43, 1.28, 1.07));
+    /* 회전 벨트 */
+    var belt = new THREE.Group(); belt.position.set(0, 1.02, 0.34); g.add(belt);
+    belt.add(pgCyl(0.92, 0.92, 0.16, '#DCE8F2', 0, 0, 0, 22));
+    var plates = [];
+    for (var p = 0; p < 6; p++){
+      var a = p / 6 * Math.PI * 2;
+      var pl = new THREE.Group();
+      pl.position.set(Math.cos(a) * 0.74, 0.11, Math.sin(a) * 0.74);
+      pl.add(pgCyl(0.14, 0.14, 0.03, '#FFFDF8', 0, 0, 0, 12));
+      pl.add(pgBox(0.17, 0.07, 0.12, ['#FFB88C', '#FFF0C9', '#B6E3C6', '#FFC9DA'][p % 4], 0, 0.05, 0));
+      pl.add(pgBox(0.15, 0.05, 0.03, '#FFFDF8', 0, 0.09, -0.03));
+      belt.add(pl); plates.push(pl);
+    }
+    /* 간판 · 문 · 창문 */
+    g.add(pgBox(0.86, 0.4, 0.08, '#FFF4E2', 0, 1.9, 0.98));
+    var fish = pgSph(0.11, '#FFB88C', -0.16, 1.9, 1.02, 8); fish.scale.set(1.5, 0.9, 0.5); g.add(fish);
+    g.add(pgBox(0.34, 0.05, 0.02, '#EBCE9C', 0.16, 1.9, 1.03));
+    pgbWindow(g, -0.82, 0.92, 1.02, 0.62, 0.44, 0xEAF6FE);
+    pgbWindow(g, 0.82, 0.92, 1.02, 0.62, 0.44, 0xEAF6FE);
+    pgbFlowerBox(g, -0.82, 0.56, 1.08, 0.66);
+    pgbFlowerBox(g, 0.82, 0.56, 1.08, 0.66);
+    g.add(pgBox(0.6, 0.66, 0.1, '#E9C4A0', -1.6, 0.36, 0.9));
+    pgbSmoke(g, 1.04, 2.4, -0.4, 3);
+    g.userData.tick = function(t){
+      belt.rotation.y = t * 0.4;
+      plates.forEach(function(pl, k){ pl.position.y = 0.11 + Math.sin(t * 1.6 + k) * 0.012; });
+    };
+  }
+
+  /* 38. 🍪 마카롱 하우스 (v20) */
+  function pgbMacaronHouse(g){
+    g.add(pgBox(2.9, 0.14, 2.4, C.stone2, 0, 0.07, 0));
+    g.add(pgBox(2.2, 1.2, 1.8, '#FFFBF6', 0, 0.78, 0));
+    /* 마카롱 꼬끄(아래) + 필링 + 윗 꼬끄 */
+    var low = pgSph(1.18, '#F9C3D2', 0, 1.5, 0, 20);
+    low.scale.set(1.12, 0.52, 0.94); g.add(low);
+    g.add(pgCyl(1.2, 1.2, 0.26, '#FFF2E2', 0, 1.5, 0, 22));
+    var top = pgSph(1.18, '#F9C3D2', 0, 2.3, 0, 20);
+    top.scale.set(1.12, 0.62, 0.94); g.add(top);
+    var hip = pgSph(1.0, '#F3B2C4', 0, 2.24, 0, 18);
+    hip.scale.set(1.0, 0.3, 0.84); hip.position.y = 2.28; g.add(hip);
+    /* 크림 장식 점 */
+    for (var i = 0; i < 7; i++){
+      var a = i / 7 * Math.PI * 2;
+      g.add(pgSph(0.055, '#FFFDF8', Math.cos(a) * 1.02, 2.44, Math.sin(a) * 0.8, 7));
+    }
+    /* 문 · 창문 */
+    var door = pgBox(0.66, 0.84, 0.1, '#E9B98C', 0, 0.46, 0.92); g.add(door);
+    g.add(pgSph(0.09, '#FFE9A8', 0.22, 0.46, 0.98, 8));
+    pgbWindow(g, -0.78, 0.72, 0.92, 0.56, 0.44, 0xFFF6C9);
+    pgbWindow(g, 0.78, 0.72, 0.92, 0.56, 0.44, 0xFFF6C9);
+    /* 굴뚝 */
+    g.add(pgCyl(0.16, 0.18, 0.5, '#F3B2C4', 0.6, 2.72, -0.32, 10));
+    pgbSmoke(g, 0.6, 2.94, -0.32, 3);
+    pgbFlowerBox(g, -0.78, 0.34, 0.98, 0.6);
+    g.userData.tick = function(t){
+      top.position.y = 2.3 + Math.sin(t * 1.1) * 0.015;
+    };
+  }
+
+  /* 39. 🍬 캔디 숍 (v20) */
+  function pgbCandyShop(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.4, 1.5, 1.9, '#EFFBF4', 0, 0.86, 0));
+    /* 줄무늬 차양 */
+    for (var i = 0; i < 6; i++){
+      g.add(pgBox(0.4, 0.1, 1.02, i % 2 ? '#FFF7FB' : '#FFB6CB', -1.0 + i * 0.4, 1.72, 0.56));
+    }
+    g.add(pgBox(2.42, 0.12, 0.16, '#FF9FB8', 0, 1.64, 1.02));
+    g.add(pgBox(2.42, 1.5, 0.02, '#D9F6E6', 0, 0.86, 0.96));
+    /* 유리병 사탕 */
+    var jars = [];
+    [[-0.78, 0], [0, 0.06], [0.78, -0.04]].forEach(function(j, k){
+      var jar = new THREE.Group(); jar.position.set(j[0], 1.28, 1.0); g.add(jar);
+      jar.add(pgCyl(0.23, 0.23, 0.42, '#FFFDF8', 0, 0, 0, 14));
+      jar.add(pgCyl(0.18, 0.2, 0.08, '#E9DCC2', 0, 0.25, 0, 12));
+      var cols = ['#FF9FB8', '#FFE39B', '#A6E5CF', '#C9B6F0'];
+      for (var c = 0; c < 5; c++) jar.add(pgSph(0.07, cols[(c + k) % 4], Math.cos(c * 1.4) * 0.12, -0.12 + (c % 3) * 0.09, Math.sin(c * 1.4) * 0.12, 7));
+      jars.push(jar);
+    });
+    /* 큰 롤리팝 두 개 */
+    var pops = [];
+    [-1.42, 1.42].forEach(function(sx, idx){
+      var pop = new THREE.Group(); pop.position.set(sx, 0, 0.5); g.add(pop);
+      pop.add(pgCyl(0.035, 0.035, 1.3, '#FFFDF8', 0, 0.65, 0, 6));
+      var disc = pgCyl(0.36, 0.36, 0.12, idx ? '#A6E5CF' : '#FFC9DA', 0, 1.42, 0, 18);
+      disc.rotation.x = Math.PI / 2; pop.add(disc);
+      var spiral = pgTor(0.24, 0.035, idx ? '#74C7A6' : '#FF9FB8', 0, 1.42, 0.07, Math.PI * 1.5);
+      pop.add(spiral);
+      pops.push(pop);
+    });
+    /* 문 · 간판 */
+    g.add(pgBox(0.62, 0.9, 0.1, '#E9C4A0', 0, 0.5, 0.98));
+    g.add(pgSph(0.06, '#FFE9A8', 0.2, 0.5, 1.03, 8));
+    g.add(pgBox(0.96, 0.36, 0.08, '#FFF6C9', 0, 1.92, 0.86));
+    g.add(pgBox(0.72, 0.05, 0.02, '#E8B87A', 0, 1.92, 0.91));
+    g.userData.tick = function(t){
+      jars.forEach(function(j, k){ j.rotation.y = Math.sin(t * 0.7 + k) * 0.06; });
+      pops.forEach(function(p, k){ p.rotation.z = Math.sin(t * 0.9 + k) * 0.05; });
+    };
+  }
+
+  /* 40. 🍄 버섯 요정 집 (v20) */
+  function pgbMushroomHouse(g){
+    g.add(pgBox(2.8, 0.14, 2.3, C.stone2, 0, 0.07, 0));
+    g.add(pgCyl(0.92, 1.02, 1.42, '#FFF7EA', 0, 0.78, 0, 18));
+    g.add(pgCyl(0.98, 0.98, 0.1, '#EFE0CA', 0, 1.44, 0, 18));
+    /* 빨간 갓 + 흰 점 */
+    var cap = pgSph(1.32, '#F08A8A', 0, 1.42, 0, 22);
+    cap.scale.set(1.0, 0.62, 1.0); g.add(cap);
+    var capTop = pgSph(1.05, '#F5A0A0', 0, 1.62, 0, 18);
+    capTop.scale.set(1.0, 0.5, 1.0); g.add(capTop);
+    var dots = [];
+    for (var i = 0; i < 8; i++){
+      var a = i / 8 * Math.PI * 2, rr = 0.62 + (i % 3) * 0.2;
+      var d = pgSph(0.1 + (i % 2) * 0.03, '#FFF6EA', Math.cos(a) * rr, 1.86 - (i % 3) * 0.06, Math.sin(a) * rr, 8);
+      d.scale.set(1, 0.5, 1); g.add(d); dots.push(d);
+    }
+    /* 문 · 둥근 창 */
+    var door = pgBox(0.58, 0.8, 0.1, '#C9A47C', 0, 0.46, 0.92); g.add(door);
+    var dtop = pgCyl(0.29, 0.29, 0.2, '#C9A47C', 0, 0.86, 0.92, 12);
+    dtop.rotation.x = Math.PI / 2; dtop.rotation.z = Math.PI / 2; g.add(dtop);
+    g.add(pgSph(0.07, '#FFE9A8', 0.18, 0.44, 0.97, 8));
+    var rwin = pgCyl(0.24, 0.24, 0.08, '#CBE9F8', -0.52, 1.16, 0.86, 14); rwin.rotation.x = Math.PI / 2; g.add(rwin);
+    g.add(pgTor(0.25, 0.04, '#A7D9EC', -0.52, 1.16, 0.9));
+    /* 굴뚝 */
+    g.add(pgCyl(0.12, 0.14, 0.46, '#EFE0CA', 0.5, 2.12, -0.28, 8));
+    pgbSmoke(g, 0.5, 2.36, -0.28, 3);
+    /* 잔디 · 꽃 */
+    for (var f = 0; f < 5; f++){
+      var fa = -0.6 + f * 0.5;
+      g.add(pgSph(0.07, ['#C9B6F0', '#FFB6CB', '#FFE39B'][f % 3], Math.cos(fa) * 1.3, 0.16, Math.sin(fa) * 1.1, 7));
+    }
+    g.userData.tick = function(t){
+      dots.forEach(function(d, k){ d.position.y += Math.sin(t * 1.3 + k) * 0.0006; });
+    };
+  }
+
+  /* 41. 🧸 장난감 가게 (v20) */
+  function pgbToyShop(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.4, 1.5, 1.9, '#FFF9E8', 0, 0.86, 0));
+    for (var i = 0; i < 7; i++){
+      g.add(pgSph(0.16, i % 2 ? '#FFFDF8' : '#8FCBEE', -1.02 + i * 0.34, 1.86, 0.62, 10));
+    }
+    g.add(pgBox(2.42, 0.1, 1.0, '#8FCBEE', 0, 1.76, 0.54));
+    /* 곰돌이 간판 */
+    var teddy = new THREE.Group(); teddy.position.set(0, 2.3, 0.5); g.add(teddy);
+    teddy.add(pgSph(0.32, '#D9A877', 0, 0, 0, 16));
+    teddy.add(pgSph(0.13, '#D9A877', -0.24, 0.24, 0, 10));
+    teddy.add(pgSph(0.13, '#D9A877', 0.24, 0.24, 0, 10));
+    teddy.add(pgSph(0.14, '#F0C9A8', 0, -0.08, 0.26, 12));
+    teddy.add(pgSph(0.045, '#6B4A38', -0.12, 0.07, 0.28, 7));
+    teddy.add(pgSph(0.045, '#6B4A38', 0.12, 0.07, 0.28, 7));
+    teddy.add(pgSph(0.045, '#6B4A38', 0, -0.06, 0.37, 7));
+    teddy.add(pgSph(0.06, '#FFB6CB', -0.26, -0.02, 0.24, 7));
+    teddy.add(pgSph(0.06, '#FFB6CB', 0.26, -0.02, 0.24, 7));
+    /* 진열창 — 블록 · 공 */
+    pgbWindow(g, -0.76, 1.1, 0.98, 0.66, 0.54, 0xEAF6FE);
+    g.add(pgBox(0.16, 0.16, 0.16, '#FF9FB8', -0.92, 1.02, 1.02));
+    g.add(pgBox(0.14, 0.14, 0.14, '#FFE39B', -0.74, 1.0, 1.02));
+    g.add(pgSph(0.1, '#A6E5CF', -0.62, 1.18, 1.02, 10));
+    pgbWindow(g, 0.76, 1.1, 0.98, 0.66, 0.54, 0xEAF6FE);
+    g.add(pgSph(0.11, '#C9B6F0', 0.62, 1.06, 1.02, 10));
+    g.add(pgBox(0.18, 0.12, 0.14, '#FFC9A3', 0.88, 1.0, 1.02));
+    g.add(pgBox(0.6, 0.9, 0.1, '#E9C4A0', 0, 0.5, 0.98));
+    g.add(pgSph(0.06, '#FFE9A8', 0.2, 0.5, 1.03, 8));
+    pgbFlowerBox(g, -0.76, 0.44, 1.04, 0.7);
+    pgbFlowerBox(g, 0.76, 0.44, 1.04, 0.7);
+    g.userData.tick = function(t){
+      teddy.rotation.z = Math.sin(t * 1.4) * 0.06;
+      teddy.position.y = 2.3 + Math.sin(t * 1.4) * 0.03;
+    };
+  }
+
+  /* 42. 🚒 소방서 (v20) */
+  function pgbFireStation(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.5, 1.62, 2.0, '#FFF4EF', 0, 0.89, 0));
+    g.add(pgBox(2.62, 0.12, 2.1, '#E4665E', 0, 1.72, 0));
+    /* 큰 차고문 */
+    var door = pgBox(1.1, 1.12, 0.08, '#F6D9A8', -0.34, 0.62, 1.0); g.add(door);
+    for (var i = 0; i < 4; i++) g.add(pgBox(1.02, 0.04, 0.03, '#D9B98C', -0.34, 0.2 + i * 0.26, 1.06));
+    g.add(pgBox(1.16, 0.1, 0.1, '#E4665E', -0.34, 1.2, 1.02));
+    /* 사이렌 탑 */
+    g.add(pgBox(0.84, 0.6, 0.84, '#FFE9E4', 0.76, 1.98, 0));
+    var bell = new THREE.Group(); bell.position.set(0.76, 2.28, 0); g.add(bell);
+    bell.add(pgCyl(0.02, 0.02, 0.16, '#B4B1A8', 0, 0.06, 0, 6));
+    bell.add(pgSph(0.16, '#E4665E', 0, -0.14, 0, 12));
+    var rt = new THREE.Mesh(new THREE.ConeGeometry(0.52, 0.4, 4), pgM('#E4665E'));
+    rt.position.set(0.76, 2.62, 0); rt.rotation.y = Math.PI / 4; g.add(rt);
+    /* 사다리 · 호스 */
+    for (var r = 0; r < 4; r++) g.add(pgBox(0.9, 0.035, 0.035, '#C9A47C', 1.0, 0.7 + r * 0.16, 1.06));
+    g.add(pgBox(0.03, 0.62, 0.03, '#C9A47C', 0.66, 0.94, 1.06));
+    g.add(pgBox(0.03, 0.62, 0.03, '#C9A47C', 1.34, 0.94, 1.06));
+    var coil = pgTor(0.2, 0.05, '#FF9F8C', -1.06, 0.34, 0.9); coil.rotation.x = Math.PI / 2.3; g.add(coil);
+    /* 작은 창문 */
+    pgbWindow(g, 0.86, 1.16, 1.0, 0.44, 0.4, 0xFFE9A8);
+    g.add(pgCyl(0.05, 0.05, 0.34, '#B4B1A8', -1.02, 1.6, 0.9, 6));
+    g.userData.tick = function(t){
+      bell.rotation.z = Math.sin(t * 2.4) * 0.35;
+    };
+  }
+
+  /* 43. 📮 우체국 (v20) */
+  function pgbPostOffice(g){
+    g.add(pgBox(2.9, 0.16, 2.4, C.stone2, 0, 0.08, 0));
+    g.add(pgBox(2.4, 1.44, 1.9, '#FFFBF2', 0, 0.8, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.72, 0.9, 4), pgM('#A9C4E0'));
+    roof.position.set(0, 2.0, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.5, 0.1, 2.0, '#93B0CE', 0, 1.52, 0));
+    /* 봉투 간판 */
+    g.add(pgBox(0.96, 0.56, 0.08, '#FFF6E6', 0, 1.92, 0.86));
+    g.add(pgBox(0.8, 0.02, 0.02, '#D9A877', 0, 1.92, 0.91));
+    var flap = pgBox(0.8, 0.02, 0.02, '#D9A877', 0, 1.92, 0.915); g.add(flap);
+    /* 창문 · 문 */
+    pgbWindow(g, -0.76, 0.94, 0.96, 0.6, 0.5, 0xEAF6FE);
+    pgbWindow(g, 0.76, 0.94, 0.96, 0.6, 0.5, 0xEAF6FE);
+    g.add(pgBox(0.62, 0.86, 0.1, '#D9A877', 0, 0.48, 0.96));
+    g.add(pgSph(0.055, '#FFE9A8', 0.2, 0.48, 1.01, 8));
+    /* 빨간 우체통 */
+    var box = new THREE.Group(); box.position.set(-1.34, 0, 1.12); g.add(box);
+    box.add(pgBox(0.44, 0.62, 0.34, '#E4665E', 0, 0.4, 0));
+    var cap = pgCyl(0.22, 0.22, 0.34, '#E4665E', 0, 0.7, 0, 14); cap.rotation.z = Math.PI / 2; box.add(cap);
+    box.add(pgBox(0.3, 0.07, 0.03, '#CE544C', 0, 0.54, 0.18));
+    var flag = pgBox(0.03, 0.26, 0.14, '#FFE39B', 0.22, 0.74, 0); box.add(flag);
+    /* 담장 · 꽃 */
+    g.add(pgBox(2.5, 0.16, 0.14, '#EFE3D2', 0, 0.1, 1.16));
+    pgbFlowerBox(g, 0.76, 0.42, 1.02, 0.66);
+    g.add(pgSph(0.05, '#FFB6CB', 1.22, 0.3, 1.0, 6));
+    g.userData.tick = function(t){
+      flag.rotation.z = Math.sin(t * 2.2) * 0.22;
+    };
+  }
+
+  /* 44. ❄️ 눈사람 이글루 (v20) */
+  function pgbSnowIgloo(g){
+    g.add(pgBox(2.9, 0.14, 2.4, '#E2EFF6', 0, 0.07, 0));
+    var dome = pgSph(1.24, '#F4FBFF', 0, 0.2, 0, 22);
+    dome.scale.set(1.0, 0.72, 1.0); g.add(dome);
+    /* 얼음 벽돌 결 */
+    for (var r = 0; r < 4; r++){
+      var y = 0.28 + r * 0.26, rr = 1.2 * Math.cos(Math.asin(Math.min(0.98, (y - 0.2) / 0.9))) * 0.98;
+      if (rr < 0.3) continue;
+      var ring = pgTor(rr, 0.022, '#DDEFF8', 0, y, 0, Math.PI * 2); ring.rotation.x = Math.PI / 2; g.add(ring);
+    }
+    /* 터널 입구 */
+    var tun = pgCyl(0.5, 0.52, 0.5, '#BFE0F2', 0, 0.32, 1.06, 16);
+    tun.rotation.x = Math.PI / 2; g.add(tun);
+    var tdoor = pgCyl(0.38, 0.38, 0.06, '#A7D3EA', 0, 0.32, 1.3, 14); tdoor.rotation.x = Math.PI / 2; g.add(tdoor);
+    /* 눈사람 친구 */
+    var sm = new THREE.Group(); sm.position.set(1.36, 0, 0.72); g.add(sm);
+    sm.add(pgSph(0.34, '#FFFDF8', 0, 0.3, 0, 14));
+    sm.add(pgSph(0.25, '#FFFDF8', 0, 0.72, 0, 12));
+    var nose = pgCone(0.07, 0.2, '#FFA45C', 0, 0.72, 0.24, 8); nose.rotation.x = Math.PI / 2; sm.add(nose);
+    sm.add(pgSph(0.035, '#6B5B4B', -0.08, 0.78, 0.2, 6));
+    sm.add(pgSph(0.035, '#6B5B4B', 0.08, 0.78, 0.2, 6));
+    var scarf = pgCyl(0.26, 0.26, 0.09, '#FF9FB8', 0, 0.58, 0, 14); sm.add(scarf);
+    var tail = pgBox(0.09, 0.3, 0.06, '#FF9FB8', 0.2, 0.44, 0.12); sm.add(tail);
+    var hat = pgBox(0.3, 0.26, 0.3, '#6E9BC6', 0, 0.98, 0); sm.add(hat);
+    sm.add(pgCyl(0.24, 0.24, 0.06, '#6E9BC6', 0, 0.86, 0, 12));
+    /* 눈송이 */
+    var flakes = [];
+    for (var f = 0; f < 8; f++){
+      var fl = pgSph(0.05, '#FFFFFF', Math.cos(f * 0.9) * 1.4, 1.5 + (f % 3) * 0.3, Math.sin(f * 0.9) * 1.2, 6);
+      g.add(fl); flakes.push(fl);
+    }
+    g.userData.tick = function(t){
+      sm.rotation.y = Math.sin(t * 0.6) * 0.12;
+      flakes.forEach(function(fl, k){
+        var u = (t * 0.12 + k * 0.13) % 1;
+        fl.position.y = 2.1 - u * 2.0;
+        fl.position.x = Math.cos(k + t * 0.4) * 1.3;
+      });
+    };
+  }
+
+  /* 45. 🍵 대나무 찻집 (v20) */
+  function pgbBambooTeahouse(g){
+    g.add(pgBox(2.9, 0.14, 2.4, C.stone2, 0, 0.07, 0));
+    g.add(pgBox(2.1, 1.3, 1.7, '#FFF7E6', 0, 0.79, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.85, 1.0, 4), pgM('#9BD3A6'));
+    roof.position.set(0, 1.94, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.2, 0.12, 1.8, '#7FBF8C', 0, 1.44, 0));
+    /* 대나무 기둥 */
+    var bams = [];
+    [-1.28, 1.28].forEach(function(sx){
+      [-0.85, 0.85].forEach(function(sz){
+        var b = pgCyl(0.09, 0.1, 2.3, '#8ED19C', sx, 1.15, sz, 8); g.add(b); bams.push(b);
+        for (var n = 0; n < 4; n++) g.add(pgCyl(0.1, 0.1, 0.05, '#74B884', sx, 0.4 + n * 0.5, sz, 8));
+      });
+    });
+    /* 창문 · 문 */
+    for (var w = 0; w < 3; w++){
+      g.add(pgBox(0.44, 0.5, 0.06, '#EAF6EE', -0.62 + w * 0.62, 0.98, 0.87));
+      g.add(pgBox(0.03, 0.5, 0.03, '#C9A47C', -0.62 + w * 0.62, 0.98, 0.91));
+      g.add(pgBox(0.44, 0.03, 0.03, '#C9A47C', -0.62 + w * 0.62, 0.98, 0.91));
+    }
+    var slide = new THREE.Group(); slide.position.set(0, 0, 0.9); g.add(slide);
+    slide.add(pgBox(0.52, 0.7, 0.08, '#C9A47C', 0, 0.38, 0));
+    slide.add(pgSph(0.05, '#FFE9A8', 0.16, 0.36, 0.05, 6));
+    /* 매달린 등불 */
+    var lamp = new THREE.Group(); lamp.position.set(0.44, 1.3, 1.28); g.add(lamp);
+    lamp.add(pgCyl(0.02, 0.02, 0.24, '#B08A61', 0, 0.2, 0, 6));
+    var lan = pgSph(0.17, '#FFCE8F', 0, 0, 0, 12); lan.scale.set(1, 1.2, 1); lamp.add(lan);
+    lamp.add(pgCyl(0.1, 0.1, 0.05, '#EFB877', 0, 0.16, 0, 10));
+    /* 찻잔 간판 */
+    var cup = new THREE.Group(); cup.position.set(-0.5, 1.72, 0.94); g.add(cup);
+    cup.add(pgCyl(0.16, 0.13, 0.16, '#FFFDF8', 0, 0, 0, 12));
+    cup.add(pgTor(0.09, 0.025, '#E7C39A', 0.17, 0, 0, Math.PI));
+    pgbSmoke(g, -0.5, 1.92, 0.94, 2);
+    g.userData.tick = function(t){
+      lamp.rotation.z = Math.sin(t * 1.2) * 0.16;
+      bams.forEach(function(b, k){ b.rotation.z = Math.sin(t * 0.8 + k) * 0.015; });
+    };
+  }
+
+  /* 46. 🏴 해적선 놀이터 (v20) */
+  function pgbPirateShip(g){
+    g.add(pgBox(3.0, 0.14, 2.5, C.sand, 0, 0.07, 0));
+    /* 선체 */
+    g.add(pgBox(2.5, 0.6, 1.3, '#C9A47C', 0, 0.52, 0));
+    g.add(pgBox(2.2, 0.3, 1.1, '#B08A61', 0, 0.92, 0));
+    var bow = pgCyl(0.62, 0.62, 0.6, '#C9A47C', 1.18, 0.52, 0, 12);
+    bow.rotation.z = Math.PI / 2; bow.scale.set(1, 1, 0.6); g.add(bow);
+    /* 갑판 · 난간 */
+    g.add(pgBox(2.36, 0.1, 1.16, '#E4C69E', 0, 1.1, 0));
+    for (var i = 0; i < 7; i++){
+      g.add(pgCyl(0.035, 0.035, 0.3, '#C9A47C', -1.02 + i * 0.34, 1.26, 0.56, 6));
+      g.add(pgCyl(0.035, 0.035, 0.3, '#C9A47C', -1.02 + i * 0.34, 1.26, -0.56, 6));
+    }
+    g.add(pgBox(2.3, 0.05, 0.05, '#C9A47C', 0, 1.4, 0.56));
+    g.add(pgBox(2.3, 0.05, 0.05, '#C9A47C', 0, 1.4, -0.56));
+    /* 돛대 · 돛 */
+    g.add(pgCyl(0.06, 0.07, 2.5, '#B08A61', 0, 2.4, 0, 8));
+    var sail = new THREE.Group(); sail.position.set(0, 2.2, 0); g.add(sail);
+    var s1 = pgBox(0.05, 1.05, 1.0, '#FFFDF6', 0.06, 0, 0); sail.add(s1);
+    var s2 = pgBox(0.05, 0.8, 0.72, '#FFF7E8', -0.06, -0.08, 0); sail.add(s2);
+    g.add(pgBox(1.5, 0.06, 0.06, '#B08A61', 0, 2.7, 0));
+    /* 깃발 */
+    var fl = pgFlag('#3E4E6E', 0.6, 0.36); fl.position.set(0.06, 3.62, 0); g.add(fl);
+    /* 키 · 통 */
+    var wheel = pgCyl(0.36, 0.36, 0.07, '#C9A47C', -1.4, 1.0, 0, 14); wheel.rotation.z = Math.PI / 2; g.add(wheel);
+    g.add(pgBox(0.5, 0.4, 0.4, '#B08A61', -0.8, 1.35, -0.3));
+    g.add(pgBox(0.46, 0.06, 0.42, '#C9A47C', -0.8, 1.56, -0.3));
+    g.add(pgSph(0.06, '#FFE9A8', 1.3, 1.5, 0.2, 8));
+    g.userData.tick = function(t){
+      fl.rotation.y = Math.sin(t * 3.1) * 0.28;
+      sail.rotation.z = Math.sin(t * 1.1) * 0.03;
+    };
+  }
+
+  /* 47. 🎈 열기구 정류장 (v20) */
+  function pgbBalloonStop(g){
+    g.add(pgBox(3.0, 0.14, 2.4, C.stone2, 0, 0.07, 0));
+    /* 승강장 */
+    g.add(pgBox(2.4, 0.28, 1.5, '#FFF6E6', 0, 0.26, 0));
+    for (var i = 0; i < 6; i++) g.add(pgBox(0.34, 0.05, 1.52, i % 2 ? '#EBD9BE' : '#FFF6E6', -0.85 + i * 0.34, 0.42, 0));
+    g.add(pgCyl(0.06, 0.07, 1.5, '#C9A47C', -1.02, 1.15, 0.62, 8));
+    g.add(pgBox(0.62, 0.34, 0.06, '#FFF6C9', -1.02, 1.72, 0.62));
+    g.add(pgBox(0.46, 0.05, 0.02, '#E8B87A', -1.02, 1.72, 0.66));
+    /* 열기구 */
+    var bal = new THREE.Group(); bal.position.set(0.24, 2.0, -0.1); g.add(bal);
+    var env = pgSph(0.82, '#FFB6CB', 0, 0.72, 0, 20);
+    env.scale.set(1, 1.12, 1); bal.add(env);
+    var goreCols = ['#FFE39B', '#A6E5CF', '#FFF3E6', '#C9B6F0'];
+    for (var gi = 0; gi < 4; gi++){
+      var ga = gi * Math.PI / 2 + Math.PI / 4;
+      var seg = pgSph(0.52, goreCols[gi], Math.cos(ga) * 0.5, 0.7, Math.sin(ga) * 0.5, 14);
+      seg.scale.set(1.05, 1.22, 0.62);
+      seg.rotation.y = -ga;
+      bal.add(seg);
+    }
+    bal.add(pgCyl(0.2, 0.26, 0.16, '#FF9FB8', 0, 1.62, 0, 12));
+    [-0.24, 0.24].forEach(function(sx){ [-0.18, 0.18].forEach(function(sz){
+      bal.add(pgCyl(0.012, 0.012, 0.42, '#D9A877', sx, -0.16, sz, 5));
+    }); });
+    /* 바구니 */
+    var basket = new THREE.Group(); basket.position.set(0, -0.42, 0); bal.add(basket);
+    basket.add(pgBox(0.44, 0.3, 0.44, '#D9A877', 0, 0, 0));
+    basket.add(pgBox(0.46, 0.06, 0.46, '#C9A47C', 0, 0.16, 0));
+    /* 말뚝 · 꽃 */
+    g.add(pgCyl(0.05, 0.05, 0.44, '#B08A61', 1.18, 0.24, 0.66, 6));
+    pgbFlowerBox(g, 0.9, 0.5, 0.9, 0.6);
+    pgbSmoke(g, 1.1, 0.7, -0.6, 2);
+    g.userData.tick = function(t){
+      bal.position.y = 2.0 + Math.sin(t * 0.9) * 0.12;
+      bal.rotation.y = Math.sin(t * 0.5) * 0.1;
+      basket.rotation.z = Math.sin(t * 0.9 + 0.6) * 0.07;
+    };
+  }
+
+  /* 48. 🏊 미니 수영장 풀빌라 (v20) */
+  function pgbPoolVilla(g){
+    g.add(pgBox(3.0, 0.14, 2.5, C.stone2, 0, 0.07, 0));
+    /* 빌라 */
+    g.add(pgBox(2.1, 1.26, 1.5, '#FFFDF6', 0, 0.77, -0.42));
+    g.add(pgBox(2.24, 0.14, 1.64, '#F0DCC6', 0, 1.46, -0.42));
+    g.add(pgBox(1.7, 0.12, 1.2, '#FFE9D8', 0, 1.58, -0.42));
+    /* 큰 창 · 문 */
+    for (var w = 0; w < 2; w++){
+      g.add(pgBox(0.62, 0.56, 0.06, '#EAF6FE', -0.52 + w * 1.04, 0.86, 0.34));
+      g.add(pgBox(0.03, 0.56, 0.03, '#C3D9E6', -0.52 + w * 1.04, 0.86, 0.38));
+      g.add(pgBox(0.62, 0.03, 0.03, '#C3D9E6', -0.52 + w * 1.04, 0.86, 0.38));
+    }
+    g.add(pgBox(0.5, 0.72, 0.08, '#E9C4A0', 0, 0.5, 0.36));
+    /* 수영장 */
+    g.add(pgBox(1.66, 0.2, 0.92, '#BFE6FA', 0.42, 0.2, 0.86));
+    var water = pgBox(1.5, 0.06, 0.76, '#9FD6F2', 0.42, 0.3, 0.86); g.add(water);
+    for (var s = 0; s < 2; s++) g.add(pgBox(1.24, 0.01, 0.03, '#CFEFFC', 0.42, 0.335, 0.72 + s * 0.28));
+    /* 사다리 · 미끄럼틀 */
+    [-0.2, 0.04].forEach(function(dx){ g.add(pgCyl(0.018, 0.018, 0.4, '#B4DCEE', -0.34 + dx, 0.36, 0.6, 5)); });
+    var slide = new THREE.Group(); slide.position.set(-0.66, 0.62, 0.78); g.add(slide);
+    slide.add(pgBox(0.26, 0.06, 0.9, '#FFC9DA', 0, 0, 0));
+    slide.rotation.x = -0.42;
+    /* 파라솔 · 선베드 */
+    var um = new THREE.Group(); um.position.set(-1.14, 0, 0.5); g.add(um);
+    um.add(pgCyl(0.03, 0.03, 0.9, '#B98A5E', 0, 0.45, 0, 6));
+    var top = new THREE.Mesh(new THREE.ConeGeometry(0.52, 0.26, 10), pgM('#FF9FB8')); top.position.y = 0.94; um.add(top);
+    g.add(pgBox(0.5, 0.08, 0.24, '#FFFDF8', 0.9, 0.16, 1.0));
+    g.add(pgBox(0.5, 0.06, 0.24, '#FFE9D8', 0.9, 0.24, 0.94));
+    g.add(pgBox(0.3, 0.03, 0.24, '#BFE6FA', 0.14, 0.32, 1.06));
+    /* 야자수 */
+    g.add(pgCyl(0.06, 0.08, 1.2, '#C9A47C', 1.24, 0.62, -0.92, 8));
+    for (var l = 0; l < 5; l++){
+      var a = l / 5 * Math.PI * 2;
+      var leaf = pgBox(0.5, 0.05, 0.16, '#96E2C3', 1.24 + Math.cos(a) * 0.24, 1.22, -0.92 + Math.sin(a) * 0.24);
+      leaf.rotation.y = a; leaf.rotation.z = -0.28; g.add(leaf);
+    }
+    g.userData.tick = function(t){
+      water.position.y = 0.3 + Math.sin(t * 1.6) * 0.012;
+      um.rotation.y = Math.sin(t * 0.6) * 0.06;
+    };
+  }
+
   function pgBuildItemMesh(kind){
     var g = new THREE.Group();
     g.userData.buildKind = kind;
@@ -9617,6 +10673,18 @@ async function finishBoot(){
     else if (kind === 'hot_spring') pgbHotSpring(g);
     else if (kind === 'tree_deck') pgbTreeDeck(g);
     else if (kind === 'bungeoppang') pgbBungeoppang(g);
+    else if (kind === 'sushi_train_shop') pgbSushiTrainShop(g);
+    else if (kind === 'macaron_house') pgbMacaronHouse(g);
+    else if (kind === 'candy_shop') pgbCandyShop(g);
+    else if (kind === 'mushroom_house') pgbMushroomHouse(g);
+    else if (kind === 'toy_shop') pgbToyShop(g);
+    else if (kind === 'fire_station') pgbFireStation(g);
+    else if (kind === 'post_office') pgbPostOffice(g);
+    else if (kind === 'snow_igloo') pgbSnowIgloo(g);
+    else if (kind === 'bamboo_teahouse') pgbBambooTeahouse(g);
+    else if (kind === 'pirate_ship') pgbPirateShip(g);
+    else if (kind === 'balloon_stop') pgbBalloonStop(g);
+    else if (kind === 'pool_villa') pgbPoolVilla(g);
     else pgbCottagePink(g);
     return g;
   }
@@ -11067,7 +12135,20 @@ async function finishBoot(){
     frog_raincoat:   { ly:322, by:392, gs:197, ge:219, sx:208, lcx:180, rcx:250 },
     bunny_ribbon:    { ly:337, by:394, gs:191, ge:205, sx:198, lcx:179, rcx:216 },
     painter_beret:   { ly:334, by:393, gs:191, ge:204, sx:197, lcx:180, rcx:215 },
-    barista_apron:   { ly:309, by:393, gs:192, ge:201, sx:196, lcx:181, rcx:212 }
+    barista_apron:   { ly:309, by:393, gs:192, ge:201, sx:196, lcx:181, rcx:212 },
+    /* v20 추가 12종 — 400×400 원본 기준 직접 측정 */
+    police_officer:  { ly:316, by:392, gs:198, ge:210, sx:204, lcx:172, rcx:232 },
+    taekwondo_dobok: { ly:312, by:393, gs:194, ge:206, sx:200, lcx:176, rcx:262 },
+    basketball_jersey: { ly:330, by:392, gs:201, ge:213, sx:207, lcx:184, rcx:251 },
+    rock_guitar:     { ly:310, by:392, gs:199, ge:208, sx:203, lcx:170, rcx:250 },
+    magic_academy:   { ly:322, by:392, gs:196, ge:206, sx:201, lcx:170, rcx:245 },
+    penguin_padding: { ly:326, by:386, gs:193, ge:201, sx:197, lcx:176, rcx:222 },
+    sailor_girl:     { ly:320, by:391, gs:192, ge:210, sx:201, lcx:172, rcx:228 },
+    cake_dress:      { ly:336, by:389, gs:185, ge:203, sx:194, lcx:165, rcx:222 },
+    cherry_fairy:    { ly:320, by:389, gs:205, ge:218, sx:211, lcx:190, rcx:242 },
+    bear_sweater:    { ly:310, by:392, gs:197, ge:214, sx:205, lcx:175, rcx:243 },
+    space_pajama:    { ly:290, by:390, gs:199, ge:210, sx:204, lcx:176, rcx:241 },
+    hamster_hood:    { ly:330, by:392, gs:202, ge:214, sx:208, lcx:184, rcx:246 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
   var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:8 };
@@ -11254,6 +12335,19 @@ async function finishBoot(){
     bunny_ribbon:    { cx:198, hw:40, sy:232, len:50, w:16, ss:1, slv:'#FBD3DE', cuff:'#FFF0F5', skin:'#FBDFC7' },
     painter_beret:   { cx:198, hw:43, sy:226, len:51, w:17, ss:0, slv:'#FCF3E3', cuff:'#EDDCC2', skin:'#F9DCC4' },
     barista_apron:   { cx:196, hw:40, sy:228, len:51, w:16, ss:1, slv:'#FDFBF4', cuff:'#C3E2CB', skin:'#F9DCC6' },
+    /* v20 추가 12종 */
+    police_officer:  { cx:196, hw:42, sy:236, len:44, w:16, ss:1, slv:'#AFCCE7', cuff:'#7C9BC4', skin:'#F9DCC4' },
+    taekwondo_dobok: { cx:203, hw:48, sy:238, len:44, w:17, ss:0, slv:'#BFCEDD', cuff:'#DCE7F1', skin:'#F9DCC4' },
+    basketball_jersey: { cx:205, hw:44, sy:236, len:44, w:16, ss:1, slv:'#9FC9E6', cuff:'#F0A76A', skin:'#F9DCC4' },
+    rock_guitar:     { cx:208, hw:40, sy:240, len:42, w:16, ss:1, slv:'#D24A45', cuff:'#2B2B30', skin:'#F8DCC4' },
+    magic_academy:   { cx:205, hw:42, sy:236, len:44, w:17, ss:0, slv:'#3A4463', cuff:'#C7A34E', skin:'#F9DCC4' },
+    penguin_padding: { cx:200, hw:48, sy:238, len:42, w:18, ss:0, slv:'#A9BCE0', cuff:'#E7EEF9', skin:'#F9DCC4' },
+    sailor_girl:     { cx:200, hw:45, sy:236, len:42, w:16, ss:1, slv:'#37435E', cuff:'#EFEADA', skin:'#FADCC6' },
+    cake_dress:      { cx:200, hw:50, sy:238, len:40, w:17, ss:1, slv:'#F9C8D3', cuff:'#FFF0F4', skin:'#FBDFC7' },
+    cherry_fairy:    { cx:203, hw:45, sy:238, len:40, w:16, ss:1, slv:'#FAD5DC', cuff:'#FFF2F5', skin:'#FBDFC7' },
+    bear_sweater:    { cx:202, hw:42, sy:234, len:44, w:18, ss:0, slv:'#F09BA8', cuff:'#F8C3CC', skin:'#F9DBC1' },
+    space_pajama:    { cx:207, hw:44, sy:232, len:45, w:18, ss:0, slv:'#39446E', cuff:'#C6B8DD', skin:'#F9DCC4' },
+    hamster_hood:    { cx:203, hw:48, sy:240, len:42, w:19, ss:0, slv:'#F7DD8C', cuff:'#FDF3CE', skin:'#FADFC8' }
   };
   var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:51, w:17, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
   function pgArmOf(k){ return PG_ARM[k] || PG_ARM_DEF; }
