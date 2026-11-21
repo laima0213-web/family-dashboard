@@ -12808,8 +12808,10 @@ async function finishBoot(){
     var box = document.getElementById('pgLabels');
     if (!box || box.hidden) return;
     var w = PG.renderer.domElement.clientWidth, h = PG.renderer.domElement.clientHeight;
+    var farView = PG.dist > 56;              /* 멀리서 볼 땐 기구 이름표를 숨긴다 (나라 이름표는 계속) */
     PG.labels.forEach(function(L){
       if (!L.el) return;
+      if (farView && L.key.indexOf('nat:') !== 0){ L.el.style.display = 'none'; return; }
       var v = PG.vec.set(L.g.position.x, L.g.position.y + L.y, L.g.position.z);
       v.project(PG.camera);
       if (v.z > 1){ L.el.style.display = 'none'; return; }
@@ -14183,9 +14185,9 @@ async function finishBoot(){
     var fov = (asp < 0.72) ? 58 : 48;
     var vHalf = Math.tan(fov * Math.PI / 360);
     var hHalf = vHalf * asp;
-    var dW = ((WX1 - WX0) + 16) / 2 / hHalf;
-    var dH = ((WZ1 - WZ0) + 18) / 2 / vHalf;
-    return Math.max(36, Math.min(520, Math.max(dW, dH) * 1.1));
+    var dW = ((WX1 - WX0) + 7) / 2 / hHalf;
+    var dH = ((WZ1 - WZ0) + 10) / 2 / vHalf;
+    return Math.max(36, Math.min(520, Math.max(dW, dH) * 1.04));
   }
   function pgAspect(){
     var el = PG.renderer && PG.renderer.domElement;
