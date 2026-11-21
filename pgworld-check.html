@@ -10944,7 +10944,7 @@ async function finishBoot(){
     yard.add(pgPatch(-2.2, 30.2, SEA_SHORE, 23.7, 0, 0, 8.4, 0, 0.012, pgGroundMat('sand', 0.22)));
     yard.add(pgPatch(-2.2, 30.2, SEA_SHORE - 2.1, SEA_SHORE + 0.06, 0, 0, 0, 0, 0.014, '#E6CDA0'));
     var seaMat = new THREE.MeshLambertMaterial({ color: 0x8FD6F0, transparent: true, opacity: 0.92 });
-    yard.add(pgPatch(-2.6, 30.6, -24.3, SEA_SHORE - 0.08, 8.2, 8.2, 0, 0, 0.032, seaMat));
+    yard.add(pgPatch(-2.6, 30.6, -24.3, SEA_SHORE - 0.08, 8.2, 8.2, 6.0, 6.0, 0.032, seaMat));
     var foam = pgBox(31.4, 0.02, 0.55, '#FFFFFF', 14, 0.046, SEA_SHORE - 0.5);
     foam.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
     yard.add(foam);
@@ -10957,6 +10957,29 @@ async function finishBoot(){
       foam2.position.z = SEA_SHORE - 1.4 + Math.sin(t * 0.55 + 1.2) * 0.4;
     });
 
+    /* ④ 🌲 숲속 개울 — 살랑 굽이치는 물길 + 물가 돌 */
+    var ss = new THREE.Shape(), SN = 30;
+    for (var si = 0; si <= SN; si++){
+      var su2 = si / SN, spx = STREAM.x0 + (STREAM.x1 - STREAM.x0) * su2;
+      var spz = STREAM.z + Math.sin(su2 * 5.2) * 0.42 - STREAM.w / 2;
+      if (si === 0) ss.moveTo(spx, -spz); else ss.lineTo(spx, -spz);
+    }
+    for (var sj = SN; sj >= 0; sj--){
+      var su3 = sj / SN, spx2 = STREAM.x0 + (STREAM.x1 - STREAM.x0) * su3;
+      var spz2 = STREAM.z + Math.sin(su3 * 5.2) * 0.42 + STREAM.w / 2;
+      ss.lineTo(spx2, -spz2);
+    }
+    var sgeo = new THREE.ShapeGeometry(ss, 4);
+    sgeo.rotateX(-Math.PI / 2);
+    var streamMesh = new THREE.Mesh(sgeo, new THREE.MeshLambertMaterial({ color: 0x8FD6F0 }));
+    streamMesh.position.y = 0.028;
+    yard.add(streamMesh);
+    for (var sb = 0; sb < 26; sb++){
+      var bx = STREAM.x0 + (STREAM.x1 - STREAM.x0) * (sb / 26);
+      var bz = STREAM.z + Math.sin((sb / 26) * 5.2) * 0.42 + (sb % 2 ? 1 : -1) * (STREAM.w / 2 + 0.12);
+      var bk = pgSph(0.13 + pgRnd() * 0.1, sb % 2 ? C.stone : C.stone2, bx, 0.07, bz, 6);
+      bk.scale.y = 0.6; yard.add(bk);
+    }
     /* ④ 🌲 숲속캠핑 — 이끼 낀 진초록 땅 */
     yard.add(pgPatch(30.2, 57.8, -23.7, 23.7, 0, 0, 0, 0, 0.012, pgGroundMat('moss', 0.16)));
     /* ⑤ ❄️ 겨울나라 — 눈밭 + 얼음 연못 */
