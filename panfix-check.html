@@ -14912,7 +14912,26 @@ async function finishBoot(){
     drag1: function(id){ PG.mode='pan'; PG.pan={x:0,y:0}; return PG.mode; },
     panTo: function(dx, dy){ PG.pan.x += dx; PG.pan.y += dy; var e = { clientX: PG.pan.x, clientY: PG.pan.y, preventDefault: function(){}, pointerId:'t' }; PG.mode='pan'; pgMove(e); return function(){ return { tx: PG.target.x, tz: PG.target.z }; }(); },
     frames: function(n){ return new Promise(function(res){ var i = 0; function step(){ if (i++ >= (n||3)) return res(PG.frames); requestAnimationFrame(step); } requestAnimationFrame(step); }); },
-    errs: function(){ return window.__errs; }
+    errs: function(){ return window.__errs; },
+    /* 실제 리스너가 받는 것과 같은 모양의 이벤트 객체로 pgDown/pgMove/pgUp을 순서대로 흘려보낸다 */
+    gesture: function(seq){
+      var out = [];
+      seq.forEach(function(s){
+        if (s.op === 'down') pgDown({ pointerId: s.id || 7, pointerType: 'touch', isPrimary: true,
+                                      clientX: s.x, clientY: s.y, button: s.button || 0,
+                                      shiftKey: !!s.shift, ctrlKey: !!s.ctrl, preventDefault: function(){} });
+        else if (s.op === 'move') pgMove({ pointerId: s.id || 7, clientX: s.x, clientY: s.y, preventDefault: function(){} });
+        else if (s.op === 'up') pgUp({ pointerId: s.id || 7, clientX: s.x, clientY: s.y });
+        else if (s.op === 'ptr') { PG.ptrs[s.id] = { x: s.x, y: s.y }; }
+        else if (s.op === 'unptr') { delete PG.ptrs[s.id]; }
+        else if (s.op === 'pinchStart') pgStartPinch();
+        else if (s.op === 'pinchMove') pgPinchMove();
+        out.push({ tx: Math.round(PG.target.x*1000)/1000, tz: Math.round(PG.target.z*1000)/1000,
+                   az: Math.round(PG.azim*1000)/1000, po: Math.round(PG.polar*1000)/1000,
+                   d: Math.round(PG.dist*1000)/1000, mode: PG.mode });
+      });
+      return out;
+    },
   };
 })();
 
