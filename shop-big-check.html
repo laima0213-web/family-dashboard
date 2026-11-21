@@ -898,7 +898,7 @@ button{font:inherit;color:inherit}
 .avd-sfr6{left:50%;bottom:2px;margin-left:-5px;animation-delay:2s;width:11px;height:11px}
 /* 캐릭터 고르기 그리드 — 11-21: 3열 → 2열 큰 카드로 확대 */
 .av-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
-.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:18px;padding:26px 7px 9px;display:flex;
+.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:18px;padding:28px 7px 9px;display:flex;
   flex-direction:column;align-items:center;gap:5px;cursor:pointer}
 .av-card.on{border-color:#5FA97A;background:#F2FBF5;box-shadow:0 3px 8px rgba(95,169,122,.2)}
 .av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
@@ -1452,7 +1452,7 @@ button.st{padding:0}
 .av-ptnote{flex:1 1 100%;font-size:10px;font-weight:800;color:#9C8EC0;line-height:1.35;letter-spacing:-.2px}
 .av-card{position:relative}
 .av-card.locked{background:#FCFAF5;border-style:dashed;border-color:#EADCC5}
-.av-card-pr{position:absolute;top:5px;right:6px;font-size:11px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
+.av-card-pr{position:absolute;top:6px;right:6px;font-size:11px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
   border:1px solid #E5D8F6;border-radius:999px;padding:0 8px;line-height:1.7;z-index:3}
 .av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
@@ -1480,7 +1480,7 @@ button.st{padding:0}
   box-shadow:0 4px 10px rgba(160,140,110,.12)}
 .av-deco-pv > img{width:97%;height:97%;object-fit:contain;position:relative;z-index:1}
 .av-deco-pv .avd{animation:none!important}
-.av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#CBBEA9;
+.av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#BCAB93;
   border:2px dashed #E7DBC9;border-radius:26px;box-shadow:none;background:linear-gradient(150deg,#FFFDF8,#F8F3EA)}
 /* 상점 시트는 여백을 살짝 줄여 카드 가로폭 확보 */
 .sheet-card:has(.av-grid),.sheet-card:has(.av-bggrid){padding-left:10px;padding-right:10px}
@@ -14025,6 +14025,14 @@ async function finishBoot(){
     app: function(){ return state; } };
 })();
 
+</script>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search), tab = q.get('tab');
+  if (tab) setTimeout(function(){
+    try { openAvatarSheet(q.get('kid') || 'k2'); avatarTab = tab; renderAvatarSheet(); } catch(e){ window.__errs.push('auto: ' + e.message); }
+  }, 900);
+})();
 </script>
 </body>
 </html>
