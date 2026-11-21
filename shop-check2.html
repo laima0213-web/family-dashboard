@@ -9156,8 +9156,9 @@ async function finishBoot(){
     g.add(pgBox(2.9, 0.14, 2.1, '#E7EDF0', 0, 0.25, 0));
     /* 물 — 살짝 비쳐 보이게 */
     var water = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.42, 1.6),
-      new THREE.MeshLambertMaterial({ color: new THREE.Color('#8FD6F0'), transparent: true, opacity: 0.62, depthWrite: false }));
+      new THREE.MeshLambertMaterial({ color: new THREE.Color('#7ECEEA'), transparent: true, opacity: 0.5, depthWrite: false }));
     water.position.set(0, 1.14, 0); g.add(water);
+    g.add(pgBox(2.42, 0.16, 1.62, '#9FDCF2', 0, 1.36, 0));
     /* 모래바닥 · 해초 */
     g.add(pgBox(2.3, 0.12, 1.5, '#F4DEB2', 0, 0.5, 0));
     [-0.82, -0.3, 0.42, 0.92].forEach(function(sx, i){
@@ -9172,7 +9173,8 @@ async function finishBoot(){
       var tail = new THREE.Mesh(new THREE.ConeGeometry(f[0] * 0.62, f[0] * 1.1, 6), pgM(f[1]));
       tail.rotation.z = Math.PI / 2; tail.position.x = -f[0] * 1.65; fg.add(tail);
       fg.add(pgSph(f[0] * 0.17, '#4A3D31', f[0] * 0.6, f[0] * 0.16, f[0] * 0.42, 6));
-      g.add(fg); fish.push({ g: fg, r: 0.52 + i * 0.12, sp: f[2], y: 0.92 + i * 0.28, ph: i * 1.7 });
+      fg.position.z = 0.72;
+      g.add(fg); fish.push({ g: fg, r: 0.52 + i * 0.12, sp: f[2], y: 0.92 + i * 0.28, ph: i * 1.7, zoff: 0.66 });
     });
     /* 수조 테두리 — 기둥 4개 · 위아래 테 */
     [[-1.2, -0.8], [1.2, -0.8], [-1.2, 0.8], [1.2, 0.8]].forEach(function(p){
@@ -9181,7 +9183,9 @@ async function finishBoot(){
     g.add(pgBox(2.54, 0.12, 1.74, '#BEE4F2', 0, 1.9, 0));
     g.add(pgBox(2.54, 0.12, 1.74, '#CDEDF8', 0, 0.38, 0));
     /* 지붕 간판 (아치 + 물결) */
-    var arch = pgTor(1.3, 0.07, '#FFB6CB', 0, 1.94, 0, Math.PI); arch.rotation.y = Math.PI / 2; g.add(arch);
+    var arch = pgTor(1.16, 0.08, '#FFB6CB', 0, 1.94, 0, Math.PI); g.add(arch);
+    g.add(pgCyl(0.08, 0.08, 0.3, '#FFB6CB', -1.16, 1.79, 0, 8));
+    g.add(pgCyl(0.08, 0.08, 0.3, '#FFB6CB', 1.16, 1.79, 0, 8));
     g.add(pgBox(1.5, 0.36, 0.12, '#FFB6CB', 0, 2.62, 0));
     g.add(pgSph(0.09, '#FFF7FB', -0.44, 2.62, 0.08, 8));
     g.add(pgSph(0.09, '#FFF7FB', 0, 2.62, 0.08, 8));
@@ -9198,7 +9202,7 @@ async function finishBoot(){
     g.userData.tick = function(t){
       fish.forEach(function(f){
         var a = f.ph + t * f.sp;
-        f.g.position.set(Math.cos(a) * f.r, f.y + Math.sin(t * 1.6 + f.ph) * 0.07, Math.sin(a) * f.r * 0.55);
+        f.g.position.set(Math.cos(a) * f.r * 0.92, f.y + Math.sin(t * 1.6 + f.ph) * 0.07, f.zoff + Math.sin(a) * 0.06);
         f.g.rotation.y = -a + Math.PI / 2;
       });
       bubbles.forEach(function(bb, i){
@@ -9427,10 +9431,15 @@ async function finishBoot(){
     });
     /* 마차 위 꽃더미 */
     var cols = ['#FFC3D6', '#FFF0B8', '#FF9FB8', '#FFE08A', '#E6D2F6', '#FFFFFF', '#A6E5CF'];
-    for (var i = 0; i < 22; i++){
-      var a = (i / 22) * Math.PI * 2;
-      var rr = 0.24 + (i % 4) * 0.11;
-      g.add(pgSph(0.14, cols[i % cols.length], Math.cos(a) * (0.62 + (i % 3) * 0.16), 1.26 + Math.sin(a * 2) * 0.1, Math.sin(a) * rr * 1.6, 7));
+    for (var i = 0; i < 34; i++){
+      var a = (i / 34) * Math.PI * 2;
+      var rr = 0.2 + (i % 5) * 0.09;
+      g.add(pgSph(0.085, cols[i % cols.length], Math.cos(a) * (0.6 + (i % 3) * 0.2), 1.2 + Math.sin(a * 3) * 0.07 + (i % 4) * 0.03, Math.sin(a) * rr * 1.7, 6));
+    }
+    for (var lv = 0; lv < 8; lv++){
+      var la = (lv / 8) * Math.PI * 2;
+      var leaf = pgSph(0.11, '#7FC56A', Math.cos(la) * (0.52 + (lv % 2) * 0.24), 1.1, Math.sin(la) * 0.62, 6);
+      leaf.scale.set(1.5, 0.45, 0.9); g.add(leaf);
     }
     g.add(pgCyl(0.06, 0.06, 0.5, '#7FC56A', 0.62, 1.36, 0.3, 6));
     g.add(pgSph(0.18, '#FFC3D6', 0.62, 1.64, 0.3, 8));
@@ -9485,8 +9494,8 @@ async function finishBoot(){
         var u = (t * 0.26 + i / puffs.length) % 1;
         var a = i * 1.1;
         pf.position.set(Math.cos(a) * (0.3 + u * 0.5), 0.42 + u * 1.4, Math.sin(a) * (0.3 + u * 0.5));
-        pf.material.opacity = 0.4 * (1 - u);
-        var s = 0.7 + u * 1.1; pf.scale.set(s, s, s);
+        pf.material.opacity = 0.34 * (1 - u);
+        var s = 0.45 + u * 1.0; pf.scale.set(s, s, s);
       });
       water.position.y = 0.31 + Math.sin(t * 1.1) * 0.008;
     };
@@ -9495,13 +9504,13 @@ async function finishBoot(){
   /* 35. 🌲 2층 트리 전망대 (v19) */
   function pgbTreeDeck(g){
     g.add(pgCyl(1.5, 1.6, 0.14, '#DFF3CC', 0, 0.07, 0, 22));
-    g.add(pgCyl(0.26, 0.34, 2.5, '#B6875C', 0, 1.32, 0, 10));
+    g.add(pgCyl(0.24, 0.34, 2.9, '#B6875C', 0, 1.45, 0, 10));
     /* 나뭇잎 */
-    [[0, 2.9, 0, 1.02], [0.68, 2.62, 0.2, 0.72], [-0.62, 2.72, -0.24, 0.66], [0.1, 3.42, -0.1, 0.66]].forEach(function(p){
+    [[0, 3.16, 0, 0.96], [0.7, 3.0, 0.22, 0.66], [-0.66, 3.06, -0.26, 0.62], [0.08, 3.72, -0.1, 0.62]].forEach(function(p){
       g.add(pgSph(p[3], '#98D57E', p[0], p[1], p[2], 12));
     });
-    g.add(pgSph(0.16, '#FF9FB8', -0.5, 2.6, 0.52, 7));
-    g.add(pgSph(0.14, '#FFF0B8', 0.62, 2.36, -0.4, 7));
+    g.add(pgSph(0.14, '#FF9FB8', -0.56, 2.98, 0.5, 7));
+    g.add(pgSph(0.12, '#FFF0B8', 0.64, 2.86, -0.42, 7));
     /* 2층 전망 데크 */
     var deck = pgCyl(1.02, 1.02, 0.1, '#E4C69E', 0, 1.62, 0, 16); g.add(deck);
     g.add(pgTor(1.02, 0.05, '#D9B98C', 0, 1.6, 0));
