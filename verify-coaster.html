@@ -11765,7 +11765,8 @@ async function finishBoot(){
                   teacup:202.5, drop:247.5, balloon:292.5, bumper:337.5 };
     Object.keys(outer).forEach(function(k){
       var a = outer[k] * Math.PI / 180;
-      var rr = (k === 'bumper') ? BUMPER_RR : ROAD.outer;   /* 범퍼카는 넓은 경기장이라 조금 바깥에 */
+      var rr = (k === 'bumper') ? BUMPER_RR : (k === 'coaster' ? 17.4 : ROAD.outer);
+      /* 범퍼카는 넓은 경기장, 🎢 롤러코스터는 8m 높이의 큰 트랙이라 조금 더 바깥에 */
       var x = PARK.x + Math.cos(a) * rr, z = PARK.z + Math.sin(a) * rr;
       pgBuildOne(k);
       var g = PG.rides[k].g;
@@ -12457,38 +12458,36 @@ async function finishBoot(){
     }
     /* ---------- ④ 승강장 — 캐노피 지붕 · 계단 · 꽃 화단 ---------- */
     var st = new THREE.Group(); g.add(st);
-    st.add(pgBox(5.2, 0.16, 1.5, '#FFF1DF', 0.3, 0.98, 4.95));
-    st.add(pgBox(5.24, 0.06, 0.10, C.pink, 0.3, 1.07, 5.68));
-    [[-1.9, 4.34], [2.5, 4.34], [-1.9, 5.56], [2.5, 5.56]].forEach(function(p){
+    st.add(pgBox(5.0, 0.16, 1.20, '#FFF1DF', 0.35, 0.98, 4.55));
+    st.add(pgBox(5.04, 0.06, 0.09, C.pink, 0.35, 1.07, 5.12));
+    [[-1.75, 4.06], [2.4, 4.06], [-1.75, 5.04], [2.4, 5.04]].forEach(function(p){
       st.add(pgCyl(0.085, 0.10, 2.30, '#E8CDA9', p[0], 2.13, p[1], 7));
     });
-    st.add(pgBox(5.6, 0.12, 2.05, '#FFE3EC', 0.3, 3.30, 4.95));
-    st.add(pgBox(5.62, 0.15, 0.22, C.mint, 0.3, 3.16, 3.96));
+    st.add(pgBox(5.4, 0.12, 1.72, '#FFE3EC', 0.35, 3.30, 4.55));
+    st.add(pgBox(5.42, 0.15, 0.20, C.mint, 0.35, 3.16, 3.72));
     for (var rf = 0; rf < 7; rf++){
-      st.add(pgSph(0.135, rf % 2 ? C.lemon : '#FFFFFF', -2.05 + rf * 0.78, 3.44, 4.95, 7));
+      st.add(pgSph(0.13, rf % 2 ? C.lemon : '#FFFFFF', -1.85 + rf * 0.74, 3.43, 4.55, 7));
     }
     /* 승강장 간판 */
-    st.add(pgCyl(0.05, 0.06, 1.5, '#D9BE99', 2.62, 1.75, 5.72, 6));
-    st.add(pgBox(1.5, 0.52, 0.07, '#FFF6E6', 2.62, 2.62, 5.72));
-    st.add(pgSph(0.13, C.coral, 2.28, 2.62, 5.76, 8));
-    st.add(pgSph(0.10, C.lemon, 2.62, 2.62, 5.76, 8));
-    st.add(pgSph(0.10, C.mint, 2.96, 2.62, 5.76, 8));
+    st.add(pgCyl(0.05, 0.06, 1.5, '#D9BE99', 2.62, 1.75, 5.14, 6));
+    st.add(pgBox(1.4, 0.50, 0.07, '#FFF6E6', 2.62, 2.60, 5.14));
+    st.add(pgSph(0.12, C.coral, 2.30, 2.60, 5.18, 8));
+    st.add(pgSph(0.10, C.lemon, 2.62, 2.60, 5.18, 8));
+    st.add(pgSph(0.10, C.mint, 2.94, 2.60, 5.18, 8));
     /* 계단 — 서쪽으로 내려간다 (순환 산책로 쪽) */
-    var steps = 6, sx0 = -2.05, sx1 = -4.15;
+    var steps = 6, sx0 = -1.95, sx1 = -3.95;
     for (var si = 0; si < steps; si++){
       var hh = 0.16 + (steps - 1 - si) * 0.153;
-      st.add(pgBox(0.36, hh, 1.22, '#F3E3C8', sx0 + (sx1 - sx0) * (si + 0.5) / steps, hh / 2, 4.95));
+      st.add(pgBox(0.34, hh, 1.10, '#F3E3C8', sx0 + (sx1 - sx0) * (si + 0.5) / steps, hh / 2, 4.55));
     }
     [-1, 1].forEach(function(sd){
-      st.add(pgBeam([sx0 + 0.2, 1.16, 4.95 + sd * 0.58], [sx1 - 0.1, 0.24, 4.95 + sd * 0.58], 0.035, '#D9BE99', 5));
+      st.add(pgBeam([sx0 + 0.2, 1.14, 4.55 + sd * 0.52], [sx1 - 0.1, 0.24, 4.55 + sd * 0.52], 0.032, '#D9BE99', 5));
     });
-    /* 승강장 꽃 화단 */
-    [[-1.2, 5.95], [1.9, 5.95]].forEach(function(fp, fi){
-      st.add(pgBox(1.1, 0.2, 0.4, '#C9A57A', fp[0], 0.1, fp[1]));
-      for (var fl = 0; fl < 4; fl++){
-        st.add(pgSph(0.08, [C.pink, C.lemon, C.white, C.lav][(fl + fi) % 4], fp[0] - 0.4 + fl * 0.26, 0.26, fp[1], 6));
-      }
-    });
+    /* 승강장 꽃 화단 — 동쪽 끝 */
+    st.add(pgBox(1.0, 0.2, 0.4, '#C9A57A', 3.5, 0.1, 4.55));
+    for (var fl = 0; fl < 4; fl++){
+      st.add(pgSph(0.08, [C.pink, C.lemon, C.white, C.lav][fl % 4], 3.14 + fl * 0.24, 0.26, 4.55, 6));
+    }
     /* ---------- ⑤ 3량 열차 ---------- */
     var CARS = 3, du = 1.45 / 36.6;
     var cars = [], seat = [];
@@ -15411,7 +15410,7 @@ async function finishBoot(){
       t++;
       var S = window.__pg, st = null;
       try { st = S && S.app(); } catch(e){}
-      if (!st){ if (t > 300) clearInterval(iv); return; }
+      if (!st){ if (t > 400) clearInterval(iv); return; }
       clearInterval(iv);
       st.playground = st.playground || {};
       st.playground.k1 = [
@@ -15422,6 +15421,7 @@ async function finishBoot(){
       ];
       if (!st.shop) st.shop = { bonus:{}, spent:{}, unlocked:{} };
       S.open('k1');
+      try { window.__vlog = []; window.addEventListener('error', function(e){ window.__vlog.push('ERR ' + e.message); }); } catch(e){}
     }, 80);
   } catch(e){ console.warn('verify boot', e); }
 })();
