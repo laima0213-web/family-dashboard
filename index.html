@@ -644,6 +644,63 @@ button{font:inherit;color:inherit}
 @keyframes avdFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes avdFall{0%{transform:translateY(-4px) rotate(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(104px) rotate(160deg);opacity:0}}
 @keyframes avdBob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-3px)}}
+/* v18 새 꾸미기 12종 */
+.avd-bu{position:absolute;border-radius:50%;border:1.5px solid rgba(150,205,245,.85);
+  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 22%,rgba(206,234,255,.55) 60%,rgba(168,212,248,.42) 100%);
+  box-shadow:inset -1px -2px 5px rgba(150,196,240,.55),0 1px 3px rgba(160,195,235,.25);
+  animation:avdRise 4.8s ease-in-out infinite}
+.avd-bu:after{content:'';position:absolute;left:22%;top:16%;width:26%;height:22%;border-radius:50%;background:rgba(255,255,255,.95)}
+.avd-bu1{width:20px;height:20px;left:7px;bottom:10px}
+.avd-bu2{width:14px;height:14px;right:8px;bottom:26px;animation-delay:1.5s}
+.avd-bu3{width:11px;height:11px;left:36px;bottom:18px;animation-delay:2.9s}
+@keyframes avdRise{0%{transform:translateY(7px) scale(.8);opacity:0}22%{opacity:.95}78%{opacity:.9}100%{transform:translateY(-40px) scale(1.06);opacity:0}}
+.avd-cl{position:absolute;background:#fff;border-radius:50%;opacity:.95;
+  box-shadow:11px 3px 0 -1px #fff,-9px 4px 0 -2px #fff,0 2px 6px rgba(160,190,225,.35),0 0 0 .8px rgba(196,214,236,.5)}
+.avd-cl1{width:23px;height:14px;left:3px;top:11px;animation:avdDrift 6.5s ease-in-out infinite}
+.avd-cl2{width:17px;height:11px;right:5px;bottom:15px;animation:avdDrift 7.5s 1.3s ease-in-out infinite}
+@keyframes avdDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+.avd-sun{position:absolute;top:-20px;right:-20px;width:66px;height:66px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,248,206,.95) 0%,rgba(255,226,150,.55) 40%,rgba(255,238,188,0) 72%);
+  animation:avdSun 5.4s ease-in-out infinite}
+.avd-sun:after{content:'';position:absolute;inset:-4px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,234,152,.5) 0 5deg,rgba(255,234,152,0) 5deg 24deg);
+  animation:avdSpin 22s linear infinite}
+@keyframes avdSun{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.07);opacity:1}}
+@keyframes avdSpin{to{transform:rotate(360deg)}}
+.avd-wd1{right:3px;top:36px;font-size:21px;transform:rotate(22deg);filter:drop-shadow(0 2px 3px rgba(150,120,190,.45));animation:avdFloat 2.6s ease-in-out infinite}
+.avd-ws1{position:absolute;right:21px;top:22px;font-size:9px;animation:avdTw 1.7s ease-in-out infinite}
+.avd-ws2{position:absolute;right:4px;top:17px;font-size:7.5px;animation:avdTw 1.7s .55s ease-in-out infinite}
+.avd-sg{position:absolute;left:50%;top:33%;transform:translateX(-50%);display:flex;align-items:center;gap:1px;
+  color:#FFD45C;font-size:12px;filter:drop-shadow(0 1px 1px rgba(198,158,60,.45))}
+.avd-sg b{font-weight:900;font-size:14px;line-height:1;animation:avdTw 2.2s ease-in-out infinite}
+.avd-sg b + b{animation-delay:.5s}
+.avd-sg i{display:block;width:5px;height:2px;border-radius:2px;background:#FFD45C}
+.avd-td{position:absolute;left:5px;bottom:5px;font-size:14px;animation:avdSway2 3.2s ease-in-out infinite}
+.avd-ic1{position:absolute;right:6px;bottom:7px;font-size:14px;transform:rotate(-10deg);animation:avdFloat 2.8s ease-in-out infinite}
+.avd-ic2{position:absolute;right:23px;bottom:2px;font-size:10px;transform:rotate(13deg);animation:avdFloat 2.8s .8s ease-in-out infinite}
+.avd-bl{position:absolute;width:14px;height:17px;border-radius:50% 50% 48% 48%;animation:avdBalloon 5.2s ease-in-out infinite}
+.avd-bl:after{content:'';position:absolute;left:50%;top:99%;width:1px;height:15px;background:rgba(150,140,130,.45);transform:translateX(-50%)}
+.avd-bl1{left:9px;bottom:26px;background:radial-gradient(circle at 32% 28%,#FFD7E2,#FFA7BF)}
+.avd-bl2{right:11px;bottom:42px;background:radial-gradient(circle at 32% 28%,#E2F7F0,#93E0C1);animation-delay:1.2s}
+.avd-bl3{left:29px;bottom:54px;width:11px;height:13px;background:radial-gradient(circle at 32% 28%,#FFF6D0,#FFDD8C);animation-delay:2.4s}
+@keyframes avdBalloon{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+.avd-sp1{position:absolute;left:6px;bottom:4px;font-size:13px;animation:avdSway 3.6s ease-in-out infinite}
+.avd-sp2{position:absolute;right:8px;bottom:3px;font-size:10px;animation:avdSway 3.6s 1.1s ease-in-out infinite}
+@keyframes avdSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes avdSway2{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(6deg)}}
+.avd-sf1{top:6px;left:9px;font-size:12px;animation:avdFall 3.6s linear infinite}
+.avd-sf2{top:6px;right:13px;font-size:10px;animation:avdFall 3.6s 1.2s linear infinite}
+.avd-sf3{top:6px;left:44%;font-size:9px;animation:avdFall 3.6s 2.4s linear infinite}
+.avd-sf4{bottom:12px;left:12px;font-size:9px;animation:avdTw 2.4s ease-in-out infinite}
+.avd-rcsvg{position:absolute;left:5px;top:3px;width:62px;height:54px;animation:avdFloat 3.4s ease-in-out infinite}
+.avd-wg{position:absolute;width:16px;height:25px;border-radius:62% 38% 56% 44%/58% 60% 40% 42%;
+  background:linear-gradient(140deg,rgba(202,231,255,.98),rgba(255,214,238,.95));border:1.2px solid rgba(196,222,250,.95);
+  box-shadow:0 0 9px rgba(186,216,255,.95);animation:avdFlap 1.9s ease-in-out infinite}
+.avd-wg1{left:1px;top:45px;transform-origin:right center}
+.avd-wg2{right:1px;top:45px;transform-origin:left center;animation-delay:.28s}
+@keyframes avdFlap{0%,100%{transform:rotate(-9deg) scaleY(.94)}50%{transform:rotate(9deg) scaleY(1.04)}}
+.avd-wt1{position:absolute;left:13px;top:38px;font-size:8px;animation:avdTw 1.8s ease-in-out infinite}
+.avd-wt2{position:absolute;right:13px;top:38px;font-size:8px;animation:avdTw 1.8s .6s ease-in-out infinite}
 /* 캐릭터 고르기 그리드 */
 .av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
 .av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:6px 4px 5px;display:flex;
@@ -3635,7 +3692,20 @@ var AV_PRESETS = [
   { k:'patissier_chef', n:'딸기 파티셰' },
   { k:'rock_headset',   n:'헤드셋 스트릿' },
   { k:'astronaut_suit', n:'우주비행사' },
-  { k:'picnic_cherry',  n:'체리 피크닉' }
+  { k:'picnic_cherry',  n:'체리 피크닉' },
+  /* v18 추가 12종 — 봄이·윤이 함께 고르는 새 콘셉트 */
+  { k:'chick_raincoat',  n:'병아리 우비' },
+  { k:'shark_pajama',    n:'상어 잠옷' },
+  { k:'bee_hood',        n:'꿀벌 후드' },
+  { k:'ballerina_tutu',  n:'발레리나 튀튀' },
+  { k:'detective_coat',  n:'탐정 코트' },
+  { k:'moon_witch',      n:'달빛 마녀' },
+  { k:'mermaid_tail',    n:'바다요정 인어' },
+  { k:'safari_explorer', n:'사파리 탐험가' },
+  { k:'doctor_nurse',    n:'꼬마 의사' },
+  { k:'skater_punk',     n:'스케이트보더' },
+  { k:'snow_fairy',      n:'눈꽃 요정' },
+  { k:'cat_butler',      n:'고양이 집사' }
 ];
 var AV_BGS = [
   { k:'none',     n:'기본',   c:'#FAF6EC' },   /* 무료 기본 배경 — 판매 품목 아님 */
@@ -3651,7 +3721,20 @@ var AV_BGS = [
   { k:'starry',   n:'별밤',       c:'linear-gradient(165deg,#3E4278 0%,#5D5DA2 55%,#9182C6 100%)' },
   { k:'gingham',  n:'딸기 체크',  c:'repeating-linear-gradient(0deg,#FFE1E9 0 6px,#FFF3F6 6px 12px),repeating-linear-gradient(90deg,#FFD2DE 0 6px,rgba(255,255,255,0) 6px 12px)' },
   { k:'meadow',   n:'봄꽃',       c:'linear-gradient(160deg,#EDFAD9 0%,#D8F3C7 58%,#C9F0DA 100%)' },
-  { k:'sunset',   n:'노을 솜사탕', c:'linear-gradient(155deg,#FFE4F0 0%,#FFDAD1 46%,#FFEBCB 100%)' }
+  { k:'sunset',   n:'노을 솜사탕', c:'linear-gradient(155deg,#FFE4F0 0%,#FFDAD1 46%,#FFEBCB 100%)' },
+  /* v18 추가 12종 — 파스텔 그라데이션 · 도트 · 물결 */
+  { k:'cotton_sky',   n:'솜사탕 하늘', c:'linear-gradient(180deg,#E8F4FF 0%,#FBE7F1 56%,#FFF3E6 100%)' },
+  { k:'cherry_mist',  n:'벚꽃 안개',   c:'radial-gradient(circle at 30% 22%,#FFF3F8 0%,#FFDDEA 46%,#FCD3E2 100%)' },
+  { k:'matcha_latte', n:'말차 라떼',   c:'linear-gradient(165deg,#F3F8E6 0%,#E2EFCE 46%,#F7F0DA 100%)' },
+  { k:'blueberry',    n:'블루베리 소다', c:'linear-gradient(160deg,#E9E9FF 0%,#D9DEFB 52%,#F3E7FF 100%)' },
+  { k:'moon_lavender',n:'달빛 라벤더', c:'linear-gradient(172deg,#4C4679 0%,#6F64A2 46%,#BCA9DB 100%)' },
+  { k:'cream_dot',    n:'도트 크림',   c:'radial-gradient(#F3DFC2 1.5px,transparent 1.6px) 0 0/9px 9px,#FFFBF3' },
+  { k:'cloud_wave',   n:'구름 물결',   c:'repeating-radial-gradient(circle at 50% 130%,#FFFFFF 0 7px,#E7F2FE 7px 18px)' },
+  { k:'lemon_soda',   n:'레몬 소다',   c:'radial-gradient(circle at 24% 16%,#FFFEF0 0%,#FFF7C8 42%,#FFEE9C 100%)' },
+  { k:'coral_peach',  n:'코랄 복숭아', c:'linear-gradient(150deg,#FFE4D8 0%,#FFCDBD 47%,#FFDAE3 100%)' },
+  { k:'milky_way',    n:'은하수',      c:'radial-gradient(circle at 71% 21%,#FFF8EA 0 2px,transparent 2.6px) 0 0/24px 24px,linear-gradient(160deg,#2F3258 0%,#4B4677 56%,#9182B8 100%)' },
+  { k:'honey_butter', n:'꿀버터',      c:'linear-gradient(160deg,#FFF7DC 0%,#FFE9B8 50%,#FFDDA8 100%)' },
+  { k:'snow_flake',   n:'겨울 눈꽃',   c:'radial-gradient(circle at 30% 28%,#FFFFFF 0 1.3px,transparent 1.5px) 0 0/12px 12px,linear-gradient(160deg,#EBF6FC 0%,#DBECF8 100%)' }
 ];
 var AV_DECOS = [
   { k:'none',    n:'없음' },
@@ -3667,7 +3750,20 @@ var AV_DECOS = [
   { k:'berry',     n:'🍓 딸기' },
   { k:'note',      n:'🎵 음표' },
   { k:'starfall',  n:'🌟 별무리' },
-  { k:'paw',       n:'🐾 발자국' }
+  { k:'paw',       n:'🐾 발자국' },
+  /* v18 추가 12종 */
+  { k:'bubble',    n:'🫧 비눗방울' },
+  { k:'cloud',     n:'☁️ 솜구름' },
+  { k:'sunshine',  n:'🌤️ 햇살' },
+  { k:'wand',      n:'🪄 마법봉' },
+  { k:'starglass', n:'🌟 별안경' },
+  { k:'teddy',     n:'🧸 미니 곰인형' },
+  { k:'icecream',  n:'🍦 아이스크림' },
+  { k:'balloon',   n:'🎈 풍선' },
+  { k:'sprout',    n:'🌱 새싹' },
+  { k:'snowflake', n:'❄️ 눈결정' },
+  { k:'raincloud', n:'🌦️ 무지개 구름' },
+  { k:'wing',      n:'🦋 반짝 날개' }
 ];
 /* v17 — 🏡 집·마을 : 상점에서 💎 1P로 사서 놀이터에 직접 짓는 12종 */
 var AV_BUILDS = [
@@ -3682,9 +3778,22 @@ var AV_BUILDS = [
   { k:'fountain_heart', e:'⛲', n:'하트 꽃 분수' },
   { k:'gazebo_tea',     e:'⛩️', n:'정원 쉼터' },
   { k:'cherry_arch',    e:'🌸', n:'벚꽃 아치 벤치' },
-  { k:'pond_duck',      e:'🦆', n:'오리 미니연못' }
+  { k:'pond_duck',      e:'🦆', n:'오리 미니연못' },
+  /* v18 추가 12종 */
+  { k:'beach_caravan',  e:'🚐', n:'바닷가 카라반' },
+  { k:'icecream_truck', e:'🍦', n:'아이스크림 트럭' },
+  { k:'cat_cafe',       e:'🐱', n:'고양이 카페' },
+  { k:'doll_house',     e:'🏰', n:'2층 인형집' },
+  { k:'glass_house',    e:'🌿', n:'유리 온실' },
+  { k:'star_dome',      e:'🔭', n:'별빛 천문대' },
+  { k:'sea_lighthouse', e:'🗼', n:'바닷가 등대' },
+  { k:'carousel_cart',  e:'🎠', n:'회전목마 마차' },
+  { k:'wish_well',      e:'🪣', n:'소원 우물' },
+  { k:'farm_barn',      e:'🚜', n:'농장 헛간' },
+  { k:'mini_station',   e:'🚂', n:'미니 기차역' },
+  { k:'rainbow_cottage',e:'🌈', n:'무지개 오두막' }
 ];
-var PG_BUILD_MAX = 16;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
+var PG_BUILD_MAX = 24;                          /* 아이 한 명이 놀이터에 지을 수 있는 최대 채수 */
 function avBuildOf(k){ return (typeof AV_BUILDS === 'undefined' ? [] : AV_BUILDS).filter(function(b){ return b.k === k; })[0] || null; }
 function avBuildName(k){ var b = avBuildOf(k); return b ? b.n : k; }
 function avBuildIcon(k){ var b = avBuildOf(k); return b ? (b.e || '🏡') : '🏡'; }
@@ -3802,6 +3911,173 @@ function avBuildSvg(k){
       + '<rect x="20" y="37.4" width="24" height="2" rx="1" fill="#8FD5B8"/><rect x="20" y="39.8" width="24" height="3.2" rx="1.2" fill="#CFF0E2"/>'
       + '<g stroke="#C99B6B" stroke-width="1.8"><line x1="22" y1="46" x2="22" y2="53"/><line x1="42" y1="46" x2="42" y2="53"/></g>'
       + '<circle cx="14" cy="49" r="1.4" fill="#FFD9E6"/><circle cx="51" cy="43" r="1.4" fill="#FFD9E6"/>';
+  } else if (k === 'beach_caravan'){
+    S += '<path d="M49.6 41 l4.4 1.8 -4.4 1.8" fill="none" stroke="#C9A47C" stroke-width="1.5" stroke-linejoin="round"/>'
+      + '<rect x="31.6" y="11.6" width="1.3" height="12" rx=".6" fill="#C9A47C"/>'
+      + '<path d="M33 12 l6.4 2.2 -6.4 2.2z" fill="#FFB6CB"/>'
+      + '<rect x="13.6" y="25.4" width="36" height="22" rx="7.6" fill="#E7F7FD" stroke="#B4DDEE" stroke-width="1.3"/>'
+      + '<path d="M17 27.8 q15-6.2 30 0" fill="none" stroke="#FFFFFF" stroke-width="2.4" opacity=".9"/>'
+      + '<g><rect x="15.4" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFC9DA"/><rect x="20.6" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFF6EE"/><rect x="25.8" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFC9DA"/><rect x="31" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFF6EE"/><rect x="36.2" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFC9DA"/><rect x="41.4" y="21.4" width="4.6" height="4.6" rx="1.5" fill="#FFF6EE"/></g>'
+      + '<rect x="14.4" y="24.6" width="34.4" height="1.4" rx=".7" fill="#EFB8C8"/>'
+      + '<rect x="18.4" y="31.4" width="11.4" height="8.6" rx="2" fill="#FFF6C9" stroke="#EDE0CE" stroke-width="1"/>'
+      + '<path d="M24.1 31.4 v8.6 M18.4 35.7 h11.4" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="36.2" y="32.4" width="8" height="15" rx="2.2" fill="#F7DCBE" stroke="#E7C39A" stroke-width="1"/>'
+      + '<circle cx="42.6" cy="40.2" r=".9" fill="#FFE9A8"/>'
+      + '<circle cx="21.6" cy="49.4" r="4.2" fill="#7E8A96"/><circle cx="21.6" cy="49.4" r="1.7" fill="#FFFDF8"/>'
+      + '<circle cx="42.4" cy="49.4" r="4.2" fill="#7E8A96"/><circle cx="42.4" cy="49.4" r="1.7" fill="#FFFDF8"/>'
+      + '<path d="M11 53.6 q5-2.2 10 0 q5 2.2 10 0 q5-2.2 10 0 q5 2.2 10 0" fill="none" stroke="#BFE9FA" stroke-width="1.4"/>'
+      + '<circle cx="51.4" cy="46.4" r="1.5" fill="#FFE39B"/>';
+  } else if (k === 'icecream_truck'){
+    S += '<rect x="11.4" y="27.4" width="29.4" height="19.2" rx="3.4" fill="#FFF4F8" stroke="#F3D6E2" stroke-width="1.2"/>'
+      + '<rect x="40.2" y="31.6" width="11.6" height="15" rx="3.2" fill="#E7F7FD" stroke="#B4DDEE" stroke-width="1.2"/>'
+      + '<rect x="42.4" y="34" width="6.4" height="5.4" rx="1.5" fill="#D6EEFB"/>'
+      + '<rect x="14.6" y="31" width="20" height="9.6" rx="2.2" fill="#FFF6C9" stroke="#F0E2C0" stroke-width="1"/>'
+      + '<rect x="14.6" y="33.6" width="20" height="1.1" fill="#F3E3C4"/>'
+      + '<path d="M21 27.2 l5-9.6 5 9.6z" fill="#E8B87A"/>'
+      + '<circle cx="26" cy="18.6" r="4.1" fill="#FFC3D6"/><circle cx="22.4" cy="15.4" r="3" fill="#D8F3E4"/><circle cx="29.4" cy="15" r="2.7" fill="#FFF0BE"/>'
+      + '<rect x="8.8" y="26.4" width="6.6" height="3" rx="1.5" fill="#FFB6CB"/>'
+      + '<path d="M11.4 41 h29.4" stroke="#FFC9DA" stroke-width="2.2" stroke-linecap="round"/>'
+      + '<circle cx="22" cy="48.4" r="3.8" fill="#7E8A96"/><circle cx="22" cy="48.4" r="1.5" fill="#FFFDF8"/>'
+      + '<circle cx="43" cy="48.4" r="3.8" fill="#7E8A96"/><circle cx="43" cy="48.4" r="1.5" fill="#FFFDF8"/>'
+      + '<circle cx="48" cy="44" r="1.2" fill="#FFE39B"/>'
+      + '<g fill="#FFF"><circle cx="34.6" cy="44.6" r="1"/><circle cx="37.4" cy="42.4" r=".8"/></g>';
+  } else if (k === 'cat_cafe'){
+    S += '<rect x="16" y="29.6" width="32" height="23" rx="3" fill="#FFF8EF" stroke="#EFE0CB" stroke-width="1.2"/>'
+      + '<path d="M11.8 31.6 L18.4 18.6 L23.6 25.4 L32 14.4 L40.4 25.4 L45.6 18.6 L52.2 31.6 Z" fill="#F8C9D8"/>'
+      + '<path d="M11.8 31.6 L18.4 18.6 L23.6 25.4 L32 14.4 L40.4 25.4 L45.6 18.6 L52.2 31.6" fill="none" stroke="#EFAEC3" stroke-width="1.2"/>'
+      + '<circle cx="32" cy="34.6" r="4.3" fill="#FFF3F8" stroke="#EBC3D1" stroke-width="1"/>'
+      + '<path d="M28.4 32.2 l1-3.6 3 2.3z M35.6 32.2 l-1-3.6 -3 2.3z" fill="#FFF3F8" stroke="#EBC3D1" stroke-width=".9"/>'
+      + '<circle cx="30.6" cy="34.3" r=".55" fill="#8B7A63"/><circle cx="33.4" cy="34.3" r=".55" fill="#8B7A63"/>'
+      + '<path d="M30.9 35.9 q1.1.8 2.2 0" fill="none" stroke="#E8A9BC" stroke-width=".7"/>'
+      + '<rect x="19" y="35.4" width="6.6" height="6.4" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="38.4" y="35.4" width="6.6" height="6.4" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="28.8" y="42" width="6.6" height="10.6" rx="2" fill="#F7DCBE" stroke="#E7C39A" stroke-width=".9"/>'
+      + '<circle cx="34" cy="47.6" r=".8" fill="#FFE9A8"/>'
+      + '<g fill="#EFC6D4"><circle cx="22.6" cy="46.4" r="1.5"/><circle cx="20.6" cy="48" r=".7"/><circle cx="21.6" cy="48.8" r=".7"/><circle cx="23.6" cy="48.8" r=".7"/><circle cx="24.6" cy="48" r=".7"/></g>'
+      + '<rect x="16" y="52.2" width="32" height="2.6" rx="1.2" fill="#F3E4D2"/>'
+      + '<circle cx="45.6" cy="30.6" r="1.4" fill="#96E2C3"/>';
+  } else if (k === 'doll_house'){
+    S += '<rect x="18" y="35" width="28" height="17" rx="2.6" fill="#FFF2F8" stroke="#F0D8E4" stroke-width="1.1"/>'
+      + '<rect x="20.4" y="21.6" width="23.2" height="14.2" rx="2.6" fill="#FFFAF2" stroke="#F0E2CE" stroke-width="1.1"/>'
+      + '<path d="M16.6 21.8 L32 8.6 L47.4 21.8 Z" fill="#CBB8F1"/>'
+      + '<path d="M16.6 21.8 L32 8.6 L47.4 21.8" fill="none" stroke="#B3A0E2" stroke-width="1.2"/>'
+      + '<path d="M32 8.6 l0-4 4.6 1.6 -4.6 1.6z" fill="#FFB6CB"/><line x1="32" y1="8.6" x2="32" y2="4.4" stroke="#C9A47C" stroke-width=".9"/>'
+      + '<rect x="18.6" y="34.2" width="27" height="1.8" fill="#EFD6E2"/>'
+      + '<rect x="22.4" y="25" width="6" height="6" rx="1.4" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="35.6" y="25" width="6" height="6" rx="1.4" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<path d="M22.4 28 h6 M25.4 25 v6" stroke="#EDE0CE" stroke-width=".7"/>'
+      + '<rect x="32.6" y="29.2" width="9.4" height="1.6" rx=".8" fill="#FFFFFF" stroke="#EFD6E2" stroke-width=".6"/>'
+      + '<g stroke="#FFFFFF" stroke-width=".9"><line x1="34" y1="29.4" x2="34" y2="31"/><line x1="36.6" y1="29.4" x2="36.6" y2="31"/><line x1="39.2" y1="29.4" x2="39.2" y2="31"/></g>'
+      + '<rect x="28.6" y="40" width="6.8" height="12" rx="2" fill="#EAB9CC" stroke="#DFA5BC" stroke-width=".8"/>'
+      + '<circle cx="34.2" cy="46" r=".8" fill="#FFE9A8"/>'
+      + '<rect x="21" y="40.4" width="5.6" height="5.4" rx="1.3" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="37.4" y="40.4" width="5.6" height="5.4" rx="1.3" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>';
+  } else if (k === 'glass_house'){
+    S += '<path d="M15 53 V33.4 a17 11.6 0 0 1 34 0 V53 Z" fill="#EAF9F6" fill-opacity=".88" stroke="#A9E0D2" stroke-width="1.3"/>'
+      + '<g stroke="#C7EDE4" stroke-width="1"><line x1="32" y1="21.6" x2="32" y2="53"/><line x1="23" y1="23.4" x2="23" y2="53"/><line x1="41" y1="23.4" x2="41" y2="53"/><line x1="15.4" y1="34" x2="48.6" y2="34"/></g>'
+      + '<rect x="28" y="17.4" width="8" height="3.2" rx="1.5" fill="#BFE8D8"/>'
+      + '<g fill="#8FD9BE"><circle cx="23" cy="45.6" r="3.6"/><circle cx="27.6" cy="42.6" r="2.6"/><circle cx="41.2" cy="45.8" r="3.2"/><circle cx="37.6" cy="43.4" r="2.2"/></g>'
+      + '<rect x="20.4" y="47.4" width="8" height="5.2" rx="1.5" fill="#EFC6A8"/>'
+      + '<rect x="37.6" y="48" width="6.8" height="4.6" rx="1.3" fill="#EFC6A8"/>'
+      + '<g fill="#FFB6CB"><circle cx="23" cy="41.4" r="1.2"/><circle cx="41" cy="41.8" r="1.2"/><circle cx="32" cy="39" r="1"/></g>'
+      + '<g stroke="#7FBF6A" stroke-width="1.1"><line x1="32" y1="40" x2="32" y2="45"/></g>'
+      + '<path d="M27 53 v-4 a5 5 0 0 1 10 0 v4z" fill="#CFF0E8"/>'
+      + '<g fill="#FFFFFF" opacity=".65"><circle cx="19" cy="28.4" r="1.4"/><circle cx="45" cy="30.6" r="1.2"/></g>';
+  } else if (k === 'star_dome'){
+    S += '<rect x="15" y="38" width="34" height="14" rx="3" fill="#F4F2FC" stroke="#DDD7F3" stroke-width="1.1"/>'
+      + '<path d="M15.6 38 a16.4 13.4 0 0 1 32.8 0 Z" fill="#CFC8EC"/>'
+      + '<path d="M15.6 38 a16.4 13.4 0 0 1 32.8 0" fill="none" stroke="#B5ACDE" stroke-width="1.3"/>'
+      + '<rect x="29.9" y="22.6" width="4.2" height="15.4" rx="1.8" fill="#8478B4" opacity=".75"/>'
+      + '<g stroke="#B98A5E" stroke-width="2.3" stroke-linecap="round"><line x1="28.4" y1="36.6" x2="39.4" y2="26.4"/></g>'
+      + '<circle cx="40.4" cy="25.4" r="2.2" fill="#FFE39B"/>'
+      + '<path d="M28.2 51.6 v-5.8 a3.8 3.8 0 0 1 7.6 0 v5.8z" fill="#C9B6F0"/>'
+      + '<rect x="13" y="51.4" width="38" height="2.8" rx="1.3" fill="#EAE7F7"/>'
+      + '<g fill="#FFE39B"><circle cx="21" cy="14.4" r="1.1"/><circle cx="44" cy="12.6" r="1.3"/><circle cx="32" cy="7.2" r="1"/><circle cx="48.4" cy="21" r=".9"/><circle cx="14.4" cy="24.6" r=".9"/><circle cx="37.6" cy="10.4" r=".7"/></g>'
+      + '<g fill="#FFFFFF"><circle cx="26" cy="9.6" r=".7"/><circle cx="50" cy="15.4" r=".6"/></g>';
+  } else if (k === 'sea_lighthouse'){
+    S += '<path d="M36.8 20.4 l8.6-3.4 -1 5.4z" fill="#FFF3CE" opacity=".9"/>'
+      + '<path d="M27.2 20.4 l-8.6-3.4 1 5.4z" fill="#FFF3CE" opacity=".9"/>'
+      + '<path d="M25 53 L28.2 24.4 h7.6 L39 53 Z" fill="#FFFDF8" stroke="#EFE3D6" stroke-width="1.1"/>'
+      + '<path d="M27.4 33.6 h9.2 l.5 4.4 h-10.2z" fill="#FFB6CB"/>'
+      + '<path d="M28.3 42.6 h7.4 l.5 4.4 h-8.4z" fill="#FFB6CB"/>'
+      + '<rect x="27.4" y="17.6" width="9.2" height="6.6" rx="1.6" fill="#FFE39B" stroke="#F0D48E" stroke-width="1"/>'
+      + '<rect x="30.4" y="19.6" width="3.2" height="2.8" rx="1" fill="#FFFDF0"/>'
+      + '<path d="M26.4 17.8 L32 11.2 L37.6 17.8 Z" fill="#FF9F8C"/>'
+      + '<circle cx="32" cy="10.2" r="1.3" fill="#FFE39B"/>'
+      + '<g fill="#DFDAD0"><ellipse cx="20" cy="52" rx="6.4" ry="2.8"/><ellipse cx="44.6" cy="52.6" rx="6" ry="2.6"/><ellipse cx="32" cy="53.4" rx="9" ry="2.4"/></g>'
+      + '<path d="M10 55 q6-2.4 12 0 q6 2.4 12 0 q6-2.4 12 0" fill="none" stroke="#BFE9FA" stroke-width="1.5"/>'
+      + '<path d="M20.4 44.6 q3-2.6 6 0 q3 2.6 6 0" fill="none" stroke="#BFE9FA" stroke-width="1.3"/>';
+  } else if (k === 'carousel_cart'){
+    S += '<line x1="32" y1="21" x2="32" y2="12.6" stroke="#E8C28A" stroke-width="1.6"/>'
+      + '<path d="M32 8.6 l1.5 2.6 2.9.4 -2.1 2 .5 2.9 -2.8-1.5 -2.8 1.5 .5-2.9 -2.1-2 2.9-.4z" fill="#FFE39B"/>'
+      + '<path d="M12.6 22.4 q19.4-13.6 38.8 0 z" fill="#FFD3DF"/>'
+      + '<path d="M12.6 22.4 q6.5-9.2 12.9-9.2 q-1.6 5-2.3 9.2z" fill="#FFF7F1"/>'
+      + '<path d="M31.6 22.4 q1.4-9.6 8-12.6 q3.4 5.6 4.2 12.6z" fill="#FFF7F1"/>'
+      + '<path d="M12.6 22.4 q4.2 3.2 8.4 0 q4.2 3.2 8.4 0 q4.2 3.2 8.4 0 q4.2 3.2 8.4 0 q4.2 3.2 5.2 0" fill="none" stroke="#FFFFFF" stroke-width="1.6"/>'
+      + '<rect x="18.6" y="29.6" width="26.8" height="12.4" rx="3" fill="#FFF4F9" stroke="#F0D3E0" stroke-width="1.1"/>'
+      + '<rect x="18.6" y="28.4" width="26.8" height="2.6" rx="1.3" fill="#FFE39B"/>'
+      + '<path d="M24 42 v-6.4 a3.4 3.4 0 0 1 6.8 0 v6.4z" fill="#CFEAFB"/>'
+      + '<path d="M34 42 v-6.4 a3.4 3.4 0 0 1 6.8 0 v6.4z" fill="#CFEAFB"/>'
+      + '<circle cx="23.4" cy="45.8" r="5.2" fill="#FFFDF8" stroke="#E7C39A" stroke-width="1.5"/>'
+      + '<circle cx="40.6" cy="45.8" r="5.2" fill="#FFFDF8" stroke="#E7C39A" stroke-width="1.5"/>'
+      + '<g stroke="#E7C39A" stroke-width="1"><line x1="23.4" y1="41.4" x2="23.4" y2="50.2"/><line x1="19" y1="45.8" x2="27.8" y2="45.8"/><line x1="40.6" y1="41.4" x2="40.6" y2="50.2"/><line x1="36.2" y1="45.8" x2="45" y2="45.8"/></g>'
+      + '<g fill="#FFC3D6"><circle cx="20" cy="22.8" r="1"/><circle cx="44" cy="22.8" r="1"/></g>';
+  } else if (k === 'wish_well'){
+    S += '<rect x="17.6" y="35.4" width="28.8" height="12" rx="3.2" fill="#E9E5DD" stroke="#D4CFC4" stroke-width="1.1"/>'
+      + '<ellipse cx="32" cy="36" rx="11.6" ry="3.2" fill="#A5DEF5"/>'
+      + '<ellipse cx="32" cy="36" rx="11.6" ry="3.2" fill="none" stroke="#E9E5DD" stroke-width="1.4"/>'
+      + '<g fill="#DCD7CC"><rect x="19" y="39" width="4.4" height="2.6" rx=".9"/><rect x="24.4" y="39" width="4.4" height="2.6" rx=".9"/><rect x="29.8" y="39" width="4.4" height="2.6" rx=".9"/><rect x="35.2" y="39" width="4.4" height="2.6" rx=".9"/><rect x="40.6" y="39" width="4.4" height="2.6" rx=".9"/><rect x="21.6" y="43" width="4.4" height="2.6" rx=".9"/><rect x="27" y="43" width="4.4" height="2.6" rx=".9"/><rect x="32.4" y="43" width="4.4" height="2.6" rx=".9"/><rect x="37.8" y="43" width="4.4" height="2.6" rx=".9"/></g>'
+      + '<g stroke="#B6875C" stroke-width="2"><line x1="21.4" y1="35.6" x2="21.4" y2="24.6"/><line x1="42.6" y1="35.6" x2="42.6" y2="24.6"/></g>'
+      + '<path d="M14.6 25.4 L32 15.4 L49.4 25.4 Z" fill="#FFC9DA"/>'
+      + '<path d="M14.6 25.4 L32 15.4 L49.4 25.4" fill="none" stroke="#EFAEC3" stroke-width="1.2"/>'
+      + '<line x1="32" y1="20.4" x2="32" y2="31.2" stroke="#C9A47C" stroke-width="1.1"/>'
+      + '<path d="M28.6 31.4 h6.8 l-1.1 4.6 h-4.6z" fill="#E8B87A" stroke="#D9A877" stroke-width=".8"/>'
+      + '<circle cx="37.4" cy="29.4" r="1" fill="#FFFFFF"/><circle cx="26.6" cy="27.6" r=".8" fill="#FFF0B8"/>'
+      + '<g fill="#FFC3D6"><circle cx="14.6" cy="51.6" r="1.6"/><circle cx="18.6" cy="53.4" r="1.3"/><circle cx="49.4" cy="51.6" r="1.6"/><circle cx="45.4" cy="53.4" r="1.3"/></g>'
+      + '<g stroke="#7FBF6A" stroke-width="1.2"><line x1="14.6" y1="51.6" x2="14.6" y2="48"/><line x1="49.4" y1="51.6" x2="49.4" y2="48"/></g>';
+  } else if (k === 'farm_barn'){
+    S += '<rect x="16.4" y="29.6" width="31.2" height="22.4" rx="2.4" fill="#F5BCAD" stroke="#E6A091" stroke-width="1.2"/>'
+      + '<path d="M12.6 30 L19.6 21.6 L44.4 21.6 L51.4 30 Z" fill="#E59C88"/>'
+      + '<path d="M19.6 21.6 L32 12.4 L44.4 21.6 Z" fill="#EEB09C"/>'
+      + '<path d="M19.6 21.6 L32 12.4 L44.4 21.6 M12.6 30 L19.6 21.6 L44.4 21.6 L51.4 30" fill="none" stroke="#D98F7C" stroke-width="1.1"/>'
+      + '<rect x="26" y="36" width="12.4" height="16" rx="1.8" fill="#FFF7EF" stroke="#E9C2B2" stroke-width="1"/>'
+      + '<path d="M28 37.6 L36.4 50.4 M36.4 37.6 L28 50.4" stroke="#E9C2B2" stroke-width="1.2"/>'
+      + '<rect x="18.6" y="33.6" width="5.2" height="4.6" rx="1" fill="#FFE39B" stroke="#EBCE86" stroke-width=".8"/>'
+      + '<rect x="40.4" y="33.6" width="5.2" height="4.6" rx="1" fill="#FFE39B" stroke="#EBCE86" stroke-width=".8"/>'
+      + '<rect x="45.4" y="45.4" width="7.6" height="6.6" rx="1.8" fill="#FFE39B" stroke="#EBCE86" stroke-width="1"/>'
+      + '<path d="M45.4 48.4 h7.6 M49.2 45.4 v6.6" stroke="#E7CE93" stroke-width=".8"/>'
+      + '<g stroke="#C9A47C" stroke-width="1.3"><line x1="9" y1="51" x2="15" y2="51"/><line x1="9" y1="48.4" x2="15" y2="48.4"/><line x1="9" y1="45.8" x2="15" y2="45.8"/><line x1="9.6" y1="54" x2="9.6" y2="44.6"/><line x1="14.4" y1="54" x2="14.4" y2="44.6"/></g>'
+      + '<circle cx="32" cy="18.6" r="1.5" fill="#FFF6C9"/>';
+  } else if (k === 'mini_station'){
+    S += '<rect x="14.6" y="34" width="34.8" height="18" rx="2.6" fill="#FFF7ED" stroke="#EFDCC6" stroke-width="1.2"/>'
+      + '<rect x="10.6" y="28.6" width="42.8" height="4.6" rx="2.2" fill="#FFC9DA"/>'
+      + '<g fill="#FFF7F1"><rect x="14" y="28.6" width="4.6" height="4.6"/><rect x="23.2" y="28.6" width="4.6" height="4.6"/><rect x="32.4" y="28.6" width="4.6" height="4.6"/><rect x="41.6" y="28.6" width="4.6" height="4.6"/><rect x="50.8" y="28.6" width="1.8" height="4.6"/></g>'
+      + '<rect x="30.6" y="24.4" width="2.8" height="3" fill="#E7C39A"/>'
+      + '<circle cx="32" cy="21.6" r="4.4" fill="#FFFDF8" stroke="#E7C39A" stroke-width="1.2"/>'
+      + '<path d="M32 18.8 v2.8 M32 21.6 l2.2 1.6" stroke="#B98A5E" stroke-width="1"/>'
+      + '<rect x="17.4" y="37.6" width="10.4" height="7.4" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<path d="M17.4 41.3 h10.4" stroke="#EDE0CE" stroke-width=".7"/>'
+      + '<rect x="35.4" y="37.6" width="9.6" height="14.4" rx="2.2" fill="#CFEAFB" stroke="#B4DDEE" stroke-width=".9"/>'
+      + '<circle cx="42.6" cy="45" r=".8" fill="#FFFDF8"/>'
+      + '<rect x="8" y="51.6" width="48" height="2.6" rx="1.2" fill="#EDE3D4"/>'
+      + '<g stroke="#BFC8CF" stroke-width="1.1"><line x1="8" y1="54.8" x2="56" y2="54.8"/></g>'
+      + '<g stroke="#C9A47C" stroke-width="1"><line x1="12" y1="54" x2="12" y2="56"/><line x1="20" y1="54" x2="20" y2="56"/><line x1="28" y1="54" x2="28" y2="56"/><line x1="36" y1="54" x2="36" y2="56"/><line x1="44" y1="54" x2="44" y2="56"/><line x1="52" y1="54" x2="52" y2="56"/></g>'
+      + '<rect x="19" y="46.4" width="6.4" height="1.4" rx=".7" fill="#C9A47C"/><rect x="19.6" y="47.8" width="1" height="2.4" fill="#C9A47C"/><rect x="23.8" y="47.8" width="1" height="2.4" fill="#C9A47C"/>';
+  } else if (k === 'rainbow_cottage'){
+    S += '<rect x="16" y="31" width="32" height="22" rx="3" fill="#FFF8EF" stroke="#F0E0CB" stroke-width="1.2"/>'
+      + '<path d="M12 32 L32 14.6 L52 32 Z" fill="#CDE7F6"/>'
+      + '<path d="M12 32 L32 14.6 L52 32" fill="none" stroke="#AFD6EC" stroke-width="1.2"/>'
+      + '<rect x="42" y="18.6" width="4.8" height="8.4" rx="1.3" fill="#E9C4B0"/><circle cx="46.6" cy="15.6" r="2.2" fill="#FFF" opacity=".8"/><circle cx="49.4" cy="12.2" r="1.5" fill="#FFF" opacity=".6"/>'
+      + '<path d="M23 51.4 a9 9 0 0 1 18 0" fill="none" stroke="#FFB6CB" stroke-width="2.6"/>'
+      + '<path d="M25.6 51.4 a6.4 6.4 0 0 1 12.8 0" fill="none" stroke="#FFE39B" stroke-width="2.4"/>'
+      + '<path d="M28 51.4 a4 4 0 0 1 8 0" fill="none" stroke="#A6E5CF" stroke-width="2.2"/>'
+      + '<rect x="28.8" y="42.6" width="6.6" height="10.6" rx="2" fill="#D9A877" stroke="#C9A47C" stroke-width=".8"/>'
+      + '<circle cx="34" cy="48" r=".8" fill="#FFE9A8"/>'
+      + '<rect x="19.4" y="35.4" width="6.4" height="6.4" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="38.2" y="35.4" width="6.4" height="6.4" rx="1.6" fill="#FFF6C9" stroke="#EDE0CE" stroke-width=".9"/>'
+      + '<rect x="16" y="52" width="32" height="2.6" rx="1.2" fill="#EFE3D2"/>'
+      + '<g fill="#FFC3D6"><circle cx="13.4" cy="50" r="1.8"/><circle cx="17.4" cy="52.4" r="1.5"/><circle cx="50.6" cy="50" r="1.8"/><circle cx="46.6" cy="52.4" r="1.5"/></g>'
+      + '<g fill="#FFE39B"><circle cx="13.4" cy="50" r=".7"/><circle cx="50.6" cy="50" r=".7"/></g>';
   } else {
     S += '<ellipse cx="32" cy="46" rx="19" ry="8.2" fill="#CDEBF6" stroke="#A7D9EC" stroke-width="1.2"/>'
       + '<ellipse cx="32" cy="46" rx="15.4" ry="6.2" fill="#9FDBF2"/>'
@@ -3859,6 +4135,25 @@ function avDecoHtml(kind){
   if (kind === 'note')      return '<span class="avd avd-n1">🎵</span><span class="avd avd-n2">🎵</span><span class="avd avd-n3">🎵</span>';
   if (kind === 'starfall')  return '<span class="avd avd-t1">🌟</span><span class="avd avd-t2">🌟</span><span class="avd avd-t3">🌟</span><span class="avd avd-t4">🌟</span>';
   if (kind === 'paw')       return '<span class="avd avd-p1">🐾</span><span class="avd avd-p2">🐾</span><span class="avd avd-p3">🐾</span>';
+  /* v18 추가 12종 */
+  if (kind === 'bubble')   return '<span class="avd avd-bu avd-bu1"></span><span class="avd avd-bu avd-bu2"></span><span class="avd avd-bu avd-bu3"></span>';
+  if (kind === 'cloud')    return '<span class="avd avd-cl avd-cl1"></span><span class="avd avd-cl avd-cl2"></span>';
+  if (kind === 'sunshine') return '<span class="avd avd-sun"></span>';
+  if (kind === 'wand')     return '<span class="avd avd-wd1">🪄</span><span class="avd avd-ws1">✨</span><span class="avd avd-ws2">✨</span>';
+  if (kind === 'starglass')return '<span class="avd avd-sg"><b>★</b><i></i><b>★</b></span>';
+  if (kind === 'teddy')    return '<span class="avd avd-td">🧸</span>';
+  if (kind === 'icecream') return '<span class="avd avd-ic1">🍦</span><span class="avd avd-ic2">🍦</span>';
+  if (kind === 'balloon')  return '<span class="avd avd-bl avd-bl1"></span><span class="avd avd-bl avd-bl2"></span><span class="avd avd-bl avd-bl3"></span>';
+  if (kind === 'sprout')   return '<span class="avd avd-sp1">🌱</span><span class="avd avd-sp2">🌱</span>';
+  if (kind === 'snowflake')return '<span class="avd avd-sf1">❄️</span><span class="avd avd-sf2">❄️</span><span class="avd avd-sf3">❄️</span><span class="avd avd-sf4">✨</span>';
+  if (kind === 'raincloud')return '<span class="avd avd-rcsvg"><svg viewBox="0 0 62 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<g fill="#FFFFFF"><circle cx="20" cy="16" r="8"/><circle cx="31" cy="12" r="9.4"/><circle cx="43" cy="16" r="7.2"/>'
+    + '<rect x="12" y="15" width="39" height="8" rx="4"/></g>'
+    + '<path d="M13 44 a18 18 0 0 1 36 0" fill="none" stroke="#FF9EB8" stroke-width="4" stroke-linecap="round"/>'
+    + '<path d="M18 44 a13 13 0 0 1 26 0" fill="none" stroke="#FFCF5C" stroke-width="4" stroke-linecap="round"/>'
+    + '<path d="M23 44 a8 8 0 0 1 16 0" fill="none" stroke="#6FD3AE" stroke-width="4" stroke-linecap="round"/>'
+    + '</svg></span>';
+  if (kind === 'wing')     return '<span class="avd avd-wg avd-wg1"></span><span class="avd avd-wg avd-wg2"></span><span class="avd avd-wt1">✨</span><span class="avd avd-wt2">✨</span>';
   return '';
 }
 /* 전신 일러스트 + 배경 + 꾸미기 이펙트 */
@@ -8031,6 +8326,424 @@ async function finishBoot(){
     };
   }
 
+
+  /* ---------- v18 새 집·마을 12종 ---------- */
+  /* 13. 🚐 바닷가 파스텔 카라반 */
+  function pgbBeachCaravan(g){
+    g.add(pgBox(2.9, 0.14, 1.9, C.sand, 0, 0.07, 0));
+    g.add(pgBox(2.8, 1.28, 1.66, '#EAF7FD', 0, 0.99, 0));
+    g.add(pgBox(2.86, 0.16, 1.72, '#C9E9F7', 0, 1.68, 0));
+    g.add(pgBox(2.6, 0.08, 1.5, '#FFFFFF', 0, 1.77, 0));
+    pgbWindow(g, -0.66, 1.1, 0.84, 0.66, 0.54, 0xBFE4FF);
+    pgbWindow(g, 0.66, 1.1, 0.84, 0.66, 0.54, 0xBFE4FF);
+    g.add(pgBox(0.62, 1.04, 0.08, '#F7DCBE', 0, 0.85, 0.85));
+    g.add(pgSph(0.045, '#FFE9A8', 0.22, 0.9, 0.9, 6));
+    var awn = new THREE.Group();
+    awn.position.set(0, 1.6, 0.92); awn.rotation.x = 0.44;
+    g.add(awn);
+    for (var i = 0; i < 8; i++){
+      awn.add(pgBox(0.35, 0.05, 0.8, i % 2 ? '#FFFDF8' : '#FFC9DA', -1.22 + i * 0.35, 0, 0.34));
+    }
+    [-0.95, 0.95].forEach(function(wx){
+      var wh = pgCyl(0.33, 0.33, 0.15, '#7E8A96', wx, 0.34, 0, 14);
+      wh.rotation.z = Math.PI / 2; g.add(wh);
+      var hub = pgCyl(0.13, 0.13, 0.17, '#FFFDF8', wx, 0.34, 0, 10);
+      hub.rotation.z = Math.PI / 2; g.add(hub);
+    });
+    var hitch = pgCyl(0.045, 0.045, 0.62, '#B9C6CF', 1.6, 0.48, 0.22, 7);
+    hitch.rotation.z = Math.PI / 2 - 0.22; g.add(hitch);
+    g.add(pgCyl(0.02, 0.02, 0.5, C.wood, -1.16, 2.02, 0, 5));
+    var fl = pgFlag('#FFB6CB', 0.42, 0.28); fl.position.set(-1.16, 2.28, 0); g.add(fl);
+    g.add(pgSph(0.1, '#FFE39B', 1.24, 0.2, 0.96, 8));
+    g.add(pgSph(0.07, '#FFC3D6', -1.24, 0.18, 0.9, 7));
+    g.userData.tick = function(t){ fl.rotation.y = Math.sin(t * 1.7) * 0.28; };
+  }
+
+  /* 14. 🍦 아이스크림 트럭 */
+  function pgbIcecreamTruck(g){
+    g.add(pgBox(2.5, 1.32, 1.54, '#FFF4F8', 0, 0.96, 0));
+    g.add(pgBox(1.1, 1.1, 1.46, '#E7F7FD', 1.72, 0.86, 0));
+    var ws = pgBox(0.06, 0.46, 1.04, '#CFEAFB', 2.28, 1.1, 0);
+    ws.material = new THREE.MeshLambertMaterial({ color: 0xD6EEFB, emissive: new THREE.Color(0x9FD2F0), emissiveIntensity: 0.25 });
+    g.add(ws);
+    g.add(pgBox(2.56, 0.14, 1.6, '#FFC9DA', 0, 1.56, 0));
+    var glass = pgBox(1.24, 0.68, 0.06, '#FFF6C9', -0.28, 1.1, 0.79);
+    glass.material = new THREE.MeshLambertMaterial({ color: 0xFFF3C8, emissive: new THREE.Color(0xFFCE63), emissiveIntensity: 0.4 });
+    g.add(glass);
+    g.add(pgBox(1.36, 0.08, 0.12, '#FFFDF8', -0.28, 1.48, 0.81));
+    g.add(pgBox(1.36, 0.08, 0.12, '#FFFDF8', -0.28, 0.72, 0.81));
+    var cone = pgCone(0.27, 0.44, '#E8B87A', -0.8, 1.98, 0, 10);
+    cone.rotation.x = Math.PI; g.add(cone);
+    g.add(pgSph(0.28, '#FFC3D6', -0.8, 2.28, 0, 12));
+    g.add(pgSph(0.21, '#D8F3E4', -1.04, 2.55, 0.02, 10));
+    g.add(pgSph(0.19, '#FFF0BE', -0.56, 2.57, -0.02, 10));
+    g.add(pgSph(0.06, '#FF9F8C', -0.8, 2.82, 0.02, 7));
+    [-0.78, 1.16].forEach(function(wx){
+      var wh = pgCyl(0.3, 0.3, 0.14, '#7E8A96', wx, 0.32, 0, 14);
+      wh.rotation.z = Math.PI / 2; g.add(wh);
+      var hub = pgCyl(0.12, 0.12, 0.16, '#FFFDF8', wx, 0.32, 0, 10);
+      hub.rotation.z = Math.PI / 2; g.add(hub);
+    });
+    g.add(pgBox(2.1, 0.14, 0.04, '#FFC9DA', 0, 0.46, 0.78));
+    g.add(pgSph(0.075, '#FFE39B', 2.32, 0.66, 0.55, 8));
+    g.add(pgSph(0.075, '#FFE39B', 2.32, 0.66, -0.55, 8));
+    g.add(pgBox(0.5, 0.2, 0.5, '#FFB6CB', 0, 1.72, 0.5));
+    g.add(pgSph(0.09, '#FFF', 0, 1.86, 0.5, 7));
+  }
+
+  /* 15. 🐱 고양이 카페 */
+  function pgbCatCafe(g){
+    g.add(pgBox(2.5, 0.16, 2.0, '#F3E4D2', 0, 0.08, 0));
+    g.add(pgBox(2.15, 1.42, 1.75, '#FFF8EF', 0, 0.87, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.66, 0.92, 4), pgM('#F8C9D8'));
+    roof.position.set(0, 1.92, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    [-0.72, 0.72].forEach(function(dx){
+      var ear = pgCone(0.26, 0.5, '#F8C9D8', dx, 2.36, -0.42, 4);
+      ear.rotation.y = Math.PI / 4; g.add(ear);
+    });
+    var face = pgCyl(0.3, 0.3, 0.07, '#FFF3F8', 0, 1.46, 0.88, 18);
+    face.rotation.x = Math.PI / 2; g.add(face);
+    [-0.15, 0.15].forEach(function(dx){
+      var e = pgCone(0.09, 0.16, '#F8C9D8', dx, 1.62, 0.9, 3);
+      e.rotation.y = Math.PI / 4; g.add(e);
+    });
+    g.add(pgSph(0.035, '#8B7A63', -0.1, 1.48, 0.93, 6));
+    g.add(pgSph(0.035, '#8B7A63', 0.1, 1.48, 0.93, 6));
+    g.add(pgSph(0.045, '#E8A9BC', 0, 1.4, 0.93, 6));
+    pgbWindow(g, -0.6, 0.94, 0.88, 0.56, 0.56, 0xFFD7A8);
+    pgbWindow(g, 0.6, 0.94, 0.88, 0.56, 0.56, 0xFFD7A8);
+    g.add(pgBox(0.58, 0.96, 0.08, '#F7DCBE', 0, 0.58, 0.88));
+    g.add(pgSph(0.04, '#FFE9A8', 0.2, 0.62, 0.93, 6));
+    var mat = pgBox(0.78, 0.04, 0.5, '#EFC6D4', 0, 0.03, 1.15); g.add(mat);
+    g.add(pgSph(0.09, '#FFF3F8', 0, 0.08, 1.2, 8));
+    for (var i = 0; i < 3; i++){
+      g.add(pgSph(0.035, '#FFF3F8', -0.08 + i * 0.07, 0.06, 1.32, 5));
+      g.add(pgSph(0.035, '#FFF3F8', -0.08 + i * 0.07, 0.06, 1.12, 5));
+    }
+    pgbFlowerBox(g, -0.6, 0.62, 0.94, 0.62);
+    pgbFlowerBox(g, 0.6, 0.62, 0.94, 0.62);
+    pgbSmoke(g, 0.7, 2.05, -0.45, 2);
+    g.add(pgBox(0.3, 0.72, 0.3, '#EFA9BC', 0.7, 2.2, -0.45));
+    g.add(pgBox(0.4, 0.09, 0.4, '#DE8CA6', 0.7, 2.58, -0.45));
+  }
+
+  /* 16. 🏰 2층 인형집 */
+  function pgbDollHouse(g){
+    g.add(pgBox(2.5, 0.16, 2.0, '#F3E4D2', 0, 0.08, 0));
+    g.add(pgBox(2.15, 1.12, 1.72, '#FFF2F8', 0, 0.72, 0));
+    g.add(pgBox(1.92, 1.0, 1.56, '#FFFAF2', 0, 1.76, 0));
+    g.add(pgBox(2.12, 0.1, 1.68, '#EFD6E2', 0, 1.26, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.56, 0.86, 4), pgM('#CBB8F1'));
+    roof.position.set(0, 2.68, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(1.0, 0.06, 0.32, '#FFFFFF', 0, 1.3, 0.86));
+    for (var i = 0; i < 4; i++) g.add(pgCyl(0.018, 0.018, 0.2, '#FFFFFF', -0.38 + i * 0.25, 1.42, 0.98, 5));
+    g.add(pgBox(0.98, 0.04, 0.04, '#FFFFFF', 0, 1.5, 0.98));
+    pgbWindow(g, -0.48, 1.86, 0.8, 0.4, 0.4, 0xFFDCA8);
+    pgbWindow(g, 0.48, 1.86, 0.8, 0.4, 0.4, 0xFFDCA8);
+    g.add(pgBox(0.54, 0.9, 0.08, '#EAB9CC', 0, 0.56, 0.86));
+    g.add(pgSph(0.04, '#FFE9A8', 0.19, 0.6, 0.91, 6));
+    pgbWindow(g, -0.66, 0.76, 0.87, 0.34, 0.34, 0xFFDCA8);
+    pgbWindow(g, 0.66, 0.76, 0.87, 0.34, 0.34, 0xFFDCA8);
+    g.add(pgCyl(0.015, 0.015, 0.46, '#C9A47C', 0, 3.1, 0, 5));
+    var fl = pgFlag('#FFB6CB', 0.36, 0.24); fl.position.set(0, 3.32, 0); g.add(fl);
+    [-1.02, 1.02].forEach(function(sx){
+      g.add(pgCyl(0.05, 0.06, 1.3, '#EAD3B8', sx, 0.75, 0.82, 6));
+    });
+    g.userData.tick = function(t){ fl.rotation.y = Math.sin(t * 1.5) * 0.3; };
+  }
+
+  /* 17. 🌿 유리 온실 */
+  function pgbGlassHouse(g){
+    var glass = new THREE.MeshLambertMaterial({ color: 0xE4F8F3, transparent: true, opacity: 0.42, side: THREE.DoubleSide });
+    var glass2 = new THREE.MeshLambertMaterial({ color: 0xF2FCFA, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+    g.add(pgBox(2.4, 0.18, 1.9, '#E7F3EE', 0, 0.09, 0));
+    g.add(pgBox(2.02, 0.18, 1.56, '#D8EDE6', 0, 0.26, 0));
+    var body = new THREE.Mesh(new THREE.BoxGeometry(1.94, 1.2, 1.48), glass);
+    body.position.set(0, 0.95, 0); g.add(body);
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(0.99, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), glass2);
+    dome.position.set(0, 1.55, 0); dome.scale.set(1, 0.72, 0.78); g.add(dome);
+    /* 창틀 */
+    [[-0.97, 0.9], [0.97, 0.9], [-0.97, -0.9], [0.97, -0.9], [0, 0.9], [0, -0.9]].forEach(function(p){
+      g.add(pgBox(0.06, 1.2, 0.06, '#A9E0D2', p[0], 0.95, p[1]));
+    });
+    [0.42, 0.78, 1.14].forEach(function(hy){
+      g.add(pgBox(2.0, 0.05, 0.05, '#BFE8D8', 0, hy, 0.75));
+      g.add(pgBox(2.0, 0.05, 0.05, '#BFE8D8', 0, hy, -0.75));
+    });
+    g.add(pgBox(2.02, 0.06, 1.5, '#BFE8D8', 0, 1.55, 0));
+    g.add(pgBox(0.5, 0.06, 0.4, '#CFF0E8', 0, 1.98, 0.55));
+    /* 식물 */
+    [[ -0.6, 0.5, 0.34, '#8FD9BE'], [0.62, -0.42, 0.3, '#96E2C3'], [0.34, 0.55, 0.26, '#A6E5CF'], [-0.66, -0.5, 0.24, '#8FD9BE']].forEach(function(p){
+      g.add(pgCyl(0.12, 0.1, 0.22, '#EFC6A8', p[0], 0.36, p[1], 9));
+      g.add(pgSph(p[2], p[3], p[0], 0.36 + p[2] + 0.12, p[1], 10));
+      g.add(pgSph(0.07, '#FFB6CB', p[0] + 0.08, 0.36 + p[2] + 0.24, p[1] + 0.05, 6));
+    });
+    g.add(pgCyl(0.02, 0.02, 0.7, '#C9A47C', 0.3, 0.6, 0.2, 5));
+    g.add(pgSph(0.2, '#96E2C3', 0.3, 1.0, 0.2, 9));
+    g.userData.tick = function(t){
+      body.material.opacity = 0.4 + 0.08 * Math.sin(t * 1.2);
+      dome.material.opacity = 0.48 + 0.08 * Math.sin(t * 1.1 + 1.4);
+    };
+  }
+
+  /* 18. 🔭 별빛 천문대 */
+  function pgbStarDome(g){
+    g.add(pgCyl(1.24, 1.34, 0.24, '#F4F2FC', 0, 0.12, 0, 22));
+    g.add(pgCyl(1.02, 1.12, 0.92, '#FBFAFF', 0, 0.7, 0, 22));
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(1.1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), pgM('#CFC8EC'));
+    dome.position.set(0, 1.16, 0); g.add(dome);
+    g.add(pgTor(1.1, 0.05, '#B5ACDE', 0, 1.16, 0));
+    var slit = pgBox(0.3, 0.86, 0.2, '#8A80BA', 0, 1.86, 0.5);
+    slit.rotation.x = -0.28; g.add(slit);
+    var tele = pgCyl(0.11, 0.14, 1.0, '#B98A5E', 0.42, 1.62, 0.18, 9);
+    tele.rotation.z = -0.62; tele.rotation.x = -0.3; g.add(tele);
+    var lens = pgCyl(0.16, 0.16, 0.06, '#FFE39B', 0.72, 2.02, 0.28, 12);
+    lens.rotation.z = -0.62; lens.rotation.x = -0.3; g.add(lens);
+    g.add(pgBox(0.52, 0.62, 0.08, '#C9B6F0', 0, 0.55, 1.06));
+    g.add(pgSph(0.04, '#FFE9A8', 0.16, 0.58, 1.11, 6));
+    [[-0.55, 1.0, 0.7], [0.5, 1.0, -0.72], [0, 1.0, -0.95]].forEach(function(p){
+      g.add(pgBox(0.34, 0.24, 0.04, '#FFE9A8', p[0], p[1], p[2]));
+    });
+    var stars = [];
+    for (var i = 0; i < 7; i++){
+      var a = i / 7 * Math.PI * 2;
+      var st = pgSph(0.05, '#FFF3CE', Math.cos(a) * 1.6, 2.3 + Math.sin(i * 2.1) * 0.3, Math.sin(a) * 1.6, 6);
+      st.material = new THREE.MeshBasicMaterial({ color: 0xFFF3CE, transparent: true, opacity: 0.9 });
+      g.add(st); stars.push(st);
+    }
+    g.userData.tick = function(t){
+      stars.forEach(function(st, k){
+        st.material.opacity = 0.45 + 0.45 * (0.5 + 0.5 * Math.sin(t * 2.1 + k * 1.3));
+        st.position.y = 2.3 + Math.sin(t * 0.8 + k) * 0.28;
+      });
+      lens.material = pgM('#FFE39B');
+      tele.rotation.y = Math.sin(t * 0.5) * 0.3;
+      lens.rotation.y = tele.rotation.y;
+    };
+  }
+
+  /* 19. 🗼 바닷가 등대 */
+  function pgbSeaLighthouse(g){
+    [[0.9, 0.5, 0.34], [-0.85, 0.3, 0.3], [0.2, 0.95, 0.26], [-0.5, -0.8, 0.28], [0.7, -0.7, 0.22]].forEach(function(p){
+      var rk = pgSph(p[2], '#DCD7CC', p[0], p[2] * 0.5, p[1], 8);
+      rk.scale.y = 0.72; g.add(rk);
+    });
+    g.add(pgCyl(0.92, 1.02, 0.22, '#E9E5DD', 0, 0.11, 0, 18));
+    g.add(pgCyl(0.43, 0.63, 1.9, '#FFFDF8', 0, 1.15, 0, 20));
+    /* 빨간 줄무늬 — 탑이 위로 갈수록 가늘어지므로 반지름도 함께 줄인다 */
+    [[0.55, 0.60], [1.14, 0.54], [1.72, 0.47]].forEach(function(p, i){
+      g.add(pgCyl(p[1] - 0.03, p[1] + 0.02, 0.22, '#FFC0D0', 0, p[0], 0, 20));
+    });
+    g.add(pgCyl(0.36, 0.38, 0.14, '#E4E0D8', 0, 2.16, 0, 16));
+    var lamp = pgCyl(0.27, 0.27, 0.4, '#FFF0C0', 0, 2.42, 0, 14);
+    lamp.material = new THREE.MeshLambertMaterial({ color: 0xFFF3CE, emissive: new THREE.Color(0xFFC94D), emissiveIntensity: 0.9 });
+    g.add(lamp);
+    g.add(pgCone(0.36, 0.4, '#FF9F8C', 0, 2.82, 0, 12));
+    g.add(pgSph(0.07, '#FFE39B', 0, 3.06, 0, 8));
+    var beam = new THREE.Group();
+    beam.position.set(0, 2.42, 0); g.add(beam);
+    [-1, 1].forEach(function(d){
+      var b = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.1, 8, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xFFF3CE, transparent: true, opacity: 0.22, side: THREE.DoubleSide }));
+      b.rotation.z = d > 0 ? -Math.PI / 2 : Math.PI / 2;
+      b.position.set(d * 1.15, 0, 0);
+      beam.add(b);
+    });
+    g.add(pgBox(0.46, 0.58, 0.08, '#C9B6F0', 0, 0.62, 0.55));
+    g.userData.tick = function(t){
+      beam.rotation.y = t * 0.55;
+      lamp.material.emissiveIntensity = 0.72 + 0.22 * Math.sin(t * 2.2);
+    };
+  }
+
+  /* 20. 🎠 회전목마 마차 */
+  function pgbCarouselCart(g){
+    g.add(pgBox(2.2, 0.12, 1.5, '#F3E4D2', 0, 0.06, 0));
+    g.add(pgBox(1.6, 0.72, 1.1, '#FFF4F9', 0, 0.8, 0));
+    g.add(pgBox(1.68, 0.1, 1.18, '#FFE39B', 0, 1.2, 0));
+    [[-0.66, -0.46], [0.66, -0.46], [-0.66, 0.46], [0.66, 0.46]].forEach(function(p){
+      g.add(pgCyl(0.04, 0.04, 0.96, '#E8C28A', p[0], 1.7, p[1], 6));
+    });
+    var can = new THREE.Mesh(new THREE.ConeGeometry(1.12, 0.7, 14), pgM('#FFD3DF'));
+    can.position.set(0, 2.48, 0); g.add(can);
+    var can2 = new THREE.Mesh(new THREE.ConeGeometry(0.74, 0.5, 12), pgM('#FFF7F1'));
+    can2.position.set(0, 2.62, 0); g.add(can2);
+    g.add(pgTor(1.12, 0.06, '#FFE39B', 0, 2.14, 0));
+    g.add(pgCyl(0.05, 0.05, 2.4, '#E8C28A', 0, 1.2, 0, 8));
+    g.add(pgSph(0.13, '#FFE39B', 0, 2.94, 0, 10));
+    g.add(pgBox(0.9, 0.06, 0.5, '#FFFFFF', 0, 1.04, 0));
+    g.add(pgBox(0.3, 0.28, 0.3, '#CFF0E2', -0.28, 1.2, 0));
+    g.add(pgSph(0.06, '#FFC3D6', -0.28, 1.38, 0, 7));
+    [-0.95, 0.95].forEach(function(wx){
+      var wh = pgCyl(0.4, 0.4, 0.11, '#FFFDF8', wx, 0.42, 0, 18);
+      wh.rotation.z = Math.PI / 2; g.add(wh);
+      var rim = pgCyl(0.42, 0.42, 0.05, '#E7C39A', wx, 0.42, 0, 18);
+      rim.rotation.z = Math.PI / 2; g.add(rim);
+      var hub = pgCyl(0.1, 0.1, 0.14, '#E7C39A', wx, 0.42, 0, 10);
+      hub.rotation.z = Math.PI / 2; g.add(hub);
+      for (var s = 0; s < 4; s++){
+        var sp = pgBox(0.04, 0.62, 0.04, '#E7C39A', wx, 0.42, 0);
+        sp.rotation.x = s * Math.PI / 4; g.add(sp);
+      }
+    });
+    var fl = pgFlag('#FFB6CB', 0.3, 0.2); fl.position.set(0, 3.06, 0); g.add(fl);
+    g.userData.tick = function(t){
+      can.rotation.y = t * 0.18; can2.rotation.y = -t * 0.12;
+      fl.rotation.y = Math.sin(t * 1.8) * 0.3;
+    };
+  }
+
+  /* 21. 🪣 소원 우물 */
+  function pgbWishWell(g){
+    g.add(pgCyl(1.12, 1.2, 0.12, '#E7E3DC', 0, 0.06, 0, 20));
+    g.add(pgCyl(0.94, 1.0, 0.88, '#E9E5DD', 0, 0.5, 0, 20));
+    for (var i = 0; i < 16; i++){
+      var a = i / 16 * Math.PI * 2;
+      var st = pgBox(0.34, 0.16, 0.1, i % 2 ? '#DCD7CC' : '#D2CDC2',
+        Math.cos(a) * 0.97, 0.34 + (i % 3) * 0.24, Math.sin(a) * 0.97);
+      st.rotation.y = -a; g.add(st);
+    }
+    var water = new THREE.Mesh(new THREE.CircleGeometry(0.8, 20),
+      new THREE.MeshLambertMaterial({ color: new THREE.Color(C.water), transparent: true, opacity: 0.9 }));
+    water.rotation.x = -Math.PI / 2; water.position.set(0, 0.94, 0); g.add(water);
+    g.add(pgTor(0.94, 0.07, '#D4CFC4', 0, 0.94, 0));
+    [-0.88, 0.88].forEach(function(sx){
+      g.add(pgCyl(0.075, 0.085, 1.1, '#B6875C', sx, 1.45, 0, 7));
+      g.add(pgSph(0.1, '#A97B52', sx, 0.95, 0, 6));
+    });
+    g.add(pgBox(1.94, 0.1, 0.1, '#B6875C', 0, 1.92, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.24, 0.62, 4), pgM('#FFC9DA'));
+    roof.position.set(0, 2.24, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgSph(0.08, '#FFE39B', 0, 2.6, 0, 8));
+    var rope = pgCyl(0.018, 0.018, 0.42, '#C9A47C', 0, 1.7, 0, 5); g.add(rope);
+    var bucket = pgCyl(0.17, 0.14, 0.22, '#E8B87A', 0, 1.36, 0, 10); g.add(bucket);
+    g.add(pgTor(0.15, 0.015, '#D9A877', 0, 1.47, 0, Math.PI));
+    var ring = pgTor(0.5, 0.012, '#FFFFFF', 0, 0.96, 0);
+    ring.rotation.x = -Math.PI / 2;
+    ring.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
+    g.add(ring);
+    var sparks = [];
+    for (var k = 0; k < 5; k++){
+      var sp = pgSph(0.035, '#FFFFFF', 0, 1.0, 0, 6);
+      sp.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.7 });
+      g.add(sp); sparks.push(sp);
+    }
+    g.add(pgSph(0.07, '#FFC3D6', 0.62, 0.06, 1.02, 7));
+    g.add(pgSph(0.06, '#FFE39B', -0.66, 0.06, 1.0, 7));
+    g.userData.tick = function(t){
+      bucket.position.y = 1.36 + Math.sin(t * 1.3) * 0.05;
+      rope.position.y = 1.7 + Math.sin(t * 1.3) * 0.05;
+      var s = 0.9 + Math.sin(t * 0.9) * 0.09;
+      ring.scale.set(s, s, 1);
+      ring.material.opacity = 0.3 + 0.2 * (0.5 + 0.5 * Math.sin(t * 1.4));
+      sparks.forEach(function(sp, k){
+        var u = (t * 0.42 + k / sparks.length) % 1;
+        var aa = k * 1.3;
+        sp.position.set(Math.cos(aa) * (0.15 + u * 0.5), 1.0 + u * 0.9, Math.sin(aa) * (0.15 + u * 0.5));
+        sp.material.opacity = 0.65 * (1 - u);
+      });
+    };
+  }
+
+  /* 22. 🚜 농장 헛간 */
+  function pgbFarmBarn(g){
+    g.add(pgBox(2.6, 0.16, 2.2, '#E7DFD0', 0, 0.08, 0));
+    g.add(pgBox(2.15, 1.3, 1.8, '#F5BCAD', 0, 0.82, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.72, 0.92, 4), pgM('#E59C88'));
+    roof.position.set(0, 1.92, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.2, 0.1, 1.84, '#D98F7C', 0, 1.42, 0));
+    g.add(pgBox(1.05, 1.12, 0.08, '#FFF7EF', 0, 0.66, 0.88));
+    g.add(pgBox(1.05, 0.06, 0.1, '#E9C2B2', 0, 0.66, 0.89));
+    [[-1, 1]].forEach(function(d){
+      var br = pgBox(0.07, 1.3, 0.09, '#E9C2B2', 0, 0.66, 0.9);
+      br.rotation.z = d * 0.52; g.add(br);
+    });
+    pgbWindow(g, -0.66, 0.94, 0.88, 0.38, 0.38, 0xFFD7A8);
+    pgbWindow(g, 0.66, 0.94, 0.88, 0.38, 0.38, 0xFFD7A8);
+    g.add(pgCyl(0.3, 0.3, 1.0, '#CBC8C0', 1.32, 0.5, -0.62, 14));
+    g.add(pgCone(0.34, 0.36, '#B4B1A8', 1.32, 1.18, -0.62, 14));
+    [[-1.15, 1.0], [-0.72, 1.0]].forEach(function(p){
+      var hay = pgBox(0.42, 0.34, 0.42, '#FFE39B', p[0], 0.17, p[1]);
+      hay.rotation.y = 0.3; g.add(hay);
+    });
+    g.add(pgCyl(0.02, 0.02, 0.5, '#C9A47C', -1.15, 1.28, 1.0, 5));
+    for (var i = 0; i < 4; i++){
+      g.add(pgCyl(0.05, 0.05, 0.42, '#C9A47C', -1.35 + i * 0.28, 0.21, 1.12, 6));
+    }
+    g.add(pgBox(0.9, 0.05, 0.05, '#C9A47C', -1.35, 0.3, 1.12));
+    g.add(pgSph(0.07, '#FFF6C9', 0, 2.55, 0, 7));
+  }
+
+  /* 23. 🚂 미니 기차역 */
+  function pgbMiniStation(g){
+    g.add(pgBox(2.4, 0.16, 2.3, '#EFE3D4', 0, 0.08, 0));
+    g.add(pgBox(1.44, 1.16, 1.24, '#FFF7ED', -0.42, 0.78, 0.3));
+    var cnp = pgBox(2.36, 0.12, 1.02, '#FFC9DA', 0.1, 1.58, 0.52);
+    g.add(cnp);
+    for (var i = 0; i < 6; i++){
+      g.add(pgBox(0.3, 0.05, 0.9, i % 2 ? '#FFF7F1' : '#FFC9DA', -0.95 + i * 0.4, 1.65, 0.52));
+    }
+    [[-0.9, 1.02], [1.12, 1.02]].forEach(function(p){
+      g.add(pgCyl(0.04, 0.045, 1.48, '#E8C28A', p[0], 0.78, p[1], 6));
+    });
+    var clock = pgCyl(0.28, 0.28, 0.07, '#FFFDF8', -0.42, 1.28, 0.93, 18);
+    clock.rotation.x = Math.PI / 2; g.add(clock);
+    g.add(pgBox(0.03, 0.18, 0.04, '#B98A5E', -0.42, 1.34, 0.98));
+    g.add(pgBox(0.13, 0.03, 0.04, '#B98A5E', -0.36, 1.28, 0.98));
+    pgbWindow(g, -0.72, 0.72, 0.88, 0.36, 0.4, 0xFFD7A8);
+    pgbWindow(g, -0.12, 0.72, 0.88, 0.36, 0.4, 0xFFD7A8);
+    g.add(pgBox(0.5, 0.86, 0.08, '#CFEAFB', 0.62, 0.5, 0.9));
+    g.add(pgSph(0.035, '#FFFDF8', 0.8, 0.54, 0.95, 6));
+    g.add(pgBox(0.9, 0.08, 0.4, '#C9A47C', 0.45, 0.34, 1.02));
+    [-0.28, 0.28].forEach(function(dx){
+      g.add(pgBox(0.08, 0.28, 0.34, '#B6875C', 0.45 + dx, 0.17, 1.02));
+    });
+    g.add(pgBox(2.4, 0.24, 0.3, '#D9D3C7', 0, 0.2, -1.16));
+    g.add(pgBox(2.4, 0.05, 0.08, '#B9C6CF', 0, 0.34, -1.28));
+    g.add(pgBox(2.4, 0.05, 0.08, '#B9C6CF', 0, 0.34, -1.04));
+    for (var s = 0; s < 5; s++){
+      g.add(pgBox(0.12, 0.05, 0.28, '#C9A47C', -0.9 + s * 0.45, 0.31, -1.16));
+    }
+    var train = new THREE.Group(); g.add(train);
+    train.add(pgBox(0.7, 0.42, 0.5, '#CFE8F8', 0, 0.42, 0));
+    train.add(pgBox(0.72, 0.1, 0.52, '#FFC9DA', 0, 0.64, 0));
+    train.add(pgBox(0.3, 0.26, 0.42, '#FFE39B', 0.32, 0.6, 0));
+    train.add(pgCyl(0.07, 0.07, 0.2, '#7E8A96', 0.12, 0.2, 0.24, 8));
+    train.add(pgCyl(0.07, 0.07, 0.2, '#7E8A96', -0.2, 0.2, 0.24, 8));
+    train.add(pgCyl(0.07, 0.07, 0.2, '#7E8A96', 0.12, 0.2, -0.24, 8));
+    train.add(pgCyl(0.07, 0.07, 0.2, '#7E8A96', -0.2, 0.2, -0.24, 8));
+    g.userData.tick = function(t){
+      train.position.set(Math.sin(t * 0.35) * 0.8, 0, -1.16);
+    };
+  }
+
+  /* 24. 🌈 무지개 오두막 */
+  function pgbRainbowCottage(g){
+    g.add(pgBox(2.5, 0.16, 2.0, '#EFE6D8', 0, 0.08, 0));
+    g.add(pgBox(2.15, 1.28, 1.72, '#FFF8EF', 0, 0.8, 0));
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.62, 0.94, 4), pgM('#CDE7F6'));
+    roof.position.set(0, 1.9, 0); roof.rotation.y = Math.PI / 4; g.add(roof);
+    g.add(pgBox(2.2, 0.09, 1.76, '#AFD6EC', 0, 1.4, 0));
+    g.add(pgBox(0.3, 0.66, 0.3, '#E9C4B0', 0.62, 1.9, -0.45));
+    g.add(pgBox(0.4, 0.09, 0.4, '#DCAF97', 0.62, 2.26, -0.45));
+    pgbSmoke(g, 0.62, 2.36, -0.45, 3);
+    g.add(pgBox(0.6, 0.86, 0.08, '#D9A877', 0, 0.53, 0.86));
+    g.add(pgSph(0.04, '#FFE9A8', 0.2, 0.56, 0.91, 6));
+    [[0.36, '#FFB6CB'], [0.28, '#FFE39B'], [0.2, '#A6E5CF']].forEach(function(p){
+      var arc = pgTor(p[0], 0.045, p[1], 0, 0.96, 0.88, Math.PI);
+      g.add(arc);
+    });
+    pgbWindow(g, -0.66, 0.86, 0.87, 0.42, 0.42, 0xFFD7A8);
+    pgbWindow(g, 0.66, 0.86, 0.87, 0.42, 0.42, 0xFFD7A8);
+    pgbFlowerBox(g, -0.66, 0.52, 0.93, 0.58);
+    pgbFlowerBox(g, 0.66, 0.52, 0.93, 0.58);
+    g.add(pgBox(1.0, 0.07, 0.34, '#E4C69E', 0, 0.07, 1.02));
+    [[-1.14, 1.14, '#FFC3D6'], [1.14, 1.14, '#FFE39B'], [-1.14, -1.0, '#C9B6F0'], [1.14, -1.0, '#A6E5CF']].forEach(function(p){
+      g.add(pgCyl(0.015, 0.02, 0.2, '#7FBF6A', p[0], 0.15, p[1], 4));
+      g.add(pgSph(0.075, p[2], p[0], 0.28, p[1], 7));
+    });
+  }
+
   function pgBuildItemMesh(kind){
     var g = new THREE.Group();
     g.userData.buildKind = kind;
@@ -8046,6 +8759,18 @@ async function finishBoot(){
     else if (kind === 'gazebo_tea') pgbGazeboTea(g);
     else if (kind === 'cherry_arch') pgbCherryArch(g);
     else if (kind === 'pond_duck') pgbPondDuck(g);
+    else if (kind === 'beach_caravan') pgbBeachCaravan(g);
+    else if (kind === 'icecream_truck') pgbIcecreamTruck(g);
+    else if (kind === 'cat_cafe') pgbCatCafe(g);
+    else if (kind === 'doll_house') pgbDollHouse(g);
+    else if (kind === 'glass_house') pgbGlassHouse(g);
+    else if (kind === 'star_dome') pgbStarDome(g);
+    else if (kind === 'sea_lighthouse') pgbSeaLighthouse(g);
+    else if (kind === 'carousel_cart') pgbCarouselCart(g);
+    else if (kind === 'wish_well') pgbWishWell(g);
+    else if (kind === 'farm_barn') pgbFarmBarn(g);
+    else if (kind === 'mini_station') pgbMiniStation(g);
+    else if (kind === 'rainbow_cottage') pgbRainbowCottage(g);
     else pgbCottagePink(g);
     return g;
   }
@@ -9470,7 +10195,20 @@ async function finishBoot(){
     rabbit_pajama: { ly:306, by:385, gs:196, ge:196, sx:196, lcx:174, rcx:218 },
     rock_headset: { ly:356, by:382, gs:186, ge:203, sx:194, lcx:170, rcx:218 },
     soccer_sport: { ly:362, by:388, gs:202, ge:202, sx:202, lcx:174, rcx:230 },
-    wizard_robe: { ly:361, by:390, gs:183, ge:201, sx:192, lcx:171, rcx:213 }
+    wizard_robe: { ly:361, by:390, gs:183, ge:201, sx:192, lcx:171, rcx:213 },
+    /* v18 추가 12종 — 400×400 원본 기준 직접 측정 */
+    chick_raincoat:  { ly:344, by:390, gs:199, ge:204, sx:201, lcx:181, rcx:220 },
+    shark_pajama:    { ly:362, by:391, gs:197, ge:203, sx:200, lcx:178, rcx:219 },
+    bee_hood:        { ly:346, by:389, gs:186, ge:191, sx:189, lcx:170, rcx:208 },
+    ballerina_tutu:  { ly:340, by:390, gs:199, ge:203, sx:201, lcx:192, rcx:209 },
+    detective_coat:  { ly:352, by:390, gs:199, ge:204, sx:201, lcx:176, rcx:228 },
+    moon_witch:      { ly:338, by:390, gs:193, ge:198, sx:195, lcx:177, rcx:213 },
+    mermaid_tail:    { ly:368, by:392, gs:245, ge:251, sx:248, lcx:214, rcx:270 },
+    safari_explorer: { ly:350, by:390, gs:197, ge:202, sx:199, lcx:172, rcx:224 },
+    doctor_nurse:    { ly:348, by:389, gs:205, ge:210, sx:207, lcx:193, rcx:225 },
+    skater_punk:     { ly:356, by:390, gs:204, ge:209, sx:206, lcx:178, rcx:233 },
+    snow_fairy:      { ly:358, by:390, gs:197, ge:209, sx:203, lcx:185, rcx:220 },
+    cat_butler:      { ly:350, by:389, gs:198, ge:203, sx:200, lcx:183, rcx:220 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
   var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:8 };
@@ -9631,6 +10369,19 @@ async function finishBoot(){
     rock_headset:   { cx:201, hw:43, sy:224, len:52, w:18, ss:0, slv:'#B7DFC9', cuff:'#F4FBF5', skin:'#FADFC8' },
     soccer_sport:   { cx:206, hw:43, sy:220, len:52, w:18, ss:1, slv:'#BFDDEE', cuff:'#EFF8FC', skin:'#F9DBC1' },
     wizard_robe:    { cx:198, hw:42, sy:218, len:52, w:18, ss:0, slv:'#A98BC0', cuff:'#CBB4DA', skin:'#F8D9C2' },
+    /* v18 추가 12종 */
+    chick_raincoat:  { cx:200, hw:42, sy:226, len:51, w:17, ss:0, slv:'#F5D95E', cuff:'#FFF0A8', skin:'#FADFC8' },
+    shark_pajama:    { cx:198, hw:43, sy:226, len:51, w:18, ss:0, slv:'#BFD8EC', cuff:'#EEF6FC', skin:'#FADCC4' },
+    bee_hood:        { cx:189, hw:42, sy:222, len:51, w:18, ss:0, slv:'#F2CE4E', cuff:'#FFF3C8', skin:'#F9DCC2' },
+    ballerina_tutu:  { cx:201, hw:38, sy:230, len:50, w:16, ss:1, slv:'#FBD7E2', cuff:'#FFF0F5', skin:'#FBDFC7' },
+    detective_coat:  { cx:201, hw:43, sy:224, len:51, w:17, ss:0, slv:'#DCC39B', cuff:'#F0E3C8', skin:'#F9DBC1' },
+    moon_witch:      { cx:195, hw:42, sy:228, len:50, w:17, ss:0, slv:'#CDB8E4', cuff:'#F1E8FA', skin:'#F8DCC4' },
+    mermaid_tail:    { cx:190, hw:40, sy:228, len:50, w:16, ss:1, slv:'#D7F0EC', cuff:'#F2FBFA', skin:'#F8E0CA' },
+    safari_explorer: { cx:199, hw:42, sy:224, len:51, w:17, ss:1, slv:'#D8C69B', cuff:'#EFE6CE', skin:'#F7D8BE' },
+    doctor_nurse:    { cx:207, hw:42, sy:226, len:51, w:17, ss:0, slv:'#FDFBF4', cuff:'#DCEFE4', skin:'#F9DDC6' },
+    skater_punk:     { cx:206, hw:44, sy:222, len:52, w:18, ss:0, slv:'#C9BCE8', cuff:'#EFEAFA', skin:'#FADCC4' },
+    snow_fairy:      { cx:203, hw:43, sy:226, len:51, w:17, ss:0, slv:'#DDEFF8', cuff:'#FAFDFF', skin:'#FBE3CF' },
+    cat_butler:      { cx:200, hw:42, sy:228, len:50, w:17, ss:0, slv:'#CFE1EE', cuff:'#FFF6E4', skin:'#F9DCC4' },
   };
   var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:51, w:17, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
   function pgArmOf(k){ return PG_ARM[k] || PG_ARM_DEF; }
