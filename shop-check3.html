@@ -10414,7 +10414,7 @@ async function finishBoot(){
     /* 수영장 */
     g.add(pgBox(1.66, 0.2, 0.92, '#BFE6FA', 0.42, 0.2, 0.86));
     var water = pgBox(1.5, 0.06, 0.76, '#9FD6F2', 0.42, 0.3, 0.86); g.add(water);
-    for (var s = 0; s < 3; s++) g.add(pgBox(1.4, 0.012, 0.06, '#DFF3FD', 0.42, 0.335, 0.66 + s * 0.2));
+    for (var s = 0; s < 2; s++) g.add(pgBox(1.24, 0.01, 0.03, '#CFEFFC', 0.42, 0.335, 0.72 + s * 0.28));
     /* 사다리 · 미끄럼틀 */
     [-0.2, 0.04].forEach(function(dx){ g.add(pgCyl(0.018, 0.018, 0.4, '#B4DCEE', -0.34 + dx, 0.36, 0.6, 5)); });
     var slide = new THREE.Group(); slide.position.set(-0.66, 0.62, 0.78); g.add(slide);
