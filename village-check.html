@@ -13283,6 +13283,15 @@ async function finishBoot(){
     [[-28.0, 13.0, 'tul'], [-12.6, 9.6, 'hyd'], [-18.9, 13.6, 'tul']].forEach(function(p13){
       pgVilAdd(yard, p13[0], p13[1], 0.24, 0.36, function(){ return pgVilPot(p13[0], p13[1], p13[2]); });
     });
+    /* 분수 둘레 화분 4 · 분수를 바라보는 벤치 2 */
+    [[-22.2, 10.8], [-17.8, 10.8], [-22.2, 6.4], [-17.8, 6.4]].forEach(function(p16, pi){
+      pgVilAdd(yard, p16[0], p16[1], 0.24, 0.36, function(){ return pgVilPot(p16[0], p16[1], pi % 2 ? 'hyd' : 'tul'); });
+    });
+    [[-23.8, 11.0, C.peach], [-16.2, 11.0, C.lav]].forEach(function(p17){
+      pgVilAdd(yard, p17[0], p17[1], 0.85, 1.05, function(){
+        return pgBenchDeco(yard, p17[0], p17[1], Math.atan2(-20 - p17[0], 8.6 - p17[1]), p17[2]);
+      });
+    });
     /* 🐦 새 목욕통 · 🌳 뒷동산 소품 */
     pgVilAdd(yard, -33.4, 7.4, 0.45, 0.6, function(){ return pgVilBirdbath(-33.4, 7.4); });
     [[-34.6, -19.0], [-4.2, -19.4]].forEach(function(p14){
