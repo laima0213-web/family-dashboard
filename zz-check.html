@@ -1575,7 +1575,7 @@ button.av-ptgift{border:0;font-family:inherit;cursor:pointer}
   background:rgba(30,16,60,.52);opacity:0;transition:opacity .22s}
 .p3.on{opacity:1}
 .p3-card{position:relative;width:100%;max-width:348px;border-radius:30px;overflow:hidden;
-  padding:16px 13px 15px;text-align:center;
+  padding:16px 13px 18px;text-align:center;
   background:linear-gradient(168deg,#9273E6 0%,#7C5CD8 46%,#6244BE 100%);
   box-shadow:0 20px 48px rgba(38,18,86,.5),inset 0 1px 0 rgba(255,255,255,.28);
   transform:translateY(16px) scale(.95);transition:transform .26s cubic-bezier(.2,1.2,.4,1)}
@@ -1620,7 +1620,7 @@ button.av-ptgift{border:0;font-family:inherit;cursor:pointer}
   font-size:16px;font-weight:900;color:#7A4A00;background:linear-gradient(180deg,#FFE79B,#FFCE4E);
   box-shadow:0 5px 0 #E0A92F,0 10px 20px rgba(40,16,80,.3);cursor:pointer}
 .p3-ok:active{transform:translateY(3px);box-shadow:0 2px 0 #E0A92F}
-.p3-more{margin-top:6px;border:0;background:transparent;font-family:inherit;font-size:11.5px;font-weight:900;
+.p3-more{margin-top:9px;border:0;background:transparent;font-family:inherit;font-size:11.5px;font-weight:900;
   color:#FFE9A8;text-decoration:underline;cursor:pointer;padding:2px}
 .p3-burst{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:30px;z-index:1}
 .p3-burst i{position:absolute;left:50%;top:52%;width:8px;height:8px;opacity:0;
@@ -4355,7 +4355,7 @@ function p3Burst(el){
     }
   } catch(e){}
 }
-function p3Close(){
+function p3Close(quiet){
   var el = document.getElementById('p3');
   var kid = p3State ? p3State.kid : null;
   p3State = null;
@@ -4363,7 +4363,7 @@ function p3Close(){
     el.classList.remove('on');
     setTimeout(function(){ try { if (el.parentNode) el.parentNode.removeChild(el); } catch(e){} }, 260);
   }
-  if (kid){
+  if (kid && !quiet){
     var rem = giftPendAmt(kid);
     if (rem > 0) toast('🎁 아직 선물상자가 ' + rem + '개 더 남아 있어요! 상점을 다시 눌러 열어 보세요', 3200);
   }
@@ -4414,7 +4414,7 @@ function p3Open(kid){
       if (t.closest('.p3-ok')){ p3Close(); return; }
       if (t.closest('.p3-more')){
         var k2 = p3State ? p3State.kid : null;
-        p3Close();
+        p3Close(true);          /* 다음 상자를 바로 열 때는 '더 남았다' 안내를 겹쳐 띄우지 않는다 */
         if (k2) setTimeout(function(){ p3Open(k2); }, 320);
         return;
       }
