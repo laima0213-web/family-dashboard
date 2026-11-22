@@ -1631,10 +1631,13 @@ body.pg-open{overflow:hidden!important}
 .pg-exit:active{transform:scale(.96)}
 .pg-zoom{position:absolute;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;
   flex-direction:column;gap:8px;z-index:5}
-.pg-zoom button{width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.95);
+.pg-zoom button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  width:48px;height:48px;padding:2px 0;border-radius:14px;border:1px solid rgba(255,255,255,.95);
   background:rgba(255,255,255,.9);color:#4A6B4F;font-size:19px;font-weight:900;font-family:inherit;
   cursor:pointer;line-height:1;box-shadow:0 4px 14px rgba(60,110,70,.18);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pgz-ico{display:block;font-size:17px;line-height:1}
+.pgz-txt{display:block;font-size:10px;font-weight:900;line-height:1;letter-spacing:-.4px;color:inherit}
 .pg-zoom button:active{transform:scale(.94)}
 .pg-zoom button.pg-pan-btn.on{background:linear-gradient(160deg,#8FE0AE,#58A972);color:#FFFFFF;
   border-color:#4E9C68;box-shadow:0 4px 14px rgba(60,140,90,.34)}
@@ -1759,7 +1762,9 @@ body.pg-open{overflow:hidden!important}
   .pg-switch button{height:22px;padding:0 9px;font-size:10.5px}
   .pg-tools button{height:26px;padding:0 9px;font-size:10.5px}
   .pg-exit{height:38px;padding:0 12px;font-size:13px;border-radius:13px}
-  .pg-zoom button{width:40px;height:40px;font-size:17px;border-radius:12px}
+  .pg-zoom button{width:44px;height:46px;font-size:17px;border-radius:13px}
+  .pgz-ico{font-size:16px}
+  .pgz-txt{font-size:9.5px}
   .pg-lbl{font-size:8.5px;padding:0 5px}
   .pgd-grid{grid-template-columns:repeat(4,1fr);gap:5px}
   .pgd-grid.bld{grid-template-columns:repeat(3,1fr)}
@@ -1914,10 +1919,10 @@ body.pg-open{overflow:hidden!important}
   <div class="pg-hint" id="pgHint">손가락으로 자유롭게 이동 · 놀이기구는 꾹 누르면 들려요 · 두 손가락 확대</div>
 
   <div class="pg-zoom">
-    <button type="button" id="pgPanBtn" class="pg-pan-btn on" aria-label="지금 손가락으로 화면 이동 중 · 누르면 360° 회전" aria-pressed="true" title="지금 손가락으로 화면 이동 중 · 누르면 360° 회전">✋</button>
-    <button type="button" id="pgZoomIn" aria-label="확대">＋</button>
-    <button type="button" id="pgZoomOut" aria-label="축소">－</button>
-    <button type="button" id="pgReset" aria-label="처음 자리로">🏠</button>
+    <button type="button" id="pgPanBtn" class="pg-pan-btn on" aria-label="지금 손가락으로 화면 이동 중 · 누르면 360° 회전" aria-pressed="true" title="지금 손가락으로 화면 이동 중 · 누르면 360° 회전"><span class="pgz-ico">✋</span><span class="pgz-txt">이동</span></button>
+    <button type="button" id="pgZoomIn" aria-label="확대"><span class="pgz-ico">＋</span><span class="pgz-txt">확대</span></button>
+    <button type="button" id="pgZoomOut" aria-label="축소"><span class="pgz-ico">－</span><span class="pgz-txt">축소</span></button>
+    <button type="button" id="pgReset" aria-label="처음 자리로"><span class="pgz-ico">🏠</span><span class="pgz-txt">처음</span></button>
   </div>
 
   <div class="pg-load" id="pgLoad">🌳 자연 놀이터 준비 중…</div>
@@ -15647,7 +15652,7 @@ async function finishBoot(){
       b.setAttribute('aria-pressed', PG.panMode ? 'true' : 'false');
       b.setAttribute('aria-label', lbl);
       b.setAttribute('title', lbl);
-      b.textContent = PG.panMode ? '✋' : '🔄';
+      b.innerHTML = PG.panMode ? '<span class="pgz-ico">✋</span><span class="pgz-txt">이동</span>' : '<span class="pgz-ico">🔄</span><span class="pgz-txt">회전</span>';
     }
     if (!quiet) toast(PG.panMode ? '✋ 한 손가락으로 화면을 자유롭게 옮겨요 · 🔄 누르면 회전' : '🔄 한 손가락으로 360° 회전해요 · ✋ 누르면 이동', 1900);
     return PG.panMode;
