@@ -870,14 +870,14 @@ button{font:inherit;color:inherit}
 .avd-sfr4{right:5px;bottom:20px;animation-delay:1.2s;width:14px;height:14px}
 .avd-sfr5{left:50%;top:-4px;margin-left:-6px;animation-delay:1.6s;width:13px;height:13px}
 .avd-sfr6{left:50%;bottom:2px;margin-left:-5px;animation-delay:2s;width:11px;height:11px}
-/* 캐릭터 고르기 그리드 — 11-22: 3열 복귀 + 카드 여백 줄여 그림만 크게 */
-.av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
-.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:18px 4px 6px;display:flex;
-  flex-direction:column;align-items:center;gap:3px;cursor:pointer}
-.av-card.on{border-color:#5FA97A;background:#F2FBF5;box-shadow:0 3px 8px rgba(95,169,122,.2)}
-.av-card-img{width:100%;height:96px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+/* 캐릭터 고르기 그리드 — 11-23: 4열 도감형 (정사각 프레임 + 이름 + 보유/구매) */
+.av-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:2px}
+.av-card{border:1.5px solid #CBE3D4;background:#FDFFFB;border-radius:14px;padding:3px 2px 4px;display:flex;
+  flex-direction:column;align-items:center;gap:2px;cursor:pointer;overflow:hidden}
+.av-card.on{border-color:#4E9B6E;background:#F3FCF6;box-shadow:0 3px 9px rgba(78,155,110,.28)}
+.av-card-img{width:100%;height:74px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
-.av-card-n{font-size:11.5px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;line-height:1.25}
+.av-card-n{font-size:9.5px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.3px}
 .av-card.on .av-card-n{color:#3E7A54}
 /* 배경 색 칩 */
 .av-bgs{display:flex;flex-wrap:wrap;gap:9px}
@@ -1425,39 +1425,46 @@ button.st{padding:0}
 .av-ptadj button:active{transform:scale(.94)}
 .av-ptnote{flex:1 1 100%;font-size:10px;font-weight:800;color:#9C8EC0;line-height:1.35;letter-spacing:-.2px}
 .av-card{position:relative}
-.av-card.locked{background:#FCFAF5;border-style:dashed;border-color:#EADCC5}
-.av-card-pr{position:absolute;top:4px;right:4px;font-size:9px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
-  border:1px solid #E5D8F6;border-radius:999px;padding:0 5px;line-height:1.55;z-index:3}
-.av-card-img{width:100%;height:96px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+/* 미보유 카드 — 사진 1의 '미보유'처럼 한 톤 연하게 (그림만 흐리게, 글씨·버튼은 또렷하게) */
+.av-card.locked{background:#FCFBF6;border-color:#EFE7D9}
+.av-card.locked .av-card-img img{opacity:.5}
+.av-card.locked .av-deco-pv{opacity:.8}
+.av-card.locked .av-card-n{color:#A2947F}
+.av-card-pr{position:absolute;top:3px;right:3px;font-size:7.5px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
+  border:1px solid #E5D8F6;border-radius:999px;padding:0 3px;line-height:1.5;z-index:3}
+.av-card-img{width:100%;height:74px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
-.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:11.5px;
-  line-height:1.25;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:9.5px;
+  line-height:1.3;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:-.3px}
 .av-card.on .av-card-n{color:#3E7A54}
 .av-card-emoji{font-size:26px;line-height:1}
-.av-own{display:block;width:100%;text-align:center;font-size:9.5px;font-weight:900;color:#6FA97E;line-height:1.4;margin-top:auto}
+.av-own{display:block;width:100%;text-align:center;font-size:8.5px;font-weight:900;color:#6FA97E;line-height:1.3;margin-top:auto}
 .av-buy{display:block;width:100%;margin-top:auto;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
-  border-radius:999px;height:21px;font-size:10px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
+  border-radius:8px;height:17px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap;
+  letter-spacing:-.3px}
 .av-buy:active{transform:scale(.96)}
 /* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 버튼 */
 .av-refund{display:block;width:100%;margin-top:0;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
-  border-radius:999px;height:18px;font-size:9px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  border-radius:8px;height:15px;font-size:7.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
   white-space:nowrap;letter-spacing:-.3px}
 .av-refund:hover{background:#FDE9E4;border-color:#E3B0A5}
 .av-refund:active{transform:scale(.96);background:#FBDCD4}
 .av-grid{align-items:stretch}
-/* 배경 색도 3열 큰 칩 */
-.av-bggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
-.av-bgdot{width:66px;height:66px;border-radius:18px;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
+/* 배경 색도 4열 칩 */
+.av-bggrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:2px}
+.av-bgdot{width:52px;height:52px;border-radius:14px;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
 .av-card.on .av-bgdot{box-shadow:0 0 0 2.5px #5FA97A}
 /* ✨ 꾸미기 카드 — 고른 캐릭터에 실제로 씌운 모습을 118px 프리뷰로 (위 미리보기와 같은 크기라 48종 위치 그대로) */
 .av-deco-pv{width:118px;height:118px;flex:0 0 118px;border-radius:26px;border:1px solid #F0E6D6;
   box-shadow:0 4px 10px rgba(160,140,110,.12)}
 .av-deco-pv > img{width:97%;height:97%;object-fit:contain;position:relative;z-index:1}
 .av-deco-pv .avd{animation:none!important}
-/* 정지 프리뷰에서는 avdBob의 translate(-50%)가 사라지므로 왕관 위치를 직접 보정 */
-.av-deco-pv .avd-crown{transform:translateX(-50%)}
-/* 3열 카드 안에서는 118px 프리뷰를 0.78배(≈92px)로 축소 — 48종 장식 위치는 그대로 */
-.av-card-img .av-deco-pv{transform:scale(.78);transform-origin:center center;flex:0 0 118px;margin:-13px}
+/* 정지 프리뷰에서는 avdBob의 translate(-50%)가 사라지므로 왕관 위치를 직접 보정
+   — 카드 프리뷰는 overflow:hidden 이라 top:-7px 이면 왕관 윗부분이 잘려 top:0 으로 올린다 */
+.av-deco-pv .avd-crown{transform:translateX(-50%);top:0}
+/* 4열 카드 안에서는 118px 프리뷰를 0.60배(≈71px)로 축소 — 48종 장식 위치는 그대로 */
+.av-card-img .av-deco-pv{transform:scale(.62);transform-origin:center center;flex:0 0 118px;margin:-23px}
 .av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#BCAB93;
   border:2px dashed #E7DBC9;border-radius:26px;box-shadow:none;background:linear-gradient(150deg,#FFFDF8,#F8F3EA)}
 /* 상점 시트는 여백을 살짝 줄여 카드 가로폭 확보 */
@@ -1541,11 +1548,12 @@ button.st{padding:0}
   .av-ptbar{padding:4px 8px;margin:1px 0 3px;border-radius:10px}
   .av-ptbig{font-size:12px}
   .av-ptnote{font-size:9px}
-  .av-card-img{height:102px}
-  .av-card-n{font-size:11.5px}
-  .av-buy{height:21px;font-size:10px}
-  .av-own{font-size:9.5px}
-  .av-refund{height:18px;font-size:9px}
+  .av-card-img{height:82px}
+  .av-card-n{font-size:10px}
+  .av-buy{height:18px;font-size:9px}
+  .av-own{font-size:9px}
+  .av-refund{height:16px;font-size:8px}
+  .av-card-img .av-deco-pv{transform:scale(.66);margin:-20px}
 }
 /* 390px 모바일 — 문제집 입력 줄이 잘리지 않게 두 줄 배치 */
 @media (max-width:430px){
@@ -1711,6 +1719,11 @@ body.pg-open{overflow:hidden!important}
 .pgd-grid.bld{grid-template-columns:repeat(3,1fr)}
 .pgd-thumb svg{width:100%;height:100%;display:block}
 .pgd-tip{font-size:9.5px;font-weight:800;color:#A79882;line-height:1.5;margin-top:6px;text-align:center}
+/* 11-23: 상점 4열과 맞춰 집·건물 목록도 4열 — 이름이 길어도 잘리지 않게 두 줄 허용 */
+.pgd-grid.bld{grid-template-columns:repeat(4,1fr)}
+.pgd-grid.bld .pgd-nm{white-space:normal;font-size:8.5px;line-height:1.18;letter-spacing:-.3px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:clip;
+  max-height:2.36em}
 .pgd-brow{display:flex;align-items:center;gap:5px;margin-left:auto;flex:0 0 auto}
 .pgd-bbtn{border:1px solid #D9E9F5;background:#F4FAFF;color:#41708F;border-radius:999px;height:22px;
   padding:0 8px;font-size:9.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}
@@ -1756,6 +1769,62 @@ body.pg-open{overflow:hidden!important}
   background:linear-gradient(120deg,#EFFAF2,#E6F7EE);color:#357A50;font-size:12.5px;font-weight:900;
   font-family:inherit;cursor:pointer;letter-spacing:-.3px}
 .av-pgbtn:active{transform:scale(.98)}
+/* 🎁 부모가 보낸 선물 도착 표시 — 상점 버튼·포인트 바 */
+@keyframes giftPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,186,54,.55)}
+  50%{transform:scale(1.05);box-shadow:0 0 0 5px rgba(255,186,54,0)}}
+.prof-shop.gift{background:linear-gradient(120deg,#FFF4CE,#FFE29A);border-color:#F0CB63;color:#8A5A00;
+  font-weight:900;animation:giftPulse 1.9s ease-in-out infinite}
+.av-ptgift{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:900;color:#8A4B00;
+  background:linear-gradient(120deg,#FFF0BE,#FFD45C);border:1px solid #EFBF45;border-radius:999px;
+  padding:1px 7px;white-space:nowrap;animation:giftPulse 1.7s ease-in-out infinite;letter-spacing:-.3px}
+
+/* ---------- 🎁 선물상자 1P 획득 축하 팝업 (11-23) ---------- */
+.gfp{position:fixed;inset:0;z-index:12100;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:rgba(44,32,64,.58);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  opacity:0;transition:opacity .24s ease;-webkit-tap-highlight-color:transparent}
+.gfp.on{opacity:1}
+.gfp-card{position:relative;width:100%;max-width:344px;border-radius:30px;overflow:hidden;
+  background:linear-gradient(165deg,#9370F6 0%,#7E5BEF 44%,#6A48D7 100%);
+  box-shadow:0 22px 50px rgba(48,24,94,.46),inset 0 1px 0 rgba(255,255,255,.34);
+  padding:18px 15px 15px;text-align:center;transform:translateY(16px) scale(.94);
+  transition:transform .3s cubic-bezier(.2,1.4,.4,1)}
+.gfp.on .gfp-card{transform:translateY(0) scale(1)}
+.gfp-sp{position:absolute;font-style:normal;color:#FFF6C9;opacity:.7;line-height:1;
+  animation:gfpTw 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes gfpTw{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.gfp-ttl{margin:2px 0 5px;font-size:23px;font-weight:900;letter-spacing:-.6px;color:#FFE066;
+  text-shadow:0 2px 0 rgba(84,48,176,.55),0 6px 16px rgba(56,28,116,.45)}
+.gfp-sub{font-size:13px;font-weight:900;color:#fff;letter-spacing:-.3px;line-height:1.45;
+  text-shadow:0 1px 3px rgba(56,28,116,.42);padding:0 2px}
+.gfp-sub b{color:#FFE066;font-size:15px}
+.gfp-badge{display:inline-flex;align-items:center;gap:3px;margin:9px 0 0;padding:3px 12px;border-radius:999px;
+  background:linear-gradient(180deg,#FFE887,#FFCF3F);color:#6A4400;font-size:10.5px;font-weight:900;
+  box-shadow:0 3px 9px rgba(52,26,110,.3);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gfp-stage{position:relative;height:168px;margin:2px 0 0;display:flex;align-items:flex-end;justify-content:center}
+.gfp-ray{position:absolute;left:50%;bottom:6px;width:190px;height:150px;margin-left:-95px;pointer-events:none;
+  background:radial-gradient(circle at 50% 62%,rgba(255,248,196,.95),rgba(255,236,148,.4) 44%,rgba(255,230,120,0) 72%);
+  animation:gfpGlow 2.8s ease-in-out infinite}
+@keyframes gfpGlow{0%,100%{opacity:.6;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
+.gfp-gem{position:absolute;left:50%;top:-2px;margin-left:-43px;width:86px;height:86px;z-index:3;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:gfpFloat 2.4s ease-in-out infinite}
+@keyframes gfpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.gfp-gem .gi{font-size:34px;line-height:1;font-style:normal;filter:drop-shadow(0 4px 9px rgba(38,18,86,.5))}
+.gfp-gem b{font-size:17px;font-weight:900;color:#FFFBE6;letter-spacing:-.4px;line-height:1.1;
+  text-shadow:0 2px 0 rgba(66,36,150,.62),0 5px 13px rgba(38,18,86,.55)}
+.gfp-box{position:relative;z-index:2;width:132px;height:132px;display:grid;place-items:center}
+.gfp-box svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 14px rgba(42,20,92,.42))}
+.gfp-cf{position:absolute;top:-12px;width:7px;height:9px;opacity:0;animation:gfpFall 2.4s linear infinite}
+@keyframes gfpFall{0%{opacity:0;transform:translateY(-8px) rotate(0)}14%{opacity:1}
+  100%{opacity:0;transform:translateY(186px) rotate(430deg)}}
+.gfp-ok{display:block;width:100%;margin-top:8px;height:50px;border:0;border-radius:16px;font-family:inherit;
+  font-size:17px;font-weight:900;letter-spacing:-.3px;color:#6B4400;cursor:pointer;
+  background:linear-gradient(180deg,#FFEF9E,#FFCD33);box-shadow:0 5px 0 #DDA400,0 10px 20px rgba(52,26,110,.3)}
+.gfp-ok:active{transform:translateY(3px);box-shadow:0 2px 0 #DDA400}
+@media (max-height:660px){
+  .gfp-stage{height:142px} .gfp-box{width:108px;height:108px} .gfp-gem{width:76px;height:76px;margin-left:-38px}
+  .gfp-gem .gi{font-size:29px} .gfp-ttl{font-size:20px}
+}
 
 @media (max-width:430px){
   .pg-title{font-size:11.5px;padding:2px 9px}
@@ -1767,7 +1836,7 @@ body.pg-open{overflow:hidden!important}
   .pgz-txt{font-size:9.5px}
   .pg-lbl{font-size:8.5px;padding:0 5px}
   .pgd-grid{grid-template-columns:repeat(4,1fr);gap:5px}
-  .pgd-grid.bld{grid-template-columns:repeat(3,1fr)}
+  .pgd-grid.bld{grid-template-columns:repeat(4,1fr)}
   .pgd-thumb{height:38px}
   .pgd-nm{font-size:9px}
   .pg-bbar{gap:4px;padding:4px 5px 4px 10px}
@@ -2839,7 +2908,7 @@ function defaultState(){
     reading: {},
     avatars: {},
     mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
-    shop: { bonus:{}, spent:{}, unlocked:{} },
+    shop: { bonus:{}, spent:{}, unlocked:{}, pendingGift:{} },
     playground: {},                              /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 */
     pgBuilds: {},                                /* 🏡 놀이터에 직접 지은 집·건물 */
     sched: { date: t, items: [] },
@@ -3021,7 +3090,8 @@ function normalizeState(raw){
     var list = arr.filter(function(x){ return typeof x === 'string' && x; });
     if (list.length) shopUnlocked[k] = list;
   });
-  out.shop = { bonus: shopNum(shopRaw.bonus), spent: shopNum(shopRaw.spent), unlocked: shopUnlocked };
+  out.shop = { bonus: shopNum(shopRaw.bonus), spent: shopNum(shopRaw.spent), unlocked: shopUnlocked,
+               pendingGift: shopNum(shopRaw.pendingGift) };   /* 🎁 부모가 보낸 미수령 선물 */
   /* 착용 캐릭터 — 저장값이 없거나 미보유면 보유한 아이템을 우선 (배경 기본값은 무료 'none') */
   var avs = {};
   KIDS.forEach(function(id){
@@ -3803,14 +3873,37 @@ function requireParentPin(run){
   if (parentAuthed()){ run(); return; }
   ppinOpen('unlock', run);
 }
-/* 부모 PIN을 통과한 뒤 실제 포인트 조정 */
+/* 부모가 보낸 미수령 선물 (상점을 누를 때 선물상자로 열린다) */
+function giftPendAmt(kid){
+  return Number(((shopRaw().pendingGift || {})[kid])) || 0;
+}
+/* 부모 PIN을 통과한 뒤 실제 포인트 조정
+   · ＋1P 는 바로 bonus 에 넣지 않고 '도착한 선물'로 쌓아 둔다 → 아이가 상점을 누르면 선물상자가 열린다
+   · －1P 는 아직 안 받은 선물에서 먼저 빼고, 없으면 bonus 에서 뺀다 */
 function applyPointBonus(kid, delta){
   var nm = (FAMILY[kid] || {}).name || '';
+  var sent = 0;
   mutate(function(s){
-    s.shop = s.shop || {}; s.shop.bonus = s.shop.bonus || {};
-    s.shop.bonus[kid] = (Number(s.shop.bonus[kid]) || 0) + delta;
+    s.shop = s.shop || {};
+    s.shop.bonus = s.shop.bonus || {};
+    s.shop.pendingGift = s.shop.pendingGift || {};
+    if (delta > 0){
+      s.shop.pendingGift[kid] = (Number(s.shop.pendingGift[kid]) || 0) + delta;
+      sent = s.shop.pendingGift[kid];
+    } else if (delta < 0){
+      var pend = Number(s.shop.pendingGift[kid]) || 0;
+      if (pend > 0){
+        pend = pend + delta;
+        if (pend > 0) s.shop.pendingGift[kid] = pend;
+        else delete s.shop.pendingGift[kid];
+      } else {
+        s.shop.bonus[kid] = (Number(s.shop.bonus[kid]) || 0) + delta;
+      }
+    }
   });
-  toast(delta > 0 ? ('💎 ' + nm + '에게 +1P 선물했어요') : ('💎 ' + nm + ' 포인트를 1P 줄였어요'), 2000);
+  toast(delta > 0
+    ? ('🎁 ' + nm + '에게 1P 선물을 보냈어요! 상점을 누르면 선물상자가 열려요')
+    : ('💎 ' + nm + ' 포인트를 1P 줄였어요'), delta > 0 ? 3400 : 2000);
   renderAvatarSheet(); renderKids();
 }
 function avShopCard(kind, key, label, inner, kid, av){
@@ -3818,13 +3911,12 @@ function avShopCard(kind, key, label, inner, kid, av){
   var paid = avPaid(kid, kind, key) && !avIsFree(kind, key);   /* 1P 주고 산 아이템만 취소 가능 */
   return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
     + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? ' (보유)' : ' · 💎 1P') + '">'
-    + (has ? '' : '<span class="av-card-pr">💎 1P</span>')
     + inner
     + '<span class="av-card-n">' + esc(label) + '</span>'
     + (has
         ? '<span class="av-own">보유 ✓</span>'
-          + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="엄마·아빠 PIN으로 구매를 취소할 수 있어요">🔒 구매 취소</button>' : '')
-        : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '">1P로 구매</button>')
+          + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="엄마·아빠 PIN으로 구매를 취소할 수 있어요">🔒 취소</button>' : '')
+        : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '" title="💎 1P로 구매">1P로 구매</button>')
     + '</div>';
 }
 /* 상점에서 실제로 구매해 둔 아이템인지 (무료 기본값 'none' 등은 제외) */
@@ -3976,6 +4068,114 @@ function gftReveal(el, kid, kind, key){
   } catch(e){}
   setTimeout(function(){ try { if (typeof confetti === 'function') confetti(26); } catch(e){} }, 60);
 }
+/* ============================================================
+   🎁 선물 도착 → 상점을 누르면 뜨는 '선물상자 1P 획득' 축하 팝업
+   · 부모가 ＋1P 를 주면 shop.pendingGift 에 쌓이고,
+     아이(또는 누구든)가 상점을 여는 순간 이 팝업이 뜬다.
+   · 확인을 누를 때 한 번만 실제 포인트(bonus)로 옮긴다 → 중복 적립 없음
+   ============================================================ */
+var gfpState = null;
+function gfpSvg(){
+  return '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<defs>'
+    + '<linearGradient id="gfpB" x1="0" y1="0" x2="0" y2="1">'
+    +   '<stop offset="0" stop-color="#FEFCFF"/><stop offset="1" stop-color="#D3C3F7"/></linearGradient>'
+    + '<linearGradient id="gfpL" x1="0" y1="0" x2="0" y2="1">'
+    +   '<stop offset="0" stop-color="#FFF3C4"/><stop offset="1" stop-color="#FFCB3D"/></linearGradient>'
+    + '<radialGradient id="gfpG" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="0" stop-color="#FFFDE6" stop-opacity=".95"/><stop offset="1" stop-color="#FFE98C" stop-opacity="0"/></radialGradient>'
+    + '</defs>'
+    + '<ellipse cx="70" cy="126" rx="36" ry="5.5" fill="#2C1660" opacity=".3"/>'
+    + '<ellipse cx="70" cy="64" rx="46" ry="27" fill="url(#gfpG)"/>'
+    + '<g transform="rotate(-14 62 74)">'
+    +   '<rect x="31" y="56" width="56" height="16" rx="5" fill="url(#gfpL)" stroke="#4A2C9E" stroke-width="4"/>'
+    +   '<rect x="55" y="56" width="10" height="16" fill="#FFB300" stroke="#4A2C9E" stroke-width="3"/>'
+    + '</g>'
+    + '<path d="M30 76 h80 v10 H30 Z" fill="#8E74D8" stroke="#4A2C9E" stroke-width="4" stroke-linejoin="round"/>'
+    + '<path d="M30 84 h80 v34 a9 9 0 0 1 -9 9 H39 a9 9 0 0 1 -9 -9 Z" fill="url(#gfpB)" stroke="#4A2C9E" stroke-width="4.5" stroke-linejoin="round"/>'
+    + '<rect x="63" y="84" width="14" height="43" fill="#FFD24D" stroke="#4A2C9E" stroke-width="3.4"/>'
+    + '<path d="M63 88 q-18 -2 -24 8 q-4 7 3 10" fill="none" stroke="#FFC93C" stroke-width="5" stroke-linecap="round"/>'
+    + '<path d="M77 88 q18 -2 24 8 q4 7 -3 10" fill="none" stroke="#FFC93C" stroke-width="5" stroke-linecap="round"/>'
+    + '<rect x="38" y="94" width="7" height="15" rx="3.5" fill="#fff" opacity=".6"/>'
+    + '<path d="M114 26 l2.6 6.4 6.4 2.6 -6.4 2.6 -2.6 6.4 -2.6 -6.4 -6.4 -2.6 6.4 -2.6z" fill="#FFF7C4"/>'
+    + '<path d="M26 44 l2 4.8 4.8 2 -4.8 2 -2 4.8 -2 -4.8 -4.8 -2 4.8 -2z" fill="#FFF7C4" opacity=".9"/>'
+    + '</svg>';
+}
+function gfpClose(){
+  var el = document.getElementById('gfp');
+  if (!el) return;
+  gfpState = null;
+  el.classList.remove('on');
+  setTimeout(function(){ try { if (el.parentNode) el.parentNode.removeChild(el); } catch(e){} }, 260);
+}
+function giftBoxPopup(kid, amount){
+  try {
+    var n = Number(amount) || 0;
+    if (n <= 0) return;
+    var old = document.getElementById('gfp');
+    if (old){ try { if (old.parentNode) old.parentNode.removeChild(old); } catch(e){} }
+    var fam = (typeof FAMILY !== 'undefined' && FAMILY[kid]) ? FAMILY[kid] : {};
+    var who = fam.name || '우리 아이';
+    gfpState = { kid: kid, n: n, done: false };
+    var el = document.createElement('div');
+    el.className = 'gfp';
+    el.id = 'gfp';
+    var stars = '', cfs = '';
+    var st = [[7,5,11],[79,8,9],[13,15,8],[87,20,12],[45,3,9],[92,58,8],[5,62,9],[70,46,7]];
+    for (var i = 0; i < st.length; i++){
+      stars += '<i class="gfp-sp" style="left:' + st[i][0] + '%;top:' + st[i][1] + '%;font-size:' + st[i][2]
+        + 'px;animation-delay:' + (i * 0.26).toFixed(2) + 's">✦</i>';
+    }
+    var cols = ['#FFE066','#FFFFFF','#9BE7C4','#FFB6CB','#C9B6F0','#7FE3F0'];
+    for (var j = 0; j < 22; j++){
+      cfs += '<i class="gfp-cf" style="left:' + (Math.random() * 95).toFixed(1) + '%;background:' + cols[j % cols.length]
+        + ';animation-delay:' + (Math.random() * 2.2).toFixed(2) + 's;border-radius:' + (Math.random() < .4 ? '50%' : '2px') + '"></i>';
+    }
+    el.innerHTML = '<div class="gfp-card">' + stars
+      + '<div class="gfp-ttl">축하합니다!</div>'
+      + '<div class="gfp-sub">선물상자에서 <b>' + n + 'P</b>를 획득하셨습니다!</div>'
+      + '<div class="gfp-badge">🎁 ' + esc(who) + '의 선물</div>'
+      + '<div class="gfp-stage"><div class="gfp-ray"></div>'
+      +   '<div class="gfp-box">' + gfpSvg() + '</div>'
+      +   '<div class="gfp-gem"><i class="gi">💎</i><b>+' + n + 'P</b></div>'
+      +   cfs + '</div>'
+      + '<button class="gfp-ok" type="button">확인</button>'
+      + '</div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('on'); });
+    gftPop();
+    setTimeout(function(){ try { if (typeof confetti === 'function') confetti(28); } catch(e){} }, 130);
+    el.addEventListener('click', function(ev){
+      var t = ev.target;
+      if (t && t.closest && t.closest('.gfp-ok')) giftPendingClaim();
+    });
+  } catch(e){ console.warn('[dashboard] 선물상자 팝업:', e && e.message); }
+}
+/* 확인 — 대기 중인 선물을 한 번만 실제 포인트로 옮긴다 */
+function giftPendingClaim(){
+  if (!gfpState || gfpState.done) return;
+  gfpState.done = true;
+  var kid = gfpState.kid, n = gfpState.n, got = 0;
+  mutate(function(s){
+    s.shop = s.shop || {};
+    s.shop.bonus = s.shop.bonus || {};
+    s.shop.pendingGift = s.shop.pendingGift || {};
+    var pend = Number(s.shop.pendingGift[kid]) || 0;
+    got = Math.min(n, pend);
+    if (got > 0){
+      s.shop.bonus[kid] = (Number(s.shop.bonus[kid]) || 0) + got;
+      if (pend - got > 0) s.shop.pendingGift[kid] = pend - got;
+      else delete s.shop.pendingGift[kid];
+    }
+  });
+  gftChime();
+  try { if (typeof confetti === 'function') confetti(24); } catch(e){}
+  if (avatarDraft && avatarDraft.kid === kid) renderAvatarSheet();
+  renderKids();
+  gfpClose();
+  if (got > 0) toast('💎 선물상자에서 ' + got + 'P를 받았어요!', 2400);
+}
+
 /* ↩ 구매 취소(삭제) — 1P 환불 + 착용·놀이터 배치까지 함께 정리 (호출 전 부모 PIN 통과 필요) */
 function avRefund(kid, kind, key){
   if (!state) return false;
@@ -5526,7 +5726,9 @@ function kidProfileHtml(id){
     + '<div class="prof-foot">'
     +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
     +   '<span class="prof-btns">'
-    +     '<button class="prof-edit prof-shop" type="button" data-act="avatar-open" data-m="' + id + '" title="캐릭터·배경·꾸미기 상점">🛍️ 상점</button>'
+    +     '<button class="prof-edit prof-shop' + (giftPendAmt(id) > 0 ? ' gift' : '') + '" type="button" data-act="avatar-open" data-m="' + id + '" title="'
+    +       (giftPendAmt(id) > 0 ? '🎁 선물 도착! 눌러서 선물상자를 열어요' : '캐릭터·배경·꾸미기 상점') + '">'
+    +       (giftPendAmt(id) > 0 ? '🎁 선물 도착!' : '🛍️ 상점') + '</button>'
     +     '<button class="prof-edit prof-play" type="button" data-act="playground-open" data-m="' + id + '" title="상점에서 산 캐릭터가 노는 자연 놀이터">🌳 놀이터</button>'
     +   '</span>'
     + '</div>';
@@ -7003,6 +7205,9 @@ function openAvatarSheet(id){
   renderAvatarSheet();
   var sh = $('#sheet'); if (sh) sh.hidden = false;
   var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '캐릭터 꾸미기와 상점');
+  /* 🎁 부모가 보낸 선물이 도착해 있으면, 상점을 여는 이 순간 선물상자가 열린다 */
+  var pgift = giftPendAmt(id);
+  if (pgift > 0) setTimeout(function(){ giftBoxPopup(id, pgift); }, 230);
 }
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
@@ -7067,6 +7272,7 @@ function renderAvatarSheet(){
     + topHtml
     + '<div class="av-ptbar">'
     +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
+    +   (giftPendAmt(kid) > 0 ? '<span class="av-ptgift" title="상점을 열면 선물상자가 열려요">🎁 선물 도착! +' + giftPendAmt(kid) + 'P</span>' : '')
     +   '<span class="av-ptunit">1개 = 💎 1P</span>'
     +   '<span class="av-ptown">👗 보유한 아이템: ' + (ownCount ? ownCount + '개' : '없음') + '</span>'
     +   '<span class="av-ptlock">🔒 엄마·아빠 전용</span>'
