@@ -12103,6 +12103,445 @@ async function finishBoot(){
     g.add(pgBox(0.5, 0.06, 0.3, '#BFE6FA', 1.05, 0.42, -0.3));
     return g;
   }
+  /* ============================================================
+     ✨ 나라 기본 풍경 소품 — 🏖️ 바닷가 · 🌲 숲속캠핑 · ❄️ 겨울나라
+     ============================================================ */
+  /* 🛏 선베드 (파라솔 세트 안에서 함께 쓴다) */
+  function pgLounger(g, lx, lz, ry, col){
+    var b = new THREE.Group(); b.position.set(lx, 0, lz); b.rotation.y = ry || 0;
+    [[-0.24, -0.54], [0.24, -0.54], [-0.24, 0.54], [0.24, 0.54]].forEach(function(p){
+      b.add(pgCyl(0.024, 0.024, 0.3, '#E7D6BE', p[0], 0.14, p[1], 5));
+    });
+    b.add(pgBox(0.64, 0.09, 1.36, '#FFFDF8', 0, 0.31, 0));
+    b.add(pgBox(0.58, 0.08, 1.24, col, 0, 0.38, 0.04));
+    var back = pgBox(0.62, 0.52, 0.08, '#FFFDF8', 0, 0.52, -0.6);
+    back.rotation.x = -0.5; b.add(back);
+    var bc = pgBox(0.56, 0.44, 0.07, col, 0, 0.535, -0.585);
+    bc.rotation.x = -0.5; b.add(bc);
+    g.add(b); return b;
+  }
+  /* 🌂 8갈래 줄무늬 비치파라솔 + 선베드·타월 세트 */
+  function pgBeachSet(x, z, col, ry, style){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    g.add(pgBox(2.2, 0.03, 2.1, '#FBF0D8', 0, 0.02, 0));
+    g.add(pgCyl(0.045, 0.05, 2.05, '#F0E4CE', 0, 1.02, 0, 6));
+    g.add(pgCyl(0.17, 0.21, 0.08, '#E7D6BE', 0, 0.04, 0, 8));
+    for (var i = 0; i < 8; i++){
+      var w = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 1.04, 0.5, 2, 1, true,
+                i * Math.PI / 4, Math.PI / 4), pgM(i % 2 ? '#FFFFFF' : col));
+      w.position.set(0, 1.96, 0); g.add(w);
+    }
+    g.add(pgSph(0.075, col, 0, 2.25, 0, 8));
+    for (var k = 0; k < 8; k++){
+      var a = k * Math.PI / 4 + Math.PI / 8;
+      g.add(pgSph(0.06, k % 2 ? col : '#FFFDF6', Math.cos(a) * 1.02, 1.74, Math.sin(a) * 1.02, 6));
+    }
+    if (style === 0){
+      pgLounger(g, -0.72, 0.72, 0.2, col);
+      pgLounger(g, 0.72, 0.86, 0.2, '#FFFDF8');
+      g.add(pgCyl(0.2, 0.22, 0.34, '#EADFCB', 0, 0.17, -0.74, 8));
+      g.add(pgCyl(0.05, 0.05, 0.16, col, 0.06, 0.42, -0.74, 6));
+      g.add(pgBox(0.03, 0.14, 0.02, '#96E2C3', 0.08, 0.5, -0.78));
+    } else if (style === 1){
+      pgLounger(g, -0.64, 0.62, 0.18, col);
+      for (var t = 0; t < 4; t++){
+        g.add(pgBox(0.92, 0.02, 0.18, t % 2 ? '#FFFFFF' : col, 0.74, 0.028, 0.42 + t * 0.21));
+      }
+      g.add(pgSph(0.14, '#FFE39B', 0.62, 0.15, 1.26, 8));
+    } else {
+      for (var t2 = 0; t2 < 5; t2++){
+        g.add(pgBox(0.17, 0.02, 1.3, t2 % 2 ? '#FFFFFF' : col, -0.68 + t2 * 0.19, 0.028, 0.72));
+      }
+      var tube = pgSph(0.3, col, 0.66, 0.12, 0.66, 10);
+      tube.scale.set(1, 0.4, 1); g.add(tube);
+      var tube2 = pgSph(0.18, '#FFFDF6', 0.66, 0.12, 0.66, 9);
+      tube2.scale.set(1, 0.42, 1); g.add(tube2);
+    }
+    return g;
+  }
+  /* 🏄 서핑보드 거치대 */
+  function pgSurfBoards(x, z, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    [-0.52, 0.52].forEach(function(dx){ g.add(pgCyl(0.05, 0.06, 0.86, '#C79A6B', dx, 0.43, 0, 6)); });
+    g.add(pgBox(1.16, 0.09, 0.13, '#D9B98C', 0, 0.78, 0));
+    [[-0.3, '#9ED4F8'], [0.0, '#FFB6CB'], [0.3, '#FFE39B']].forEach(function(p, i){
+      var b = pgBox(0.26, 1.55, 0.06, p[1], p[0], 0.9, 0.06 + i * 0.05);
+      b.rotation.z = p[0] * 0.22; g.add(b);
+      var st = pgBox(0.06, 1.36, 0.062, '#FFFDF6', p[0], 0.9, 0.062 + i * 0.05);
+      st.rotation.z = p[0] * 0.22; g.add(st);
+      var fin = pgCone(0.13, 0.2, p[1], p[0], 0.14, 0.06 + i * 0.05, 4);
+      fin.rotation.x = Math.PI; g.add(fin);
+    });
+    return g;
+  }
+  /* 🛟 구명튜브 */
+  function pgTube(x, z, col){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 4;
+    var t = pgTor(0.32, 0.11, col, 0, 0.11, 0, 6.283);
+    t.rotation.x = Math.PI / 2; g.add(t);
+    for (var i = 0; i < 4; i++){
+      var a = i * Math.PI / 2 + 0.4;
+      var seg = pgTor(0.32, 0.115, '#FFFDF6', 0, 0.11, 0, 0.5);
+      seg.rotation.x = Math.PI / 2; seg.rotation.z = a; g.add(seg);
+    }
+    return g;
+  }
+  /* 🏐 비치볼 */
+  function pgBeachBall(x, z, col){
+    var g = new THREE.Group(); g.position.set(x, 0.15, z);
+    g.add(pgSph(0.15, '#FFFDF8', 0, 0, 0, 12));
+    [[0.0, col], [2.09, C.lemon], [4.18, C.mint]].forEach(function(p){
+      var s = new THREE.Mesh(new THREE.SphereGeometry(0.152, 8, 8, p[0], Math.PI / 3), pgM(p[1]));
+      g.add(s);
+    });
+    return g;
+  }
+  /* ⛺ 캠핑 텐트 4가지 — 돔 · 티피 · A프레임 · 오각 벨텐트 */
+  function pgCampTent(style, x, z, col, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    g.add(pgBox(2.1, 0.03, 2.05, '#EADFC8', 0, 0.028, 0));
+    if (style === 'dome') pgTentDome(g, col);
+    else if (style === 'tipi') pgTentTipi(g, col);
+    else if (style === 'aframe') pgTentAFrame(g, col);
+    else pgTentBell(g, col);
+    var lamp = pgSph(0.1, '#FFE9A8', 0.8, 0.44, 0.8, 8);
+    lamp.material = new THREE.MeshBasicMaterial({ color: 0xFFE9A8, transparent: true, opacity: 0.9 });
+    g.add(lamp);
+    g.add(pgCyl(0.018, 0.018, 0.4, '#C79A6A', 0.8, 0.2, 0.8, 5));
+    PG.dyn.push(function(t){ lamp.scale.setScalar(0.88 + Math.sin(t * 2.8 + x) * 0.1); });
+    return g;
+  }
+  function pgTentDome(g, col){
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(0.98, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), pgM(col));
+    dome.scale.set(1, 1.0, 1.05); dome.position.set(0, 0.02, 0); g.add(dome);
+    var band = new THREE.Mesh(new THREE.TorusGeometry(0.985, 0.028, 5, 22, Math.PI), pgM('#FFFDF6'));
+    band.position.set(0, 0.03, 0); band.rotation.y = Math.PI / 2; g.add(band);
+    var awn = pgBox(1.42, 0.05, 0.72, '#FFFDF6', 0, 0.62, 0.76); awn.rotation.x = -0.44; g.add(awn);
+    var door = new THREE.Mesh(new THREE.CircleGeometry(0.42, 14, 0, Math.PI), pgM('#FFF6E4'));
+    door.position.set(0, 0.03, 0.92); g.add(door);
+    g.add(pgBox(0.04, 0.32, 0.03, '#DCCBAE', 0, 0.2, 0.95));
+    [-0.54, 0.54].forEach(function(dx){
+      var pole = pgCyl(0.02, 0.02, 1.0, '#C79A6A', dx * 1.72, 0.56, 1.0, 5);
+      pole.rotation.z = -dx * 0.26; pole.rotation.x = -0.22; g.add(pole);
+    });
+  }
+  function pgTentTipi(g, col){
+    g.add(pgCyl(0.028, 0.028, 2.42, '#C79A6A', 0, 1.21, 0.02, 5));
+    g.add(pgCone(1.1, 2.05, col, 0, 1.02, 0, 12));
+    var front = new THREE.Mesh(new THREE.ConeGeometry(1.11, 2.07, 12, 1, true, Math.PI * 0.56, Math.PI * 0.3), pgM('#F5E6CE'));
+    front.position.set(0, 1.02, 0); g.add(front);
+    var door = pgFlag('#BE8B8B', 0.58, 0.88);
+    door.rotation.z = Math.PI; door.rotation.x = -0.26; door.position.set(0, 0.03, 0.56); g.add(door);
+    [[0.4, 2.02], [-0.4, 2.02]].forEach(function(p){
+      var pole = pgCyl(0.025, 0.025, 0.8, '#C79A6A', p[0] * 0.5, p[1] - 0.2, 0.02, 5);
+      pole.rotation.z = -p[0] * 0.55; pole.rotation.x = 0.1; g.add(pole);
+    });
+    var flag = pgFlag('#FF9FB8', 0.34, 0.26); flag.position.set(0.05, 2.4, 0.02); g.add(flag);
+    g.add(pgCyl(0.13, 0.1, 0.2, '#D9A877', 0.86, 0.1, 0.62, 9));
+    g.add(pgSph(0.13, '#9AD6A8', 0.86, 0.27, 0.62, 8));
+  }
+  function pgTentAFrame(g, col){
+    /* 두 장의 경사 천 — 폭 0.85 · 꼭대기 1.45 높이로 맞물린다 */
+    [-1, 1].forEach(function(sg){
+      var panel = pgBox(1.68, 0.06, 1.56, col, sg * 0.425, 0.725, 0);
+      panel.rotation.z = sg * 1.041; g.add(panel);
+    });
+    var ridge = pgBox(0.12, 0.1, 1.6, '#F0E0C6', 0, 1.45, 0); g.add(ridge);
+    /* 앞·뒤 박공 삼각형 */
+    [-0.78, 0.78].forEach(function(dz, i){
+      var tri = pgFlag(i === 0 ? col : '#FFF6E4', 1.68, 1.42);
+      tri.rotation.z = Math.PI; tri.position.set(0, 0.03, dz); g.add(tri);
+    });
+    /* 앞문 천 */
+    var door = pgFlag('#C98B8B', 0.62, 0.86);
+    door.rotation.z = Math.PI; door.position.set(0, 0.03, 0.8); g.add(door);
+    g.add(pgBox(0.7, 0.04, 0.05, '#C79A6A', 0, 0.05, 0.81));
+    g.add(pgCyl(0.02, 0.02, 0.92, '#C79A6A', 0.52, 0.46, 0.82, 5));
+    g.add(pgCyl(0.02, 0.02, 0.92, '#C79A6A', -0.52, 0.46, 0.82, 5));
+    /* 팩 줄 */
+    [[-0.82, 1.34], [0.82, 1.34], [-0.82, -1.34], [0.82, -1.34]].forEach(function(p){
+      g.add(pgBeam([p[0] * 0.92, 0.98, p[1] * 0.62], [p[0], 0.02, p[1]], 0.014, '#E7D3B2', 4));
+    });
+    g.add(pgCyl(0.14, 0.11, 0.22, '#D9A877', -0.94, 0.11, 0.6, 9));
+    g.add(pgSph(0.13, '#FFC9DA', -0.94, 0.3, 0.6, 8));
+  }
+  function pgTentBell(g, col){
+    var body = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 1.06, 0.9, 5), pgM(col));
+    body.position.set(0, 0.47, 0); g.add(body);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(1.24, 1.02, 5), pgM('#FFFDF6'));
+    roof.position.set(0, 1.43, 0); g.add(roof);
+    var roofTip = pgSph(0.07, col, 0, 1.98, 0, 8); g.add(roofTip);
+    g.add(pgCyl(0.03, 0.03, 0.26, '#C79A6A', 0, 2.08, 0, 5));
+    var flag = pgFlag('#FFE39B', 0.3, 0.24); flag.position.set(0.04, 2.2, 0); g.add(flag);
+    var door = pgBox(0.46, 0.66, 0.05, '#FFF6E4', 0, 0.35, 0.94); g.add(door);
+    var flap = pgBox(0.3, 0.62, 0.04, col, 0.34, 0.35, 0.95); flap.rotation.y = 0.5; g.add(flap);
+    for (var i = 0; i < 5; i++){
+      var a = i * Math.PI * 2 / 5 + Math.PI / 5;
+      g.add(pgSph(0.05, '#FFFDF6', Math.cos(a) * 1.04, 0.88, Math.sin(a) * 1.04, 6));
+    }
+    g.add(pgCyl(0.13, 0.1, 0.2, '#D9A877', -0.86, 0.1, 0.62, 9));
+    g.add(pgSph(0.13, '#C9B6F0', -0.86, 0.27, 0.62, 8));
+  }
+  /* 🪔 랜턴 걸이 기둥 */
+  function pgLanternPost(x, z){
+    var g = new THREE.Group(); g.position.set(x, 0, z);
+    g.add(pgCyl(0.05, 0.065, 2.1, '#B6875C', 0, 1.05, 0, 6));
+    g.add(pgBox(0.74, 0.05, 0.05, '#C79A6A', 0.34, 2.06, 0));
+    [[0.16, '#FFE9A8'], [0.6, '#FFD9C6']].forEach(function(p){
+      g.add(pgCyl(0.01, 0.01, 0.18, '#D9B98C', p[0], 1.95, 0, 4));
+      var bulb = pgSph(0.13, p[1], p[0], 1.79, 0, 9);
+      bulb.material = new THREE.MeshBasicMaterial({ color: new THREE.Color(p[1]), transparent: true, opacity: 0.92 });
+      g.add(bulb);
+      g.add(pgCone(0.13, 0.1, '#B98A5E', p[0], 1.68, 0, 8));
+      PG.dyn.push(function(t){ bulb.material.opacity = 0.68 + 0.26 * Math.sin(t * 2.4 + p[0] * 8); });
+    });
+    return g;
+  }
+  /* 🍽 피크닉 테이블 */
+  function pgPicnicTable(x, z, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    g.add(pgBox(1.5, 0.07, 0.8, '#D9B98C', 0, 0.62, 0));
+    [-0.52, 0.52].forEach(function(dx){
+      g.add(pgBox(0.1, 0.6, 0.12, '#C79A6A', dx, 0.31, 0.3));
+      g.add(pgBox(0.1, 0.6, 0.12, '#C79A6A', dx, 0.31, -0.3));
+    });
+    [-0.62, 0.62].forEach(function(dx){
+      g.add(pgBox(0.32, 0.07, 1.5, '#E4C69E', dx, 0.4, 0));
+      [-0.55, 0.55].forEach(function(dz){ g.add(pgBox(0.09, 0.4, 0.1, '#C79A6A', dx, 0.2, dz)); });
+    });
+    g.add(pgCyl(0.06, 0.05, 0.13, '#FFE39B', 0.3, 0.72, 0.12, 7));
+    g.add(pgCyl(0.055, 0.05, 0.12, '#FFB6CB', 0.52, 0.71, -0.14, 7));
+    return g;
+  }
+  /* 🪵 장작 더미 */
+  function pgFirewood(x, z, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    [[0, 0.12, -0.17, '#A9814F'], [0, 0.12, 0.17, '#B98A5E'], [0.02, 0.33, 0, '#A9814F']].forEach(function(p){
+      var log = pgCyl(0.12, 0.12, 0.92, p[3], p[0], p[1], p[2], 7);
+      log.rotation.z = Math.PI / 2; g.add(log);
+      var cap = pgCyl(0.1, 0.1, 0.02, '#E4C69E', p[0] + 0.47, p[1], p[2], 7);
+      cap.rotation.z = Math.PI / 2; g.add(cap);
+    });
+    [-0.4, 0.4].forEach(function(dz){
+      var st = pgCyl(0.03, 0.035, 0.7, '#B6875C', 0.5, 0.35, dz, 5); st.rotation.z = 0.1; g.add(st);
+    });
+    return g;
+  }
+  /* 🌷 통나무 화분 */
+  function pgLogPlanter(x, z){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 3;
+    g.add(pgCyl(0.26, 0.3, 0.42, '#A9814F', 0, 0.21, 0, 10));
+    g.add(pgCyl(0.21, 0.21, 0.04, '#7A5B3A', 0, 0.43, 0, 10));
+    [[0, 0, '#FFB6CB'], [0.11, 0.08, '#FFE39B'], [-0.1, 0.07, '#C9B6F0'], [0.02, -0.11, '#FFFDF6']].forEach(function(p){
+      g.add(pgCyl(0.012, 0.012, 0.12, '#7FC56A', p[0], 0.5, p[1], 4));
+      g.add(pgSph(0.075, p[2], p[0], 0.57, p[1], 7));
+    });
+    return g;
+  }
+  /* ⭐ 별 모양 메시 (크리스마스트리 꼭대기) */
+  function pgStarMesh(rOut, rIn, col, glow){
+    var sh = new THREE.Shape();
+    for (var i = 0; i < 10; i++){
+      var a = Math.PI / 2 + i * Math.PI / 5;
+      var rr = (i % 2) ? rIn : rOut;
+      var px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+      if (i === 0) sh.moveTo(px, py); else sh.lineTo(px, py);
+    }
+    sh.closePath();
+    var geo = new THREE.ExtrudeGeometry(sh, { depth: 0.1, bevelEnabled: false });
+    geo.center();
+    var mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(col) });
+    if (glow){ mat.emissive = new THREE.Color(glow); mat.emissiveIntensity = 0.85; }
+    return new THREE.Mesh(geo, mat);
+  }
+  /* 🎄 겨울나라 랜드마크 — 엄청 커다란 크리스마스 트리 (높이 약 8.3m · 바닥 지름 4.6m) */
+  function pgBigXmasTree(x, z){
+    var g = new THREE.Group(); g.position.set(x, 0, z);
+    var mound = pgSph(2.35, '#FFFFFF', 0, 0.02, 0, 14);
+    mound.scale.set(1.05, 0.15, 1.05); g.add(mound);
+    g.add(pgCyl(0.36, 0.48, 1.6, '#A87B4F', 0, 0.8, 0, 10));
+    var layers = [[2.30, 2.40, 0.85], [1.98, 2.10, 2.05], [1.62, 1.85, 3.15],
+                  [1.28, 1.60, 4.15], [0.92, 1.40, 5.05], [0.56, 1.25, 5.85]];
+    var greens = ['#3C7C4F', '#468A59', '#3C7C4F', '#4C9361', '#3C7C4F', '#57A16C'];
+    var ornCols = ['#FF6F91', '#FFD166', '#6FD3F6', '#B48CF2', '#FF9F8C', '#96E2C3'];
+    layers.forEach(function(L, i){
+      var r = L[0], h = L[1], base = L[2];
+      g.add(pgCone(r, h, greens[i], 0, base + h / 2, 0, 14));
+      g.add(pgCone(r * 0.74, h * 0.56, '#FFFFFF', 0, base + h * 0.62, 0, 14));
+      for (var k = 0; k < 5; k++){
+        var a = (k / 5) * 6.283 + i * 0.7, rr = r * 0.86;
+        g.add(pgSph(0.13 + (i % 2) * 0.02, ornCols[(k + i) % ornCols.length],
+                    Math.cos(a) * rr, base + h * 0.18, Math.sin(a) * rr, 8));
+      }
+    });
+    /* 꼭대기 황금 별 */
+    var starG = new THREE.Group(); starG.position.set(0, 7.62, 0); g.add(starG);
+    starG.add(pgStarMesh(0.62, 0.26, '#FFD84D', '#FFC02E'));
+    var s2 = pgStarMesh(0.62, 0.26, '#FFE89A', '#FFD54A'); s2.rotation.y = Math.PI / 2; starG.add(s2);
+    var starLight = new THREE.PointLight(0xFFE082, 1.05, 9);
+    starLight.position.set(0, 7.62, 0); g.add(starLight);
+    PG.dyn.push(function(t){
+      starG.rotation.y = t * 0.55;
+      starLight.intensity = 0.9 + 0.28 * Math.sin(t * 2.0);
+    });
+    /* 반짝이는 전구 가랜드 — 나무를 감아 올라간다 */
+    var bulbs = [];
+    var bulbCols = ['#FFE9A8', '#FFB6CB', '#9ED4F8', '#96E2C3', '#FFC9A3'];
+    for (var b = 0; b < 46; b++){
+      var u = b / 46;
+      var by = 1.35 + u * 5.9;
+      var br = 2.16 * (1 - u) + 0.34;
+      var ba = u * Math.PI * 2 * 5.2;
+      var bulb = pgSph(0.065, bulbCols[b % bulbCols.length], Math.cos(ba) * br, by, Math.sin(ba) * br, 6);
+      bulb.material = new THREE.MeshBasicMaterial({ color: new THREE.Color(bulbCols[b % bulbCols.length]), transparent: true, opacity: 0.95 });
+      g.add(bulb); bulbs.push(bulb);
+    }
+    PG.dyn.push(function(t){
+      for (var i = 0; i < bulbs.length; i++){
+        var k2 = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * 2.6 - i * 0.55));
+        bulbs[i].material.opacity = k2;
+        bulbs[i].scale.setScalar(0.8 + k2 * 0.4);
+      }
+    });
+    /* 트리 밑 선물상자 */
+    var giftCols = ['#FF8FA8', '#7FD1F5', '#FFD166', '#B48CF2', '#8FE0BE', '#FFA98C'];
+    [[2.05, 0.75, 0.5], [-1.95, -0.95, 0.44], [0.5, 2.3, 0.38], [-1.25, 2.05, 0.34],
+     [1.7, -1.85, 0.4], [-2.25, 1.15, 0.3], [0.1, -2.4, 0.44]].forEach(function(p, i){
+      var s2b = p[2];
+      var gg = new THREE.Group(); gg.position.set(p[0], 0, p[1]); gg.rotation.y = i * 0.8; g.add(gg);
+      gg.add(pgBox(s2b * 1.6, s2b * 1.1, s2b * 1.6, giftCols[i % giftCols.length], 0, s2b * 0.55, 0));
+      gg.add(pgBox(s2b * 0.22, s2b * 1.14, s2b * 1.62, '#FFF6E4', 0, s2b * 0.55, 0));
+      gg.add(pgBox(s2b * 1.62, s2b * 0.14, s2b * 1.64, '#FFF6E4', 0, s2b * 0.55, 0));
+      gg.add(pgSph(s2b * 0.2, '#FFE9A8', 0, s2b * 1.12, 0, 7));
+    });
+    return g;
+  }
+  /* ⛄ 눈사람 — 모자 · 목도리 · 당근코 · 단추 · 나뭇가지 팔 */
+  function pgSnowBuddy(x, z, s, style, ry){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    var b1 = pgSph(0.46 * s, '#FFFFFF', 0, 0.42 * s, 0, 14); b1.scale.set(1, 0.94, 1); g.add(b1);
+    g.add(pgSph(0.32 * s, '#FFFFFF', 0, 1.0 * s, 0, 14));
+    g.add(pgSph(0.245 * s, '#FFFFFF', 0, 1.42 * s, 0, 14));
+    var nose = pgCone(0.075 * s, 0.34 * s, '#FF8A3D', 0, 1.44 * s, 0.3 * s, 8);
+    nose.rotation.x = Math.PI / 2; g.add(nose);
+    [-0.1, 0.1].forEach(function(dx){ g.add(pgSph(0.042 * s, '#3A3A3A', dx * s, 1.5 * s, 0.2 * s, 6)); });
+    [0.86, 1.04, 1.22].forEach(function(by){ g.add(pgSph(0.038 * s, '#3A3A3A', 0, by * s, 0.3 * s, 6)); });
+    [-1, 1].forEach(function(sg){
+      g.add(pgBeam([sg * 0.28 * s, 1.12 * s, 0], [sg * 0.8 * s, 1.44 * s, sg * 0.3 * s], 0.028 * s, '#8A6238', 5));
+      g.add(pgBeam([sg * 0.58 * s, 1.3 * s, sg * 0.14 * s], [sg * 0.76 * s, 1.56 * s, sg * 0.42 * s], 0.02 * s, '#8A6238', 4));
+    });
+    var scarfCol = style === 1 ? '#B48CF2' : (style === 2 ? '#96E2C3' : '#FF8FA8');
+    g.add(pgTor(0.28 * s, 0.075 * s, scarfCol, 0, 1.18 * s, 0, 6.283));
+    var tail = pgBox(0.16 * s, 0.44 * s, 0.07 * s, scarfCol, 0.22 * s, 0.94 * s, 0.26 * s);
+    tail.rotation.z = 0.2; tail.rotation.x = -0.15; g.add(tail);
+    if (style === 0){
+      g.add(pgCyl(0.22 * s, 0.27 * s, 0.1 * s, '#E8455F', 0, 1.62 * s, 0, 10));
+      var hc = pgCone(0.22 * s, 0.42 * s, '#E8455F', 0.03 * s, 1.86 * s, 0.03 * s, 10);
+      hc.rotation.x = -0.18; g.add(hc);
+      g.add(pgSph(0.095 * s, '#FFFFFF', 0.09 * s, 2.02 * s, 0.12 * s, 8));
+    } else if (style === 1){
+      g.add(pgSph(0.265 * s, '#7FD1F5', 0, 1.6 * s, 0, 12));
+      g.add(pgCyl(0.275 * s, 0.275 * s, 0.09 * s, '#FFFDF8', 0, 1.58 * s, 0, 12));
+      g.add(pgSph(0.1 * s, '#FFFDF8', 0, 1.83 * s, 0, 8));
+    } else {
+      g.add(pgCyl(0.3 * s, 0.33 * s, 0.05 * s, '#F2DDB4', 0, 1.6 * s, 0, 12));
+      g.add(pgCyl(0.2 * s, 0.24 * s, 0.2 * s, '#DEC49B', 0, 1.72 * s, 0, 12));
+      g.add(pgTor(0.235 * s, 0.03 * s, '#96E2C3', 0, 1.64 * s, 0, 6.283));
+    }
+    [-1, 1].forEach(function(sg){
+      g.add(pgSph(0.075 * s, '#FFB6CB', sg * 0.26 * s, 0.98 * s, 0.14 * s, 7));
+    });
+    return g;
+  }
+  /* 🏠 아기 이글루 */
+  function pgSnowIgloo(x, z, s, ry){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(1.0 * s, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), pgM('#EAF6FF'));
+    dome.position.set(0, 0.02, 0); g.add(dome);
+    for (var i = 0; i < 3; i++){
+      var yy = 0.26 + i * 0.3;
+      var rr = Math.sqrt(Math.max(0.02, 1 - Math.pow(yy / (1.0 * s), 2))) * 1.0 * s + 0.006;
+      var ring = pgTor(rr, 0.02, '#CFE8F7', 0, yy, 0, 6.283);
+      ring.rotation.x = Math.PI / 2; g.add(ring);
+    }
+    var hole = new THREE.Mesh(new THREE.CircleGeometry(0.4 * s, 14, 0, Math.PI), pgM('#6E8FA6'));
+    hole.position.set(0, 0.02, 0.97 * s); g.add(hole);
+    var rim = new THREE.Mesh(new THREE.TorusGeometry(0.4 * s, 0.05 * s, 5, 12, Math.PI), pgM('#DCF3FF'));
+    rim.position.set(0, 0.02, 0.98 * s); g.add(rim);
+    return g;
+  }
+  /* 🛷 눈썰매 */
+  function pgSnowSled(x, z, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    g.add(pgBox(0.62, 0.06, 1.5, '#E8B96B', 0, 0.15, 0));
+    [-0.26, 0.26].forEach(function(dx){
+      var run = pgBox(0.06, 0.06, 1.62, '#8E6A45', dx, 0.05, 0);
+      run.rotation.x = 0.06; g.add(run);
+      var curl = pgBox(0.06, 0.24, 0.06, '#8E6A45', dx, 0.16, -0.8);
+      curl.rotation.x = -0.5; g.add(curl);
+    });
+    g.add(pgBox(0.56, 0.05, 0.1, '#FF9F8C', 0, 0.19, 0.3));
+    g.add(pgBeam([0, 0.2, -0.78], [0.3, 0.34, -1.2], 0.018, '#C79A6A', 4));
+    return g;
+  }
+  /* 🕯 겨울 가로등 · 눈꽃 기둥 */
+  function pgIceLamp(x, z, s){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z);
+    g.add(pgCyl(0.11, 0.15, 0.12, '#EAF6FF', 0, 0.06, 0, 8));
+    g.add(pgCyl(0.055, 0.07, 1.7 * s, '#F2FBFF', 0, 0.85 * s, 0, 8));
+    var bulb = pgSph(0.16 * s, '#FFF6D8', 0, 1.78 * s, 0, 10);
+    bulb.material = new THREE.MeshLambertMaterial({ color: 0xFFF6D8, emissive: new THREE.Color(0xFFE482), emissiveIntensity: 0.8 });
+    g.add(bulb);
+    for (var k = 0; k < 3; k++){
+      var bar = pgBox(0.62 * s, 0.035, 0.06, '#E8F7FF', 0, 2.0 * s, 0);
+      bar.rotation.y = k * Math.PI / 3; g.add(bar);
+    }
+    PG.dyn.push(function(t){ bulb.material.emissiveIntensity = 0.62 + 0.2 * Math.sin(t * 2.2 + x); });
+    return g;
+  }
+  /* ❄ 반짝이는 얼음 아치 */
+  function pgIceArch(x, z, ry){
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry || 0;
+    [-1.5, 1.5].forEach(function(dx){
+      var p = pgCyl(0.16, 0.22, 2.9, '#DCF3FF', dx, 1.45, 0, 8);
+      p.material = new THREE.MeshLambertMaterial({ color: 0xDCF3FF, transparent: true, opacity: 0.9,
+        emissive: new THREE.Color(0x9BD3F0), emissiveIntensity: 0.22 });
+      g.add(p);
+      g.add(pgCyl(0.26, 0.3, 0.14, '#EAF6FF', dx, 0.07, 0, 8));
+    });
+    var top = pgTor(1.5, 0.17, '#CFEBFF', 0, 2.9, 0, Math.PI); g.add(top);
+    for (var i = 0; i < 7; i++){
+      var a = i / 6 * Math.PI;
+      g.add(pgCone(0.075, 0.36, '#EAF9FF', Math.cos(a) * 1.5, 2.72 + Math.sin(a) * 1.5 - 0.14, 0, 6));
+    }
+    for (var k = 0; k < 5; k++){
+      var a2 = k / 4 * Math.PI;
+      var spark = pgSph(0.07, '#FFFDF6', Math.cos(a2) * 1.5, 2.9 + Math.sin(a2) * 1.5, 0.12, 6);
+      spark.material = new THREE.MeshBasicMaterial({ color: 0xEAF9FF, transparent: true, opacity: 0.85 });
+      g.add(spark);
+    }
+    return g;
+  }
+  /* ❄ 반짝이는 얼음 조각 기둥 */
+  function pgIceShard(x, z, s){
+    s = s || 1;
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = pgRnd() * 3;
+    [[0, 0, 1.0], [0.16, 0.1, 0.62], [-0.14, -0.12, 0.5]].forEach(function(p){
+      var sh = pgCone(0.2 * s * p[2], 1.5 * s * p[2], '#DDF2FF', p[0] * s, 0.75 * s * p[2], p[1] * s, 5);
+      sh.rotation.z = p[0] * 0.5; sh.rotation.x = -p[1] * 0.5;
+      sh.material = new THREE.MeshLambertMaterial({ color: 0xDDF2FF, transparent: true, opacity: 0.88,
+        emissive: new THREE.Color(0xB9E3F7), emissiveIntensity: 0.3 });
+      g.add(sh);
+    });
+    var fl = pgSph(0.1, '#FFFDF6', 0, 1.5 * s, 0, 6);
+    fl.material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.9 });
+    g.add(fl);
+    PG.dyn.push(function(t){ fl.scale.setScalar(0.7 + 0.5 * (0.5 + 0.5 * Math.sin(t * 3.1 + x))); });
+    return g;
+  }
   /* ---------- 🏡 동화마을 나라 ---------- */
   function pgBuildVillage(yard){
     /* 분수 광장 — 산책로 북쪽 넓은 마당 */
@@ -12159,10 +12598,23 @@ async function finishBoot(){
     [[1.6, -11.4, 1.1], [27.4, -10.8, 1.15], [3.4, 12.6, 1.0], [22.2, 15.4, 1.05]].forEach(function(p){
       if (pgPropFree(p[0], p[1], 0.8)){ yard.add(pgPalm(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.6); }
     });
-    /* 파라솔 · 선베드 */
-    [[5.5, -7.4, C.pink, 0.3], [23.2, -5.6, C.sky, -0.4], [8.6, 9.8, C.lemon, 0.7], [25.6, 8.4, C.mint, -0.2]].forEach(function(p){
-      if (pgPropFree(p[0], p[1], 1.1)){ yard.add(pgParasol(p[0], p[1], p[2], p[3])); pgSolid(p[0], p[1], 1.0); }
+    /* 🌂 비치파라솔 12개 — 기존 4자리 포함, 줄무늬 우산 + 선베드·타월·튜브 세트 */
+    [[5.5, -7.4, C.pink, 2.70, 1], [23.2, -5.6, C.lav, 3.00, 2],
+     [8.6, 9.8, C.lemon, 0.70, 1], [25.6, 8.4, C.mint, -0.20, 0],
+     [2.8, -5.2, C.peach, 2.42, 0], [8.6, -4.4, C.sky, 2.86, 2],
+     [9.6, -9.6, C.lemon, 2.18, 0], [18.4, -3.2, C.mint, 3.26, 1],
+     [21.8, -12.6, C.coral, 2.60, 0], [27.8, -6.8, C.sky, 3.00, 1],
+     [4.6, 7.4, C.coral, 0.42, 0], [18.6, 9.8, C.teal, 0.92, 1]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.45)){
+        yard.add(pgBeachSet(p[0], p[1], p[2], p[3], p[4]));
+        pgSolid(p[0], p[1], 1.15);
+      }
     });
+    /* 🏄 서핑보드 거치대 · 튜브 · 비치볼 */
+    if (pgPropFree(11.4, -13.0, 0.85)){ yard.add(pgSurfBoards(11.4, -13.0, -0.3)); pgSolid(11.4, -13.0, 0.7); }
+    if (pgPropFree(16.9, -12.4, 0.45)) yard.add(pgTube(16.9, -12.4, C.sky));
+    if (pgPropFree(11.3, -6.6, 0.35)) yard.add(pgBeachBall(11.3, -6.6, C.coral));
+    if (pgPropFree(26.4, 3.0, 0.45)) yard.add(pgTube(26.4, 3.0, C.lemon));
     /* 조개 · 불가사리 · 모래성 */
     for (var s = 0; s < 16; s++){
       var sx = -1 + pgRnd() * 30, sz = -12.5 + pgRnd() * 34;
@@ -12239,6 +12691,26 @@ async function finishBoot(){
       var rk = pgSph(0.14 + pgRnd() * 0.12, r2 % 2 ? C.stone : C.stone2, rx, 0.09, rz, 7);
       rk.scale.y = 0.6; yard.add(rk);
     }
+    /* ⛺ 기본 캠핑 텐트 5동 — 돔 · 티피 · A프레임 · 벨텐트 */
+    [[33.2, -4.4, 'dome', '#A7E7D2', -0.55], [39.8, -3.6, 'tipi', '#FFF3E0', -2.52],
+     [48.2, -6.8, 'aframe', '#FFC9A3', 0.4], [40.6, 6.6, 'bell', '#E3D4F6', 2.7],
+     [50.6, 4.2, 'dome', '#CFE9FA', 1.1]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.75)){
+        yard.add(pgCampTent(p[2], p[0], p[1], p[3], p[4]));
+        pgSolid(p[0], p[1], 1.25);
+      }
+    });
+    /* 🪔 랜턴 걸이 · 피크닉 테이블 · 장작 · 통나무 화분 */
+    if (pgPropFree(35.4, -6.2, 0.5)){ yard.add(pgLanternPost(35.4, -6.2)); pgSolid(35.4, -6.2, 0.4); }
+    if (pgPropFree(42.4, -5.6, 0.35)){ yard.add(pgLanternPost(42.4, -5.6)); pgSolid(42.4, -5.6, 0.35); }
+    if (pgPropFree(40.8, -11.8, 1.1)){ yard.add(pgPicnicTable(40.8, -11.8, 0.35)); pgSolid(40.8, -11.8, 1.0); }
+    if (pgPropFree(34.4, -11.6, 0.7)){ yard.add(pgFirewood(34.4, -11.6, 0.5)); pgSolid(34.4, -11.6, 0.55); }
+    [[32.0, -7.4], [42.2, -6.2], [38.6, -1.6], [47.4, 1.6]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.45)){ yard.add(pgLogPlanter(p[0], p[1])); pgSolid(p[0], p[1], 0.35); }
+    });
+    /* ✨ 텐트 사이 전구 줄 */
+    pgGarland(yard, [35.4, 2.04, -6.2], [42.4, 2.04, -5.6],
+              ['#FFE39B', '#FFB6CB', '#9ED4F8', '#96E2C3'], 8, 0.5);
     /* 반딧불이 */
     for (var ff = 0; ff < 10; ff++){
       var fly = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5),
@@ -12273,9 +12745,45 @@ async function finishBoot(){
       arc.add(star);
     }
     pgSolid(70, -6.5, 1.7);
+    /* 🎄 겨울나라 랜드마크 — 엄청 커다란 크리스마스 트리 (높이 약 8.3m · 바닥 지름 4.6m) */
+    if (pgPropFree(65.0, -6.0, 2.6)){
+      yard.add(pgBigXmasTree(65.0, -6.0));
+      pgSolid(65.0, -6.0, 2.5);
+    }
     /* 눈사람 */
     [[61.5, -7.5, 1.0], [66.5, 16.5, 0.9], [81, 4.5, 0.95]].forEach(function(p){
       if (pgPropFree(p[0], p[1], 1.0)){ yard.add(pgSnowman(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.8); }
+    });
+    /* ⛄ 눈사람 5명 더 — 왕눈사람 커플 · 가족 (모자 · 목도리 · 당근코 · 단추) */
+    [[62.6, -9.8, 1.45, 0, 0.5], [64.9, -11.4, 1.28, 1, -0.6],
+     [79.4, -6.6, 1.05, 2, 1.4], [61.0, 8.6, 0.95, 1, 3.6]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 1.15)){
+        yard.add(pgSnowBuddy(p[0], p[1], p[2], p[3], p[4]));
+        pgSolid(p[0], p[1], 0.9 * p[2]);
+      }
+    });
+    /* 얼음 연못 옆 눈사람 가족 — 눈더미와 겹치지 않는 자리를 골라 한 명 */
+    [[67.6, 15.4], [66.4, 13.4], [74.8, 15.6], [65.2, 17.2]].forEach(function(p){
+      if (PG.snowFamilyDone || !pgPropFree(p[0], p[1], 1.15)) return;
+      PG.snowFamilyDone = true;
+      yard.add(pgSnowBuddy(p[0], p[1], 1.15, 3, 2.2));
+      pgSolid(p[0], p[1], 1.0);
+    });
+    /* 🏠 아기 이글루 2채 */
+    if (pgPropFree(62.0, 20.0, 1.3)){ yard.add(pgSnowIgloo(62.0, 20.0, 1.0, 0.5)); pgSolid(62.0, 20.0, 1.15); }
+    if (pgPropFree(79.0, 19.6, 1.0)){ yard.add(pgSnowIgloo(79.0, 19.6, 0.85, -0.6)); pgSolid(79.0, 19.6, 0.95); }
+    /* 🛷 눈썰매 2대 */
+    [[77.8, 2.2, -0.5], [60.2, -13.4, 0.9]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.65)){ yard.add(pgSnowSled(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.5); }
+    });
+    /* 🕯 겨울 가로등 · 눈꽃 기둥 */
+    [[60.4, -15.4, 1.0], [78.2, 8.6, 1.0], [70.0, 19.0, 0.95]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.5)){ yard.add(pgIceLamp(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.4); }
+    });
+    /* ❄ 반짝이는 얼음 아치 · 얼음 조각 */
+    if (pgPropFree(76.0, -4.0, 1.9)){ yard.add(pgIceArch(76.0, -4.0, 0.25)); pgSolid(76.0, -4.0, 1.7); }
+    [[63.0, -2.6, 1.5], [67.4, -9.4, 1.15]].forEach(function(p){
+      if (pgPropFree(p[0], p[1], 0.6)){ yard.add(pgIceShard(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.45); }
     });
     /* 얼음 결정 · 눈더미 */
     for (var i = 0; i < 10; i++){
