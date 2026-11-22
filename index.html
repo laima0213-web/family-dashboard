@@ -870,14 +870,14 @@ button{font:inherit;color:inherit}
 .avd-sfr4{right:5px;bottom:20px;animation-delay:1.2s;width:14px;height:14px}
 .avd-sfr5{left:50%;top:-4px;margin-left:-6px;animation-delay:1.6s;width:13px;height:13px}
 .avd-sfr6{left:50%;bottom:2px;margin-left:-5px;animation-delay:2s;width:11px;height:11px}
-/* 캐릭터 고르기 그리드 — 11-21: 3열 → 2열 큰 카드로 확대 */
-.av-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
-.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:18px;padding:28px 7px 9px;display:flex;
-  flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+/* 캐릭터 고르기 그리드 — 11-22: 3열 복귀 + 카드 여백 줄여 그림만 크게 */
+.av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
+.av-card{border:1.5px solid #EFE3D2;background:#FFFEFB;border-radius:14px;padding:18px 4px 6px;display:flex;
+  flex-direction:column;align-items:center;gap:3px;cursor:pointer}
 .av-card.on{border-color:#5FA97A;background:#F2FBF5;box-shadow:0 3px 8px rgba(95,169,122,.2)}
-.av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.av-card-img{width:100%;height:96px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
-.av-card-n{font-size:14px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;line-height:1.25}
+.av-card-n{font-size:11.5px;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;max-width:100%;text-overflow:ellipsis;line-height:1.25}
 .av-card.on .av-card-n{color:#3E7A54}
 /* 배경 색 칩 */
 .av-bgs{display:flex;flex-wrap:wrap;gap:9px}
@@ -1426,38 +1426,40 @@ button.st{padding:0}
 .av-ptnote{flex:1 1 100%;font-size:10px;font-weight:800;color:#9C8EC0;line-height:1.35;letter-spacing:-.2px}
 .av-card{position:relative}
 .av-card.locked{background:#FCFAF5;border-style:dashed;border-color:#EADCC5}
-.av-card-pr{position:absolute;top:6px;right:6px;font-size:11px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
-  border:1px solid #E5D8F6;border-radius:999px;padding:0 8px;line-height:1.7;z-index:3}
-.av-card-img{width:100%;height:126px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.av-card-pr{position:absolute;top:4px;right:4px;font-size:9px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
+  border:1px solid #E5D8F6;border-radius:999px;padding:0 5px;line-height:1.55;z-index:3}
+.av-card-img{width:100%;height:96px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .av-card-img img{width:100%;height:100%;object-fit:contain;display:block}
-.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:14px;
+.av-card-n{position:relative;z-index:2;display:block;width:100%;text-align:center;font-size:11.5px;
   line-height:1.25;font-weight:800;color:#7A6A58;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .av-card.on .av-card-n{color:#3E7A54}
 .av-card-emoji{font-size:26px;line-height:1}
-.av-own{display:block;width:100%;text-align:center;font-size:11.5px;font-weight:900;color:#6FA97E;line-height:1.4;margin-top:auto}
+.av-own{display:block;width:100%;text-align:center;font-size:9.5px;font-weight:900;color:#6FA97E;line-height:1.4;margin-top:auto}
 .av-buy{display:block;width:100%;margin-top:auto;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
-  border-radius:999px;height:28px;font-size:12px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
+  border-radius:999px;height:21px;font-size:10px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap}
 .av-buy:active{transform:scale(.96)}
 /* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 버튼 */
 .av-refund{display:block;width:100%;margin-top:0;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
-  border-radius:999px;height:24px;font-size:11px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  border-radius:999px;height:18px;font-size:9px;font-weight:900;cursor:pointer;padding:0;line-height:1;
   white-space:nowrap;letter-spacing:-.3px}
 .av-refund:hover{background:#FDE9E4;border-color:#E3B0A5}
 .av-refund:active{transform:scale(.96);background:#FBDCD4}
 .av-grid{align-items:stretch}
-/* 배경 색도 2열 큰 칩 */
-.av-bggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
-.av-bgdot{width:82px;height:82px;border-radius:22px;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
+/* 배경 색도 3열 큰 칩 */
+.av-bggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
+.av-bgdot{width:66px;height:66px;border-radius:18px;border:2px solid #fff;box-shadow:0 0 0 1.5px #E3D6C6;display:block}
 .av-card.on .av-bgdot{box-shadow:0 0 0 2.5px #5FA97A}
 /* ✨ 꾸미기 카드 — 고른 캐릭터에 실제로 씌운 모습을 118px 프리뷰로 (위 미리보기와 같은 크기라 48종 위치 그대로) */
 .av-deco-pv{width:118px;height:118px;flex:0 0 118px;border-radius:26px;border:1px solid #F0E6D6;
   box-shadow:0 4px 10px rgba(160,140,110,.12)}
 .av-deco-pv > img{width:97%;height:97%;object-fit:contain;position:relative;z-index:1}
 .av-deco-pv .avd{animation:none!important}
+/* 3열 카드 안에서는 118px 프리뷰를 0.78배(≈92px)로 축소 — 48종 장식 위치는 그대로 */
+.av-card-img .av-deco-pv{transform:scale(.78);transform-origin:center center;flex:0 0 118px;margin:-13px}
 .av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#BCAB93;
   border:2px dashed #E7DBC9;border-radius:26px;box-shadow:none;background:linear-gradient(150deg,#FFFDF8,#F8F3EA)}
 /* 상점 시트는 여백을 살짝 줄여 카드 가로폭 확보 */
-.sheet-card:has(.av-grid),.sheet-card:has(.av-bggrid){padding-left:10px;padding-right:10px}
+.sheet-card:has(.av-grid),.sheet-card:has(.av-bggrid){padding-left:8px;padding-right:8px}
 .av-lab-note{margin-left:4px;font-size:9.5px;font-weight:900;color:#8A72C0;background:#F4EFFE;
   border-radius:999px;padding:1px 6px}
 .avtab i{font-style:normal;font-size:9px;font-weight:900;color:#B79BE0;margin-left:2px}
@@ -1537,11 +1539,11 @@ button.st{padding:0}
   .av-ptbar{padding:4px 8px;margin:1px 0 3px;border-radius:10px}
   .av-ptbig{font-size:12px}
   .av-ptnote{font-size:9px}
-  .av-card-img{height:134px}
-  .av-card-n{font-size:14.5px}
-  .av-buy{height:28px;font-size:12px}
-  .av-own{font-size:11.5px}
-  .av-refund{height:24px;font-size:11px}
+  .av-card-img{height:102px}
+  .av-card-n{font-size:11.5px}
+  .av-buy{height:21px;font-size:10px}
+  .av-own{font-size:9.5px}
+  .av-refund{height:18px;font-size:9px}
 }
 /* 390px 모바일 — 문제집 입력 줄이 잘리지 않게 두 줄 배치 */
 @media (max-width:430px){
