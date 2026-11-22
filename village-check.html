@@ -12796,11 +12796,12 @@ async function finishBoot(){
     /* 기둥 · 도리 · 박공지붕 */
     [-0.76, 0.76].forEach(function(pz){ g.add(pgBox(0.13, 1.56, 0.13, '#C08F62', 0, 0.98, pz)); });
     g.add(pgBox(1.0, 0.08, 0.08, '#B6875C', 0, 1.7, 0));
-    [-1, 1].forEach(function(sg){
-      var rp = pgBox(0.88, 0.07, 1.72, sg > 0 ? '#FFB6CB' : '#F7A0BB', sg * 0.37, 1.86, 0);
-      rp.rotation.z = -sg * 0.5; g.add(rp);
-    });
-    g.add(pgBox(0.14, 0.1, 1.76, '#FFD9E6', 0, 2.06, 0));
+    /* 4각 파스텔 지붕 (모서리가 정면으로) */
+    var wroof = new THREE.Mesh(new THREE.ConeGeometry(1.06, 0.78, 4), pgM('#FFB6CB'));
+    wroof.position.set(0, 1.98, 0); wroof.rotation.y = 0.1; g.add(wroof);
+    var wtrim = new THREE.Mesh(new THREE.ConeGeometry(1.12, 0.1, 4), pgM('#FFF6E6'));
+    wtrim.position.set(0, 1.62, 0); wtrim.rotation.y = 0.1; g.add(wtrim);
+    g.add(pgSph(0.075, C.lemon, 0, 2.4, 0, 7));
     g.add(pgSph(0.07, C.lemon, 0, 2.14, 0.9, 7));
     /* 두레박 · 손잡이 */
     g.add(pgCyl(0.018, 0.018, 0.42, '#D8B183', 0, 1.56, 0, 5));
@@ -13148,6 +13149,14 @@ async function finishBoot(){
       plz.add(pgSph(0.075, [C.pink, C.lemon, C.white, C.lav][i % 4],
              -20 + Math.cos(ea) * 4.48, 0.14, -9.0 + Math.sin(ea) * 4.48, 6));
     }
+    /* 광장 바닥 꽃다발 — 안쪽 테두리 둘레 12곳 */
+    for (i = 0; i < 12; i++){
+      var fa2 = i / 12 * Math.PI * 2 + 0.12;
+      var fxx = -20 + Math.cos(fa2) * 2.75, fzz = -9.0 + Math.sin(fa2) * 2.75;
+      plz.add(pgSph(0.09, [C.pink, C.lemon, C.white, C.lav][i % 4], fxx, 0.1, fzz, 6));
+      plz.add(pgSph(0.065, [C.lemon, C.white, C.pink, C.mint][i % 4], fxx + 0.12, 0.09, fzz + 0.08, 6));
+      plz.add(pgSph(0.055, [C.white, C.lav, C.lemon, C.pink][i % 4], fxx - 0.1, 0.09, fzz + 0.1, 6));
+    }
     /* 시계탑 → 꽃 아치로 이어지는 축제 가랜드 */
     [-0.66, 0.66].forEach(function(gx3){
       pgGarland(plz, [gx3, 3.5, -9.0], [gx3 * 1.42, 3.16, -3.95], [C.pink, C.lemon, C.mint, C.white], 8, 0.28);
@@ -13241,13 +13250,13 @@ async function finishBoot(){
       var cg = new THREE.Group(); cg.position.set(-7.2, 0, -5.4); cg.rotation.y = 2.5;
       pgCart(cg, 0, 0, 0.2, 'balloon'); return cg;
     });
-    pgVilAdd(yard, -20.4, 12.2, 0.85, 1.1, function(){
-      var cg = new THREE.Group(); cg.position.set(-20.4, 0, 12.2); cg.rotation.y = 0.3;
+    pgVilAdd(yard, -22.9, 13.0, 0.85, 1.1, function(){
+      var cg = new THREE.Group(); cg.position.set(-22.9, 0, 13.0); cg.rotation.y = 0.9;
       pgCart(cg, 0, 0, 0, 'candy'); return cg;
     });
     /* 📮 우체통 · 🪧 안내 게시판 · 이정표 */
     pgVilAdd(yard, -4.4, -4.8, 0.35, 0.5, function(){ return pgVilMailbox(-4.4, -4.8, -0.5); });
-    pgVilAdd(yard, -20, -13.6, 0.62, 0.85, function(){ return pgVilNotice(-20, -13.6, 0); });
+    pgVilAdd(yard, -24.2, -13.6, 0.62, 0.85, function(){ return pgVilNotice(-24.2, -13.6, 0.25); });
     pgVilAdd(yard, -22.2, -3.4, 0.3, 0.45, function(){ return pgVilSignpost(-22.2, -3.4, 0.4); });
     /* 🌷 화분 · 🏮 요정 랜턴 — 광장 주변 */
     [[-21.7, -4.1, 'tul'], [-13.0, -7.6, 'tul'], [-27.2, -7.6, 'hyd'],
@@ -13258,7 +13267,7 @@ async function finishBoot(){
       pgVilAdd(yard, p10[0], p10[1], 0.28, 0.42, function(){ return pgVilLantern(p10[0], p10[1], p10[2]); });
     });
     /* 🌼 파스텔 픽킷 울타리 — 광장 뒤 · 북쪽 뒤뜰 */
-    yard.add(pgVilPicket(-20, -14.9, 0, 14));
+    yard.add(pgVilPicket(-19.6, -14.9, 0, 12));
     yard.add(pgVilPicket(-24.8, 16.6, 0, 10));
     /* 🌷 화단 3곳 */
     pgVilAdd(yard, -28.9, 5.4, 0.9, 1.1, function(){ return pgVilBed(-28.9, 5.4, 0.85, 'tulip'); });
