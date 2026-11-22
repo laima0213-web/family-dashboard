@@ -1443,9 +1443,8 @@ button.st{padding:0}
 .av-card{position:relative}
 /* 미보유 카드 — 사진 1의 '미보유'처럼 한 톤 연하게 (그림만 흐리게, 글씨·버튼은 또렷하게) */
 .av-card.locked{background:#FCFBF6;border-color:#EFE7D9}
-.av-card.locked .av-card-img img,
-.av-card.locked .av-deco-pv,
-.av-card.locked .av-bgdot{opacity:.52}
+.av-card.locked .av-card-img img{opacity:.5}
+.av-card.locked .av-deco-pv{opacity:.8}
 .av-card.locked .av-card-n{color:#A2947F}
 .av-card-pr{position:absolute;top:3px;right:3px;font-size:7.5px;font-weight:900;color:#7B5AA6;background:#F3ECFD;
   border:1px solid #E5D8F6;border-radius:999px;padding:0 3px;line-height:1.5;z-index:3}
@@ -1481,7 +1480,7 @@ button.st{padding:0}
    — 카드 프리뷰는 overflow:hidden 이라 top:-7px 이면 왕관 윗부분이 잘려 top:0 으로 올린다 */
 .av-deco-pv .avd-crown{transform:translateX(-50%);top:0}
 /* 4열 카드 안에서는 118px 프리뷰를 0.60배(≈71px)로 축소 — 48종 장식 위치는 그대로 */
-.av-card-img .av-deco-pv{transform:scale(.60);transform-origin:center center;flex:0 0 118px;margin:-24px}
+.av-card-img .av-deco-pv{transform:scale(.62);transform-origin:center center;flex:0 0 118px;margin:-23px}
 .av-deco-none{display:grid;place-items:center;font-size:44px;font-weight:900;color:#BCAB93;
   border:2px dashed #E7DBC9;border-radius:26px;box-shadow:none;background:linear-gradient(150deg,#FFFDF8,#F8F3EA)}
 /* 상점 시트는 여백을 살짝 줄여 카드 가로폭 확보 */
