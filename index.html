@@ -286,6 +286,10 @@ button{font:inherit;color:inherit}
 .rd .rtx{margin-left:0}
 .rd-empty{font-size:12px;font-weight:800;color:var(--faint);text-align:center;padding:9px 6px;
   background:#FFFCF6;border:1px dashed #EFE3D2;border-radius:12px}
+.rd-hint{margin:6px 0 0;font-size:10.5px;font-weight:800;color:#9178BD;background:#F8F3FF;
+  border:1px solid #EBDDFB;border-radius:9px;padding:4px 8px;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-hint b{color:#7B5AA6;font-weight:900}
 .rd-add{display:flex;gap:4px;margin-top:5px}
 .rd-add input{min-width:0;height:var(--inp-h);border:1px dashed #DFD0BB;background:#FFFDF8;border-radius:10px;
   padding:0 8px;font-size:12.5px;font-family:inherit;color:var(--ink)}
@@ -1537,13 +1541,14 @@ button.st{padding:0}
 .cdx-sbody{flex:1 1 auto;min-width:0;display:block}
 .cdx-sbody b{display:block;font-size:9.5px;font-weight:900;color:#5E4E86;letter-spacing:-.3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
-.cdx-sbody small{display:block;font-size:7.5px;font-weight:800;color:#A79CB8;letter-spacing:-.2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.cdx-sbody small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:7.5px;font-weight:800;color:#A79CB8;letter-spacing:-.2px;line-height:1.28}
 .cdx-sbar{display:block;height:4px;border-radius:999px;background:#EFE9F7;margin-top:2px;overflow:hidden}
 .cdx-sbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#B79BE0,#7FD6CE)}
 .cdx-set.done .cdx-sbar i{background:linear-gradient(90deg,#7ED9A4,#FFD45C)}
 .cdx-snum{font-size:8.5px;font-weight:900;color:#8A72C0;white-space:nowrap;flex:0 0 auto}
 .cdx-sdone{font-size:9.5px;line-height:1;flex:0 0 auto}
+.cdx-sx{font-style:normal;font-size:7px;font-weight:900;color:#B4611A;margin-left:1px;vertical-align:top}
 .cdx-empty{padding:16px 10px;text-align:center;border:1.5px dashed #E6DAF5;border-radius:14px;
   background:#FCFAFF;font-size:12px;font-weight:900;color:#8A7CA6;line-height:1.65}
 .cdx-empty small{font-size:10.5px;font-weight:800;color:#A99FBE}
@@ -1910,6 +1915,8 @@ body.pg-open{overflow:hidden!important}
 .gfp-sub{font-size:13px;font-weight:900;color:#fff;letter-spacing:-.3px;line-height:1.45;
   text-shadow:0 1px 3px rgba(56,28,116,.42);padding:0 2px}
 .gfp-sub b{color:#FFE066;font-size:15px}
+.gfp-sub .gfp-bk{display:inline-block;max-width:222px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;vertical-align:bottom}
 .gfp-badge{display:inline-flex;align-items:center;gap:3px;margin:9px 0 0;padding:3px 12px;border-radius:999px;
   background:linear-gradient(180deg,#FFE887,#FFCF3F);color:#6A4400;font-size:10.5px;font-weight:900;
   box-shadow:0 3px 9px rgba(52,26,110,.3);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4077,7 +4084,8 @@ function avItemLabel(kind, key){
 /* ============================================================
    12-0e. 📖 테마별 수집 도감 · 🔥 연속 공부 미션 · 🎁 3상자 깜짝 뽑기
    · 도감: 상점 유료 품목(캐릭터·꾸미기·집·마을·배경)을 모은 만큼 채워진다
-   · 세트: 7개 테마 세트를 완성하면 선물상자 1개가 자동으로 도착 (세트당 1번)
+   · 세트: 7개 테마 세트를 단계별 목표(예: 3개·8개·전체 15개)로 나누고, 목표를 달성할 때마다
+     선물상자 1개가 자동으로 도착 (마일스톤당 1번 · 중복 지급 없음)
    · 연속: 3·5·7·10·14·21·30일 연속 공부를 달성하면 선물상자 1개 (마일스톤당 1번)
    · 선물상자를 열면 상자 3개 중 1개 고르기 → 꽝 없이 1P, 행운 상자는 2P
    ============================================================ */
@@ -4100,11 +4108,13 @@ function codexHasKind(kid, kind){
   for (var i = 0; i < l.length; i++) if (l[i].indexOf(pre) === 0) return true;
   return false;
 }
-/* 🏡 세트별 건물 키 — AV_BUILDS 의 실제 키와 정확히 일치해야 한다 */
+/* 🏡 세트별 건물 키 — AV_BUILDS 의 실제 키와 정확히 일치해야 한다
+   · total = 그 세트의 실제 전체 개수 (테마 세트는 그 나라 건물 종 수)
+   · goals = 단계별 선물상자 목표 (작은 순서). 마지막 값이 전체 개수 */
 var CODEX_SETS = [
-  { id:'first3', ico:'🌱', n:'첫 도감 시작', need:3, how:'상점 아이템 아무거나 3개',
+  { id:'first3', ico:'🌱', n:'첫 도감 시작', goals:[3], how:'상점 아이템 아무거나 3개',
     count:function(kid){ return codexOwned(kid); } },
-  { id:'coord', ico:'👗', n:'나만의 코디 완성', need:3, how:'캐릭터 1 + 꾸미기 1 + 배경 1',
+  { id:'coord', ico:'👗', n:'나만의 코디 완성', goals:[3], how:'캐릭터 1 + 꾸미기 1 + 배경 1',
     count:function(kid){
       var c = 0;
       if (codexHasKind(kid, 'preset')) c++;
@@ -4112,26 +4122,31 @@ var CODEX_SETS = [
       if (codexHasKind(kid, 'bg')) c++;
       return c;
     } },
-  { id:'fairy', ico:'🏡', n:'동화마을 주민', need:3, how:'동화마을 건물 3개',
+  { id:'fairy', ico:'🏡', n:'동화마을 주민', goals:[5, 12, 21], how:'동화마을 건물 모으기',
     keys:['cottage_pink','cottage_mint','doll_house','bakery_bread','flower_shop','cafe_dessert',
           'gazebo_tea','cherry_arch','fountain_heart','mushroom_house','macaron_house','windmill_house',
           'rainbow_cottage','wish_well','bamboo_teahouse','flower_carriage','cat_cafe','glass_house',
           'bookstore','fire_station','post_office'] },
-  { id:'camp', ico:'⛺', n:'숲속 캠핑 마스터', need:3, how:'숲속캠핑 건물 3개',
+  { id:'camp', ico:'⛺', n:'숲속 캠핑 마스터', goals:[3, 9, 17], how:'숲속캠핑 건물 모으기',
     keys:['treehouse','library_mini','camp_tent','campfire','dome_tent','family_airtent','tipi_tent',
           'forest_camper','forest_hammock','bbq_grill_zone','firewood_cabin','valley_bridge',
           'outdoor_cinema','tree_deck','pond_duck','farm_barn','star_dome'] },
-  { id:'beach', ico:'🏖️', n:'바닷가 탐험대', need:3, how:'바닷가 건물 3개',
+  { id:'beach', ico:'🏖️', n:'바닷가 탐험대', goals:[3, 9], how:'바닷가 건물 모으기',
     keys:['beach_caravan','sand_castle','palm_hammock','ocean_deck','yacht_pier','beach_shack',
           'surf_shop','sea_lighthouse','beach_cafe'] },
-  { id:'winter', ico:'❄️', n:'겨울왕국 빌더', need:3, how:'겨울나라 건물 3개',
+  { id:'winter', ico:'❄️', n:'겨울왕국 빌더', goals:[3, 8], how:'겨울나라 건물 모으기',
     keys:['snow_igloo','santa_cabin','xmas_tree','sled_slope','snow_lodge','ice_rink',
           'winter_snack','snowman_family'] },
-  { id:'park', ico:'🎡', n:'놀이공원 오너', need:3, how:'놀이공원 건물 3개',
+  { id:'park', ico:'🎡', n:'놀이공원 오너', goals:[3, 8, 15], how:'놀이공원 건물 모으기',
     keys:['carousel_cart','balloon_stop','mini_station','icecream_truck','toy_shop','aquarium',
           'pink_castle','donut_shop','candy_shop','bungeoppang','sushi_train_shop','ramen_shop',
           'pirate_ship','pool_villa','hot_spring'] }
 ];
+/* 세트마다 실제 전체 개수를 붙인다 (테마 세트 = 그 나라 건물 종 수, first3·coord = 3) */
+CODEX_SETS.forEach(function(st){
+  if (!st.total) st.total = (st.keys && st.keys.length) ? st.keys.length : (st.goals[st.goals.length - 1] || 3);
+  st.need = st.total;      /* 옛 코드 호환용 */
+});
 function codexSetGot(st, kid){
   if (!st) return 0;
   if (typeof st.count === 'function') return st.count(kid);
@@ -4143,8 +4158,42 @@ function codexSetGot(st, kid){
 }
 function codexSetsDone(kid){
   var n = 0;
-  for (var i = 0; i < CODEX_SETS.length; i++) if (codexSetGot(CODEX_SETS[i], kid) >= CODEX_SETS[i].need) n++;
+  for (var i = 0; i < CODEX_SETS.length; i++) if (codexSetGot(CODEX_SETS[i], kid) >= CODEX_SETS[i].total) n++;
   return n;
+}
+/* ---------- 🎁 세트 마일스톤 (3개·8개·전체 …) ---------- */
+function codexClaimedSet(kid){ return (shopRaw().claimedSets || {})[kid] || []; }
+/* 저장 키 — 한 단계뿐인 세트는 세트 id 그대로(옛 기록 호환), 여러 단계는 '세트id:목표' */
+function codexGoalKey(st, g){ return (st.goals.length <= 1) ? st.id : (st.id + ':' + g); }
+function codexGoalClaimed(st, g, claimed){
+  if (claimed.indexOf(codexGoalKey(st, g)) > -1) return true;
+  /* 옛 버전(세트당 1번·3개 달성)에서 세트 id만 저장한 기록 → 첫 단계는 이미 받은 것으로 본다 */
+  if (st.goals.length > 1 && g === st.goals[0] && claimed.indexOf(st.id) > -1) return true;
+  return false;
+}
+function codexSetGifts(st, kid, claimed){
+  var cs = claimed || codexClaimedSet(kid), n = 0;
+  for (var i = 0; i < st.goals.length; i++) if (codexGoalClaimed(st, st.goals[i], cs)) n++;
+  return n;
+}
+function codexGiftsTotal(kid){
+  var n = 0;
+  for (var i = 0; i < CODEX_SETS.length; i++) n += codexSetGifts(CODEX_SETS[i], kid);
+  return n;
+}
+function codexNextGoal(st, got){
+  for (var i = 0; i < st.goals.length; i++) if (got < st.goals[i]) return st.goals[i];
+  return 0;
+}
+/* 카드 한 줄 설명 — 지금 다음 목표가 바로 보이게 */
+function codexGoalHint(st, got){
+  var total = st.total, gs = st.goals;
+  if (got >= total) return '모든 ' + total + '개 완성 🎉';
+  if (gs.length <= 1) return total + '개 모으면 🎁';
+  var trail = gs.map(function(g){ return (got >= g ? g + '✓' : '' + g); }).join('·');
+  var next = codexNextGoal(st, got);
+  if (got < gs[0]) return '목표 ' + gs[0] + '개 · ' + gs.join('·') + '마다 🎁';
+  return '다음 ' + next + '개 · ' + trail;
 }
 /* 🔥 연속 공부 — pointsDays 와 같은 기준(2026-11-16부터 오늘까지의 공부 ✓ 기록) */
 var STREAK_GOALS = [3, 5, 7, 10, 14, 21, 30];
@@ -4183,9 +4232,13 @@ function codexSyncClaims(silent){
   KIDS.forEach(function(kid){
     var cs = (sh.claimedSets || {})[kid] || [];
     for (var i = 0; i < CODEX_SETS.length; i++){
-      var st = CODEX_SETS[i];
-      if (cs.indexOf(st.id) > -1) continue;
-      if (codexSetGot(st, kid) >= st.need) adds.push({ kid:kid, type:'set', id:st.id, ico:st.ico, nm:st.n });
+      var st = CODEX_SETS[i], got = codexSetGot(st, kid);
+      for (var g = 0; g < st.goals.length; g++){
+        var goal = st.goals[g];
+        if (got < goal) break;                        /* 목표는 작은 순서 — 아직이면 뒤도 아직 */
+        if (codexGoalClaimed(st, goal, cs)) continue;  /* 이미 받은 단계는 다시 지급 0 */
+        adds.push({ kid:kid, type:'set', id:codexGoalKey(st, goal), ico:st.ico, nm:st.n, goal:goal, total:st.total });
+      }
     }
     var ck = (sh.claimedStreaks || {})[kid] || [];
     var days = studyStreak(kid);
@@ -4217,7 +4270,7 @@ function codexSyncClaims(silent){
     adds.forEach(function(a, i){
       setTimeout(function(){
         toast(a.type === 'set'
-          ? ('🎁 도감 세트 완성! ' + a.ico + ' ' + a.nm + ' · 선물상자가 도착했어요!')
+          ? ('🎁 ' + a.ico + ' ' + a.nm + ' ' + (a.goal >= a.total ? a.total + '개 완성' : a.goal + '개 달성') + '! 선물상자가 도착했어요!')
           : ('🔥 ' + a.days + '일 연속 공부 달성! 선물상자가 도착했어요!'), 3200);
       }, i * 1500);
     });
@@ -4247,12 +4300,13 @@ function avEmptyHtml(kind){
 function codexBarHtml(kid){
   var own = codexOwned(kid), total = codexTotal();
   var pct = total ? Math.round(own / total * 100) : 0;
-  var done = codexSetsDone(kid);
+  var done = codexSetsDone(kid), gifts = codexGiftsTotal(kid);
   var days = studyStreak(kid), goal = streakNext(days);
   return '<div class="cdx">'
     + '<div class="cdx-row">'
     +   '<span class="cdx-ttl">📖 내 도감 <b>' + own + '</b><span class="cdx-of"> / ' + total + '</span></span>'
-    +   '<span class="cdx-sets">🎁 세트 ' + done + '/' + CODEX_SETS.length + '</span>'
+    +   '<span class="cdx-sets" title="모든 단계를 다 모은 세트 수 · 지금까지 받은 세트 선물 개수">🎁 세트 완성 ' + done + '/' + CODEX_SETS.length
+    +     (gifts ? ' · 선물 ' + gifts + '개' : '') + '</span>'
     +   '<span class="cdx-pct">' + pct + '%</span>'
     + '</div>'
     + '<div class="cdx-bar"><i style="width:' + (pct < 2 ? 2 : pct) + '%"></i></div>'
@@ -4276,18 +4330,18 @@ function codexToolsHtml(kid){
     + (codexSetsOpen ? codexSetsHtml(kid) : '');
 }
 function codexSetsHtml(kid){
-  var claimed = (shopRaw().claimedSets || {})[kid] || [];
+  var claimed = codexClaimedSet(kid);
   var h = '<div class="cdx-setgrid">';
   for (var i = 0; i < CODEX_SETS.length; i++){
-    var st = CODEX_SETS[i], got = codexSetGot(st, kid), done = got >= st.need;
-    var shown = Math.min(got, st.need);
-    h += '<div class="cdx-set' + (done ? ' done' : '') + '">'
+    var st = CODEX_SETS[i], got = codexSetGot(st, kid), total = st.total;
+    var shown = Math.min(got, total), full = got >= total, gifts = codexSetGifts(st, kid, claimed);
+    h += '<div class="cdx-set' + (full ? ' done' : '') + '" title="' + esc(st.how) + '\n' + esc(codexGoalHint(st, got)) + '">'
       + '<span class="cdx-sico">' + st.ico + '</span>'
-      + '<span class="cdx-sbody"><b>' + esc(st.n) + '</b><small>' + esc(st.how) + '</small>'
-      +   '<span class="cdx-sbar"><i style="width:' + Math.round(shown / st.need * 100) + '%"></i></span></span>'
-      + '<span class="cdx-snum">' + shown + '/' + st.need + '</span>'
-      + (done ? '<span class="cdx-sdone" title="' + (claimed.indexOf(st.id) > -1 ? '선물상자를 받았어요' : '완성!') + '">'
-          + (claimed.indexOf(st.id) > -1 ? '🎁' : '✓') + '</span>' : '')
+      + '<span class="cdx-sbody"><b>' + esc(st.n) + '</b><small>' + esc(codexGoalHint(st, got)) + '</small>'
+      +   '<span class="cdx-sbar"><i style="width:' + Math.round(shown / Math.max(1, total) * 100) + '%"></i></span></span>'
+      + '<span class="cdx-snum">' + shown + '/' + total + '</span>'
+      + (gifts > 0 ? '<span class="cdx-sdone" title="' + esc('받은 선물상자 ' + gifts + '개' + (full ? ' · 모든 ' + total + '개 완성!' : '')) + '">🎁'
+          + (gifts > 1 ? '<b class="cdx-sx">' + gifts + '</b>' : '') + '</span>' : '')
       + '</div>';
   }
   return h + '</div>';
@@ -4626,7 +4680,7 @@ function gfpClose(){
   el.classList.remove('on');
   setTimeout(function(){ try { if (el.parentNode) el.parentNode.removeChild(el); } catch(e){} }, 260);
 }
-function giftBoxPopup(kid, amount){
+function giftBoxPopup(kid, amount, subHtml){
   try {
     var n = Number(amount) || 0;
     if (n <= 0) return;
@@ -4649,9 +4703,11 @@ function giftBoxPopup(kid, amount){
       cfs += '<i class="gfp-cf" style="left:' + (Math.random() * 95).toFixed(1) + '%;background:' + cols[j % cols.length]
         + ';animation-delay:' + (Math.random() * 2.2).toFixed(2) + 's;border-radius:' + (Math.random() < .4 ? '50%' : '2px') + '"></i>';
     }
+    /* subHtml 을 넘기면 그 문구를 그대로 쓴다 (📚 독서 완독 축하 등) — 없으면 기존 문구 */
+    var subTxt = subHtml ? String(subHtml) : ('선물상자에서 <b>' + n + 'P</b>를 획득하셨습니다!');
     el.innerHTML = '<div class="gfp-card">' + stars
       + '<div class="gfp-ttl">축하합니다!</div>'
-      + '<div class="gfp-sub">선물상자에서 <b>' + n + 'P</b>를 획득하셨습니다!</div>'
+      + '<div class="gfp-sub">' + subTxt + '</div>'
       + '<div class="gfp-badge">🎁 ' + esc(who) + '의 선물</div>'
       + '<div class="gfp-stage"><div class="gfp-ray"></div>'
       +   '<div class="gfp-box">' + gfpSvg() + '</div>'
@@ -7377,6 +7433,7 @@ function renderReading(){
     +   (isNow ? '' : '<button class="cnow" type="button" data-act="read-now">이번 달</button>')
     + '</div>'
     + '<div class="rd-list">' + (rows || '<div class="rd-empty">📚 ' + (isNow ? '이번 달' : monNum + '월에') + ' 읽은 책을 기록해 볼까요?</div>') + '</div>'
+    + '<div class="rd-hint">🎁 책 1권 적을 때마다 <b>1P</b> 선물상자!</div>'
     + '<div class="rd-add">'
     +   '<input id="readTitle" placeholder="책 제목" aria-label="책 제목">'
     +   '<input id="readAuthor" placeholder="글쓴이" aria-label="글쓴이">'
@@ -7388,12 +7445,21 @@ function readingAdd(){
   var title = ((ti && ti.value) || '').trim();
   var author = ((au && au.value) || '').trim();
   if (!title){ toast('책 제목을 적어 주세요'); if (ti) ti.focus(); return false; }
+  var kid = readingKid();
   mutate(function(s){
-    readingEnsure(s).push({ id: uid('rd'), title: title, author: author, date: todayKey() });
+    /* ① 책 한 권 기록 + ② 같은 순간 그 아이에게 1P 선물상자 자동 적립 */
+    readingEnsure(s).push({ id: uid('rd'), title: title, author: author, date: todayKey(), reward: 1 });
+    s.shop = s.shop || {};
+    s.shop.pendingGift = s.shop.pendingGift || {};
+    s.shop.pendingGift[kid] = (Number(s.shop.pendingGift[kid]) || 0) + 1;
   });
   renderReading();
-  var t2 = $('#readTitle'); if (t2) t2.focus();
-  toast('📚 ' + title + ' 기록했어요', 1600);
+  renderKids();                 /* 프로필의 🎁 선물 도착! 배지도 바로 갱신 */
+  /* 모바일 가상 키보드가 선물상자 팝업을 가리지 않게 입력 포커스를 먼저 풀어 둔다 */
+  try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch(e){}
+  giftBoxPopup(kid, 1,
+    '📚 <b class="gfp-bk">' + esc(title) + '</b> 완독!<br>선물상자에서 <b>1P</b>를 획득하셨습니다!');
+  if (!document.getElementById('gfp')) toast('📚 ' + title + ' 기록하고 1P 선물상자를 열었어요', 1800);
   return true;
 }
 function readingSave(id){
