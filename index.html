@@ -6999,7 +6999,7 @@ function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
   var pts = pointsOf(kid), nm = (FAMILY[kid] || {}).name || '';
-  var tabs = [ ['preset', '🧒 캐릭터'], ['bg', '🎨 배경 색'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'] ];
+  var tabs = [ ['preset', '🧒 캐릭터'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'], ['bg', '🎨 배경 색'] ];
   var pane = '';
   if (avatarTab === 'bg'){
     pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + (AV_BGS.length - 1) + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
