@@ -12759,12 +12759,19 @@ async function finishBoot(){
       if (pgPropFree(p[0], p[1], 1.0)){ yard.add(pgSnowman(p[0], p[1], p[2])); pgSolid(p[0], p[1], 0.8); }
     });
     /* ⛄ 눈사람 5명 더 — 왕눈사람 커플 · 가족 (모자 · 목도리 · 당근코 · 단추) */
-    [[62.6, -9.8, 1.45, 0, 0.5], [64.9, -11.4, 1.28, 1, -0.6], [67.6, 15.4, 1.15, 3, 2.2],
+    [[62.6, -9.8, 1.45, 0, 0.5], [64.9, -11.4, 1.28, 1, -0.6],
      [79.4, -6.6, 1.05, 2, 1.4], [61.0, 8.6, 0.95, 1, 3.6]].forEach(function(p){
       if (pgPropFree(p[0], p[1], 1.15)){
         yard.add(pgSnowBuddy(p[0], p[1], p[2], p[3], p[4]));
         pgSolid(p[0], p[1], 0.9 * p[2]);
       }
+    });
+    /* 얼음 연못 옆 눈사람 가족 — 눈더미와 겹치지 않는 자리를 골라 한 명 */
+    [[67.6, 15.4], [66.4, 13.4], [74.8, 15.6], [65.2, 17.2]].forEach(function(p){
+      if (PG.snowFamilyDone || !pgPropFree(p[0], p[1], 1.15)) return;
+      PG.snowFamilyDone = true;
+      yard.add(pgSnowBuddy(p[0], p[1], 1.15, 3, 2.2));
+      pgSolid(p[0], p[1], 1.0);
     });
     /* 🏠 아기 이글루 2채 */
     if (pgPropFree(62.0, 20.0, 1.3)){ yard.add(pgSnowIgloo(62.0, 20.0, 1.0, 0.5)); pgSolid(62.0, 20.0, 1.15); }
