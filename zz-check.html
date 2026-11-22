@@ -4573,7 +4573,11 @@ function giftOpen(kid, kind, key){
     el.addEventListener('click', function(ev){
       if (el.classList.contains('opened')){
         var t = ev.target;
-        if (t && t.className && String(t.className).indexOf('gft-ok') >= 0){ giftClose(); }
+        if (t && t.className && String(t.className).indexOf('gft-ok') >= 0){
+          giftClose();
+          /* 방금 산 카드로 📖 도감 세트가 완성됐다면, 언박싱을 닫는 이 순간 선물상자를 알려 준다 */
+          try { codexSyncClaims(false); } catch(e){ console.warn('[dashboard] 도감 세트:', e && e.message); }
+        }
         return;
       }
       gftReveal(el, kid, kind, key);
@@ -7907,7 +7911,6 @@ document.addEventListener('click', function(ev){
     /* 새로 산 순간에만 선물 상자 언박싱 연출 (구매 취소·보유 아이템 착용에는 뜨지 않음) */
     if (typeof giftOpen === 'function') giftOpen(bKid, bKind, bKey);
     else toast('🎉 ' + ((FAMILY[bKid] || {}).name || '') + ' 아이템 샀어요! 💎 -' + ITEM_PRICE + 'P', 2400);
-    codexSyncClaims(false);      /* 방금 산 카드로 도감 세트가 완성되면 그 자리에서 선물상자 적립 */
     return;
   }
   if (act === 'av-refund'){
