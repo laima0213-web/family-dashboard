@@ -9,6 +9,14 @@
 <body>
 <iframe id="f" src="./zz-reading-gift.html?reset=1"></iframe>
 <script>
+/* iframe 에도 같은 버전 쿼리를 넘겨 GitHub Pages 캐시를 피한다 */
+(function(){
+  var f = document.getElementById('f');
+  var v = (/[?&]v=([\w.-]+)/.exec(location.search) || [])[1];
+  if (v) f.src = './zz-reading-gift.html?reset=1&v=' + v;
+})();
+</script>
+<script>
 /* ?to=reading 이면 독서 카드, ?to=top 이면 맨 위(프로필 포인트)로 스크롤 */
 (function(){
   var f = document.getElementById('f');
