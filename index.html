@@ -1499,6 +1499,119 @@ button.st{padding:0}
 .av-ptfoot{flex:1 1 100%;display:flex;justify-content:flex-end;margin-top:-2px}
 .av-plink{border:0;background:transparent;font-size:9.5px;font-weight:900;color:#8A72C0;cursor:pointer;padding:0}
 .av-tip.try{background:#FBF2FF;border-color:#EBD9F7;color:#8A5FB0}
+
+/* ---------- 📖 수집 도감 · 🔥 연속 공부 미션 ---------- */
+.cdx{margin:3px 0 3px;background:linear-gradient(120deg,#FBF8FF,#FFF9F2);border:1px solid #E7DEF8;
+  border-radius:14px;padding:6px 9px}
+.cdx-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.cdx-ttl{font-size:12px;font-weight:900;color:#6D57A8;letter-spacing:-.3px;white-space:nowrap}
+.cdx-ttl b{font-size:14.5px;color:#5B44A0;letter-spacing:-.6px}
+.cdx-of{font-size:11px;font-weight:900;color:#A08FC8}
+.cdx-sets,.cdx-pct{margin-left:auto;font-size:9.5px;font-weight:900;color:#8A72C0;background:#fff;
+  border:1px solid #E7DEF8;border-radius:999px;padding:1px 6px;white-space:nowrap;line-height:1.5}
+.cdx-pct{margin-left:0;color:#7B5AA6;background:#F4EFFE}
+.cdx-bar{display:block;height:9px;border-radius:999px;background:#EDE6FA;margin-top:4px;overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(109,87,168,.13)}
+.cdx-bar i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#B79BE0 0%,#FFD45C 68%,#FF9FB8 100%);transition:width .45s ease}
+.cdx-row2{display:flex;align-items:center;gap:5px;margin-top:5px;flex-wrap:wrap}
+.cdx-streak{font-size:10.5px;font-weight:900;color:#B4611A;background:linear-gradient(120deg,#FFF1CE,#FFDFA4);
+  border:1px solid #F0C879;border-radius:999px;padding:1px 7px;white-space:nowrap;line-height:1.55}
+.cdx-streak b{font-size:11px}
+.cdx-goal{font-size:9.5px;font-weight:900;color:#8A72C0;
+  background:#fff;border:1px dashed #DCD0F0;border-radius:999px;padding:1px 6px;white-space:nowrap;line-height:1.6}
+.cdx-goal.done{color:#3E8C63;border-color:#BFE6CE;background:#F2FCF5}
+.cdx-tools{display:flex;align-items:center;gap:5px;margin:0 0 3px}
+.cdx-flt{display:flex;gap:0;background:#F1ECFA;border:1px solid #E4DAF6;border-radius:999px;padding:2px}
+.cdxpill{border:0;background:transparent;font-family:inherit;font-size:10.5px;font-weight:900;color:#8A80A0;
+  border-radius:999px;padding:2px 11px;cursor:pointer;line-height:1.5;white-space:nowrap}
+.cdxpill.on{background:#7B5AA6;color:#fff;box-shadow:0 2px 6px rgba(123,90,166,.3)}
+.cdx-foldb{margin-left:auto;border:1px solid #E7DEF8;background:#fff;border-radius:999px;padding:2px 8px;
+  font-family:inherit;font-size:9.5px;font-weight:900;color:#7B5AA6;cursor:pointer;white-space:nowrap;line-height:1.7}
+.cdx-foldb b{color:#B4611A}
+.cdx-setgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:1px 0 2px}
+.cdx-set{display:flex;align-items:center;gap:4px;background:#FFFDF8;border:1px solid #EFE7F8;
+  border-radius:11px;padding:4px 6px;min-width:0}
+.cdx-set.done{background:linear-gradient(120deg,#F3FFF7,#FFFDF0);border-color:#CBEAD4}
+.cdx-sico{font-size:15px;line-height:1;flex:0 0 auto}
+.cdx-sbody{flex:1 1 auto;min-width:0;display:block}
+.cdx-sbody b{display:block;font-size:9.5px;font-weight:900;color:#5E4E86;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.cdx-sbody small{display:block;font-size:7.5px;font-weight:800;color:#A79CB8;letter-spacing:-.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.cdx-sbar{display:block;height:4px;border-radius:999px;background:#EFE9F7;margin-top:2px;overflow:hidden}
+.cdx-sbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#B79BE0,#7FD6CE)}
+.cdx-set.done .cdx-sbar i{background:linear-gradient(90deg,#7ED9A4,#FFD45C)}
+.cdx-snum{font-size:8.5px;font-weight:900;color:#8A72C0;white-space:nowrap;flex:0 0 auto}
+.cdx-sdone{font-size:9.5px;line-height:1;flex:0 0 auto}
+.cdx-empty{padding:16px 10px;text-align:center;border:1.5px dashed #E6DAF5;border-radius:14px;
+  background:#FCFAFF;font-size:12px;font-weight:900;color:#8A7CA6;line-height:1.65}
+.cdx-empty small{font-size:10.5px;font-weight:800;color:#A99FBE}
+button.av-ptgift{border:0;font-family:inherit;cursor:pointer}
+
+/* ---------- 🎁 3상자 고르기 (보라빛 별빛 모달) ---------- */
+.p3{position:fixed;inset:0;z-index:12200;display:flex;align-items:center;justify-content:center;padding:14px;
+  background:rgba(30,16,60,.52);opacity:0;transition:opacity .22s}
+.p3.on{opacity:1}
+.p3-card{position:relative;width:100%;max-width:348px;border-radius:30px;overflow:hidden;
+  padding:16px 13px 18px;text-align:center;
+  background:linear-gradient(168deg,#9273E6 0%,#7C5CD8 46%,#6244BE 100%);
+  box-shadow:0 20px 48px rgba(38,18,86,.5),inset 0 1px 0 rgba(255,255,255,.28);
+  transform:translateY(16px) scale(.95);transition:transform .26s cubic-bezier(.2,1.2,.4,1)}
+.p3.on .p3-card{transform:none}
+.p3-sp{position:absolute;font-style:normal;color:#FFF6C9;opacity:.75;line-height:1;
+  animation:p3tw 2.4s ease-in-out infinite;pointer-events:none}
+@keyframes p3tw{0%,100%{opacity:.22;transform:scale(.8)}50%{opacity:.95;transform:scale(1.18)}}
+.p3-ttl{margin:2px 0 4px;font-size:21px;font-weight:900;color:#FFE066;letter-spacing:-.5px;
+  text-shadow:0 2px 0 rgba(60,30,110,.38);line-height:1.3}
+.p3-sub{font-size:12.5px;font-weight:900;color:#fff;letter-spacing:-.3px;line-height:1.45}
+.p3-sub b{color:#FFE066;font-size:15px}
+.p3-badge{display:inline-flex;align-items:center;gap:3px;margin:7px 0 0;padding:2px 11px;border-radius:999px;
+  background:rgba(255,255,255,.18);color:#FFF7DA;font-size:10.5px;font-weight:900;line-height:1.6}
+.p3-stage{display:flex;align-items:flex-end;justify-content:center;gap:5px;margin:8px 0 0;height:184px;
+  position:relative;z-index:2}
+.p3-item{position:relative;flex:1 1 0;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;height:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  padding-top:24px;box-sizing:border-box}
+.p3-yb{position:absolute;top:0;left:50%;transform:translateX(-50%) scale(.86);opacity:0;
+  background:linear-gradient(180deg,#FFE79B,#FFC93C);color:#6B4400;font-size:9px;font-weight:900;
+  letter-spacing:.4px;border-radius:999px;padding:2px 9px;border:2px solid #FFF3C4;white-space:nowrap;
+  z-index:5;transition:opacity .25s,transform .25s;box-shadow:0 3px 8px rgba(40,16,80,.35)}
+.p3-item.picked .p3-yb{opacity:1;transform:translateX(-50%) scale(1)}
+.p3-gem{position:relative;z-index:4;display:flex;flex-direction:column;align-items:center;
+  opacity:0;transform:translateY(16px);transition:opacity .3s,transform .34s}
+.p3-item.open .p3-gem{opacity:1;transform:translateY(0)}
+.p3-gem i{font-size:25px;font-style:normal;line-height:1;filter:drop-shadow(0 3px 6px rgba(30,10,60,.5))}
+.p3-gem b{font-size:13px;font-weight:900;color:#FFE066;text-shadow:0 2px 0 rgba(60,30,110,.45);line-height:1.2}
+.p3-item.picked .p3-gem i{font-size:40px}
+.p3-item.picked .p3-gem b{font-size:19px}
+.p3-box{display:block;width:100%;max-width:100px;margin-top:2px;animation:p3bob 2.2s ease-in-out infinite}
+.p3-item:nth-child(2) .p3-box{animation-delay:.32s}
+.p3-item:nth-child(3) .p3-box{animation-delay:.64s}
+@keyframes p3bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.p3-box svg{width:100%;height:auto;display:block;overflow:visible}
+.p3-lid{transform-origin:50% 92%;transition:transform .38s cubic-bezier(.2,1.4,.4,1)}
+.p3-item.open .p3-lid{transform:translateY(-14px) rotate(-15deg)}
+.p3-lucky{margin-top:5px;font-size:11.5px;font-weight:900;color:#FFF3C4;background:rgba(255,255,255,.18);
+  border-radius:999px;padding:3px 12px;display:inline-block;line-height:1.6}
+.p3-lucky[hidden],.p3-ok[hidden]{display:none!important}
+.p3-ok{margin-top:10px;width:100%;border:0;border-radius:16px;padding:13px 0;font-family:inherit;
+  font-size:16px;font-weight:900;color:#7A4A00;background:linear-gradient(180deg,#FFE79B,#FFCE4E);
+  box-shadow:0 5px 0 #E0A92F,0 10px 20px rgba(40,16,80,.3);cursor:pointer}
+.p3-ok:active{transform:translateY(3px);box-shadow:0 2px 0 #E0A92F}
+.p3-more{margin-top:9px;border:0;background:transparent;font-family:inherit;font-size:11.5px;font-weight:900;
+  color:#FFE9A8;text-decoration:underline;cursor:pointer;padding:2px}
+.p3-burst{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:30px;z-index:1}
+.p3-burst i{position:absolute;left:50%;top:52%;width:8px;height:8px;opacity:0;
+  animation:p3cf 1s ease-out forwards}
+@keyframes p3cf{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
+@media (max-width:430px){
+  .p3-stage{height:168px}
+  .p3-box{max-width:88px}
+  .p3-ttl{font-size:19px}
+  .p3-gem i{font-size:22px}
+  .p3-item.picked .p3-gem i{font-size:34px}
+}
 /* ---------- 🔒 엄마·아빠 전용 PIN 모달 ---------- */
 .ppin{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:18px}
 .ppin[hidden]{display:none!important}
@@ -2908,7 +3021,7 @@ function defaultState(){
     reading: {},
     avatars: {},
     mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
-    shop: { bonus:{}, spent:{}, unlocked:{}, pendingGift:{} },
+    shop: { bonus:{}, spent:{}, unlocked:{}, pendingGift:{}, claimedSets:{}, claimedStreaks:{} },
     playground: {},                              /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 */
     pgBuilds: {},                                /* 🏡 놀이터에 직접 지은 집·건물 */
     sched: { date: t, items: [] },
@@ -3090,8 +3203,37 @@ function normalizeState(raw){
     var list = arr.filter(function(x){ return typeof x === 'string' && x; });
     if (list.length) shopUnlocked[k] = list;
   });
+  /* 📖 도감 세트 · 🔥 연속 공부 — 이미 받은 보상 기록 (아이별 문자열/숫자 목록) */
+  var shopList = function(src){
+    var o = {};
+    if (src && typeof src === 'object') Object.keys(src).forEach(function(k){
+      if (KIDS.indexOf(k) < 0) return;
+      var arr = src[k];
+      if (!Array.isArray(arr)) return;
+      var list = arr.filter(function(x){ return typeof x === 'string' && x; });
+      if (list.length) o[k] = list;
+    });
+    return o;
+  };
+  var shopNums = function(src){
+    var o = {};
+    if (src && typeof src === 'object') Object.keys(src).forEach(function(k){
+      if (KIDS.indexOf(k) < 0) return;
+      var arr = src[k];
+      if (!Array.isArray(arr)) return;
+      var list = [];
+      arr.forEach(function(x){
+        var n = Number(x);
+        if (isFinite(n) && n > 0 && list.indexOf(n) < 0) list.push(n);
+      });
+      if (list.length) o[k] = list;
+    });
+    return o;
+  };
   out.shop = { bonus: shopNum(shopRaw.bonus), spent: shopNum(shopRaw.spent), unlocked: shopUnlocked,
-               pendingGift: shopNum(shopRaw.pendingGift) };   /* 🎁 부모가 보낸 미수령 선물 */
+               pendingGift: shopNum(shopRaw.pendingGift),   /* 🎁 부모가 보낸 미수령 선물 */
+               claimedSets: shopList(shopRaw.claimedSets),  /* 📖 보상을 받은 도감 세트 */
+               claimedStreaks: shopNums(shopRaw.claimedStreaks) };   /* 🔥 보상을 받은 연속 공부 마일스톤 */
   /* 착용 캐릭터 — 저장값이 없거나 미보유면 보유한 아이템을 우선 (배경 기본값은 무료 'none') */
   var avs = {};
   KIDS.forEach(function(id){
@@ -3931,6 +4073,378 @@ function avItemLabel(kind, key){
   if (kind === 'build') return avBuildFull(key);
   return hit.n;
 }
+
+/* ============================================================
+   12-0e. 📖 테마별 수집 도감 · 🔥 연속 공부 미션 · 🎁 3상자 깜짝 뽑기
+   · 도감: 상점 유료 품목(캐릭터·꾸미기·집·마을·배경)을 모은 만큼 채워진다
+   · 세트: 7개 테마 세트를 완성하면 선물상자 1개가 자동으로 도착 (세트당 1번)
+   · 연속: 3·5·7·10·14·21·30일 연속 공부를 달성하면 선물상자 1개 (마일스톤당 1번)
+   · 선물상자를 열면 상자 3개 중 1개 고르기 → 꽝 없이 1P, 행운 상자는 2P
+   ============================================================ */
+/* 도감에 들어가는 유료 품목 수 — 캐릭터 + 꾸미기('없음' 제외) + 집·마을 + 배경 색('기본' 제외) */
+function codexTotal(){
+  return (typeof AV_PRESETS === 'undefined' ? 0 : AV_PRESETS.length)
+       + (typeof AV_DECOS   === 'undefined' ? 0 : Math.max(0, AV_DECOS.length - 1))
+       + (typeof AV_BUILDS  === 'undefined' ? 0 : AV_BUILDS.length)
+       + (typeof AV_BGS     === 'undefined' ? 0 : Math.max(0, AV_BGS.length - 1));
+}
+/* 실제로 모은 도감 카드 수 — '없음/기본' 무료값은 카드가 아니다 */
+function codexOwned(kid){ return avOwnedCount(kid); }
+function codexKeys(kid){
+  return (((shopRaw().unlocked || {})[kid]) || []).filter(function(x){
+    return x !== 'deco:none' && x !== 'bg:none';
+  });
+}
+function codexHasKind(kid, kind){
+  var l = codexKeys(kid), pre = kind + ':';
+  for (var i = 0; i < l.length; i++) if (l[i].indexOf(pre) === 0) return true;
+  return false;
+}
+/* 🏡 세트별 건물 키 — AV_BUILDS 의 실제 키와 정확히 일치해야 한다 */
+var CODEX_SETS = [
+  { id:'first3', ico:'🌱', n:'첫 도감 시작', need:3, how:'상점 아이템 아무거나 3개',
+    count:function(kid){ return codexOwned(kid); } },
+  { id:'coord', ico:'👗', n:'나만의 코디 완성', need:3, how:'캐릭터 1 + 꾸미기 1 + 배경 1',
+    count:function(kid){
+      var c = 0;
+      if (codexHasKind(kid, 'preset')) c++;
+      if (codexHasKind(kid, 'deco')) c++;
+      if (codexHasKind(kid, 'bg')) c++;
+      return c;
+    } },
+  { id:'fairy', ico:'🏡', n:'동화마을 주민', need:3, how:'동화마을 건물 3개',
+    keys:['cottage_pink','cottage_mint','doll_house','bakery_bread','flower_shop','cafe_dessert',
+          'gazebo_tea','cherry_arch','fountain_heart','mushroom_house','macaron_house','windmill_house',
+          'rainbow_cottage','wish_well','bamboo_teahouse','flower_carriage','cat_cafe','glass_house',
+          'bookstore','fire_station','post_office'] },
+  { id:'camp', ico:'⛺', n:'숲속 캠핑 마스터', need:3, how:'숲속캠핑 건물 3개',
+    keys:['treehouse','library_mini','camp_tent','campfire','dome_tent','family_airtent','tipi_tent',
+          'forest_camper','forest_hammock','bbq_grill_zone','firewood_cabin','valley_bridge',
+          'outdoor_cinema','tree_deck','pond_duck','farm_barn','star_dome'] },
+  { id:'beach', ico:'🏖️', n:'바닷가 탐험대', need:3, how:'바닷가 건물 3개',
+    keys:['beach_caravan','sand_castle','palm_hammock','ocean_deck','yacht_pier','beach_shack',
+          'surf_shop','sea_lighthouse','beach_cafe'] },
+  { id:'winter', ico:'❄️', n:'겨울왕국 빌더', need:3, how:'겨울나라 건물 3개',
+    keys:['snow_igloo','santa_cabin','xmas_tree','sled_slope','snow_lodge','ice_rink',
+          'winter_snack','snowman_family'] },
+  { id:'park', ico:'🎡', n:'놀이공원 오너', need:3, how:'놀이공원 건물 3개',
+    keys:['carousel_cart','balloon_stop','mini_station','icecream_truck','toy_shop','aquarium',
+          'pink_castle','donut_shop','candy_shop','bungeoppang','sushi_train_shop','ramen_shop',
+          'pirate_ship','pool_villa','hot_spring'] }
+];
+function codexSetGot(st, kid){
+  if (!st) return 0;
+  if (typeof st.count === 'function') return st.count(kid);
+  var list = codexKeys(kid), n = 0;
+  for (var i = 0; i < st.keys.length; i++){
+    if (list.indexOf('build:' + st.keys[i]) > -1) n++;
+  }
+  return n;
+}
+function codexSetsDone(kid){
+  var n = 0;
+  for (var i = 0; i < CODEX_SETS.length; i++) if (codexSetGot(CODEX_SETS[i], kid) >= CODEX_SETS[i].need) n++;
+  return n;
+}
+/* 🔥 연속 공부 — pointsDays 와 같은 기준(2026-11-16부터 오늘까지의 공부 ✓ 기록) */
+var STREAK_GOALS = [3, 5, 7, 10, 14, 21, 30];
+function studyStreak(kid){
+  if (!state) return 0;
+  var start = ymdParse(POINTS_START_MONDAY);
+  var d = ymdParse(todayKey());
+  if (dayState(kid, ymd(d)) !== 'done') d = addDays(d, -1);   /* 오늘 아직이면 어제까지의 연속 */
+  var n = 0;
+  for (var i = 0; i < 400; i++){
+    if (d < start) break;
+    if (dayState(kid, ymd(d)) === 'done'){ n++; d = addDays(d, -1); }
+    else break;
+  }
+  return n;
+}
+function studyBest(kid){
+  if (!state) return 0;
+  var start = ymdParse(POINTS_START_MONDAY);
+  var end = ymdParse(todayKey());
+  var run = 0, best = 0;
+  for (var d = new Date(start); d <= end; d = addDays(d, 1)){
+    if (dayState(kid, ymd(d)) === 'done'){ run++; if (run > best) best = run; }
+    else run = 0;
+  }
+  return best;
+}
+function streakNext(days){
+  for (var i = 0; i < STREAK_GOALS.length; i++) if (STREAK_GOALS[i] > days) return STREAK_GOALS[i];
+  return 0;
+}
+/* 세트 완성 · 연속 마일스톤 → 선물상자 적립 (한 번 받은 보상은 다시 지급하지 않는다) */
+function codexSyncClaims(silent){
+  if (!state) return 0;
+  var adds = [], sh = shopRaw();
+  KIDS.forEach(function(kid){
+    var cs = (sh.claimedSets || {})[kid] || [];
+    for (var i = 0; i < CODEX_SETS.length; i++){
+      var st = CODEX_SETS[i];
+      if (cs.indexOf(st.id) > -1) continue;
+      if (codexSetGot(st, kid) >= st.need) adds.push({ kid:kid, type:'set', id:st.id, ico:st.ico, nm:st.n });
+    }
+    var ck = (sh.claimedStreaks || {})[kid] || [];
+    var days = studyStreak(kid);
+    for (var j = 0; j < STREAK_GOALS.length; j++){
+      var g = STREAK_GOALS[j];
+      if (g <= days && ck.indexOf(g) < 0) adds.push({ kid:kid, type:'streak', id:g, days:g });
+    }
+  });
+  if (!adds.length) return 0;
+  mutate(function(s){
+    s.shop = s.shop || {};
+    s.shop.pendingGift = s.shop.pendingGift || {};
+    s.shop.claimedSets = s.shop.claimedSets || {};
+    s.shop.claimedStreaks = s.shop.claimedStreaks || {};
+    adds.forEach(function(a){
+      if (a.type === 'set'){
+        var arr = (s.shop.claimedSets[a.kid] || []).slice();
+        if (arr.indexOf(a.id) < 0) arr.push(a.id);
+        s.shop.claimedSets[a.kid] = arr;
+      } else {
+        var arr2 = (s.shop.claimedStreaks[a.kid] || []).slice();
+        if (arr2.indexOf(a.id) < 0) arr2.push(a.id);
+        s.shop.claimedStreaks[a.kid] = arr2;
+      }
+      s.shop.pendingGift[a.kid] = (Number(s.shop.pendingGift[a.kid]) || 0) + 1;
+    });
+  });
+  if (!silent){
+    adds.forEach(function(a, i){
+      setTimeout(function(){
+        toast(a.type === 'set'
+          ? ('🎁 도감 세트 완성! ' + a.ico + ' ' + a.nm + ' · 선물상자가 도착했어요!')
+          : ('🔥 ' + a.days + '일 연속 공부 달성! 선물상자가 도착했어요!'), 3200);
+      }, i * 1500);
+    });
+  }
+  try {
+    if (typeof avatarDraft !== 'undefined' && avatarDraft) renderAvatarSheet();
+    renderKids();
+  } catch(e){}
+  return adds.length;
+}
+/* 상점 탭 그리드 — '전체 | 보유만' */
+function avListNote(list, total, kid, kind){
+  if (avOwnFilter === 'own') return '보유 ' + list.length + '개';
+  return total + '종';
+}
+var avOwnFilter = 'all';
+var codexSetsOpen = true;
+function avFilterList(list, kid, kind){
+  if (avOwnFilter !== 'own') return list;
+  return list.filter(function(x){ return !avIsFree(kind, x.k) && avUnlocked(kid, kind, x.k); });
+}
+function avEmptyHtml(kind){
+  return '<div class="cdx-empty">🗂️ 아직 모은 카드가 없어요<br>'
+    + '<small>' + (kind === 'build' ? '집·마을 카드를 💎 1P로 하나씩 모아 보세요' : '💎 1P로 하나씩 사면 내 도감이 쌓여요') + '</small></div>';
+}
+/* 상점 위 도감 진행률 바 + 연속 공부 배지 */
+function codexBarHtml(kid){
+  var own = codexOwned(kid), total = codexTotal();
+  var pct = total ? Math.round(own / total * 100) : 0;
+  var done = codexSetsDone(kid);
+  var days = studyStreak(kid), goal = streakNext(days);
+  return '<div class="cdx">'
+    + '<div class="cdx-row">'
+    +   '<span class="cdx-ttl">📖 내 도감 <b>' + own + '</b><span class="cdx-of"> / ' + total + '</span></span>'
+    +   '<span class="cdx-sets">🎁 세트 ' + done + '/' + CODEX_SETS.length + '</span>'
+    +   '<span class="cdx-pct">' + pct + '%</span>'
+    + '</div>'
+    + '<div class="cdx-bar"><i style="width:' + (pct < 2 ? 2 : pct) + '%"></i></div>'
+    + '<div class="cdx-row2">'
+    +   '<span class="cdx-streak" title="공부를 ✓ 한 날이 며칠 이어졌는지 · 최장 ' + studyBest(kid) + '일">🔥 <b>' + days + '일 연속 공부</b></span>'
+    +   (goal ? '<span class="cdx-goal">' + goal + '일 달성 시 🎁</span>' : '<span class="cdx-goal done">모든 연속 미션 완료 🎉</span>')
+    + '</div>'
+    + '</div>';
+}
+/* '전체 | 보유만' 알약 + 도감 세트 미션 접기 */
+function codexToolsHtml(kid){
+  var done = codexSetsDone(kid);
+  return '<div class="cdx-tools">'
+    + '<span class="cdx-flt">'
+    +   '<button type="button" class="cdxpill' + (avOwnFilter === 'all' ? ' on' : '') + '" data-act="av-filter" data-f="all">전체</button>'
+    +   '<button type="button" class="cdxpill' + (avOwnFilter === 'own' ? ' on' : '') + '" data-act="av-filter" data-f="own">보유만</button>'
+    + '</span>'
+    + '<button type="button" class="cdx-foldb" data-act="cdx-fold">📖 도감 세트 미션 '
+    +   '<b>' + done + '/' + CODEX_SETS.length + '</b> ' + (codexSetsOpen ? '▴' : '▾') + '</button>'
+    + '</div>'
+    + (codexSetsOpen ? codexSetsHtml(kid) : '');
+}
+function codexSetsHtml(kid){
+  var claimed = (shopRaw().claimedSets || {})[kid] || [];
+  var h = '<div class="cdx-setgrid">';
+  for (var i = 0; i < CODEX_SETS.length; i++){
+    var st = CODEX_SETS[i], got = codexSetGot(st, kid), done = got >= st.need;
+    var shown = Math.min(got, st.need);
+    h += '<div class="cdx-set' + (done ? ' done' : '') + '">'
+      + '<span class="cdx-sico">' + st.ico + '</span>'
+      + '<span class="cdx-sbody"><b>' + esc(st.n) + '</b><small>' + esc(st.how) + '</small>'
+      +   '<span class="cdx-sbar"><i style="width:' + Math.round(shown / st.need * 100) + '%"></i></span></span>'
+      + '<span class="cdx-snum">' + shown + '/' + st.need + '</span>'
+      + (done ? '<span class="cdx-sdone" title="' + (claimed.indexOf(st.id) > -1 ? '선물상자를 받았어요' : '완성!') + '">'
+          + (claimed.indexOf(st.id) > -1 ? '🎁' : '✓') + '</span>' : '')
+      + '</div>';
+  }
+  return h + '</div>';
+}
+/* ============================================================
+   🎁 3상자 고르기 — 꽝 없이 2개는 +1P, 1개는 행운의 +2P
+   · 상자를 고르는 순간 한 번만 지급 (중복 0건 · 앱을 닫아도 유실 0건)
+   ============================================================ */
+var p3State = null;
+function p3BoxSvg(col){
+  var C = { red:['#F4696E','#D8484F'], blue:['#5FB3EA','#3D8BC6'], mint:['#5FD3B6','#33A88E'] }[col]
+        || ['#F4696E','#D8484F'];
+  return '<svg viewBox="0 0 100 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<ellipse cx="50" cy="88" rx="30" ry="5" fill="#2C1660" opacity=".3"/>'
+    + '<g class="p3-lid">'
+    +   '<rect x="17" y="33" width="66" height="16" rx="4" fill="' + C[0] + '" stroke="#3A2070" stroke-width="3.4"/>'
+    +   '<rect x="44" y="33" width="12" height="16" fill="#FFD24E" stroke="#3A2070" stroke-width="2.6"/>'
+    +   '<circle cx="30" cy="29" r="6" fill="' + C[0] + '" stroke="#3A2070" stroke-width="3"/>'
+    +   '<circle cx="70" cy="29" r="6" fill="' + C[0] + '" stroke="#3A2070" stroke-width="3"/>'
+    +   '<circle cx="50" cy="28" r="5" fill="#FFD24E" stroke="#3A2070" stroke-width="2.6"/>'
+    + '</g>'
+    + '<path d="M19 52 h62 v30 a6 6 0 0 1 -6 6 H25 a6 6 0 0 1 -6 -6 Z" fill="' + C[0] + '" stroke="#3A2070" stroke-width="3.6" stroke-linejoin="round"/>'
+    + '<rect x="44" y="52" width="12" height="36" fill="#FFD24E" stroke="#3A2070" stroke-width="2.6"/>'
+    + '<rect x="19" y="52" width="62" height="8" fill="' + C[1] + '" opacity=".55"/>'
+    + '<rect x="26" y="66" width="6" height="14" rx="3" fill="#fff" opacity=".45"/>'
+    + '</svg>';
+}
+function p3Burst(el){
+  try {
+    var b = el.querySelector('.p3-burst'); if (!b) return;
+    var cols = ['#FF6B6B','#FFD34E','#7FD6CE','#FFB6CB','#C9B6F0','#FFFFFF','#FFA45C','#9BE7FF'];
+    for (var i = 0; i < 34; i++){
+      var p = document.createElement('i');
+      var a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 150;
+      p.style.setProperty('--x', (Math.cos(a) * d).toFixed(0) + 'px');
+      p.style.setProperty('--y', (Math.sin(a) * d - 14).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random() * 560 - 280).toFixed(0) + 'deg');
+      p.style.animationDelay = (Math.random() * 0.12).toFixed(2) + 's';
+      p.style.background = cols[i % cols.length];
+      p.style.width = (5 + Math.random() * 7).toFixed(0) + 'px';
+      p.style.height = (5 + Math.random() * 7).toFixed(0) + 'px';
+      p.style.borderRadius = (Math.random() < 0.36 ? '50%' : '2px');
+      b.appendChild(p);
+    }
+  } catch(e){}
+}
+function p3Close(quiet){
+  var el = document.getElementById('p3');
+  var kid = p3State ? p3State.kid : null;
+  p3State = null;
+  if (el){
+    el.classList.remove('on');
+    setTimeout(function(){ try { if (el.parentNode) el.parentNode.removeChild(el); } catch(e){} }, 260);
+  }
+  if (kid && !quiet){
+    var rem = giftPendAmt(kid);
+    if (rem > 0) toast('🎁 아직 선물상자가 ' + rem + '개 더 남아 있어요! 상점을 다시 눌러 열어 보세요', 3200);
+  }
+  try { if (typeof avatarDraft !== 'undefined' && avatarDraft) renderAvatarSheet(); renderKids(); } catch(e){}
+}
+function p3Open(kid){
+  try {
+    if (!state || !kid) return false;
+    var pend = giftPendAmt(kid);
+    if (pend <= 0) return false;
+    var old = document.getElementById('p3');
+    if (old) { try { if (old.parentNode) old.parentNode.removeChild(old); } catch(e){} }
+    var lucky = Math.floor(Math.random() * 3);
+    p3State = { kid: kid, lucky: lucky, picked: -1, won: 0, granted: false, pend: pend };
+    var who = (FAMILY[kid] || {}).name || '우리 아이';
+    var names = ['red', 'blue', 'mint'], cols = '';
+    for (var i = 0; i < 3; i++){
+      cols += '<div class="p3-item" data-i="' + i + '" role="button" tabindex="0" aria-label="선물상자 ' + (i + 1) + '번째">'
+        + '<span class="p3-yb">YOUR PICK</span>'
+        + '<span class="p3-gem"><i>💎</i><b>+' + (i === lucky ? 2 : 1) + 'P</b></span>'
+        + '<span class="p3-box">' + p3BoxSvg(names[i]) + '</span>'
+        + '</div>';
+    }
+    var stars = '', st = [[8,7,12],[80,10,10],[14,20,8],[88,26,13],[48,2,10],[93,62,9],[6,68,10],[72,50,8],[30,12,7],[64,16,9]];
+    for (var j = 0; j < st.length; j++){
+      stars += '<i class="p3-sp" style="left:' + st[j][0] + '%;top:' + st[j][1] + '%;font-size:' + st[j][2]
+        + 'px;animation-delay:' + (j * 0.24).toFixed(2) + 's">✦</i>';
+    }
+    var el = document.createElement('div');
+    el.className = 'p3';
+    el.id = 'p3';
+    el.innerHTML = '<div class="p3-card">' + stars
+      + '<div class="p3-burst"></div>'
+      + '<div class="p3-ttl">🎁 선물상자가 도착했어요!</div>'
+      + '<div class="p3-sub">상자 3개 중 하나를 터치해 보세요!</div>'
+      + '<div class="p3-badge">🎁 ' + esc(who) + '의 선물' + (pend > 1 ? ' · ' + pend + '개 도착' : '') + '</div>'
+      + '<div class="p3-stage">' + cols + '</div>'
+      + '<div class="p3-lucky" hidden>🎉 행운의 2P 대박!</div>'
+      + '<button class="p3-ok" type="button" hidden>확인</button>'
+      + (pend > 1 ? '<button class="p3-more" type="button">🎁 다음 선물 열기 (' + (pend - 1) + '개 더)</button>' : '')
+      + '</div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('on'); });
+    gftPop();
+    el.addEventListener('click', function(ev){
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      if (t.closest('.p3-ok')){ p3Close(); return; }
+      if (t.closest('.p3-more')){
+        var k2 = p3State ? p3State.kid : null;
+        p3Close(true);          /* 다음 상자를 바로 열 때는 '더 남았다' 안내를 겹쳐 띄우지 않는다 */
+        if (k2) setTimeout(function(){ p3Open(k2); }, 320);
+        return;
+      }
+      if (p3State && p3State.picked < 0){
+        var it = t.closest('.p3-item');
+        if (it) p3Pick(Number(it.getAttribute('data-i')));
+      }
+    });
+    return true;
+  } catch(e){ console.warn('[dashboard] 3상자 뽑기:', e && e.message); return false; }
+}
+function p3Pick(i){
+  var S = p3State, el = document.getElementById('p3');
+  if (!S || !el || S.picked >= 0) return;
+  var won = (i === S.lucky) ? 2 : 1;
+  S.picked = i; S.won = won;
+  el.classList.add('opened');
+  var items = el.querySelectorAll('.p3-item');
+  for (var k = 0; k < items.length; k++) items[k].classList.add('open');
+  var mine = el.querySelector('.p3-item[data-i="' + i + '"]');
+  if (mine) mine.classList.add('picked');
+  var ttl = el.querySelector('.p3-ttl'), sub = el.querySelector('.p3-sub');
+  if (ttl) ttl.textContent = '축하합니다!';
+  if (sub) sub.innerHTML = '선물상자에서 <b>' + won + 'P</b>를 획득하셨습니다!';
+  if (won === 2){ var lb = el.querySelector('.p3-lucky'); if (lb) lb.hidden = false; }
+  var ok = el.querySelector('.p3-ok'); if (ok) ok.hidden = false;
+  gftChime();
+  p3Burst(el);
+  setTimeout(function(){ try { if (typeof confetti === 'function') confetti(30); } catch(e){} }, 110);
+  /* 💎 지급 — 상자를 고른 이 순간 딱 1번 (picked 플래그 + granted 플래그) */
+  if (!S.granted){
+    S.granted = true;
+    var kid = S.kid, got = 0;
+    mutate(function(s){
+      s.shop = s.shop || {};
+      s.shop.bonus = s.shop.bonus || {};
+      s.shop.pendingGift = s.shop.pendingGift || {};
+      var pend = Number(s.shop.pendingGift[kid]) || 0;
+      if (pend <= 0) return;
+      got = won;
+      s.shop.bonus[kid] = (Number(s.shop.bonus[kid]) || 0) + got;
+      if (pend - 1 > 0) s.shop.pendingGift[kid] = pend - 1;
+      else delete s.shop.pendingGift[kid];
+    });
+    if (!got){
+      if (sub) sub.innerHTML = '이미 확인한 선물이에요';
+      toast('🎁 이 선물은 이미 열렸어요', 2200);
+    }
+    try { renderKids(); if (typeof avatarDraft !== 'undefined' && avatarDraft) renderAvatarSheet(); } catch(e){}
+  }
+}
 /* ============================================================
    🎁 1P 선물 상자 언박싱 — 띠링~✨ 사운드 + 컨페티 + 아이템 공개
    · 새로 1P로 살 때만 뜬다 (구매 취소·보유 아이템 착용에는 뜨지 않음)
@@ -4038,7 +4552,11 @@ function giftOpen(kid, kind, key){
     el.addEventListener('click', function(ev){
       if (el.classList.contains('opened')){
         var t = ev.target;
-        if (t && t.className && String(t.className).indexOf('gft-ok') >= 0){ giftClose(); }
+        if (t && t.className && String(t.className).indexOf('gft-ok') >= 0){
+          giftClose();
+          /* 방금 산 카드로 📖 도감 세트가 완성됐다면, 언박싱을 닫는 이 순간 선물상자를 알려 준다 */
+          try { codexSyncClaims(false); } catch(e){ console.warn('[dashboard] 도감 세트:', e && e.message); }
+        }
         return;
       }
       gftReveal(el, kid, kind, key);
@@ -7159,6 +7677,7 @@ function setCommute(k, customLabel){
 }
 function afterRoutine(){
   renderKids(); renderClean(); renderReward(); renderWeek();
+  try { codexSyncClaims(false); } catch(e){ console.warn('[dashboard] 연속 공부 미션:', e && e.message); }
 }
 function checkHighFive(){
   var msgs = [];
@@ -7205,9 +7724,13 @@ function openAvatarSheet(id){
   renderAvatarSheet();
   var sh = $('#sheet'); if (sh) sh.hidden = false;
   var shc = $('#sheet .sheet-card'); if (shc) shc.setAttribute('aria-label', '캐릭터 꾸미기와 상점');
-  /* 🎁 부모가 보낸 선물이 도착해 있으면, 상점을 여는 이 순간 선물상자가 열린다 */
+  avOwnFilter = 'all';
+  codexSetsOpen = true;
+  /* 📖 도감 세트 · 🔥 연속 공부 보상부터 정산 — 상점을 여는 순간 새 선물이 함께 도착한다 */
+  try { codexSyncClaims(false); } catch(e){}
+  /* 🎁 선물이 도착해 있으면, 상점을 여는 이 순간 3상자 뽑기가 열린다 */
   var pgift = giftPendAmt(id);
-  if (pgift > 0) setTimeout(function(){ giftBoxPopup(id, pgift); }, 230);
+  if (pgift > 0) setTimeout(function(){ p3Open(id); }, 240);
 }
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
@@ -7216,16 +7739,20 @@ function renderAvatarSheet(){
   var tabs = [ ['preset', '🧒 캐릭터'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'], ['bg', '🎨 배경 색'] ];
   var pane = '';
   if (avatarTab === 'bg'){
-    pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + (AV_BGS.length - 1) + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
-      + '<div class="av-bggrid">' + AV_BGS.map(function(bx){
+    var bgList = avFilterList(AV_BGS, kid, 'bg');
+    pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + avListNote(bgList, AV_BGS.length - 1, kid, 'bg')
+      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + (bgList.length ? '<div class="av-bggrid">' + bgList.map(function(bx){
           return avShopCard('bg', bx.k, bx.n,
             '<span class="av-card-img"><span class="av-bgdot" style="background:' + bx.c + '"></span></span>', kid, av);
-        }).join('') + '</div></div>';
+        }).join('') + '</div>' : avEmptyHtml('bg')) + '</div>';
   } else if (avatarTab === 'deco'){
     /* 카드마다 고른 캐릭터에 그 꾸미기를 실제로 씌운 모습을 118px 프리뷰로 보여 줍니다 */
     var pvPreset = av.preset || 'bun_ribbon', pvBg = avBgColor(av.bg);
-    pane = '<div class="av-sec"><div class="av-lab">꾸미기를 골라요 · ' + (AV_DECOS.length - 1) + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
-      + '<div class="av-grid">' + AV_DECOS.map(function(d){
+    var dList = avFilterList(AV_DECOS, kid, 'deco');
+    pane = '<div class="av-sec"><div class="av-lab">꾸미기를 골라요 · ' + avListNote(dList, AV_DECOS.length - 1, kid, 'deco')
+      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + (dList.length ? '<div class="av-grid">' + dList.map(function(d){
           var lab = (d.k === 'none') ? '없음' : d.n.replace(/^\S+\s*/, '');
           var pv = (d.k === 'none')
             ? '<span class="av-card-img"><span class="avw av-deco-pv av-deco-none">—</span></span>'
@@ -7233,21 +7760,25 @@ function renderAvatarSheet(){
               + '<img src="' + avImgSrc(pvPreset) + '" alt="" draggable="false" decoding="async">'
               + avDecoHtml(d.k) + '</span></span>';
           return avShopCard('deco', d.k, lab, pv, kid, av);
-        }).join('') + '</div></div>';
+        }).join('') + '</div>' : avEmptyHtml('deco')) + '</div>';
   } else if (avatarTab === 'build'){
-    pane = '<div class="av-sec"><div class="av-lab">집·마을을 골라요 · ' + AV_BUILDS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
-      + '<div class="av-grid">' + AV_BUILDS.map(function(bd){
+    var bList = avFilterList(AV_BUILDS, kid, 'build');
+    pane = '<div class="av-sec"><div class="av-lab">집·마을을 골라요 · ' + avListNote(bList, AV_BUILDS.length, kid, 'build')
+      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + (bList.length ? '<div class="av-grid">' + bList.map(function(bd){
           return avShopCard('build', bd.k, bd.n,
             '<span class="av-card-img"><span class="av-card-svg">' + avBuildSvg(bd.k) + '</span></span>', kid, av);
-        }).join('') + '</div></div>'
+        }).join('') + '</div>' : avEmptyHtml('build')) + '</div>'
       + '<div class="av-bnote"><small>구매한 집·건물은 🌳 자연 놀이터 ›🎨 꾸미기 ›🏡 집·건물에서 원하는 곳에 직접 지을 수 있어요</small>'
       +   '<button type="button" data-act="pg-from-shop" data-m="' + kid + '">🌳 자연 놀이터 가기 ›</button></div>';
   } else {
-    pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · ' + AV_PRESETS.length + '종 <span class="av-lab-note">1개 = 💎 1P</span></div>'
-      + '<div class="av-grid">' + AV_PRESETS.map(function(p){
+    var pList = avFilterList(AV_PRESETS, kid, 'preset');
+    pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · ' + avListNote(pList, AV_PRESETS.length, kid, 'preset')
+      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + (pList.length ? '<div class="av-grid">' + pList.map(function(p){
           return avShopCard('preset', p.k, p.n,
             '<span class="av-card-img"><img src="' + avImgSrc(p.k) + '" alt="" draggable="false"></span>', kid, av);
-        }).join('') + '</div></div>';
+        }).join('') + '</div>' : avEmptyHtml('preset')) + '</div>';
   }
   var lockedNow = ['preset','bg','deco'].filter(function(k){ return !avUnlocked(kid, k, av[k]); }).length;
   var ownCount = avOwnedCount(kid);
@@ -7272,7 +7803,7 @@ function renderAvatarSheet(){
     + topHtml
     + '<div class="av-ptbar">'
     +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
-    +   (giftPendAmt(kid) > 0 ? '<span class="av-ptgift" title="상점을 열면 선물상자가 열려요">🎁 선물 도착! +' + giftPendAmt(kid) + 'P</span>' : '')
+    +   (giftPendAmt(kid) > 0 ? '<button type="button" class="av-ptgift" data-act="gift-open" title="눌러서 선물상자 3개 중 하나를 골라요">🎁 선물 도착! +' + giftPendAmt(kid) + 'P</button>' : '')
     +   '<span class="av-ptunit">1개 = 💎 1P</span>'
     +   '<span class="av-ptown">👗 보유한 아이템: ' + (ownCount ? ownCount + '개' : '없음') + '</span>'
     +   '<span class="av-ptlock">🔒 엄마·아빠 전용</span>'
@@ -7283,6 +7814,8 @@ function renderAvatarSheet(){
     +   '<span class="av-ptnote">공부를 ✓ 완료한 날마다 하루 +1P씩 쌓여요 · 아이템은 1개당 💎 1P</span>'
     +   '<span class="av-ptfoot"><button type="button" class="av-plink" data-act="pt-parent">🔒 부모 PIN 변경</button></span>'
     + '</div>'
+    + codexBarHtml(kid)
+    + codexToolsHtml(kid)
     + '<div class="av-tabs">' + tabs.map(function(t){
         return '<button class="avtab' + (avatarTab === t[0] ? ' on' : '') + '" type="button" data-act="av-tab" data-tab="' + t[0] + '">' + t[1] + '</button>';
       }).join('') + '</div>'
@@ -7330,6 +7863,9 @@ document.addEventListener('click', function(ev){
     return;
   }
   if (act === 'av-tab'){ avatarTab = el.dataset.tab; renderAvatarSheet(); return; }
+  if (act === 'av-filter'){ avOwnFilter = (el.dataset.f === 'own') ? 'own' : 'all'; renderAvatarSheet(); return; }
+  if (act === 'cdx-fold'){ codexSetsOpen = !codexSetsOpen; renderAvatarSheet(); return; }
+  if (act === 'gift-open'){ if (avatarDraft) p3Open(avatarDraft.kid); return; }
   if (act === 'av-buy'){
     if (!avatarDraft) return;
     var bKid = avatarDraft.kid, bKind = el.dataset.k, bKey = el.dataset.v;
@@ -8271,6 +8807,7 @@ async function unlockApp(afterPinSetup){
   applyConfig(root.config || DEMO_CONFIG);
   prefs = normalizePrefs(readPrefsRaw());
   state = root.state ? normalizeState(root.state) : initialState({ samples: !DB.isRemote() });
+  try { if (root.state) { codexSyncClaims(true); } } catch(e){ console.warn('[dashboard] 도감 정산:', e && e.message); }
   var prRoot = resolveParentPin(root);
   if (prRoot) parentPinRec = prRoot;
   var isNew = !root.state;
