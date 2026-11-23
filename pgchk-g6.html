@@ -16901,7 +16901,7 @@ async function finishBoot(){
     PG.lastSig = pgSig();
     pgRenderDeco();
     pgHintEmpty();
-    PG.followSync();
+    pgFollowSync();
     pgApplyZone();
     if (PG.portal){
       pgPortalRender();
