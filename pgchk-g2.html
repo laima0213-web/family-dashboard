@@ -1856,6 +1856,90 @@ body.pg-open{overflow:hidden!important}
   animation:pgNoteUp 1.15s ease-out forwards}
 @keyframes pgNoteUp{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
   25%{opacity:1}100%{opacity:0;transform:translate(-50%,-190%) scale(1.15) rotate(18deg)}}
+
+/* ============================================================
+   🚪 입장문(포털) · 공간 표시 · 한 공간만 놀기
+   ============================================================ */
+.pg-lrow{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0}
+.pg-zonebtn{display:flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;
+  border:1.5px solid rgba(255,255,255,.98);background:rgba(255,255,255,.92);color:#3F6247;
+  font-size:11.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap;letter-spacing:-.3px;
+  box-shadow:0 3px 12px rgba(60,110,70,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pg-zonebtn b{font-size:9px;color:#93AE96;line-height:1}
+.pg-zonebtn:active{transform:scale(.95)}
+.pg-zonebtn[hidden]{display:none!important}
+.pg-locchip{display:flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.95);background:rgba(255,255,255,.88);color:#6B7F6E;
+  font-size:10px;font-weight:900;font-family:inherit;cursor:pointer;max-width:54vw;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;letter-spacing:-.3px;
+  box-shadow:0 3px 10px rgba(60,110,70,.14)}
+.pg-locchip:active{transform:scale(.96)}
+.pg-locchip[hidden]{display:none!important}
+.pg-portal{position:absolute;inset:0;z-index:9;display:flex;align-items:flex-end;justify-content:center;
+  background:linear-gradient(180deg,rgba(30,46,34,.10),rgba(26,40,30,.46));
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.pg-portal[hidden]{display:none!important}
+.pgp-box{width:100%;max-width:560px;max-height:76%;display:flex;flex-direction:column;
+  background:rgba(255,253,247,.985);border-radius:26px 26px 0 0;
+  box-shadow:0 -12px 36px rgba(50,80,55,.24);
+  padding:10px 12px calc(13px + env(safe-area-inset-bottom,0px))}
+.pgp-h{display:flex;align-items:center;gap:6px;padding-bottom:7px}
+.pgp-h b{font-size:14.5px;font-weight:900;letter-spacing:-.5px;color:#3E553F}
+.pgp-x{margin-left:auto;flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid #EADFCB;
+  background:#FFF8EA;color:#8B7A63;font-size:13px;font-weight:900;font-family:inherit;cursor:pointer}
+.pgp-x[hidden]{display:none!important}
+.pgp-sum{display:flex;flex-wrap:wrap;gap:2px 9px;font-size:10px;font-weight:900;color:#6F8472;
+  padding:0 2px 9px;line-height:1.4}
+.pgp-sum b{color:#3E553F}
+.pgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding-bottom:2px}
+@media (min-width:520px){.pgp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.pgp-card{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:9px 9px 8px;
+  border-radius:16px;border:1.5px solid #F0E7D7;background:#FFFDF9;font-family:inherit;
+  cursor:pointer;text-align:left;min-width:0}
+.pgp-card:active{transform:scale(.97)}
+.pgp-card.on{border-color:#A8DFB8;background:linear-gradient(160deg,#F2FBF4,#E4F7EA)}
+.pgp-top{display:flex;align-items:center;gap:5px;min-width:0}
+.pgp-ic{font-size:18px;line-height:1}
+.pgp-nm{font-size:12.5px;font-weight:900;color:#3F6247;letter-spacing:-.4px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.pgp-cnt{margin-left:auto;flex:0 0 auto;font-size:9px;font-weight:900;color:#8A72C0;
+  background:#F4EFFE;border-radius:999px;padding:1px 6px;white-space:nowrap}
+.pgp-card.has .pgp-cnt{background:#E9F8EE;color:#3F8A5C}
+.pgp-who{display:flex;align-items:center;flex-wrap:wrap;gap:3px;font-size:9.5px;font-weight:800;
+  color:#8C7C68;line-height:1.35;min-width:0}
+.pgp-who b{font-weight:900;color:#5C7D62}
+.pgp-who img{width:15px;height:15px;border-radius:50%;object-fit:cover;object-position:50% 18%;
+  background:#FFF6E6;vertical-align:-3px}
+.pgp-foot{padding-top:9px}
+.pgp-foot[hidden]{display:none!important}
+.pgp-foot button{width:100%;height:40px;border-radius:14px;border:1.5px solid #A8DFB8;
+  background:linear-gradient(160deg,#E8F9EE,#BFEBCC);color:#2F6B45;font-size:12.5px;font-weight:900;
+  font-family:inherit;cursor:pointer}
+.pg-summon{position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(100px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;align-items:center;gap:7px;
+  padding:5px 6px 5px 12px;border-radius:999px;max-width:88vw;
+  background:rgba(255,253,246,.97);border:1.5px solid #FFF0D8;
+  box-shadow:0 6px 18px rgba(80,70,50,.2)}
+.pg-summon[hidden]{display:none!important}
+.pg-summon .tx{font-size:10.5px;font-weight:900;color:#6B5B47;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg-summon button{flex:0 0 auto;height:28px;padding:0 10px;border-radius:999px;border:1.5px solid #A8DFB8;
+  background:linear-gradient(160deg,#D9F5E2,#A8E8BE);color:#2F6B45;font-size:10.5px;font-weight:900;
+  font-family:inherit;cursor:pointer;white-space:nowrap}
+.pg-summon button:active{transform:scale(.95)}
+.pg-door{position:absolute;inset:0;z-index:11;pointer-events:none;overflow:hidden}
+.pg-door[hidden]{display:none!important}
+.pg-door i{position:absolute;top:0;bottom:0;width:50.5%;background:linear-gradient(180deg,#FFF9EC,#EFE4CF);
+  transition:transform .48s cubic-bezier(.55,.04,.32,1)}
+.pg-door i.l{left:0;border-right:2px solid #E2D4BA}
+.pg-door i.r{right:0;border-left:2px solid #E2D4BA}
+.pg-door.open i.l{transform:translateX(-101%)}
+.pg-door.open i.r{transform:translateX(101%)}
+.pg-door span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;
+  font-size:16px;font-weight:900;color:#4A6B4F;letter-spacing:-.5px;white-space:nowrap;
+  opacity:0;transition:opacity .28s .2s}
+.pg-door.open span{opacity:1}
 .pg-hint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));
   transform:translateX(-50%);max-width:72vw;text-align:center;font-size:11px;font-weight:900;
   color:#41684B;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.95);
@@ -2054,6 +2138,15 @@ body.pg-open{overflow:hidden!important}
   .pg-herotag img{width:16px;height:16px}
   .pg.game .pg-hint{bottom:calc(152px + env(safe-area-inset-bottom,0px));max-width:56vw;font-size:10px}
   .pg-bubble{font-size:10.5px;padding:4px 9px}
+  .pg-zonebtn{height:26px;padding:0 8px;font-size:10.5px}
+  .pg-locchip{height:22px;font-size:9.5px;max-width:50vw}
+  .pgp-box{padding:9px 10px calc(11px + env(safe-area-inset-bottom,0px))}
+  .pgp-h b{font-size:13.5px}
+  .pgp-grid{gap:6px}
+  .pgp-card{padding:8px 8px 7px;border-radius:14px}
+  .pgp-nm{font-size:11.5px}
+  .pgp-who{font-size:9px}
+  .pg-summon{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
   .pg-lbl{font-size:8.5px;padding:0 5px}
   .pgd-grid{grid-template-columns:repeat(4,1fr);gap:5px}
   .pgd-grid.bld{grid-template-columns:repeat(4,1fr)}
@@ -2193,8 +2286,14 @@ body.pg-open{overflow:hidden!important}
 
   <div class="pg-top">
     <div class="pg-l">
-      <div class="pg-title" id="pgTitle">🌳 자연 놀이터</div>
-      <div class="pg-switch" id="pgSwitch"></div>
+      <div class="pg-lrow">
+        <div class="pg-title" id="pgTitle">🌳 자연 놀이터</div>
+        <button type="button" class="pg-zonebtn" id="pgZoneBtn" hidden title="다른 공간으로 이동">🎡 놀이공원 <b>▾</b></button>
+      </div>
+      <div class="pg-lrow">
+        <div class="pg-switch" id="pgSwitch"></div>
+        <button type="button" class="pg-locchip" id="pgLocBtn" hidden title="캐릭터 위치 · 누르면 입장문이 열려요">📍 위치</button>
+      </div>
       <div class="pg-tools">
         <button type="button" id="pgDecoBtn">🎨 꾸미기</button>
         <button type="button" id="pgLblBtn">🏷 이름표</button>
@@ -2202,7 +2301,6 @@ body.pg-open{overflow:hidden!important}
       </div>
     </div>
     <button type="button" class="pg-exit" id="pgExit">✕ 나가기</button>
-    <div class="pg-nations" id="pgNations"></div>
   </div>
 
   <div class="pg-empty" id="pgEmpty" hidden>🎨 꾸미기에서 상점에서 산 캐릭터·집을 데려와요</div>
@@ -2226,6 +2324,28 @@ body.pg-open{overflow:hidden!important}
     <button type="button" class="pg-act" id="pgActDance"><span class="ico">💃</span><span class="txt">춤</span></button>
   </div>
   <div class="pg-herotag" id="pgHeroTag" hidden></div>
+
+  <!-- 🚪 입장문 — 어느 공간으로 놀러 갈까요? -->
+  <div class="pg-portal" id="pgPortal" hidden>
+    <div class="pgp-box">
+      <div class="pgp-h">
+        <b>🚪 어디로 놀러 갈까요?</b>
+        <button type="button" class="pgp-x" id="pgPortalClose" hidden aria-label="닫기">✕</button>
+      </div>
+      <div class="pgp-sum" id="pgpSum">📍 캐릭터 위치를 불러오는 중…</div>
+      <div class="pgp-grid" id="pgpGrid"></div>
+      <div class="pgp-foot" id="pgpFoot" hidden>
+        <button type="button" id="pgpDeco">🎨 먼저 꾸미기에서 캐릭터 데려오기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg-summon" id="pgSummon" hidden>
+    <span class="tx" id="pgSummonTx">📍</span>
+    <button type="button" id="pgSummonBtn">📥 여기로 불러오기</button>
+  </div>
+
+  <div class="pg-door" id="pgDoor" hidden><i class="l"></i><i class="r"></i><span id="pgDoorLbl">입장!</span></div>
 
   <div class="pg-zoom">
     <button type="button" id="pgPanBtn" class="pg-pan-btn on" aria-label="지금 손가락으로 화면 이동 중 · 누르면 360° 회전" aria-pressed="true" title="지금 손가락으로 화면 이동 중 · 누르면 360° 회전"><span class="pgz-ico">✋</span><span class="pgz-txt">이동</span></button>
@@ -9258,7 +9378,9 @@ async function finishBoot(){
     time:0, lastT:0, decoOpen:false, decoTab:'char', lastSig:'', hintTimer:0,
     /* 🎮 게임 시점 — 주인공 따라가기 · 조이스틱 · 톡 이동 · 인사/춤 */
     follow:false, followId:'', joy:{ id:null, x:0, y:0 }, tapDown:null,
-    goal:null, goalRing:null, bubbles:[], hudDirty:true
+    goal:null, goalRing:null, bubbles:[], hudDirty:true,
+    /* 🚪 입장문 · 공간(zone) 단독 놀이 */
+    zone:'', portal:false, zoneEdge:null, doorTimer:0, locSig:''
   };
   var CDN = [
     'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
@@ -9437,11 +9559,13 @@ async function finishBoot(){
     pgNationMark('all');
     pgPanSet(true, true);            /* ✋ 기본은 한 손가락 화면 이동 — 끝쪽 구석까지 바로 끌어 갈 수 있게 */
     pgTitle(); pgSwitch(); pgRenderNations(); pgRenderDeco();
+    /* 🚪 놀이터에 들어오면 입장문부터 — 어느 공간으로 갈지 먼저 고른다 */
+    PG.zone = ''; PG.portal = false;
+    pgApplyZone(); pgZonePill(); pgLocChip(true); pgHideSummon(); pgPortalShow();
     var hint = document.getElementById('pgHint');
     if (hint){ hint.classList.add('on'); clearTimeout(PG.hintTimer); PG.hintTimer = setTimeout(function(){ hint.classList.remove('on'); }, 6000); }
     if (PG.ready){
       pgResize(); pgRefreshChars(); pgStart();
-      if (!PG.charOrder.length) pgAutoDeco();
       return;
     }
     if (PG.loading) return;
@@ -9453,7 +9577,6 @@ async function finishBoot(){
       PG.ready = true; PG.loading = false;
       pgShowLoad(null);
       pgResize(); pgRefreshChars(); pgStart();
-      if (!PG.charOrder.length) pgAutoDeco();
     }).catch(function(e){
       PG.loading = false; PG.failed = true;
       console.warn('[playground] three.js load failed:', e && e.message);
@@ -9468,6 +9591,12 @@ async function finishBoot(){
     if (el) el.hidden = true;
     document.body.classList.remove('pg-open');
     pgStop(); pgDeco(false);
+    pgPortalHide();
+    pgHideSummon();
+    var dd = document.getElementById('pgDoor');
+    if (dd){ dd.hidden = true; dd.classList.remove('open'); }
+    PG.zone = '';
+    pgApplyZone();
   }
   function pgLoadLib(i){
     return new Promise(function(res, rej){
@@ -16095,6 +16224,9 @@ async function finishBoot(){
     var mapView = PG.dist > 200;             /* 아주 멀리서(전체 지도)는 이름표를 모두 숨긴다 */
     PG.labels.forEach(function(L){
       if (!L.el) return;
+      /* 🚪 공간 안에서는 다른 나라 이름표를 숨긴다 */
+      if (PG.zone && L.key.indexOf('nat:') === 0){ L.el.style.display = 'none'; return; }
+      if (L.g && L.g.visible === false){ L.el.style.display = 'none'; return; }
       if (mapView || (farView && L.key.indexOf('nat:') !== 0)){ L.el.style.display = 'none'; return; }
       var v = PG.vec.set(L.g.position.x, L.g.position.y + L.y, L.g.position.z);
       v.project(PG.camera);
@@ -16737,7 +16869,8 @@ async function finishBoot(){
       sp: sp, sh: sh, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false,
       /* 자율 행동 — aiMode: 'walk' | 'play' | 'idle' (메모리 전용) */
       aiMode: 'idle', aiTimer: 0, wx: Number(rec.x) || 0, wz: Number(rec.z) || 0,
-      tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1, aiHome: false
+      tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1, aiHome: false,
+      homeNat: pgNationAt(Number(rec.x) || 0).k, actMode: '', actStart: 0, actEnd: 0
     };
     if (rec.ride && PG.rides[rec.ride]){
       /* 기구에 놓여 있던 캐릭터 — 열자마자 신나게 놀고 있음 */
@@ -16768,6 +16901,8 @@ async function finishBoot(){
     pgRenderDeco();
     pgHintEmpty();
     pgFollowSync();
+    pgApplyZone();
+    if (PG.portal) pgPortalRender();
   }
   function pgHintEmpty(){
     var e = document.getElementById('pgEmpty');
@@ -17392,6 +17527,20 @@ async function finishBoot(){
     }
     return [x, z];
   }
+  /* 🚪 공간(zone) 경계 — 지정한 나라의 x 범위를 넘지 않게 좌표를 당긴다 */
+  function pgZoneClampX(x, z, pad, zk){
+    var zn = pgNationKey(zk);
+    if (!zn) return [x, z];
+    var p = Math.max(0.4, pad === undefined ? CHAR_PAD : pad);
+    x = Math.max(zn.x0 + p, Math.min(zn.x1 - p, x));
+    var q = pgInRect(x, z, p);
+    return [q[0], q[1]];
+  }
+  function pgAIClampZ(x, z, prevX, prevZ, zk){
+    var pos = pgAIClamp(x, z, prevX, prevZ);
+    if (!zk) return pos;
+    return pgZoneClampX(pos[0], pos[1], CHAR_PAD, zk);
+  }
   function pgAIStartPlay(c, key, dur){
     var R = PG.rides[key];
     if (!R){ c.aiMode = 'idle'; c.aiTimer = pgAIrand(1.5, 3.5); return; }
@@ -17401,29 +17550,42 @@ async function finishBoot(){
     c.aiTimer = dur || pgAIrand(8, 14);
   }
   function pgAIPickTarget(c){
-    var keys = PG.rideList.filter(function(k){ return !!PG.rides[k]; });
+    /* 🚪 캐릭터는 자기가 살던 나라 안에서 논다 (사용자가 보고 들어간 곳에서 만날 수 있게) */
+    var zk = c.homeNat || pgNationAt(c.wx).k;
+    var zn0 = pgNationKey(zk) || NATIONS[1];
+    var inPark = (zk === 'park');
+    var keys = PG.rideList.filter(function(k){
+      var R = PG.rides[k];
+      if (!R) return false;
+      var rx = R.g.position.x;
+      return rx >= zn0.x0 && rx <= zn0.x1;
+    });
     /* 🌉 다리 위에 있으면 — 지금 서 있는 쪽 반대편 끝으로 걸어 내려간다 */
-    if (pgBridgeY(c.wx, c.wz) > 0.02){
+    if (inPark && pgBridgeY(c.wx, c.wz) > 0.02){
       c.aiBridge = 0; c.aiAim = ''; c.aiHome = false;
       if (Math.abs(c.wx - 44) <= 1.08){ c.tx = 44; c.tz = STREAM.z + (c.wz >= STREAM.z ? 2.15 : -2.15); }
       else { c.tx = POND.x; c.tz = POND.z + (c.wz >= POND.z ? 2.35 : -2.35); }
       return;
     }
     /* 10% — 연못 나무 다리를 건너 반대편까지 */
-    if (Math.random() < 0.10){
+    if (inPark && Math.random() < 0.10){
       var side = (c.wz > POND.z) ? 1 : -1;
       c.aiBridge = -side; c.aiAim = ''; c.aiHome = false;
       c.tx = POND.x; c.tz = POND.z + side * 2.42;
       return;
     }
     c.aiBridge = 0;
-    /* 18% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 (어느 나라든) */
+    /* 18% — 내가 지은 집·카페 마당으로 아장아장 걸어가 쉽다 (같은 나라 안에서만) */
     if (PG.buildOrder.length && Math.random() < 0.18){
-      var bb = PG.builds[PG.buildOrder[Math.floor(Math.random() * PG.buildOrder.length)]];
+      var bpool = PG.buildOrder.filter(function(id){
+        var bx = PG.builds[id];
+        return bx && bx.rec.x >= zn0.x0 && bx.rec.x <= zn0.x1;
+      });
+      var bb = bpool.length ? PG.builds[bpool[Math.floor(Math.random() * bpool.length)]] : null;
       if (bb){
         var rotB = Number(bb.rec.rot) || 0;
         var yardR = (bb.foot || 1.2) + 0.8;
-        var pY = pgAIClamp(bb.rec.x + Math.sin(rotB) * yardR, bb.rec.z + Math.cos(rotB) * yardR);
+        var pY = pgAIClampZ(bb.rec.x + Math.sin(rotB) * yardR, bb.rec.z + Math.cos(rotB) * yardR, undefined, undefined, zk);
         c.tx = pY[0]; c.tz = pY[1]; c.aiAim = ''; c.aiHome = true;
         return;
       }
@@ -17443,13 +17605,12 @@ async function finishBoot(){
       c.tx = p[0]; c.tz = p[1]; c.aiAim = k;
       return;
     }
-    /* 30% — 다른 나라로 산책! 메인 산책로를 따라 다섯 나라를 가로지른다 */
+    /* 30% — 같은 나라 안을 산책 */
     c.aiAim = '';
     for (var i = 0; i < 16; i++){
-      var nn = NATIONS[Math.floor(Math.random() * NATIONS.length)];
-      var wx2 = nn.x0 + 3 + Math.random() * (nn.x1 - nn.x0 - 6);
+      var wx2 = zn0.x0 + 3 + Math.random() * (zn0.x1 - zn0.x0 - 6);
       var wz2 = (Math.random() - 0.5) * 30;
-      var t = pgAIClamp(wx2, wz2);
+      var t = pgAIClampZ(wx2, wz2, undefined, undefined, zk);
       if (Math.abs(t[0] - c.wx) + Math.abs(t[1] - c.wz) > 3.0){ c.tx = t[0]; c.tz = t[1]; return; }
     }
     c.tx = c.wx; c.tz = c.wz;
@@ -17479,7 +17640,7 @@ async function finishBoot(){
       /* 기구 앞 잔디로 스르륵 내려와 다음 놀이를 찾는다 */
       var gx = R.g.position.x, gz = R.g.position.z;
       var a = Math.random() * 6.283, rr = (R.g.userData.radius || 2.0) * 0.8 + 0.4;
-      var p = pgAIClamp(gx + Math.cos(a) * rr, gz + Math.sin(a) * rr);
+      var p = pgAIClampZ(gx + Math.cos(a) * rr, gz + Math.sin(a) * rr, undefined, undefined, (c.homeNat || ''));
       c.wx = p[0]; c.wz = p[1];
     }
     c.data.x = c.wx; c.data.z = c.wz;
@@ -17507,13 +17668,13 @@ async function finishBoot(){
       if (dist <= 0.3){ pgAIArrive(c); continue; }
       var step = Math.min(dist, c.spd * dt);
       var nx = c.wx + dx / dist * step, nz = c.wz + dz / dist * step;
-      var pos = pgAIClamp(nx, nz, c.wx, c.wz);
+      var pos = pgAIClampZ(nx, nz, c.wx, c.wz, c.homeNat);
       if (Math.abs(pos[0] - nx) + Math.abs(pos[1] - nz) > 0.0005){
         /* 연못·섬 경계에 막혔으면 가장자리를 따라 옆으로 미끄러진다 */
         var px = pos[0] - POND.x, pz = pos[1] - POND.z, pl = Math.sqrt(px * px + pz * pz) || 1;
         var tgx = -pz / pl, tgz = px / pl;
         var sg = (dx * tgx + dz * tgz) >= 0 ? 1 : -1;
-        var p2 = pgAIClamp(pos[0] + tgx * sg * step, pos[1] + tgz * sg * step, c.wx, c.wz);
+        var p2 = pgAIClampZ(pos[0] + tgx * sg * step, pos[1] + tgz * sg * step, c.wx, c.wz, c.homeNat);
         c.wx = p2[0]; c.wz = p2[1];
       } else { c.wx = pos[0]; c.wz = pos[1]; }
       if (Math.abs(dx) > 0.02) c.face = dx < 0 ? -1 : 1;
@@ -17917,7 +18078,13 @@ async function finishBoot(){
       pgDecoTab('char');
       return;
     }
-    pgFollowOn();
+    var here = pgZoneChars();
+    if (!here.length){
+      pgShowSummon();
+      toast('이 공간엔 친구가 없어요 · 아래 📥로 불러와요', 2400);
+      return;
+    }
+    pgFollowOn(here[0].data.id);
   }
   function pgHeroTagSet(c){
     var tag = document.getElementById('pgHeroTag');
@@ -17983,13 +18150,13 @@ async function finishBoot(){
     }
     var sp = 3.4 * (spdMul || 1);
     var nx = c.wx + mx * sp * dt, nz = c.wz + mz * sp * dt;
-    var pos = pgAIClamp(nx, nz, c.wx, c.wz);
+    var pos = pgAIClampZ(nx, nz, c.wx, c.wz, PG.zone);
     if (Math.abs(pos[0] - nx) + Math.abs(pos[1] - nz) > 0.0004){
       /* 연못·건물·물가에 막히면 가장자리를 따라 미끄러진다 */
       var px = pos[0] - POND.x, pz = pos[1] - POND.z, pl = Math.sqrt(px * px + pz * pz) || 1;
       var tgx = -pz / pl, tgz = px / pl;
       var sg = (mx * tgx + mz * tgz) >= 0 ? 1 : -1;
-      pos = pgAIClamp(pos[0] + tgx * sg * sp * dt, pos[1] + tgz * sg * sp * dt, c.wx, c.wz);
+      pos = pgAIClampZ(pos[0] + tgx * sg * sp * dt, pos[1] + tgz * sg * sp * dt, c.wx, c.wz, PG.zone);
     }
     c.wx = pos[0]; c.wz = pos[1];
     c.data.x = c.wx; c.data.z = c.wz;
@@ -18108,6 +18275,10 @@ async function finishBoot(){
   }
   function pgGoalSet(x, z, ride){
     var g = pgGoalMesh();
+    if (PG.zone){
+      var pz = pgAIClampZ(x, z, undefined, undefined, PG.zone);
+      x = pz[0]; z = pz[1];
+    }
     PG.goal = { x: x, z: z, ride: ride || '' };
     g.position.set(x, pgBridgeY(x, z) + 0.02, z);
     g.scale.set(1, 1, 1);
@@ -18241,6 +18412,248 @@ async function finishBoot(){
     }
   }
 
+  /* ============================================================
+     🚪 입장문(포털) · 한 공간(zone)만 놀기 · 캐릭터 위치
+     ============================================================ */
+  function pgZoneChars(){
+    var out = [];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (!c) continue;
+      if (PG.zone && pgNationAt(c.wx).k !== PG.zone) continue;
+      out.push(c);
+    }
+    return out;
+  }
+  function pgCharsInZone(k){
+    var out = [];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (c && pgNationAt(c.wx).k === k) out.push(c);
+    }
+    return out;
+  }
+  function pgBuildsInZone(k){
+    var n = 0;
+    for (var i = 0; i < PG.buildOrder.length; i++){
+      var b = PG.builds[PG.buildOrder[i]];
+      if (b && pgNationAt(b.rec.x).k === k) n++;
+    }
+    return n;
+  }
+  /* 캐릭터는 현재 공간에 있는 친구만 보이게 (스프라이트는 잘리지 않으므로 직접 숨김) */
+  function pgCharVis(){
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (!c) continue;
+      var vis = !PG.zone || pgNationAt(c.wx).k === PG.zone;
+      if (c.sp.visible !== vis) c.sp.visible = vis;
+      if (c.sh.visible !== vis) c.sh.visible = vis;
+      if (!vis && c.actMode) pgActEnd(c);
+    }
+  }
+  function pgApplyZone(){
+    var k = PG.zone;
+    PG.rideList.forEach(function(key){
+      var R = PG.rides[key];
+      if (!R || !R.g) return;
+      R.g.visible = !k || pgNationAt(R.g.position.x).k === k;
+    });
+    PG.buildOrder.forEach(function(id){
+      var b = PG.builds[id];
+      if (b && b.g) b.g.visible = !k || pgNationAt(b.rec.x).k === k;
+    });
+    pgCharVis();
+    pgZoneClip();
+    pgZoneEdges(k);
+    pgUpdateLabels();
+  }
+  /* 다른 나라 땅·기구가 화면에 남지 않게 경계에서 잘라낸다 */
+  function pgZoneClip(){
+    if (!PG.renderer) return;
+    var n = PG.zone ? pgNationKey(PG.zone) : null;
+    if (!n){ PG.renderer.clippingPlanes = []; return; }
+    PG.renderer.clippingPlanes = [
+      new THREE.Plane(new THREE.Vector3(1, 0, 0), -(n.x0 + 0.06)),
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0), n.x1 - 0.06)
+    ];
+  }
+  /* 공간 양쪽 끝 통나무 울타리 + 안개판 — "여기서부터 나라 끝" */
+  function pgZoneEdges(key){
+    if (PG.zoneEdge){
+      try { PG.scene.remove(PG.zoneEdge); } catch(e){}
+      PG.zoneEdge = null;
+    }
+    var n = key ? pgNationKey(key) : null;
+    if (!n || !PG.scene) return;
+    var g = new THREE.Group();
+    var z0 = WZ0 + 1.4, z1 = WZ1 - 1.4, mid = (z0 + z1) / 2, len = z1 - z0;
+    [n.x0, n.x1].forEach(function(x, ix){
+      if (x <= WX0 + 0.6 || x >= WX1 - 0.6) return;      /* 세계 끝은 기존 울타리가 있음 */
+      var inx = (ix === 0) ? 0.30 : -0.30;              /* 클립 경계 살짝 안쪽 */
+      for (var z = z0; z <= z1; z += 2.4){
+        g.add(pgCyl(0.10, 0.13, 1.02, '#B98A5B', x + inx, 0.51, z, 8));
+        g.add(pgSph(0.20, '#8FCB86', x + inx, 0.20, z + 1.2, 8));
+      }
+      g.add(pgBox(0.09, 0.13, len, '#C79A6B', x + inx, 0.78, mid));
+      g.add(pgBox(0.07, 0.10, len, '#D2A87C', x + inx, 0.42, mid));
+      var mist = pgMesh(new THREE.PlaneGeometry(len, 4.6), '#EFF9FF');
+      mist.material.transparent = true;
+      mist.material.opacity = 0.55;
+      mist.material.depthWrite = false;
+      mist.position.set(x + inx * 2.2, 2.0, mid);
+      mist.rotation.y = Math.PI / 2;
+      g.add(mist);
+    });
+    PG.scene.add(g);
+    PG.zoneEdge = g;
+  }
+  /* 상단 공간 버튼 · 위치 칩 */
+  function pgZonePill(){
+    var b = document.getElementById('pgZoneBtn');
+    if (!b) return;
+    var n = PG.zone ? pgNationKey(PG.zone) : null;
+    b.hidden = !n;
+    if (n) b.innerHTML = n.ic + ' ' + esc(n.n) + ' <b>▾</b>';
+  }
+  function pgLocChip(force){
+    var el = document.getElementById('pgLocBtn');
+    if (!el) return;
+    if (!PG.charOrder.length){ el.hidden = true; return; }
+    var parts = [];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (!c) continue;
+      parts.push(pgPresetName(c.data.preset) + ': ' + pgNationAt(c.wx).n);
+    }
+    var txt = '📍 ' + parts.join(' · ');
+    if (force || txt !== PG.locSig){
+      el.textContent = txt;
+      el.setAttribute('title', txt + ' · 누르면 입장문');
+      PG.locSig = txt;
+    }
+    el.hidden = false;
+  }
+  /* 입장문 */
+  function pgPortalShow(){
+    var p = document.getElementById('pgPortal');
+    if (!p) return;
+    PG.portal = true;
+    pgPortalRender();
+    p.hidden = false;
+    var x = document.getElementById('pgPortalClose');
+    if (x) x.hidden = !PG.zone;
+  }
+  function pgPortalHide(){
+    PG.portal = false;
+    var p = document.getElementById('pgPortal');
+    if (p) p.hidden = true;
+  }
+  function pgPortalRender(){
+    var grid = document.getElementById('pgpGrid');
+    if (!grid) return;
+    var total = PG.charOrder.length;
+    grid.innerHTML = NATIONS.map(function(n){
+      var cs = pgCharsInZone(n.k);
+      var bc = pgBuildsInZone(n.k);
+      var who = cs.length
+        ? '<span class="pgp-who">📍 지금 여기: ' + cs.map(function(c){
+            return '<img src="' + avImgSrc(c.data.preset, true) + '" alt=""><b>' + esc(pgPresetName(c.data.preset)) + '</b>';
+          }).join(', ') + (bc ? ' · 🏡 ' + bc + '채' : '') + '</span>'
+        : '<span class="pgp-who">아직 아무도 없어요' + (bc ? ' · 🏡 ' + bc + '채' : '') + '</span>';
+      return '<button type="button" class="pgp-card' + (cs.length ? ' has' : '') + (PG.zone === n.k ? ' on' : '') + '" data-pgzone="' + n.k + '">'
+        + '<span class="pgp-top"><span class="pgp-ic">' + n.ic + '</span><span class="pgp-nm">' + esc(n.n) + '</span>'
+        + '<span class="pgp-cnt">' + (cs.length ? '🐾 ' + cs.length + '명' : '비었어요') + '</span></span>'
+        + who + '</button>';
+    }).join('');
+    var sum = document.getElementById('pgpSum');
+    if (sum){
+      sum.innerHTML = total
+        ? '📍 캐릭터 위치: ' + PG.charOrder.map(function(id){
+            var c = PG.chars[id];
+            if (!c) return '';
+            return '<span><b>' + esc(pgPresetName(c.data.preset)) + '</b> (' + pgNationAt(c.wx).n + ')</span>';
+          }).join('')
+        : '📍 아직 놀이터에 나온 캐릭터가 없어요';
+    }
+    var foot = document.getElementById('pgpFoot');
+    if (foot) foot.hidden = total > 0;
+  }
+  /* 입장문이 열리는 짧은 연출 */
+  function pgDoor(n){
+    var d = document.getElementById('pgDoor');
+    if (!d || !n) return;
+    var lb = document.getElementById('pgDoorLbl');
+    if (lb) lb.textContent = n.ic + ' ' + n.n + ' 입장!';
+    d.hidden = false;
+    d.classList.remove('open');
+    clearTimeout(PG.doorTimer);
+    setTimeout(function(){ d.classList.add('open'); }, 30);
+    PG.doorTimer = setTimeout(function(){ d.hidden = true; d.classList.remove('open'); }, 900);
+  }
+  function pgHideSummon(){
+    var el = document.getElementById('pgSummon');
+    if (el) el.hidden = true;
+  }
+  function pgShowSummon(){
+    var el = document.getElementById('pgSummon');
+    if (!el) return;
+    var others = [];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (c && pgNationAt(c.wx).k !== PG.zone) others.push(c);
+    }
+    if (!others.length){ el.hidden = true; return; }
+    var tx = document.getElementById('pgSummonTx');
+    if (tx){
+      var nm = pgPresetName(others[0].data.preset) + (others.length > 1 ? ' 외 ' + (others.length - 1) + '명' : '');
+      tx.textContent = '📍 ' + nm + '은 ' + pgNationAt(others[0].wx).n + '에 있어요';
+    }
+    el.hidden = false;
+  }
+  function pgSummonHero(){
+    var n = PG.zone ? pgNationKey(PG.zone) : null;
+    if (!n) return;
+    var cand = null;
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (c && pgNationAt(c.wx).k !== PG.zone){ cand = c; break; }
+    }
+    if (!cand) return;
+    var p = pgAIClampZ(n.cx + 1.4, 0.4, cand.wx, cand.wz, PG.zone);
+    cand.wx = p[0]; cand.wz = p[1];
+    cand.data.x = p[0]; cand.data.z = p[1];
+    cand.data.ride = ''; cand.curRide = '';
+    cand.homeNat = PG.zone;
+    cand.aiMode = 'idle'; cand.aiTimer = 999; cand.aiAim = '';
+    cand.tx = cand.wx; cand.tz = cand.wz;
+    pgCountRides();
+    pgHideSummon();
+    pgCharVis();
+    pgFollowOn(cand.data.id);
+    toast('📥 ' + pgPresetName(cand.data.preset) + '를 ' + n.n + '로 불러왔어요', 2200);
+  }
+  /* 🚪 공간 입장 */
+  function pgEnterZone(key, quiet){
+    var n = pgNationKey(key);
+    if (!n) return;
+    pgPortalHide();
+    if (PG.follow) pgFollowOff(true);
+    PG.zone = key;
+    pgApplyZone();
+    pgZonePill();
+    pgLocChip(true);
+    if (!quiet) pgDoor(n);
+    var here = pgZoneChars();
+    if (here.length){
+      pgHideSummon();
+      pgFollowOn(here[0].data.id);
+    } else {
+      pgShowSummon();
+      pgGoNation(key);
+    }
+  }
+
   /* ---------- 루프 ---------- */
   function pgStart(){
     if (PG.raf) return;
@@ -18317,6 +18730,8 @@ async function finishBoot(){
     PG.frames++;
     if (PG.frames % 2 === 0) pgUpdateLabels();
     if (PG.frames % 2 === 0) pgUpdateHud();
+    if (PG.frames % 20 === 0 && PG.zone) pgCharVis();
+    if (PG.frames % 40 === 0) pgLocChip();
     if (PG.labelsDirty){ PG.labelsDirty = false; pgBuildLabels(); }
     /* 다른 기기에서 바뀐 배치 반영 */
     if (PG.frames % 45 === 0 && !PG.drag && !PG.buildDrag){
@@ -18348,7 +18763,7 @@ async function finishBoot(){
     pgNDC(e);
     var best = null, bestD = 1e9;
     var sprites = [];
-    PG.charOrder.forEach(function(id){ if (PG.chars[id]) sprites.push(PG.chars[id].sp); });
+    PG.charOrder.forEach(function(id){ var c = PG.chars[id]; if (c && c.sp.visible !== false) sprites.push(c.sp); });
     if (sprites.length){
       var hs = PG.ray.intersectObjects(sprites, false);
       if (hs.length && hs[0].distance < bestD){
@@ -18360,7 +18775,7 @@ async function finishBoot(){
     }
     if (PG.buildOrder.length){
       var groups = [];
-      PG.buildOrder.forEach(function(id){ if (PG.builds[id]) groups.push(PG.builds[id].g); });
+      PG.buildOrder.forEach(function(id){ var bb0 = PG.builds[id]; if (bb0 && bb0.g && bb0.g.visible !== false) groups.push(bb0.g); });
       var hb = PG.ray.intersectObjects(groups, true);
       if (hb.length && hb[0].distance < bestD){
         var o = hb[0].object;
@@ -18374,7 +18789,7 @@ async function finishBoot(){
     /* 🎡 놀이기구 — 캐릭터·지은 집보다 뒤, 화면을 빈 곳으로 밀 때는 잡히지 않게 */
     if (PG.rideList.length && (!best || best.type !== 'char')){
       var rgs = [];
-      PG.rideList.forEach(function(k){ if (PG.rides[k] && PG.rides[k].g) rgs.push(PG.rides[k].g); });
+      PG.rideList.forEach(function(k){ if (PG.rides[k] && PG.rides[k].g && PG.rides[k].g.visible !== false) rgs.push(PG.rides[k].g); });
       var hr = PG.ray.intersectObjects(rgs, true);
       if (hr.length && hr[0].distance < bestD){
         var o2 = hr[0].object;
@@ -18402,8 +18817,10 @@ async function finishBoot(){
     PG.target.z += (-rZ * dxPx + fZ * dyPx * vk) * scale;
     /* 월드 밖으로 너무 나가지 않게 — 둥근 모서리 사각 경계
        카메라 초점만 넉넉히(-8.0m) 풀어, 울타리·바다·눈밭 가장자리까지 화면 가운데로 끌어온다 */
-    var tp2 = pgInRect(PG.target.x, PG.target.z, -8.0);
+    var znp = PG.zone ? pgNationKey(PG.zone) : null;
+    var tp2 = pgInRect(PG.target.x, PG.target.z, znp ? 0.5 : -8.0);
     PG.target.x = tp2[0]; PG.target.z = tp2[1];
+    if (znp) PG.target.x = Math.max(znp.x0 + 0.5, Math.min(znp.x1 - 0.5, PG.target.x));
     PG.target.y = 0.8;
     PG.camTween = null;
   }
@@ -18684,6 +19101,7 @@ async function finishBoot(){
     }
     /* 🤸 내려둔 자리에서 바로 혼자 놀기 시작한다 */
     c.wx = c.data.x; c.wz = c.data.z; c.aiAim = '';
+    c.homeNat = pgNationAt(c.data.x).k;
     if (best){
       /* 기구 위에 놓였으면 — 방금 그 기구에서 10~15초 신나게 */
       c.aiMode = 'play'; c.aiTimer = pgAIrand(10, 15);
@@ -18749,8 +19167,10 @@ async function finishBoot(){
       var G = pgGround({ clientX: mx, clientY: my }, PG.target.y || 0.8);
       if (G){
         var f = 1 - k;
+        var zn2 = PG.zone ? pgNationKey(PG.zone) : null;
         var cl2 = pgInRect(PG.target.x + (G.x - PG.target.x) * f,
-                           PG.target.z + (G.z - PG.target.z) * f, -8.0);
+                           PG.target.z + (G.z - PG.target.z) * f, zn2 ? 0.5 : -8.0);
+        if (zn2) cl2[0] = Math.max(zn2.x0 + 0.5, Math.min(zn2.x1 - 0.5, cl2[0]));
         PG.target.x = cl2[0]; PG.target.z = cl2[1];
       }
     }
@@ -18874,7 +19294,9 @@ async function finishBoot(){
     if (!owned.some(function(p){ return p.k === k; })){ toast('상점에서 산 캐릭터만 데려올 수 있어요'); return; }
     var ang = -0.9 + (PG.charOrder.length * 0.7);
     var rr = 2.1 + (PG.charOrder.length % 3) * 0.5;
-    var rec = { id: pgUid(), preset: k, x: Math.cos(ang) * rr, z: Math.sin(ang) * rr, ride: '' };
+    var aX = Math.cos(ang) * rr, aZ = Math.sin(ang) * rr;
+    if (PG.zone){ var znA = pgNationKey(PG.zone); if (znA) aX += znA.cx; }
+    var rec = { id: pgUid(), preset: k, x: aX, z: aZ, ride: '' };
     pgAddChar(rec);
     pgCountRides();
     pgSave();
@@ -18978,6 +19400,19 @@ async function finishBoot(){
     if (zi){ PG.distGoal = Math.max(6.5, PG.distGoal * 0.78); PG.camTween = null; return; }
     var zo = t.closest('#pgZoomOut');
     if (zo){ PG.distGoal = Math.min(520, PG.distGoal * 1.28); PG.camTween = null; return; }
+    /* ---------- 🚪 입장문 · 공간 ---------- */
+    var zbtn = t.closest('#pgZoneBtn');
+    if (zbtn){ pgPortalShow(); return; }
+    var lbtn = t.closest('#pgLocBtn');
+    if (lbtn){ pgPortalShow(); return; }
+    var pcl = t.closest('#pgPortalClose');
+    if (pcl){ pgPortalHide(); return; }
+    var pzc = t.closest('[data-pgzone]');
+    if (pzc){ pgEnterZone(pzc.getAttribute('data-pgzone')); return; }
+    var pdc = t.closest('#pgpDeco');
+    if (pdc){ pgPortalHide(); PG.decoTab = 'char'; pgDeco(true); pgDecoTab('char'); return; }
+    var smb = t.closest('#pgSummonBtn');
+    if (smb){ pgSummonHero(); return; }
     /* ---------- 🎮 게임 시점 ---------- */
     var gmb = t.closest('#pgGameBtn');
     if (gmb){ pgToggleFollow(); return; }
@@ -19004,8 +19439,14 @@ async function finishBoot(){
     }
     var rs = t.closest('#pgReset');
     if (rs){
-      pgGoNation('all');
-      toast('🏠 전체 월드로 돌아왔어요', 1400);
+      if (PG.zone){
+        var znR = pgNationKey(PG.zone);
+        pgGoNation(PG.zone);
+        toast('🏠 ' + znR.n + ' 공간을 한눈에 봐요', 1400);
+      } else {
+        pgGoNation('all');
+        toast('🏠 전체 월드로 돌아왔어요', 1400);
+      }
       return;
     }
     var pnb = t.closest('#pgPanBtn');
@@ -19037,7 +19478,28 @@ async function finishBoot(){
         return R.g.userData.track;
       })() }; },
     app: function(){ return state; },
-    /* 🎮 게임 시점 검증용 */
+    /* 🚪 입장문 · 공간 · 위치 */
+    zone: function(k, quiet){ if (k === undefined) return PG.zone; if (!k){ PG.zone = ''; pgApplyZone(); pgZonePill(); return ''; } pgEnterZone(k, quiet); return PG.zone; },
+    portal: function(on){ if (on === undefined) return PG.portal; if (on) pgPortalShow(); else pgPortalHide(); return PG.portal; },
+    portalInfo: function(){
+      pgPortalRender();
+      return { sum: (document.getElementById('pgpSum') || {}).textContent || '',
+               cards: (document.getElementById('pgpGrid') || { children: [] }).children.length,
+               who: (function(){ var out = {}; NATIONS.forEach(function(n){
+                 out[n.k] = pgCharsInZone(n.k).map(function(c){ return pgPresetName(c.data.preset); }); }); return out; })(),
+               loc: (document.getElementById('pgLocBtn') || {}).textContent || '',
+               pill: (document.getElementById('pgZoneBtn') || {}).textContent || '' };
+    },
+    summon: pgSummonHero,
+    vis: function(){
+      var out = { chars: {}, rides: {}, builds: {} };
+      PG.charOrder.forEach(function(id){ var c = PG.chars[id]; if (c) out.chars[pgPresetName(c.data.preset)] = { vis: c.sp.visible, nat: pgNationAt(c.wx).k, x: +c.wx.toFixed(1) }; });
+      PG.rideList.forEach(function(k){ var R = PG.rides[k]; if (R) out.rides[k] = R.g.visible; });
+      PG.buildOrder.forEach(function(id){ var b = PG.builds[id]; if (b) out.builds[id] = b.g.visible; });
+      out.clip = PG.renderer ? PG.renderer.clippingPlanes.length : -1;
+      out.zone = PG.zone;
+      return out;
+    },
     game: pgToggleFollow, heroNext: pgFollowNext, act: pgAct,
     joy: function(x, y){ PG.joy.x = Number(x) || 0; PG.joy.y = Number(y) || 0; return [PG.joy.x, PG.joy.y]; },
     tap: function(x, z, ride){ pgGoalSet(Number(x) || 0, Number(z) || 0, ride || ''); return PG.goal; },
