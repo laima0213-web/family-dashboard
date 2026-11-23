@@ -18047,7 +18047,11 @@ async function finishBoot(){
       pgFollowOff(true);
       return;
     }
-    if (!PG.chars[PG.followId]) PG.followId = PG.charOrder[0];
+    if (!PG.chars[PG.followId] || (PG.zone && pgNationAt(PG.chars[PG.followId].wx).k !== PG.zone)){
+      var inz = pgZoneChars();
+      if (inz.length) PG.followId = inz[0].data.id;
+      else { pgFollowOff(true); pgShowSummon(); return; }
+    }
     var c = pgHero();
     if (c){ c.aiMode = 'idle'; c.aiTimer = 999; c.tx = c.wx; c.tz = c.wz; }
     pgHeroTagSet(c);
@@ -18482,12 +18486,18 @@ async function finishBoot(){
   }
   /* 공간 양쪽 끝 통나무 울타리 + 안개판 — "여기서부터 나라 끝" */
   function pgZoneEdges(key){
+    var n = key ? pgNationKey(key) : null;
+    if (!n || !PG.scene){
+      if (PG.zoneEdge){ try { PG.scene.remove(PG.zoneEdge); } catch(e){} PG.zoneEdge = null; }
+      PG.zoneEdgeKey = '';
+      return;
+    }
+    if (PG.zoneEdgeKey === key && PG.zoneEdge) return;      /* 같은 공간이면 다시 짓지 않는다 */
     if (PG.zoneEdge){
       try { PG.scene.remove(PG.zoneEdge); } catch(e){}
       PG.zoneEdge = null;
     }
-    var n = key ? pgNationKey(key) : null;
-    if (!n || !PG.scene) return;
+    PG.zoneEdgeKey = key;
     var g = new THREE.Group();
     var z0 = WZ0 + 1.4, z1 = WZ1 - 1.4, mid = (z0 + z1) / 2, len = z1 - z0;
     [n.x0, n.x1].forEach(function(x, ix){
