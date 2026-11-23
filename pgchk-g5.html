@@ -16901,9 +16901,12 @@ async function finishBoot(){
     PG.lastSig = pgSig();
     pgRenderDeco();
     pgHintEmpty();
-    pgFollowSync();
+    PG.followSync();
     pgApplyZone();
-    if (PG.portal) pgPortalRender();
+    if (PG.portal){
+      pgPortalRender();
+      if (!PG.zone) pgPortalCam();
+    }
   }
   function pgHintEmpty(){
     var e = document.getElementById('pgEmpty');
@@ -18222,6 +18225,10 @@ async function finishBoot(){
       PG.target.x += (p.x - PG.target.x) * k2;
       PG.target.z += (p.z - PG.target.z) * k2;
       PG.target.y += ((p.y + 1.15) - PG.target.y) * k2;
+      if (PG.zone){
+        var znc = pgNationKey(PG.zone);
+        if (znc) PG.target.x = Math.max(znc.x0 + 2.2, Math.min(znc.x1 - 2.2, PG.target.x));
+      }
     }
     PG.polar = Math.max(0.78, Math.min(1.32, PG.polar));
     PG.distGoal = Math.max(5.0, Math.min(18.0, PG.distGoal));
@@ -18235,6 +18242,7 @@ async function finishBoot(){
   /* 땅·기구·친구를 콕 눌렀을 때 (게임 시점) */
   function pgGameTap(td){
     var c = pgHero();
+    PG.tapGo = (PG.tapGo || 0) + 1;
     if (!c) return;
     var hit = td.hit;
     if (hit && hit.type === 'char'){
@@ -18367,7 +18375,7 @@ async function finishBoot(){
     if (!box || !PG.renderer) return;
     var n = 0;
     var iv = setInterval(function(){
-      if (n > 5 || !PG.on || !c.actMode || c.actMode !== 'dance'){ clearInterval(iv); return; }
+      if (n > 9 || !PG.on || !c.actMode || c.actMode !== 'dance'){ clearInterval(iv); return; }
       var p = c.sp.position;
       var s = pgWorldToScreen(p.x + (Math.random() - 0.5) * 0.9, p.y + 1.55, p.z);
       var el = document.createElement('div');
@@ -18379,7 +18387,7 @@ async function finishBoot(){
       box.appendChild(el);
       setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 1200);
       n++;
-    }, 230);
+    }, 300);
   }
   function pgWorldToScreen(x, y, z){
     var v = PG.vec.set(x, y, z);
@@ -18551,16 +18559,7 @@ async function finishBoot(){
     var p = document.getElementById('pgPortal');
     if (!p) return;
     PG.portal = true;
-    if (!PG.zone && PG.renderer && PG.target){
-      /* 포털 뒤에는 친구들이 많은 나라를 가운데 두고 살짝 비춰 준다 */
-      var best = PG.charOrder.length ? pgNationAt(pgZoneAll()[0].wx).k : 'park';
-      var n0 = pgNationKey(best) || NATIONS[0];
-      PG.target.set(n0.cx, 1.1, 0);
-      PG.dist = PG.distGoal = 40;
-      PG.polar = 0.92; PG.azim = 0;
-      PG.camTween = null;
-      pgCamera();
-    }
+    if (!PG.zone) pgPortalCam();
     pgPortalRender();
     p.hidden = false;
     var x = document.getElementById('pgPortalClose');
@@ -18573,6 +18572,18 @@ async function finishBoot(){
       if (c) out.push(c);
     }
     return out;
+  }
+  /* 입장문 뒤 배경 — 친구들이 많은 나라를 살짝 비춘다 */
+  function pgPortalCam(){
+    if (!PG.renderer || !PG.target || PG.zone) return;
+    var all = pgZoneAll();
+    var best = all.length ? pgNationAt(all[0].wx).k : 'park';
+    var n0 = pgNationKey(best) || NATIONS[0];
+    PG.target.set(n0.cx, 1.1, 0);
+    PG.dist = PG.distGoal = 40;
+    PG.polar = 0.92; PG.azim = 0;
+    PG.camTween = null;
+    pgCamera();
   }
   function pgPortalHide(){
     PG.portal = false;
@@ -18760,7 +18771,7 @@ async function finishBoot(){
     PG.frames++;
     if (PG.frames % 2 === 0) pgUpdateLabels();
     if (PG.frames % 2 === 0) pgUpdateHud();
-    if (PG.frames % 20 === 0 && PG.zone) pgCharVis();
+      if (PG.frames % 20 === 0 && PG.zone) pgCharVis();
     if (PG.frames % 40 === 0) pgLocChip();
     if (PG.labelsDirty){ PG.labelsDirty = false; pgBuildLabels(); }
     /* 다른 기기에서 바뀐 배치 반영 */
@@ -19023,7 +19034,9 @@ async function finishBoot(){
       var td = PG.tapDown;
       PG.tapDown = null;
       var tmv = Math.abs(e.clientX - td.x) + Math.abs(e.clientY - td.y);
-      if (tmv < 12 && (PG.time - td.t) < 0.7) pgGameTap(td);
+      PG.tapN = (PG.tapN || 0) + 1;
+      PG.tapLog = (PG.tapLog || []).concat([[tmv, +(PG.time - td.t).toFixed(2)]]);
+      if (tmv < 12 && (PG.time - td.t) < 1.2) pgGameTap(td);
     }
     if (PG.mode === 'rpending'){
       if (PG.pressTimer){ clearTimeout(PG.pressTimer); PG.pressTimer = 0; }
@@ -19521,6 +19534,7 @@ async function finishBoot(){
                pill: (document.getElementById('pgZoneBtn') || {}).textContent || '' };
     },
     summon: pgSummonHero,
+    tapDbg: function(){ return { n: PG.tapN || 0, log: PG.tapLog || [], go: PG.tapGo || 0 }; },
     vis: function(){
       var out = { chars: {}, rides: {}, builds: {} };
       PG.charOrder.forEach(function(id){ var c = PG.chars[id]; if (c) out.chars[pgPresetName(c.data.preset)] = { vis: c.sp.visible, nat: pgNationAt(c.wx).k, x: +c.wx.toFixed(1) }; });
