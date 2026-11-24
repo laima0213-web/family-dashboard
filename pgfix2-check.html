@@ -20397,6 +20397,25 @@ async function finishBoot(){
       }
       return { x:+px.toFixed(2), z:+pz.toFixed(2), minDist:+minD.toFixed(3) };
     },
+    backDebug: function(k){
+      var img = PG.tex[k] && PG.tex[k].image;
+      if (!img || !img.width) return { noimg:true };
+      var w = img.width, h = img.height;
+      var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      var c = cv.getContext('2d'); c.drawImage(img, 0, 0);
+      var d = c.getImageData(0, 0, w, h).data, op = 0, i;
+      for (i = 3; i < d.length; i += 4) if (d[i] > 40) op++;
+      var cached = PG.backCv[k], cop = -1, ch = 0, cw = 0;
+      if (cached){
+        cw = cached.width; ch = cached.height;
+        var cd = cached.getContext('2d').getImageData(0, 0, cw, ch).data;
+        cop = 0; for (i = 3; i < cd.length; i += 4) if (cd[i] > 40) cop++;
+      }
+      return { w:w, h:h, opaqueSrc:op, cached:!!cached, cw:cw, ch:ch, cachedOpaque:cop,
+               complete: img.complete, natural: img.naturalWidth, t: PG.time };
+    },
+    rebake: function(k){ PG.backCv[k] = undefined; if (PG.backTex && PG.backTex[k]){ try { PG.backTex[k].dispose(); } catch(e){} delete PG.backTex[k]; } return true; },
+    G: function(){ return PG; },
     seatIdx: function(i){
       var id = PG.seatList[i||0]; if (!id) return null;
       return { id:id, s: PG.seats[id] };
