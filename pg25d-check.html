@@ -16577,6 +16577,9 @@ async function finishBoot(){
     }
     /* ③ 뒷머리 — 머리 옆(귀밑 머리·후드) 대표색으로 눈·앞머리까지 완전히 덮는다 */
     var hTall = chinY - top;
+    var fiH = null;
+    try { fiH = pgFaceInfo(k); } catch(e){ fiH = null; }
+    var eyY = (fiH ? fiH.ey : 156) * (w / 400);
     function pgRowPts(y0, y1, frac){
       var pts = [];
       for (var yy = y0; yy <= y1 && yy < h; yy++){
@@ -20720,7 +20723,7 @@ window.__t = (function(){
     },
     sheet: function(cell, cols){
       var P = window.__pg;
-      var list = Object.keys(P.presets || {});
+      var list = (P.presets && P.presets.length) ? P.presets.slice() : Object.keys(P.presets || {});
       cell = cell || 78; cols = cols || 8;
       var cvs = document.createElement('canvas');
       var rows = Math.ceil(list.length / cols);
@@ -20745,7 +20748,7 @@ window.__t = (function(){
     },
     loadAll: function(){
       var P = window.__pg;
-      var list = Object.keys(P.presets || {});
+      var list = (P.presets && P.presets.length) ? P.presets.slice() : Object.keys(P.presets || {});
       return new Promise(function(res){
         var left = list.length;
         list.forEach(function(k){
