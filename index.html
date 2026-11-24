@@ -16358,7 +16358,7 @@ async function finishBoot(){
     hamster_hood:    { ly:330, by:392, gs:202, ge:214, sx:208, lcx:184, rcx:246 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
-  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:10 };
+  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:22 };
   function pgLegOf(k){ return PG_LEG[k] || PG_LEG_DEF; }
   function pgWalkTexCount(){ var n = 0; for (var q in PG.walkTex) if (PG.walkTex[q]) n++; return n; }
   function pgPresetWalking(k){
@@ -16366,6 +16366,24 @@ async function finishBoot(){
     for (var i = 0; i < PG.charOrder.length; i++){
       var c = PG.chars[PG.charOrder[i]];
       if (c && c.data.preset === pk && c.aiMode === 'walk' && !c.held) return true;
+    }
+    return false;
+  }
+  /* 지금 화면에 그려지고 있는 프레임 키인가 */
+  function pgKeyShown(kind, key){
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (!c) continue;
+      if ((kind === 'w' ? c.walkKey : c.rideKey) === key) return true;
+    }
+    return false;
+  }
+  /* 무대에 아직 서 있는 캐릭터의 그림은 버리지 않는다 (매 프레임 다시 그리면 멈춘다) */
+  function pgPresetOnStage(k){
+    var pk = String(k).split('|')[0];
+    for (var i = 0; i < PG.charOrder.length; i++){
+      var c = PG.chars[PG.charOrder[i]];
+      if (c && c.data.preset === pk) return true;
     }
     return false;
   }
@@ -16825,10 +16843,14 @@ async function finishBoot(){
     PG.walkOrder = PG.walkOrder.filter(function(x){ return x !== key; });
     PG.walkOrder.push(key);
     if (pgWalkTexCount() > PG_WALK.MAX){        /* 캐릭터가 아주 많아도 메모리가 넘치지 않게 */
+      var wvictim = '';
       for (var q = 0; q < PG.walkOrder.length; q++){
         var old = PG.walkOrder[q];
-        if (old !== key && !pgPresetWalking(old)){ pgDropWalkTex(old); break; }
+        if (old === key) continue;
+        if (pgKeyShown('w', old)) continue;         /* 지금 화면에 쓰는 그림은 절대 버리지 않는다 */
+        wvictim = old; break;
       }
+      if (wvictim) pgDropWalkTex(wvictim);
     }
     return out;
   }
@@ -16842,7 +16864,7 @@ async function finishBoot(){
          slide — 미끄러져 내려올 때 두 다리 앞으로 쭉
          jump  — 공중에서 다리를 벌리거나 접었다 펴기
      ============================================================ */
-  var PG_RIDE = { N:10, MAX:12 };
+  var PG_RIDE = { N:10, MAX:30 };
   var PG_RIDE_MODE = {
     swing:'swing', carousel:'kick', horse:'kick', ferris:'kick', viking:'kick', coaster:'kick',
     teacup:'kick', drop:'kick', balloon:'kick', bumper:'kick', seesaw:'kick', bench:'kick',
@@ -17226,9 +17248,10 @@ async function finishBoot(){
       var victim = '';
       for (var q = 0; q < PG.rideOrder.length; q++){
         var old = PG.rideOrder[q];
-        if (old !== key && !pgRideTexUsed(old)){ victim = old; break; }
+        if (old === key) continue;
+        if (pgKeyShown('r', old)) continue;         /* 지금 쓰는 그림은 절대 버리지 않는다 */
+        victim = old; break;
       }
-      /* 지금 타고 있는 캐릭터의 그림은 절대 버리지 않는다 (매 프레임 다시 그리면 느려짐) */
       if (victim) pgDropRideTex(victim);
     }
     return out;
@@ -17326,7 +17349,7 @@ async function finishBoot(){
       aiMode: 'idle', aiTimer: 0, wx: Number(rec.x) || 0, wz: Number(rec.z) || 0,
       tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1, aiHome: false,
       homeNat: pgNationAt(Number(rec.x) || 0).k, actMode: '', actStart: 0, actEnd: 0,
-      yaw: Math.random() * 6.2832, yawT: null, seatId: '', seatAim: '', lookAt: 0
+      yaw: Math.random() * 6.2832, yawT: null, seatId: '', seatAim: '', lookAt: 0, walkKey: '', rideKey: ''
     };
     if (rec.ride && PG.rides[rec.ride]){
       /* 기구에 놓여 있던 캐릭터 — 열자마자 신나게 놀고 있음 */
@@ -18349,6 +18372,7 @@ async function finishBoot(){
       if (seat){
         /* 🪑 앉기 — 좌석 높이에 엉덩이를 맞추고 두 발을 살짝 흔든다 */
         var sArr = pgRideFrames(d.preset, 'kick', 'bench', isBack);
+        c.rideKey = d.preset + '|kick|bench' + (isBack ? '|b' : '');
         if (sArr && sArr.length){
           var si = Math.floor(t * 3.2 + c.ph * 4) % sArr.length;
           if (isBack) pgCharMap(c, null, sArr[si]); else pgCharMap(c, sArr[si], null);
@@ -18417,6 +18441,7 @@ async function finishBoot(){
           rf.arm = 'cheer';
         }
         var rArr = pgRideFrames(d.preset, rf.mode, rf.arm, isBack);
+        c.rideKey = d.preset + '|' + rf.mode + '|' + rf.arm + (isBack ? '|b' : '');
         if (rArr && rArr.length){
           var rfi = rf.idx % rArr.length;
           if (isBack) pgCharMap(c, null, rArr[rfi]); else pgCharMap(c, rArr[rfi], null);
@@ -18442,6 +18467,7 @@ async function finishBoot(){
           /* 12프레임 걷기 그림으로 갈아 끼운다 (발이 땅에 붙어 있으므로 상하는 0) */
           var wspd = (PG.follow && c.data.id === PG.followId) ? 4.4 : c.spd;
           var wArr = pgWalkFrames(d.preset, isBack);
+          c.walkKey = isBack ? (d.preset + '|b') : d.preset;
           if (wArr && wArr.length){
             var wi = Math.floor((((t * (wspd * 1.45) + c.ph) % 1) * wArr.length)) % wArr.length;
             if (isBack) pgCharMap(c, null, wArr[wi]); else pgCharMap(c, wArr[wi], null);
@@ -18473,6 +18499,7 @@ async function finishBoot(){
           var armN = isW ? ((Math.floor(au * 5) % 2) ? 'cheer' : 'wave')
                          : PG_DANCE_ARMS[Math.floor(au * 7.5) % PG_DANCE_ARMS.length];
           var aArr = pgRideFrames(d.preset, 'jump', armN, isBack);
+          c.rideKey = d.preset + '|jump|' + armN + (isBack ? '|b' : '');
           if (aArr && aArr.length){
             var ai = Math.floor(au * (isW ? 16 : 9)) % aArr.length;
             if (isBack) pgCharMap(c, null, aArr[ai]); else pgCharMap(c, aArr[ai], null);
