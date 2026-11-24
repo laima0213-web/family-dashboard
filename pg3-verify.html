@@ -16561,9 +16561,9 @@ async function finishBoot(){
     var R = PG3.HR, cy = PG3.HCY, hs = S.hs || 'bob';
     if (S.hat === 'helmet') return;                          /* 헬멧은 머리 전체를 덮는다 */
     var hm = pg3Mat(pg3Shade(S.hair));
-    var capT = (hs === 'short' || hs === 'spiky') ? 0.52 : 0.60;
+    var capT = (hs === 'short' || hs === 'spiky') ? 0.42 : 0.45;
     var capG = pg3Geo('cap' + capT, function(){
-      return new THREE.SphereGeometry(1, 30, 18, Math.PI / 2 + 0.96, Math.PI * 2 - 1.92, 0, Math.PI * capT);
+      return new THREE.SphereGeometry(1, 30, 16, 0, Math.PI * 2, 0, Math.PI * capT);
     });
     if (S.hat !== 'hood'){
       var cap = new THREE.Mesh(capG, hm);
@@ -16572,7 +16572,7 @@ async function finishBoot(){
     }
     /* 앞머리 — 눈썹 위까지 */
     var bgG = pg3Geo('bang', function(){
-      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.86, 1.72, 0.010, Math.PI * 0.355);
+      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.88, 1.76, Math.PI * 0.20, Math.PI * 0.185);
     });
     var bg = new THREE.Mesh(bgG, hm);
     bg.scale.setScalar(S.hat === 'hood' ? R * 1.02 : R * 1.065); bg.position.y = cy;
