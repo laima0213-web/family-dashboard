@@ -17381,6 +17381,7 @@ async function finishBoot(){
   }
   /* 실루엣 가장자리 → 두께 벽 (한 캐릭터당 한 번만 만든다) */
   function pgRimGeo(k){
+    if (!PG.rimGeo) PG.rimGeo = {};
     if (PG.rimGeo[k] !== undefined) return PG.rimGeo[k];
     var src = PG.tex[k], img = src && src.image;
     if (!img || !img.width || !img.height) return null;      /* 그림이 아직 안 실림 */
