@@ -16576,17 +16576,15 @@ async function finishBoot(){
     var bg = new THREE.Mesh(bgG, hm);
     bg.scale.setScalar(S.hat === 'hood' ? R * 1.02 : R * 1.065); bg.position.y = cy;
     headG.add(bg);
-    headG.add(pg3Ball(hm, 0, cy + 0.185, R * 0.955, 0.052, 0.032, 0.030));
-    headG.add(pg3Ball(hm, -0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
-    headG.add(pg3Ball(hm, 0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
+
     /* 옆머리 */
     if (S.hat === 'hood'){
       /* 후드 안 — 옆·뒷머리는 후드가 덮으므로 앞머리만 */
       headG.add(pg3Ball(hm, -R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
       headG.add(pg3Ball(hm, R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
     } else if (hs !== 'short' && hs !== 'spiky'){
-      headG.add(pg3Ball(hm, -R * 0.90, cy - 0.14, -0.22, 0.058, 0.150, 0.105));
-      headG.add(pg3Ball(hm, R * 0.90, cy - 0.14, -0.22, 0.058, 0.150, 0.105));
+      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.16, -0.26, 0.050, 0.130, 0.085));
+      headG.add(pg3Ball(hm, R * 0.92, cy - 0.16, -0.26, 0.050, 0.130, 0.085));
       /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
       headG.add(pg3Ball(hm, -R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
       headG.add(pg3Ball(hm, R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
@@ -16595,10 +16593,10 @@ async function finishBoot(){
     if (hs === 'twin' || hs === 'twinlong'){
       var tl = (hs === 'twinlong') ? 0.30 : 0.245;
       [-1, 1].forEach(function(sd){
-        var t = pg3Ball(hm, 0.315 * sd, cy - 0.12, -0.22, 0.105, tl, 0.105);
-        t.rotation.z = -0.26 * sd;
+        var t = pg3Ball(hm, 0.335 * sd, cy - 0.30, -0.12, 0.088, tl, 0.090);
+        t.rotation.z = -0.24 * sd;
         headG.add(t);
-        headG.add(pg3Ball(pg3Mat(S.acc), 0.300 * sd, cy + 0.10, -0.14, 0.050, 0.046, 0.050));
+        headG.add(pg3Ball(pg3Mat(S.acc), 0.305 * sd, cy - 0.045, -0.10, 0.045, 0.042, 0.045));
       });
     } else if (hs === 'bun'){
       headG.add(pg3Ball(hm, -0.185, cy + 0.39, -0.03, 0.135, 0.130, 0.135));
