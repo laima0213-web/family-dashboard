@@ -16435,7 +16435,7 @@ async function finishBoot(){
     var c = cv.getContext('2d');
     c.fillStyle = skin; c.fillRect(0, 0, W, H);
     var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
-    var ey = 266, dx = 25, ink = '#3B2A22';
+    var ey = 272, dx = 24, ink = '#3B2A22';
     /* 볼터치 */
     c.fillStyle = 'rgba(244,150,150,0.30)';
     [[cx - 44, ey + 24], [cx + 44, ey + 24]].forEach(function(p){
@@ -16445,7 +16445,7 @@ async function finishBoot(){
       var g = c.createLinearGradient(0, ey - 18, 0, ey + 18);
       g.addColorStop(0, '#4A2F22'); g.addColorStop(1, '#2B1A12');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(x, ey, 15, 18.5, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey, 16, 19.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#7A4B33';
       c.beginPath(); c.ellipse(x, ey + 5, 9.5, 10, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
@@ -16454,7 +16454,7 @@ async function finishBoot(){
       c.beginPath(); c.arc(x - 5.5, ey - 6, 5.4, 0, 6.2832); c.fill();
       c.beginPath(); c.arc(x + 5, ey + 9, 2.6, 0, 6.2832); c.fill();
       c.strokeStyle = ink; c.lineWidth = 2.2;   /* 윗눈꺼풀 */
-      c.beginPath(); c.arc(x, ey + 1, 16, Math.PI * 1.12, Math.PI * 1.88); c.stroke();
+      c.beginPath(); c.arc(x, ey + 2, 17, Math.PI * 1.10, Math.PI * 1.90); c.stroke();
     }
     c.strokeStyle = ink; c.lineCap = 'round'; c.lineJoin = 'round';
     if (ex === 'joy'){
@@ -16518,31 +16518,31 @@ async function finishBoot(){
     g.position.set(0.10 * side, PG3.HIP, 0);
     var pants = S.pants || S.legs;
     var thMat = pg3Mat(pants || S.skin);
-    g.add(pg3Cyl(thMat, 0.070, 0.062, PG3.THIGH, 0, -PG3.THIGH / 2, 0));
+    g.add(pg3Cyl(thMat, 0.079, 0.070, PG3.THIGH, 0, -PG3.THIGH / 2, 0));
     var knee = new THREE.Group();
     knee.position.y = -PG3.THIGH;
     g.add(knee);
     var shinMat = pg3Mat(pants || S.sock || S.skin);
-    knee.add(pg3Cyl(shinMat, 0.057, 0.050, PG3.SHIN, 0, -PG3.SHIN / 2, 0));
+    knee.add(pg3Cyl(shinMat, 0.064, 0.055, PG3.SHIN, 0, -PG3.SHIN / 2, 0));
     if (S.sock && !pants) knee.add(pg3Cyl(pg3Mat(S.sock), 0.058, 0.054, 0.09, 0, -PG3.SHIN + 0.045, 0));
-    var shoe = pg3Ball(pg3Mat(S.shoe), 0, -PG3.SHIN - 0.026, 0.022, 0.070, 0.050, 0.100);
+    var shoe = pg3Ball(pg3Mat(S.shoe), 0, -PG3.SHIN - 0.028, 0.024, 0.078, 0.054, 0.108);
     knee.add(shoe);
     root.add(g);
     return { g: g, knee: knee };
   }
   function pg3Arm(S, side, up, J){
     var g = new THREE.Group();
-    g.position.set(0.150 * side, PG3.SHO, 0);
+    g.position.set(0.162 * side, PG3.SHO, 0);
     var slvMat = pg3Mat(S.sleeve || S.top);
     var skinMat = pg3Mat(S.skin);
     var foreMat = S.long ? slvMat : skinMat;
-    g.add(pg3Ball(slvMat, 0.008 * side, 0.012, 0, 0.058, 0.056, 0.058));
-    g.add(pg3Cyl(slvMat, 0.047, 0.041, 0.145, 0, -0.072, 0));
+    g.add(pg3Ball(slvMat, 0.006 * side, 0.010, 0, 0.064, 0.060, 0.064));
+    g.add(pg3Cyl(slvMat, 0.055, 0.047, 0.150, 0, -0.074, 0));
     var elb = new THREE.Group();
     elb.position.y = -0.145;
     g.add(elb);
-    elb.add(pg3Cyl(foreMat, 0.040, 0.033, 0.135, 0, -0.068, 0));
-    elb.add(pg3Ball(pg3Mat(S.skin), 0, -0.142, 0, 0.049, 0.052, 0.045));
+    elb.add(pg3Cyl(foreMat, 0.046, 0.038, 0.140, 0, -0.070, 0));
+    elb.add(pg3Ball(pg3Mat(S.skin), 0, -0.148, 0, 0.056, 0.060, 0.052));
     g.rotation.z = -0.10 * side;
     up.add(g);
     return { g: g, elb: elb };
@@ -16551,28 +16551,28 @@ async function finishBoot(){
     var R = PG3.HR, cy = PG3.HCY, hs = S.hs || 'bob';
     if (S.hat === 'hood' || S.hat === 'helmet') return;      /* 후드·헬멧은 머리 전체를 덮는다 */
     var hm = pg3Mat(S.hair);
-    var capT = (hs === 'short' || hs === 'spiky') ? 0.54 : 0.63;
+    var capT = (hs === 'short' || hs === 'spiky') ? 0.52 : 0.60;
     var capG = pg3Geo('cap' + capT, function(){
-      return new THREE.SphereGeometry(1, 30, 18, Math.PI / 2 + 0.44, Math.PI * 2 - 0.88, 0, Math.PI * capT);
+      return new THREE.SphereGeometry(1, 30, 18, Math.PI / 2 + 0.96, Math.PI * 2 - 1.92, 0, Math.PI * capT);
     });
     var cap = new THREE.Mesh(capG, hm);
     cap.scale.setScalar(R * 1.045); cap.position.y = cy;
     headG.add(cap);
     /* 앞머리 — 눈썹 위까지 */
     var bgG = pg3Geo('bang', function(){
-      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.66, 1.32, 0.012, Math.PI * 0.42);
+      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.86, 1.72, 0.010, Math.PI * 0.355);
     });
     var bg = new THREE.Mesh(bgG, hm);
     bg.scale.setScalar(R * 1.065); bg.position.y = cy;
     headG.add(bg);
-    headG.add(pg3Ball(hm, 0, cy + 0.15, R * 0.86, 0.085, 0.055, 0.06));
-    headG.add(pg3Ball(hm, -0.14, cy + 0.155, R * 0.82, 0.070, 0.048, 0.055));
-    headG.add(pg3Ball(hm, 0.14, cy + 0.155, R * 0.82, 0.070, 0.048, 0.055));
+    headG.add(pg3Ball(hm, 0, cy + 0.175, R * 0.90, 0.062, 0.040, 0.045));
+    headG.add(pg3Ball(hm, -0.115, cy + 0.175, R * 0.87, 0.052, 0.036, 0.040));
+    headG.add(pg3Ball(hm, 0.115, cy + 0.175, R * 0.87, 0.052, 0.036, 0.040));
     /* 옆머리 */
     if (hs !== 'short' && hs !== 'spiky'){
-      headG.add(pg3Ball(hm, -R * 0.88, cy - 0.03, 0.03, 0.098, 0.195, 0.150));
-      headG.add(pg3Ball(hm, R * 0.88, cy - 0.03, 0.03, 0.098, 0.195, 0.150));
-      headG.add(pg3Ball(hm, 0, cy - 0.05, -0.20, 0.285, 0.255, 0.195));
+      headG.add(pg3Ball(hm, -R * 0.94, cy - 0.10, -0.04, 0.072, 0.165, 0.130));
+      headG.add(pg3Ball(hm, R * 0.94, cy - 0.10, -0.04, 0.072, 0.165, 0.130));
+      headG.add(pg3Ball(hm, 0, cy - 0.08, -0.19, 0.255, 0.235, 0.165));
     }
     if (hs === 'twin' || hs === 'twinlong'){
       var tl = (hs === 'twinlong') ? 0.30 : 0.245;
@@ -16672,17 +16672,17 @@ async function finishBoot(){
       headG.add(rim);
       if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.44, 0.30, 0.28, 0.16));  /* 뒤 모자 볼륨 */
     } else if (h === 'beret'){
-      var b = pg3Ball(m, 0.02, cy + 0.32, -0.02, 0.345, 0.115, 0.335);
-      b.rotation.z = -0.14; b.rotation.x = 0.10; headG.add(b);
-      headG.add(pg3Ball(m, 0.03, cy + 0.40, -0.02, 0.035, 0.045, 0.035));
+      var b = pg3Ball(m, 0.015, cy + 0.30, -0.02, 0.325, 0.098, 0.315);
+      b.rotation.z = -0.13; b.rotation.x = 0.09; headG.add(b);
+      headG.add(pg3Ball(m, 0.02, cy + 0.365, -0.03, 0.030, 0.040, 0.030));
     } else if (h === 'cap'){
       var cg = pg3Geo('caphat', function(){
-        return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.52);
+        return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.44);
       });
       var cm = new THREE.Mesh(cg, m);
-      cm.scale.set(R * 1.10, R * 0.96, R * 1.10); cm.position.y = cy + 0.01;
+      cm.scale.set(R * 1.10, R * 0.94, R * 1.10); cm.position.y = cy + 0.035;
       headG.add(cm);
-      var brim = pg3Cyl(m, 0.30, 0.32, 0.035, 0, cy + 0.06, 0.26);
+      var brim = pg3Cyl(m, 0.29, 0.31, 0.032, 0, cy + 0.10, 0.25);
       brim.rotation.x = -0.16; headG.add(brim);
       headG.add(pg3Ball(acc, 0, cy + 0.35, 0.02, 0.030, 0.030, 0.030));
     } else if (h === 'chef'){
@@ -16779,7 +16779,7 @@ async function finishBoot(){
   }
   function pg3Extra(up, headG, S, J){
     if (S.collar){
-      var cr = pg3Ring(pg3Mat(S.collar), 0.105, 0.030, 0, 0.455, 0.01);
+      var cr = pg3Ring(pg3Mat(S.collar), 0.082, 0.022, 0, 0.455, 0.01);
       cr.rotation.x = Math.PI / 2; up.add(cr);
     }
     if (S.apron){
@@ -16868,12 +16868,12 @@ async function finishBoot(){
     g.add(up);
     J.up = up;
     var topMat = pg3Mat(S.top);
-    up.add(pg3Cyl(topMat, 0.136, 0.158, 0.46, 0, 0.245, 0));
-    up.add(pg3Ball(topMat, 0, 0.455, 0, 0.152, 0.075, 0.125));
+    up.add(pg3Cyl(topMat, 0.148, 0.168, 0.46, 0, 0.245, 0));
+    up.add(pg3Ball(topMat, 0, 0.452, 0, 0.158, 0.082, 0.132));
     if (S.skirt){
-      var sk = pg3Cyl(pg3Mat(S.skirt), 0.152, 0.30, 0.26, 0, 0.11, 0);
+      var sk = pg3Cyl(pg3Mat(S.skirt), 0.160, 0.295, 0.25, 0, 0.115, 0);
       up.add(sk);
-      up.add(pg3Ring(pg3Mat(S.skirt), 0.285, 0.022, 0, 0.005, 0));
+      up.add(pg3Ring(pg3Mat(S.skirt), 0.168, 0.018, 0, 0.235, 0));
     }
     if (S.shorts){
       up.add(pg3Cyl(pg3Mat(S.shorts), 0.155, 0.175, 0.16, 0, 0.06, 0));
@@ -20087,13 +20087,8 @@ window.addEventListener('unhandledrejection', function(e){ window.__err.push('pr
   var tries = 0;
   function go(){
     tries++;
-    try {
-      if (typeof unlocked !== 'undefined' && !unlocked && typeof unlockApp === 'function'){ unlockApp(false); }
-    } catch(e){ window.__err.push('unlock:' + e.message); }
-    setTimeout(function(){
-      try { if (typeof state !== 'undefined' && state && window.__pg && window.__pg.state && !window.__pg.state().on) window.__pg.open('k1'); }
-      catch(e){ window.__err.push('open:' + e.message); }
-    }, 700);
+    try { if (typeof unlocked !== 'undefined' && !unlocked && typeof unlockApp === 'function'){ unlockApp(false); } }
+    catch(e){ window.__err.push('unlock:' + e.message); }
     if (tries < 3) setTimeout(go, 2500);
   }
   window.addEventListener('load', function(){ setTimeout(go, 400); });
