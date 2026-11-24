@@ -16435,26 +16435,26 @@ async function finishBoot(){
     var c = cv.getContext('2d');
     c.fillStyle = skin; c.fillRect(0, 0, W, H);
     var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
-    var ey = 284, dx = 25, ink = '#3B2A22';
+    var ey = 286, dx = 23, ink = '#3B2A22';
     /* 볼터치 */
     c.fillStyle = 'rgba(244,150,150,0.30)';
     [[cx - 46, ey + 22], [cx + 46, ey + 22]].forEach(function(p){
       c.beginPath(); c.ellipse(p[0], p[1], 15, 9, 0, 0, 6.2832); c.fill();
     });
     function eyeOval(x){
-      var g = c.createLinearGradient(0, ey - 18, 0, ey + 18);
-      g.addColorStop(0, '#4A2F22'); g.addColorStop(1, '#2B1A12');
+      var g = c.createLinearGradient(0, ey - 20, 0, ey + 20);
+      g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
       c.fillStyle = g;
       c.beginPath(); c.ellipse(x, ey, 17.5, 21, 0, 0, 6.2832); c.fill();
-      c.fillStyle = '#7A4B33';
-      c.beginPath(); c.ellipse(x, ey + 6, 10.5, 11, 0, 0, 6.2832); c.fill();
+      c.fillStyle = '#8B5A3C';
+      c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
-      c.beginPath(); c.ellipse(x, ey + 6, 6.5, 7, 0, 0, 6.2832); c.fill();
-      c.fillStyle = 'rgba(255,255,255,0.95)';
-      c.beginPath(); c.arc(x - 6, ey - 7, 6.2, 0, 6.2832); c.fill();
-      c.beginPath(); c.arc(x + 5, ey + 9, 2.6, 0, 6.2832); c.fill();
-      c.strokeStyle = ink; c.lineWidth = 2.2;   /* 윗눈꺼풀 */
-      c.beginPath(); c.arc(x, ey + 2, 17, Math.PI * 1.10, Math.PI * 1.90); c.stroke();
+      c.beginPath(); c.ellipse(x, ey + 7, 6.8, 7.4, 0, 0, 6.2832); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.98)';
+      c.beginPath(); c.arc(x - 6.5, ey - 8, 7.4, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x + 6, ey + 10, 3.4, 0, 6.2832); c.fill();
+      c.strokeStyle = ink; c.lineWidth = 2.4;   /* 윗눈꺼풀 */
+      c.beginPath(); c.arc(x, ey + 1, 18, Math.PI * 1.08, Math.PI * 1.92); c.stroke();
     }
     c.strokeStyle = ink; c.lineCap = 'round'; c.lineJoin = 'round';
     if (ex === 'joy'){
@@ -16490,11 +16490,11 @@ async function finishBoot(){
       eyeOval(cx - dx); eyeOval(cx + dx);
       /* 코·입 */
       c.fillStyle = '#C4645C';
-      c.beginPath(); c.ellipse(cx, ey + 36, 9, 7, 0, 0, Math.PI); c.fill();
+      c.beginPath(); c.ellipse(cx, ey + 34, 10, 8, 0, 0, Math.PI); c.fill();
       c.fillStyle = '#F2A8A0';
-      c.beginPath(); c.ellipse(cx, ey + 40, 5.5, 3, 0, 0, Math.PI); c.fill();
-      c.strokeStyle = '#B65A52'; c.lineWidth = 2.6;
-      c.beginPath(); c.moveTo(cx - 10, ey + 29); c.quadraticCurveTo(cx, ey + 33, cx + 10, ey + 29); c.stroke();
+      c.beginPath(); c.ellipse(cx, ey + 39, 6, 3.4, 0, 0, Math.PI); c.fill();
+      c.strokeStyle = '#B65A52'; c.lineWidth = 2.8;
+      c.beginPath(); c.moveTo(cx - 11, ey + 26); c.quadraticCurveTo(cx, ey + 31, cx + 11, ey + 26); c.stroke();
     }
     var tx = new THREE.CanvasTexture(cv);
     if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
@@ -16574,6 +16574,9 @@ async function finishBoot(){
     if (hs !== 'short' && hs !== 'spiky'){
       headG.add(pg3Ball(hm, -R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       headG.add(pg3Ball(hm, R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
+      /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
+      headG.add(pg3Ball(hm, -R * 0.80, cy - 0.04, 0.20, 0.050, 0.150, 0.055));
+      headG.add(pg3Ball(hm, R * 0.80, cy - 0.04, 0.20, 0.050, 0.150, 0.055));
       headG.add(pg3Ball(hm, 0, cy - 0.08, -0.19, 0.255, 0.235, 0.165));
     }
     if (hs === 'twin' || hs === 'twinlong'){
@@ -16674,7 +16677,7 @@ async function finishBoot(){
       headG.add(rim);
       if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.44, 0.30, 0.28, 0.16));  /* 뒤 모자 볼륨 */
     } else if (h === 'beret'){
-      var b = pg3Ball(m, 0.015, cy + 0.265, -0.02, 0.325, 0.105, 0.315);
+      var b = pg3Ball(m, 0.015, cy + 0.272, -0.02, 0.300, 0.095, 0.290);
       b.rotation.z = -0.16; b.rotation.x = 0.14; headG.add(b);
       headG.add(pg3Ball(m, 0.02, cy + 0.335, -0.04, 0.030, 0.038, 0.030));
     } else if (h === 'cap'){
