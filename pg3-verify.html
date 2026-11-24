@@ -16377,8 +16377,9 @@ async function finishBoot(){
   }
   function pg3Sph(){ return pg3Geo('sph', function(){ return new THREE.SphereGeometry(1, 20, 14); }); }
   /* 밝은 머리색은 한 톤 진하게 — 피부와 붙어 보이지 않게 */
-  var PG3_HAIRDARK = new THREE.Color('#6B4A38');
+  var PG3_HAIRDARK = null;                 /* THREE는 놀이터를 열 때 불러오므로 지연 생성 */
   function pg3Shade(hex){
+    if (!PG3_HAIRDARK) PG3_HAIRDARK = new THREE.Color('#6B4A38');
     var c = new THREE.Color(hex), hsl = c.getHSL({ h: 0, s: 0, l: 0 });
     if (hsl.l > 0.62) c.lerp(PG3_HAIRDARK, 0.22);
     return '#' + c.getHexString();
