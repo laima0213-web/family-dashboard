@@ -16388,8 +16388,10 @@ async function finishBoot(){
     var key = col + '|' + (kind || '');
     if (PG3.mat[key]) return PG3.mat[key];
     /* 놀이터 조명이 밝아(하늘+해) 색이 하얗게 타므로 재질 색을 미리 눌러 둔다 */
-    var o = { color: new THREE.Color(col).multiplyScalar(0.70), roughness: 0.92, metalness: 0.0 };
-    if (kind === 'metal'){ o.roughness = 0.34; o.metalness = 0.28; }
+    var base = new THREE.Color(col);
+    var o = { color: base.clone().multiplyScalar(0.52), emissive: base.clone().multiplyScalar(0.20),
+              roughness: 0.95, metalness: 0.0 };
+    if (kind === 'metal'){ o.roughness = 0.34; o.metalness = 0.20; }
     if (kind === 'matte'){ o.roughness = 1.0; }
     var m = new THREE.MeshStandardMaterial(o);
     PG3.mat[key] = m;
