@@ -9684,6 +9684,10 @@ async function finishBoot(){
     lg.addColorStop(0.72, '#E9F7FF');
     lg.addColorStop(1, '#FFF4E4');
     g.fillStyle = lg; g.fillRect(0, 0, 8, 256);
+    /* 캔버스를 문서에 붙여 두어야 브라우저가 메모리 압박으로 그림을 비우지 않는다 */
+    cv.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+    cv.setAttribute('data-pg3face', key);
+    document.body.appendChild(cv);
     var tx = new THREE.CanvasTexture(cv);
     if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
     return tx;
@@ -16275,1064 +16279,983 @@ async function finishBoot(){
   /* ============================================================
      캐릭터
      ============================================================ */
-  function pgTex(k){
-    if (PG.tex[k]) return PG.tex[k];
-    var tx = new THREE.TextureLoader().load('assets/avatars/' + k + '.webp');
-    if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
-    PG.tex[k] = tx;
-    return tx;
+  /* ============================================================
+     🧸 진짜 3D 관절 치비 인형 — AV_PRESETS 60종
+     · 앞뒤 종이 두 장 대신 머리·몸통·팔·다리 관절 메시로 세운다
+     · 얼굴은 머리 구의 +Z 정면(uv.x 0.25)에 피부색과 함께 그린 4종 텍스처
+     ============================================================ */
+  var PG3 = {
+    HIP: 0.40, THIGH: 0.18, SHIN: 0.17,
+    HR: 0.36, HCY: 0.36,          /* 머리 반지름 · 머리 그룹 안 중심 높이 */
+    SHO: 0.44,                    /* 어깨 관절 (몸통 기준) */
+    FACE_U: 0.25,                 /* 구의 +Z 정면이 놓이는 uv.x (실측 확인) */
+    geo: {}, mat: {}, faceMat: {}, style: {}
+  };
+  var PG3_DEF = {
+    hair:'#6B4A38', hs:'bob', skin:'#FFE7D3', top:'#F7E8DA', sleeve:null,
+    skirt:null, pants:null, shorts:null, legs:null, sock:null, shoe:'#8A6A4A',
+    acc:'#F0A8B8', collar:null, apron:null, bag:null, cape:null, robe:null, cloak:null,
+    hat:null, hatCol:null, ears:null, earCol:null, tail:null, wings:null, glasses:false
+  };
+  /* 은혜님 상점 캐릭터 60종 — 그림(assets/avatars)의 머리·옷·소품 색을 그대로 옮긴 표 */
+  var PG3_STYLE = {
+    fox_sailor:     { hair:'#F3D9B2', hs:'twin',  top:'#C7B3E3', skirt:'#C7B3E3', collar:'#FDFBF7', acc:'#F6B6C8', shoe:'#8A5A3E', ears:'fox', earCol:'#F7E6CC', tail:'fox' },
+    bun_ribbon:     { hair:'#6B4030', hs:'bun',   top:'#FBC9D1', skirt:'#FBC9D1', collar:'#FFFDF8', acc:'#F08BA8', shoe:'#F2A6B6' },
+    rabbit_pajama:  { hair:'#C9B2E3', hs:'long',  top:'#DED2F2', pants:'#DED2F2', acc:'#F4D7E6', shoe:'#E9DCF4', ears:'bunny', earCol:'#F4DCEB' },
+    beret_study:    { hair:'#6B4632', hs:'bob',   top:'#F5E8D2', skirt:'#A98157', collar:'#FFFDF8', acc:'#8A5E3C', shoe:'#6A4832', hat:'beret', hatCol:'#C9A67C' },
+    pony_star:      { hair:'#2F3238', hs:'pony',  top:'#F6D44E', skirt:'#6FA8DC', acc:'#FFD84D', shoe:'#EDE7D9' },
+    mint_hood:      { hair:'#6B4F3D', hs:'bob',   top:'#D9EFDC', skirt:'#FDFCF8', acc:'#A8D8B8', shoe:'#F2EDE4', hat:'hood', hatCol:'#D9EFDC' },
+    cat_ribbon:     { hair:'#CFC8D8', hs:'long',  top:'#3A3450', skirt:'#3A3450', acc:'#C9A8E0', shoe:'#4B4260', ears:'cat', earCol:'#CFC8D8', tail:'cat' },
+    berry_twin:     { hair:'#F7A9A0', hs:'twin',  top:'#FBE4E0', skirt:'#F8BAC4', acc:'#F2A0AE', shoe:'#F2A6B4' },
+    cap_track:      { hair:'#2B3242', hs:'short', top:'#F3F2EE', sleeve:'#2C3A63', pants:'#2C3A63', acc:'#F3F2EE', shoe:'#E9E7E2', hat:'cap', hatCol:'#2C3A63' },
+    bear_hood:      { hair:'#C9A06E', hs:'short', top:'#F2D9AE', skirt:'#F8D98E', acc:'#E8CFA6', shoe:'#E2C9A0', hat:'hood', hatCol:'#F2D9AE', ears:'bear', earCol:'#E8CFA6' },
+    flower_wave:    { hair:'#EDCDA8', hs:'wavy',  top:'#DDEEF9', skirt:'#FDFCF8', collar:'#FFFDF8', acc:'#F7E1E8', shoe:'#F5EEE2', hat:'flower', hatCol:'#F7E1E8' },
+    pearl_denim:    { hair:'#2E2C2C', hs:'long',  top:'#A8C4D8', skirt:'#8FB3CC', acc:'#FDFCF8', shoe:'#2D2B2B', hat:'headband', hatCol:'#FDFCF8' },
+    dino_pajama:    { hair:'#B78B62', hs:'short', top:'#C3E6B8', pants:'#C3E6B8', acc:'#A8D8A0', shoe:'#B0D8A6', hat:'hood', hatCol:'#BEE0B0', tail:'dino' },
+    panda_hood:     { hair:'#4A3A34', hs:'braid', top:'#2E3138', sleeve:'#F7F5F0', pants:'#FDFCF8', acc:'#7FC08A', shoe:'#F2EEE8', hat:'hood', hatCol:'#F7F5F0', ears:'panda', bag:'#7FC08A' },
+    wizard_robe:    { hair:'#8E7AA8', hs:'long',  top:'#7B5FA8', robe:'#7B5FA8', acc:'#F0D98A', shoe:'#5A4278', hat:'wizard', hatCol:'#7B5FA8' },
+    soccer_sport:   { hair:'#7A5A3A', hs:'short', top:'#9CC8E8', sleeve:'#F7F7F4', shorts:'#F7F7F4', acc:'#F0C24B', shoe:'#3A3A3A', sock:'#F7F7F4' },
+    prince_royal:   { hair:'#8A5F3A', hs:'short', top:'#3C3F60', cape:'#EFE0BE', pants:'#3C3F60', collar:'#FFFDF8', acc:'#F0C24B', shoe:'#2E2A28', hat:'crown', hatCol:'#F0C24B' },
+    princess_tiara: { hair:'#C99A6E', hs:'wavy',  top:'#F9C6D4', skirt:'#F9C6D4', acc:'#F5A9BE', shoe:'#F3B9C8', hat:'tiara', hatCol:'#EFE9F6' },
+    hanbok_pastel:  { hair:'#5A4030', hs:'braid', top:'#FCE3D2', skirt:'#F9B9B0', collar:'#FFFDF8', acc:'#C9A0E0', shoe:'#F2C4B0' },
+    angel_wing:     { hair:'#E8C79A', hs:'long',  top:'#DDEEF9', skirt:'#DDEEF9', collar:'#FFFDF8', acc:'#A8D8F0', shoe:'#F7F0E4', wings:'angel' },
+    patissier_chef: { hair:'#6B4A38', hs:'twin',  top:'#F7C6CE', skirt:'#F7C6CE', apron:'#FFFDF8', acc:'#E85F5F', shoe:'#F4A9B4', hat:'chef', hatCol:'#FFFDF8' },
+    rock_headset:   { hair:'#3A3630', hs:'short', top:'#BFE3D0', skirt:'#2E2E32', acc:'#8FE8C0', shoe:'#6FA88A', hat:'headset', hatCol:'#4A4A50' },
+    astronaut_suit: { hair:'#7A5A40', hs:'short', top:'#F7F7F4', pants:'#F7F7F4', acc:'#8FB8E8', shoe:'#F2F2EE', hat:'helmet', hatCol:'#F7F7F4' },
+    picnic_cherry:  { hair:'#8A5F3A', hs:'braid', top:'#F7F7F2', skirt:'#D9574F', collar:'#FFFDF8', acc:'#F0A0A8', shoe:'#C9A97A', hat:'straw', hatCol:'#E8C98A' },
+    chick_raincoat: { hair:'#6B4A38', hs:'short', top:'#F7D84E', pants:'#F7D84E', acc:'#F0A84C', shoe:'#F0C63C', hat:'hood', hatCol:'#F7D84E', ears:'chick' },
+    shark_pajama:   { hair:'#4A3A30', hs:'short', top:'#C7DCE8', pants:'#C7DCE8', acc:'#EAF4FA', shoe:'#B0C8D8', hat:'hood', hatCol:'#B7D2E0', tail:'shark' },
+    bee_hood:       { hair:'#7A5A3A', hs:'short', top:'#F5D34E', pants:'#2E2E34', acc:'#2E2E34', shoe:'#F0C63C', hat:'hood', hatCol:'#F5D34E', ears:'bee', wings:'bee' },
+    ballerina_tutu: { hair:'#6B4A34', hs:'bun',   top:'#F9C6CE', skirt:'#F9C6CE', acc:'#F7F0E4', shoe:'#F5C6CE' },
+    detective_coat: { hair:'#5A3E2A', hs:'short', top:'#C9A57C', pants:'#7A5A3C', acc:'#8A6A4A', shoe:'#6B4A32', hat:'deerstalker', hatCol:'#B08A5A' },
+    moon_witch:     { hair:'#A88FB8', hs:'wavy',  top:'#E8DCF0', robe:'#E8DCF0', apron:'#FFFDF8', acc:'#E8D48A', shoe:'#A88FB8', hat:'wizard', hatCol:'#C9B0E0' },
+    mermaid_tail:   { hair:'#C7E4E0', hs:'wavy',  top:'#F7EFE0', tail:'mermaid', acc:'#F0C8D0', shoe:'#A8D8CC' },
+    safari_explorer:{ hair:'#7A5A3A', hs:'short', top:'#D8B98A', shorts:'#C9A97A', acc:'#B08A5A', shoe:'#8A6A4A', hat:'safari', hatCol:'#D8BE8E', bag:'#B08A5A' },
+    doctor_nurse:   { hair:'#6B4A38', hs:'bun',   top:'#A8D8C0', skirt:'#A8D8C0', cloak:'#F7F7F2', acc:'#F7F7F2', shoe:'#C9E8D8', hat:'nurse', hatCol:'#F7F7F2' },
+    skater_punk:    { hair:'#4A3A34', hs:'short', top:'#C9B0E8', shorts:'#A8E0C0', acc:'#F0C0D8', shoe:'#F0C0D8', hat:'cap', hatCol:'#C9B0E8' },
+    snow_fairy:     { hair:'#E8DCC8', hs:'long',  top:'#D8E8F0', skirt:'#D8E8F0', acc:'#BFE0F0', shoe:'#D8E8F0', hat:'tiara', hatCol:'#EAF6FF', wings:'fairy' },
+    cat_butler:     { hair:'#5A4438', hs:'short', top:'#F7F2E8', skirt:'#F0E8DA', collar:'#2E2A28', acc:'#2E2A28', shoe:'#2E2A28', ears:'cat', earCol:'#5A4438', tail:'cat' },
+    firefighter_boy:{ hair:'#3A2E28', hs:'short', top:'#D94838', pants:'#2E3440', acc:'#F0C24B', shoe:'#2E2A28', hat:'fire', hatCol:'#D94838' },
+    pilot_captain:  { hair:'#2E2A28', hs:'short', top:'#2E3440', pants:'#2E3440', collar:'#F7F7F2', acc:'#F0C24B', shoe:'#2E2A28', hat:'pilot', hatCol:'#2E3440' },
+    baseball_hero:  { hair:'#5A3E2A', hs:'short', top:'#F7F5EE', pants:'#3A4460', acc:'#C94A3A', shoe:'#2E2A28', hat:'cap', hatCol:'#2E3440', sock:'#F7F5EE' },
+    royal_knight:   { hair:'#7A5A3A', hs:'short', top:'#C9CED8', skirt:'#B8C2CE', acc:'#D8E8F8', shoe:'#9AA8B8', hat:'helmet', hatCol:'#C9CED8' },
+    pirate_captain: { hair:'#3A2E28', hs:'short', top:'#F7EFE0', pants:'#5A4232', collar:'#F7EFE0', acc:'#C94A3A', shoe:'#3A2E28', hat:'pirate', hatCol:'#6B4A32' },
+    butterfly_fairy:{ hair:'#E8C98A', hs:'long',  top:'#C8E8D8', skirt:'#C8E8D8', acc:'#F8D8E8', shoe:'#E8D8C8', wings:'butterfly' },
+    melon_pajama:   { hair:'#5A4030', hs:'twin',  top:'#F7D0D8', pants:'#F7D0D8', acc:'#A8D8A0', shoe:'#F0B8C0' },
+    snowman_cloak:  { hair:'#3A2E28', hs:'short', top:'#F7F7F2', pants:'#A8C0E0', cloak:'#A8C0E0', acc:'#F7F7F2', shoe:'#C9D8E8', hat:'beanie', hatCol:'#A8C0E0' },
+    frog_raincoat:  { hair:'#6B4A38', hs:'short', top:'#A8DC9C', pants:'#A8DC9C', acc:'#8ABA80', shoe:'#F5D34E', hat:'hood', hatCol:'#A8DC9C', ears:'frog' },
+    bunny_ribbon:   { hair:'#F7A8C0', hs:'long',  top:'#F9C6CE', skirt:'#F9C6CE', acc:'#F08CA8', shoe:'#F7B8C8', ears:'bunny', earCol:'#F9C6CE' },
+    painter_beret:  { hair:'#4A3628', hs:'bob',   top:'#F7F0E0', skirt:'#C9D8E8', apron:'#F7F0E0', acc:'#8FB8E8', shoe:'#A07A52', hat:'beret', hatCol:'#F7F0E0' },
+    barista_apron:  { hair:'#8A6A4A', hs:'pony',  top:'#C9E0C0', apron:'#F7F2E8', acc:'#8FB880', shoe:'#A07A52', hat:'beret', hatCol:'#A8C8A0' },
+    police_officer: { hair:'#2E2A28', hs:'short', top:'#5A7BA8', pants:'#2E3A5C', collar:'#2E3A5C', acc:'#F0C24B', shoe:'#2E2A28', hat:'police', hatCol:'#2E3A5C' },
+    taekwondo_dobok:{ hair:'#2E2A28', hs:'spiky', top:'#F7F5EE', pants:'#F7F5EE', acc:'#E8C24B', shoe:'#F7F0E4' },
+    basketball_jersey:{ hair:'#5A3E2A', hs:'short', top:'#9CC8E8', shorts:'#9CC8E8', acc:'#F08A3C', shoe:'#F0A84C', sock:'#F7F7F4' },
+    rock_guitar:    { hair:'#2E2A28', hs:'spiky', top:'#D94838', pants:'#3A3A40', acc:'#2E2A28', shoe:'#2E2A28', hat:'headband', hatCol:'#D94838' },
+    magic_academy:  { hair:'#5A4A3A', hs:'short', top:'#2E3450', pants:'#2E3450', collar:'#F7F7F2', acc:'#C9A8E0', shoe:'#2E2A28' },
+    penguin_padding:{ hair:'#3A3A40', hs:'short', top:'#C7DCE8', pants:'#C7DCE8', acc:'#F5D34E', shoe:'#F5D34E', hat:'hood', hatCol:'#B7D2E8' },
+    sailor_girl:    { hair:'#C9A06E', hs:'wavy',  top:'#2E3A5C', skirt:'#2E3A5C', collar:'#F7F7F2', acc:'#F7F7F2', shoe:'#2E2A28' },
+    cake_dress:     { hair:'#F0A8B8', hs:'wavy',  top:'#F9D0D8', skirt:'#F9D0D8', collar:'#FFFDF8', acc:'#E85F5F', shoe:'#F0B0C0' },
+    cherry_fairy:   { hair:'#F7C0C8', hs:'long',  top:'#F9D8E0', skirt:'#F9D8E0', acc:'#F2A8B8', shoe:'#F5C8D0', wings:'butterfly' },
+    bear_sweater:   { hair:'#6B4A34', hs:'bob',   top:'#E88A80', skirt:'#8FB3CC', acc:'#F7E0C8', shoe:'#A07A52' },
+    space_pajama:   { hair:'#3A2E28', hs:'twin',  top:'#2E3A5C', pants:'#2E3A5C', acc:'#F0D98A', shoe:'#A8B8D8' },
+    hamster_hood:   { hair:'#8A6A4A', hs:'short', top:'#F7E0B0', pants:'#F7D0A0', acc:'#F0B0A0', shoe:'#F5E8D0', hat:'hood', hatCol:'#F7E0B0', ears:'hamster' }
+  };
+
+  var PG3_LONG = ['rabbit_pajama','dino_pajama','shark_pajama','melon_pajama','space_pajama','astronaut_suit',
+    'royal_knight','firefighter_boy','pilot_captain','police_officer','wizard_robe','moon_witch','magic_academy',
+    'detective_coat','doctor_nurse','snowman_cloak','penguin_padding','safari_explorer','prince_royal','cap_track','hanbok_pastel'];
+  function pg3Style(k){
+    if (PG3.style[k]) return PG3.style[k];
+    var S = {}, q;
+    for (q in PG3_DEF) S[q] = PG3_DEF[q];
+    var B = PG3_STYLE[k] || {}, q2;
+    for (q2 in B) S[q2] = B[q2];
+    if (PG3_LONG.indexOf(k) > -1) S.long = 1;
+    PG3.style[k] = S;
+    return S;
+  }
+  /* ---------- 공용 재질·기하 (한 벌만 만들어 나눠 쓴다) ---------- */
+  function pg3Geo(key, make){
+    if (!PG3.geo[key]) PG3.geo[key] = make();
+    return PG3.geo[key];
+  }
+  function pg3Sph(){ return pg3Geo('sph', function(){ return new THREE.SphereGeometry(1, 20, 14); }); }
+  /* 밝은 머리색은 한 톤 진하게 — 피부와 붙어 보이지 않게 */
+  var PG3_HAIRDARK = null;                 /* THREE는 놀이터를 열 때 불러오므로 지연 생성 */
+  function pg3Shade(hex){
+    if (!PG3_HAIRDARK) PG3_HAIRDARK = new THREE.Color('#6B4A38');
+    var c = new THREE.Color(hex), hsl = c.getHSL({ h: 0, s: 0, l: 0 });
+    if (hsl.l > 0.62) c.lerp(PG3_HAIRDARK, 0.22);
+    return '#' + c.getHexString();
+  }
+  function pg3Mat(col, kind){
+    if (!col) col = '#F5E9DA';
+    var key = col + '|' + (kind || '');
+    if (PG3.mat[key]) return PG3.mat[key];
+    /* 놀이터 조명이 밝아(하늘+해) 색이 하얗게 타므로 재질 색을 미리 눌러 둔다 */
+    var base = new THREE.Color(col);
+    var o = { color: base.clone().multiplyScalar(0.52), emissive: base.clone().multiplyScalar(0.20),
+              roughness: 0.95, metalness: 0.0 };
+    if (kind === 'metal'){ o.roughness = 0.34; o.metalness = 0.20; }
+    if (kind === 'matte'){ o.roughness = 1.0; }
+    var m = new THREE.MeshStandardMaterial(o);
+    PG3.mat[key] = m;
+    return m;
+  }
+  function pg3Ball(mat, x, y, z, sx, sy, sz){
+    var m = new THREE.Mesh(pg3Sph(), mat);
+    m.position.set(x, y, z);
+    m.scale.set(sx, sy, (sz === undefined ? sx : sz));
+    return m;
+  }
+  function pg3Cyl(mat, rt, rb, h, x, y, z){
+    var k = 'c' + rt + '_' + rb + '_' + h;
+    var g = pg3Geo(k, function(){ return new THREE.CylinderGeometry(rt, rb, h, 18); });
+    var m = new THREE.Mesh(g, mat);
+    m.position.set(x, y, z);
+    return m;
+  }
+  function pg3Cone(mat, r, h, x, y, z, seg){
+    var k = 'n' + r + '_' + h + '_' + (seg || 16);
+    var g = pg3Geo(k, function(){ return new THREE.ConeGeometry(r, h, seg || 16); });
+    var m = new THREE.Mesh(g, mat);
+    m.position.set(x, y, z);
+    return m;
+  }
+  function pg3Box(mat, w, h, d, x, y, z){
+    var k = 'b' + w + '_' + h + '_' + d;
+    var g = pg3Geo(k, function(){ return new THREE.BoxGeometry(w, h, d); });
+    var m = new THREE.Mesh(g, mat);
+    m.position.set(x, y, z);
+    return m;
+  }
+  function pg3Ring(mat, r, tube, x, y, z, rotX){
+    var k = 't' + r + '_' + tube;
+    var g = pg3Geo(k, function(){ return new THREE.TorusGeometry(r, tube, 8, 24); });
+    var m = new THREE.Mesh(g, mat);
+    m.position.set(x, y, z);
+    if (rotX) m.rotation.x = rotX;
+    return m;
   }
 
   /* ============================================================
-     🚶 아장아장 걷기 — 캐릭터 24종 발 움직임 (12프레임 캔버스)
-     · 원본 400×400 한 장을 왼발·오른발·상체로 잘라 프레임마다 다시 그립니다.
-     · 좌표는 400×400 원본 기준
-        ly  다리 시작(치마·바지 밑단 바로 아래)
-        by  발바닥 끝(아래로 번진 연한 바닥 그림자는 잘라냄)
-        gs~ge 두 다리 사이 흰 틈(그림자·옷자락) — 어느 다리에도 넣지 않는다
-        sx  그 틈의 가운데, lcx·rcx 왼발·오른발 중심
+     😊 얼굴 — 머리 구의 앞면 uv(0.25)에 피부색과 함께 그린다
+     · normal(동그란 눈) · joy(><) · happy(⌒⌒) · chill(˘˘)
      ============================================================ */
-  var PG_LEG = {
-    angel_wing: { ly:316, by:386, gs:190, ge:199, sx:194, lcx:174, rcx:215 },
-    astronaut_suit: { ly:357, by:383, gs:188, ge:191, sx:190, lcx:165, rcx:217 },
-    bear_hood: { ly:359, by:385, gs:200, ge:214, sx:207, lcx:184, rcx:229 },
-    beret_study: { ly:313, by:383, gs:198, ge:207, sx:202, lcx:184, rcx:220 },
-    berry_twin: { ly:313, by:386, gs:200, ge:212, sx:206, lcx:186, rcx:226 },
-    bun_ribbon: { ly:335, by:385, gs:195, ge:210, sx:202, lcx:181, rcx:224 },
-    cap_track: { ly:358, by:384, gs:193, ge:229, sx:211, lcx:176, rcx:242 },
-    cat_ribbon: { ly:325, by:386, gs:192, ge:201, sx:196, lcx:182, rcx:210 },
-    dino_pajama: { ly:366, by:387, gs:189, ge:209, sx:199, lcx:176, rcx:223 },
-    flower_wave: { ly:318, by:386, gs:188, ge:202, sx:195, lcx:174, rcx:216 },
-    fox_sailor: { ly:366, by:392, gs:204, ge:208, sx:206, lcx:188, rcx:221 },
-    hanbok_pastel: { ly:358, by:392, gs:202, ge:202, sx:202, lcx:170, rcx:233 },
-    mint_hood: { ly:359, by:385, gs:211, ge:211, sx:211, lcx:185, rcx:237 },
-    panda_hood: { ly:316, by:386, gs:198, ge:211, sx:204, lcx:184, rcx:224 },
-    patissier_chef: { ly:322, by:390, gs:196, ge:207, sx:202, lcx:174, rcx:231 },
-    pearl_denim: { ly:334, by:380, gs:201, ge:213, sx:207, lcx:189, rcx:225 },
-    picnic_cherry: { ly:359, by:385, gs:189, ge:196, sx:192, lcx:177, rcx:208 },
-    pony_star: { ly:361, by:387, gs:182, ge:195, sx:188, lcx:170, rcx:208 },
-    prince_royal: { ly:346, by:386, gs:197, ge:207, sx:202, lcx:186, rcx:219 },
-    princess_tiara: { ly:350, by:387, gs:184, ge:198, sx:191, lcx:170, rcx:212 },
-    rabbit_pajama: { ly:306, by:385, gs:196, ge:196, sx:196, lcx:174, rcx:218 },
-    rock_headset: { ly:356, by:382, gs:186, ge:203, sx:194, lcx:170, rcx:218 },
-    soccer_sport: { ly:362, by:388, gs:202, ge:202, sx:202, lcx:174, rcx:230 },
-    wizard_robe: { ly:361, by:390, gs:183, ge:201, sx:192, lcx:171, rcx:213 },
-    /* v18 추가 12종 — 400×400 원본 기준 직접 측정 */
-    chick_raincoat:  { ly:344, by:390, gs:199, ge:204, sx:201, lcx:181, rcx:220 },
-    shark_pajama:    { ly:362, by:391, gs:197, ge:203, sx:200, lcx:178, rcx:219 },
-    bee_hood:        { ly:346, by:389, gs:186, ge:191, sx:189, lcx:170, rcx:208 },
-    ballerina_tutu:  { ly:340, by:390, gs:199, ge:203, sx:201, lcx:192, rcx:209 },
-    detective_coat:  { ly:352, by:390, gs:199, ge:204, sx:201, lcx:176, rcx:228 },
-    moon_witch:      { ly:338, by:390, gs:193, ge:198, sx:195, lcx:177, rcx:213 },
-    mermaid_tail:    { ly:368, by:392, gs:245, ge:251, sx:248, lcx:214, rcx:270 },
-    safari_explorer: { ly:350, by:390, gs:197, ge:202, sx:199, lcx:172, rcx:224 },
-    doctor_nurse:    { ly:348, by:389, gs:205, ge:210, sx:207, lcx:193, rcx:225 },
-    skater_punk:     { ly:356, by:390, gs:204, ge:209, sx:206, lcx:178, rcx:233 },
-    snow_fairy:      { ly:358, by:390, gs:197, ge:209, sx:203, lcx:185, rcx:220 },
-    cat_butler:      { ly:350, by:389, gs:198, ge:203, sx:200, lcx:183, rcx:220 },
-    /* v19 추가 12종 — 400×400 원본 기준 직접 측정 */
-    firefighter_boy: { ly:349, by:392, gs:197, ge:213, sx:205, lcx:178, rcx:232 },
-    pilot_captain:   { ly:339, by:392, gs:202, ge:218, sx:210, lcx:189, rcx:230 },
-    baseball_hero:   { ly:362, by:392, gs:170, ge:226, sx:198, lcx:152, rcx:238 },
-    royal_knight:    { ly:362, by:392, gs:182, ge:196, sx:189, lcx:163, rcx:216 },
-    pirate_captain:  { ly:331, by:393, gs:197, ge:212, sx:204, lcx:180, rcx:229 },
-    butterfly_fairy: { ly:307, by:393, gs:197, ge:212, sx:205, lcx:185, rcx:224 },
-    melon_pajama:    { ly:345, by:393, gs:186, ge:199, sx:192, lcx:169, rcx:216 },
-    snowman_cloak:   { ly:330, by:392, gs:196, ge:203, sx:199, lcx:178, rcx:221 },
-    frog_raincoat:   { ly:322, by:392, gs:197, ge:219, sx:208, lcx:180, rcx:250 },
-    bunny_ribbon:    { ly:337, by:394, gs:191, ge:205, sx:198, lcx:179, rcx:216 },
-    painter_beret:   { ly:334, by:393, gs:191, ge:204, sx:197, lcx:180, rcx:215 },
-    barista_apron:   { ly:309, by:393, gs:192, ge:201, sx:196, lcx:181, rcx:212 },
-    /* v20 추가 12종 — 400×400 원본 기준 직접 측정 */
-    police_officer:  { ly:316, by:392, gs:198, ge:210, sx:204, lcx:172, rcx:232 },
-    taekwondo_dobok: { ly:312, by:393, gs:194, ge:206, sx:200, lcx:176, rcx:262 },
-    basketball_jersey: { ly:330, by:392, gs:201, ge:213, sx:207, lcx:184, rcx:251 },
-    rock_guitar:     { ly:310, by:392, gs:199, ge:208, sx:203, lcx:170, rcx:250 },
-    magic_academy:   { ly:322, by:392, gs:196, ge:206, sx:201, lcx:170, rcx:245 },
-    penguin_padding: { ly:326, by:386, gs:193, ge:201, sx:197, lcx:176, rcx:222 },
-    sailor_girl:     { ly:320, by:391, gs:192, ge:210, sx:201, lcx:172, rcx:228 },
-    cake_dress:      { ly:336, by:389, gs:185, ge:203, sx:194, lcx:165, rcx:222 },
-    cherry_fairy:    { ly:320, by:389, gs:205, ge:218, sx:211, lcx:190, rcx:242 },
-    bear_sweater:    { ly:310, by:392, gs:197, ge:214, sx:205, lcx:175, rcx:243 },
-    space_pajama:    { ly:290, by:390, gs:199, ge:210, sx:204, lcx:176, rcx:241 },
-    hamster_hood:    { ly:330, by:392, gs:202, ge:214, sx:208, lcx:184, rcx:246 }
-  };
-  var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
-  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:22 };
-  function pgLegOf(k){ return PG_LEG[k] || PG_LEG_DEF; }
-  function pgWalkTexCount(){ var n = 0; for (var q in PG.walkTex) if (PG.walkTex[q]) n++; return n; }
-  function pgPresetWalking(k){
-    var pk = String(k).split('|')[0];
-    for (var i = 0; i < PG.charOrder.length; i++){
-      var c = PG.chars[PG.charOrder[i]];
-      if (c && c.data.preset === pk && c.aiMode === 'walk' && !c.held) return true;
-    }
-    return false;
-  }
-  /* 지금 화면에 그려지고 있는 프레임 키인가 */
-  function pgKeyShown(kind, key){
-    for (var i = 0; i < PG.charOrder.length; i++){
-      var c = PG.chars[PG.charOrder[i]];
-      if (!c) continue;
-      if ((kind === 'w' ? c.walkKey : c.rideKey) === key) return true;
-    }
-    return false;
-  }
-  /* 무대에 아직 서 있는 캐릭터의 그림은 버리지 않는다 (매 프레임 다시 그리면 멈춘다) */
-  function pgPresetOnStage(k){
-    var pk = String(k).split('|')[0];
-    for (var i = 0; i < PG.charOrder.length; i++){
-      var c = PG.chars[PG.charOrder[i]];
-      if (c && c.data.preset === pk) return true;
-    }
-    return false;
-  }
-  function pgDropWalkTex(k){
-    if (!PG.walkTex[k]) return;
-    PG.walkTex[k].forEach(function(tx){ try { tx.dispose(); } catch(e){} });
-    delete PG.walkTex[k];
-    PG.walkOrder = PG.walkOrder.filter(function(x){ return x !== k; });
-  }
-  /* 다리 한 쪽만 오려낸 레이어 — 두 다리 사이 흰 틈과 바닥 그림자는 빠진다 */
-  function pgLegLayer(img, L, side){
-    var w = img.width || 400, h = img.height || 400;
-    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  function pg3FaceTex(skin, ex){
+    var key = skin + '|' + ex;
+    if (PG3.faceMat[key]) return PG3.faceMat[key];
+    var W = 512, H = 512;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var c = cv.getContext('2d');
-    c.drawImage(img, 0, 0, w, h);
-    var top = Math.max(0, L.ly - 2), bot = Math.min(h, L.by + PG_WALK.FADE);
-    var x0, x1;
-    if (side < 0){ x0 = 0; x1 = L.gs; } else { x0 = L.ge; x1 = w; }
-    if (L.ge - L.gs < 4){                       /* 다리가 붙어 있는 캐릭터 — 살짝 겹쳐 이음매를 감춘다 */
-      if (side < 0) x1 = L.sx + 4; else x0 = L.sx - 4;
+    c.fillStyle = skin; c.fillRect(0, 0, W, H);
+    c.fillStyle = 'rgba(255,255,255,0.10)'; c.fillRect(0, 0, W, H);   /* 조명에 눌리지 않게 한 겹 */
+    var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
+    var ey = 290, dx = 21, ink = '#3B2A22';
+    /* 볼터치 */
+    c.fillStyle = 'rgba(244,150,150,0.30)';
+    [[cx - 46, ey + 22], [cx + 46, ey + 22]].forEach(function(p){
+      c.beginPath(); c.ellipse(p[0], p[1], 15, 9, 0, 0, 6.2832); c.fill();
+    });
+    function eyeOval(x){
+      var g = c.createLinearGradient(0, ey - 20, 0, ey + 20);
+      g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
+      c.fillStyle = g;
+      c.beginPath(); c.ellipse(x, ey, 18.5, 21.5, 0, 0, 6.2832); c.fill();
+      c.fillStyle = '#A06A45';
+      c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
+      c.fillStyle = '#2A1A12';
+      c.beginPath(); c.ellipse(x, ey + 7, 6.8, 7.4, 0, 0, 6.2832); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.98)';
+      c.beginPath(); c.arc(x - 6, ey - 7.5, 8.2, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x + 5.4, ey + 9, 3.0, 0, 6.2832); c.fill();
+      /* 눈꺼풀 선은 두지 않는다 — 또렷한 눈알과 흰 반짝임만 */
     }
-    if (x1 - x0 < 6){ if (side < 0) x1 = Math.min(w, x0 + 6); else x0 = Math.max(0, x1 - 6); }
-    var mk = document.createElement('canvas'); mk.width = w; mk.height = h;
-    var m = mk.getContext('2d');
-    m.fillStyle = '#fff'; m.fillRect(x0, top, x1 - x0, bot - top);
-    if (bot > L.by){                            /* 발 밑 연한 그림자는 아래로 갈수록 지운다 */
-      var g = m.createLinearGradient(0, L.by, 0, bot);
-      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,1)');
-      m.globalCompositeOperation = 'destination-out';
-      m.fillStyle = g; m.fillRect(x0, L.by, x1 - x0, bot - L.by);
-      m.globalCompositeOperation = 'source-over';
+    c.strokeStyle = ink; c.lineCap = 'round'; c.lineJoin = 'round';
+    if (ex === 'joy'){
+      /* >< 눈웃음 */
+      c.lineWidth = 5.6;
+      [[-1, cx - dx], [1, cx + dx]].forEach(function(p){
+        var sd = p[0], x = p[1];
+        c.beginPath();
+        c.moveTo(x - 11 * sd, ey - 11); c.lineTo(x + 5 * sd, ey); c.lineTo(x - 11 * sd, ey + 11);
+        c.stroke();
+      });
+      c.fillStyle = '#C05C55';
+      c.beginPath(); c.ellipse(cx, ey + 40, 11, 8.5, 0, 0, Math.PI); c.fill();
+      c.fillStyle = '#F09A94';
+      c.beginPath(); c.ellipse(cx, ey + 44, 6, 3.4, 0, 0, Math.PI); c.fill();
+    } else if (ex === 'happy'){
+      /* ⌒⌒ 감은 눈 */
+      c.lineWidth = 5.2;
+      [cx - dx, cx + dx].forEach(function(x){
+        c.beginPath(); c.arc(x, ey + 6, 13, Math.PI * 1.13, Math.PI * 1.87); c.stroke();
+      });
+      c.lineWidth = 3.4;
+      c.beginPath(); c.arc(cx, ey + 34, 10, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+    } else if (ex === 'chill'){
+      /* ˘˘ 나른한 눈 */
+      c.lineWidth = 4.6;
+      [cx - dx, cx + dx].forEach(function(x){
+        c.beginPath(); c.arc(x, ey + 8, 12, Math.PI * 0.10, Math.PI * 0.90); c.stroke();
+      });
+      c.lineWidth = 3.2;
+      c.beginPath(); c.moveTo(cx - 6, ey + 38); c.lineTo(cx + 6, ey + 38); c.stroke();
+    } else {
+      eyeOval(cx - dx); eyeOval(cx + dx);
+      /* 코·입 */
+      c.fillStyle = '#C4645C';
+      c.beginPath(); c.ellipse(cx, ey + 34, 10, 8, 0, 0, Math.PI); c.fill();
+      c.fillStyle = '#F2A8A0';
+      c.beginPath(); c.ellipse(cx, ey + 39, 6, 3.4, 0, 0, Math.PI); c.fill();
+      c.strokeStyle = '#B65A52'; c.lineWidth = 2.8;
+      c.beginPath(); c.moveTo(cx - 11, ey + 26); c.quadraticCurveTo(cx, ey + 31, cx + 11, ey + 26); c.stroke();
     }
-    c.globalCompositeOperation = 'destination-in';
-    try { c.filter = 'blur(1px)'; } catch(e){}
-    c.drawImage(mk, 0, 0);
-    try { c.filter = 'none'; } catch(e){}
-    c.globalCompositeOperation = 'source-over';
-    return cv;
-  }
-  /* 머리·몸통·치마 — 다리 위에 덮는 상체 레이어 */
-  function pgBodyLayer(img, L){
-    var w = img.width || 400, h = img.height || 400;
-    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    var c = cv.getContext('2d');
-    c.drawImage(img, 0, 0, w, h);
-    c.globalCompositeOperation = 'destination-in';
-    c.fillStyle = '#fff';
-    c.fillRect(0, 0, w, Math.min(h, Math.max(0, L.ly + 2)));
-    c.globalCompositeOperation = 'source-over';
-    return cv;
-  }
-  function pgCanvasTex(cv){
     var tx = new THREE.CanvasTexture(cv);
     if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
-    return tx;
+    tx.anisotropy = 4;
+    var mat = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.92, metalness: 0.0 });
+    PG3.faceMat[key] = mat;
+    return mat;
   }
-  /* ============================================================
-     🔄 뒷모습 — 실루엣은 그대로 두고 앞면(얼굴·단추·앞치마)을
-        정수리에서 뽑은 머리/모자 색과 줄별 옷색으로 덮는다
-     ============================================================ */
-  function pgEllipsePath(c, cx, cy, rx, ry){
-    var kx = rx * 0.5523, ky = ry * 0.5523;
-    c.beginPath();
-    c.moveTo(cx + rx, cy);
-    c.bezierCurveTo(cx + rx, cy + ky, cx + kx, cy + ry, cx, cy + ry);
-    c.bezierCurveTo(cx - kx, cy + ry, cx - rx, cy + ky, cx - rx, cy);
-    c.bezierCurveTo(cx - rx, cy - ky, cx - kx, cy - ry, cx, cy - ry);
-    c.bezierCurveTo(cx + kx, cy - ry, cx + rx, cy - ky, cx + rx, cy);
-    c.closePath();
+  function pg3Face(c, ex){
+    if (!c || !c.j || !c.j.headMat) return;
+    var want = pg3FaceTex(c.j.skin, ex || 'normal');
+    if (c.j.headMat !== want){
+      c.j.headMat = want;
+      c.j.head.material = want;
+    }
   }
-  function pgBackCv(k){
-    if (PG.backCv[k] !== undefined) return PG.backCv[k];
-    var img = PG.tex[k] && PG.tex[k].image;
-    if (!img || !img.width) return null;                 /* 그림이 아직 안 실림 */
-    var w = img.width, h = img.height;
-    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    var c = cv.getContext('2d');
-    c.drawImage(img, 0, 0);
-    var d = null;
-    try { d = c.getImageData(0, 0, w, h); } catch(e){ d = null; }
-    if (!d){ PG.backCv[k] = null; return null; }
-    var px = d.data, x, y, i, a;
-    var L = pgLegOf(k), cf = pgArmOf(k);
-    var top = -1, bot = 0;
-    var rowA = [], rowB = [], rowCol = [];
-    for (y = 0; y < h; y++){
-      var xa = -1, xb = -1, sr = 0, sg = 0, sb = 0, sn = 0;
-      for (x = 0; x < w; x++){
-        i = (y * w + x) * 4;
-        a = px[i + 3];
-        if (a > 60){
-          if (xa < 0) xa = x;
-          xb = x;
-          if (a > 170){ sr += px[i]; sg += px[i + 1]; sb += px[i + 2]; sn++; }
-        }
-      }
-      rowA[y] = xa; rowB[y] = xb;
-      rowCol[y] = sn ? [sr / sn, sg / sn, sb / sn] : null;
-      if (xa >= 0){ if (top < 0) top = y; bot = y; }
-    }
-    if (top < 0){ PG.backCv[k] = null; return null; }
-    var hipY = Math.max(top + 18, Math.min(bot - 3, L.ly));
-    var chinY = Math.round(top + (hipY - top) * 0.58);
-    /* ① 옷은 줄 양옆(옷감) 색으로 채워 앞면의 책·앞치마·단추 같은 무늬를 지운다 */
-    for (y = chinY; y <= bot; y++){
-      var ra = rowA[y], rb = rowB[y];
-      if (ra < 0) continue;
-      var span = rb - ra;
-      if (span < 2) continue;
-      var sw2 = Math.max(1, Math.round(span * 0.22));
-      var cr = 0, cg = 0, cb = 0, cn = 0;
-      for (x = ra; x < ra + sw2; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ cr += px[i]; cg += px[i + 1]; cb += px[i + 2]; cn++; } }
-      for (x = rb - sw2; x <= rb; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ cr += px[i]; cg += px[i + 1]; cb += px[i + 2]; cn++; } }
-      if (!cn) continue;
-      cr /= cn; cg /= cn; cb /= cn;
-      for (x = ra; x <= rb; x++){
-        i = (y * w + x) * 4;
-        if (px[i + 3] <= 8) continue;
-        var exf = Math.abs(x - (ra + rb) / 2) / (span / 2);
-        var mix = 0.82 + 0.12 * (1 - exf * exf);         /* 가운데일수록 옷감색으로 더 눌러 무늬를 지운다 */
-        px[i]     = px[i] * (1 - mix) + cr * mix;
-        px[i + 1] = px[i + 1] * (1 - mix) + cg * mix;
-        px[i + 2] = px[i + 2] * (1 - mix) + cb * mix;
-      }
-    }
-    c.putImageData(d, 0, 0);
-    /* ② 정수리 색 뽑기 — 모자·후드·머리카락 */
-    var hr = 0, hg = 0, hb = 0, hn = 0;
-    var headBand = Math.max(4, Math.round((chinY - top) * 0.5));
-    for (y = top + 2; y < Math.min(chinY, top + headBand); y++){
-      var cc = rowCol[y]; if (!cc) continue;
-      hr += cc[0]; hg += cc[1]; hb += cc[2]; hn++;
-    }
-    var hairTop = hn ? [hr / hn, hg / hn, hb / hn] : [246, 222, 194];
-    /* 얼굴 높이의 양옆(귀밑 머리·후드) 색도 섞어 모자만 뽑히지 않게 */
-    var sr = 0, sg2 = 0, sb2 = 0, sn2 = 0;
-    var fyE = Math.round((top + chinY) / 2 + (chinY - top) * 0.08);
-    for (y = fyE - Math.round((chinY - top) * 0.14); y <= fyE + Math.round((chinY - top) * 0.14); y++){
-      var ra2 = rowA[y], rb2 = rowB[y];
-      if (ra2 < 0) continue;
-      var span2 = rb2 - ra2;
-      for (x = ra2; x <= ra2 + span2 * 0.16; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ sr += px[i]; sg2 += px[i + 1]; sb2 += px[i + 2]; sn2++; } }
-      for (x = rb2 - span2 * 0.16; x <= rb2; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ sr += px[i]; sg2 += px[i + 1]; sb2 += px[i + 2]; sn2++; } }
-    }
-    var hair = hairTop;
-    if (sn2 > 20) hair = [hairTop[0] * 0.45 + (sr / sn2) * 0.55, hairTop[1] * 0.45 + (sg2 / sn2) * 0.55, hairTop[2] * 0.45 + (sb2 / sn2) * 0.55];
-    function hx(v){ var q = Math.round(v); q = q < 0 ? 0 : (q > 255 ? 255 : q); var t = q.toString(16); return t.length < 2 ? '0' + t : t; }
-    var hairCss = '#' + hx(hair[0]) + hx(hair[1]) + hx(hair[2]);
-    /* ③ 얼굴 자리 — 눈 위 '앞머리 띠'를 늘려 덮어 진짜 뒷머리처럼 (모자·후드 테두리는 그대로) */
-    var fi = null;
-    try { fi = pgFaceInfo(k); } catch(e){ fi = null; }
-    var sc = w / 400;
-    var eyPx = (fi ? fi.ey : 156) * sc;
-    var fy0 = (fi ? fi.y0 : 138) * sc - 2 * sc;
-    var fy1 = Math.max((fi ? fi.y1 : 196) * sc, chinY + 4) + 3 * sc;
-    var fx0 = ((fi ? fi.x0 : 150) - 5) * sc;
-    var fx1 = ((fi ? fi.x1 : 250) + 5) * sc;
-    if (fx0 < 0) fx0 = 0; if (fx1 > w) fx1 = w;
-    var bandBot = Math.max(top + 16, eyPx - 10 * sc);
-    var bandTop = top + Math.max(1, Math.round((bandBot - top) * 0.16));
-    var bandH = Math.max(6, bandBot - bandTop);
-    var pw = Math.max(8, Math.round(fx1 - fx0)), ph2 = Math.max(8, Math.round(fy1 - fy0));
-    var pc = document.createElement('canvas'); pc.width = pw; pc.height = ph2;
-    var pctx = pc.getContext('2d');
-    pctx.drawImage(img, Math.round(fx0), Math.round(bandTop), Math.round(pw), Math.round(bandH), 0, 0, pw, ph2);
-    pctx.globalCompositeOperation = 'destination-in';
-    try { pctx.filter = 'blur(' + Math.max(2, 5 * sc) + 'px)'; } catch(e){}
-    pctx.fillStyle = '#fff';
-    pgEllipsePath(pctx, pw / 2, ph2 / 2, pw * 0.54, ph2 * 0.52);
-    pctx.fill();
-    try { pctx.filter = 'none'; } catch(e){}
-    pctx.globalCompositeOperation = 'source-over';
-    /* 살짝 눌러 머리색과 섞는다 (너무 진하면 앞머리 무늬가 도드라짐) */
-    pctx.globalCompositeOperation = 'source-atop';
-    pctx.fillStyle = hairCss;
-    pctx.globalAlpha = 0.72;
-    pctx.fillRect(0, 0, pw, ph2);
-    pctx.globalAlpha = 1;
-    pctx.globalCompositeOperation = 'source-over';
-    c.drawImage(pc, Math.round(fx0), Math.round(fy0));
-    /* ④ 뒷머리 결 · 목덜미 그늘 · 등 가운데 그늘 */
-    var hcx = cf.cx * sc, hcy = (top + chinY) / 2;
-    var hrr = Math.max(14, (chinY - top) * 0.55 * sc);
-    var hw2 = Math.max(12, (fx1 - fx0) * 0.55);
-    c.save();
-    c.globalCompositeOperation = 'source-atop';
-    c.strokeStyle = 'rgba(0,0,0,0.085)';
-    c.lineWidth = Math.max(1.4, w / 210);
-    c.lineCap = 'round';
-    for (var s2 = 0; s2 < 3; s2++){
-      var sx0 = hcx + (s2 - 1) * (hrr * 0.42);
-      c.beginPath();
-      c.moveTo(sx0, top + (chinY - top) * 0.18);
-      c.quadraticCurveTo(sx0 + (s2 - 1) * 5, hcy, sx0 + (s2 - 1) * 11, chinY - (chinY - top) * 0.18);
-      c.stroke();
-    }
-    var grd = c.createLinearGradient(hcx - hw2, 0, hcx + hw2, 0);
-    grd.addColorStop(0, 'rgba(0,0,0,0.10)');
-    grd.addColorStop(0.5, 'rgba(0,0,0,0)');
-    grd.addColorStop(1, 'rgba(0,0,0,0.10)');
-    c.fillStyle = grd;
-    c.fillRect(hcx - hw2 * 1.1, chinY - 6, hw2 * 2.2, Math.max(0, hipY - chinY + 8));
-    c.restore();
-    PG.backCv[k] = cv;
-    PG.backOrder = (PG.backOrder || []).filter(function(q){ return q !== k; });
-    PG.backOrder.push(k);
-    if (PG.backOrder.length > 10){
-      var oldB = PG.backOrder.shift();
-      PG.backCv[oldB] = undefined;
-      if (PG.backTex && PG.backTex[oldB]){ try { PG.backTex[oldB].dispose(); } catch(e){} delete PG.backTex[oldB]; }
-    }
-    return cv;
-  }
-  function pgBackTex(k){
-    PG.backTex = PG.backTex || {};
-    if (PG.backTex[k]) return PG.backTex[k];
-    var cv = pgBackCv(k);
-    if (!cv) return null;
-    var tx = pgCanvasTex(cv);
-    PG.backTex[k] = tx;
-    return tx;
-  }
-  /* 다리 위에 덮는 '뒷모습 상체' 레이어 */
-  function pgBackBodyLayer(img, L, k){
-    var w = img.width || 400, h = img.height || 400;
-    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    var c = cv.getContext('2d');
-    var src = PG.backCv[k] || null;
-    if (!src) return null;
-    c.drawImage(src, 0, 0, w, h);
-    c.globalCompositeOperation = 'destination-in';
-    c.fillStyle = '#fff';
-    c.fillRect(0, 0, w, Math.min(h, Math.max(0, L.ly + 2)));
-    c.globalCompositeOperation = 'source-over';
-    return cv;
-  }
-  /* ============================================================
-     😊 표정 — 원본 얼굴에서 두 눈·입을 자동으로 찾아 캐시한다
-     ============================================================ */
-  var PG_FACE_DEF = { ok:true, lx:177, rx:223, ey:156, my:182, mx:200,
-                      ew:22, eh:12, ink:'#4A3A2E', skin:'#F9DCC4',
-                      x0:156, y0:140, x1:244, y1:200 };
-  function pgFaceInfo(k){
-    if (PG.faces[k]) return PG.faces[k];
-    var img = PG.tex[k] && PG.tex[k].image;
-    if (!img || !img.width) return PG_FACE_DEF;           /* 아직 안 실림 */
-    var info = PG_FACE_DEF;
-    try { info = pgAutoFace(img); } catch(e){ info = PG_FACE_DEF; }
-    PG.faces[k] = info;
-    return info;
-  }
-  function pgAutoFace(img){
-    var w = img.width, h = img.height;
-    var sc = w / 400;
-    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    var c = cv.getContext('2d'); c.drawImage(img, 0, 0);
-    var d = c.getImageData(0, 0, w, h).data;
-    var X0 = Math.round(150 * sc), X1 = Math.round(250 * sc);
-    var Y0 = Math.round(122 * sc), Y1 = Math.round(202 * sc);
-    var lx = 0, ly = 0, ln = 0, rx = 0, ry = 0, rn = 0;
-    var minx = 9999, maxx = -1, miny = 9999, maxy = -1;
-    var ir = 0, ig = 0, ib = 0, inn = 0;
-    for (var y = Y0; y < Y1; y++){
-      for (var x = X0; x < X1; x++){
-        var i = (y * w + x) * 4;
-        if (d[i + 3] < 170) continue;
-        var lum = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-        if (lum > 116) continue;
-        if (x < 200 * sc){ lx += x; ly += y; ln++; }
-        else { rx += x; ry += y; rn++; }
-        if (x < minx) minx = x; if (x > maxx) maxx = x;
-        if (y < miny) miny = y; if (y > maxy) maxy = y;
-        ir += d[i]; ig += d[i + 1]; ib += d[i + 2]; inn++;
-      }
-    }
-    if (ln < 5 || rn < 5) return PG_FACE_DEF;
-    var clx = lx / ln, cly = ly / ln, crx = rx / rn, cry = ry / rn;
-    /* 눈 두 점이 '얼굴'다운 크기·위치일 때만 믿는다 (머리카락을 눈으로 오인 방지) */
-    var gapx = Math.abs(clx - crx);
-    if (gapx < 14 * sc || gapx > 68 * sc) return PG_FACE_DEF;
-    if (Math.abs(cly - cry) > 10 * sc) return PG_FACE_DEF;
-    if ((maxy - miny) > 34 * sc) return PG_FACE_DEF;
-    if ((maxx - minx) > 96 * sc) return PG_FACE_DEF;
-    var ey = (cly + cry) / 2;
-    if (ey < 128 * sc || ey > 200 * sc) return PG_FACE_DEF;
-    var cx = (clx + crx) / 2;
-    var eww = Math.abs(crx - clx) * 0.42;
-    var ehh = Math.max(4 * sc, Math.min(13 * sc, (maxy - miny) * 0.35 + 4 * sc));
-    /* 입 — 눈 아래 가운데에서 가장 어두운 덩어리 */
-    var mx = cx, my = ey + 26 * sc, mn = 0, msumx = 0, msumy = 0;
-    var MY0 = Math.round(ey + 9 * sc), MY1 = Math.round(Math.min(2 * h, ey + 46 * sc));
-    var MX0 = Math.round(cx - 30 * sc), MX1 = Math.round(cx + 30 * sc);
-    for (y = MY0; y < MY1; y++){
-      for (x = MX0; x < MX1; x++){
-        if (x < 0 || y < 0 || x >= w || y >= h) continue;
-        i = (y * w + x) * 4;
-        if (d[i + 3] < 170) continue;
-        var lu2 = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-        if (lu2 > 140) continue;
-        msumx += x; msumy += y; mn++;
-      }
-    }
-    if (mn >= 6){ mx = msumx / mn; my = msumy / mn; }
-    /* 살색 — 눈 옆·볼에서 가장 밝은 값 */
-    var skin = [249, 220, 196], best = -1;
-    [[cx, ey + 13 * sc], [clx - 16 * sc, ey + 2 * sc], [crx + 16 * sc, ey + 2 * sc],
-     [cx, my + 12 * sc]].forEach(function(pt){
-      var xx = Math.round(pt[0]), yy = Math.round(pt[1]);
-      if (xx < 0 || yy < 0 || xx >= w || yy >= h) return;
-      var k2 = (yy * w + xx) * 4;
-      if (d[k2 + 3] < 180) return;
-      var lum2 = d[k2] * 0.299 + d[k2 + 1] * 0.587 + d[k2 + 2] * 0.114;
-      if (lum2 > best){ best = lum2; skin = [d[k2], d[k2 + 1], d[k2 + 2]]; }
-    });
-    var ink = inn ? [Math.round(ir / inn), Math.round(ig / inn), Math.round(ib / inn)] : [74, 58, 46];
-    function hx(v){ var s3 = Math.round(v).toString(16); return s3.length < 2 ? '0' + s3 : s3; }
-    var box = { x0: minx - 8 * sc, x1: maxx + 8 * sc, y0: miny - 7 * sc, y1: my + 11 * sc };
-    /* 400 기준으로 되돌린다 */
-    return {
-      ok:true,
-      lx: clx / sc, rx: crx / sc, ey: ey / sc, mx: mx / sc, my: my / sc,
-      ew: eww / sc, eh: ehh / sc,
-      ink: '#' + hx(ink[0]) + hx(ink[1]) + hx(ink[2]),
-      skin: '#' + hx(skin[0]) + hx(skin[1]) + hx(skin[2]),
-      x0: Math.max(0, box.x0 / sc), y0: Math.max(0, box.y0 / sc),
-      x1: Math.min(400, box.x1 / sc), y1: Math.min(400, box.y1 / sc)
-    };
-  }
-  function pgFaceBlob(c, x, y, rx, ry, col){
-    c.save();
-    c.translate(x, y);
-    c.scale(1, Math.max(0.05, ry / Math.max(1, rx)));
-    c.beginPath(); c.arc(0, 0, rx, 0, 6.2832); c.closePath();
-    c.fillStyle = col; c.fill();
-    c.restore();
-  }
-  function pgFaceTex(k, ex){
-    var key = k + '|' + ex;
-    PG.faceTex = PG.faceTex || {};
-    if (PG.faceTex[key]) return PG.faceTex[key];
-    var info = pgFaceInfo(k);
-    if (!info || !info.ok) return null;
-    var img = PG.tex[k] && PG.tex[k].image;
-    if (!img || !img.width) return null;
-    var w = img.width, sc = w / 400;
-    var bx0 = Math.round(info.x0 * sc), by0 = Math.round(info.y0 * sc);
-    var bx1 = Math.round(info.x1 * sc), by1 = Math.round(info.y1 * sc);
-    var bw = Math.max(8, bx1 - bx0), bh = Math.max(8, by1 - by0);
-    bx1 = bx0 + bw; by1 = by0 + bh;
-    var cv = document.createElement('canvas'); cv.width = bw; cv.height = bh;
-    var c = cv.getContext('2d');
-    c.drawImage(img, bx0, by0, bw, bh, 0, 0, bw, bh);
-    var elx = (info.lx - info.x0) * sc, ely = (info.ey - info.y0) * sc;
-    var erx = (info.rx - info.x0) * sc;
-    var mx = (info.mx - info.x0) * sc, my = (info.my - info.y0) * sc;
-    var ew = Math.max(5, info.ew * sc), eh = Math.max(3, info.eh * sc);
-    /* 원래 눈·입을 살색으로 덮는다 */
-    var pad = Math.max(2, 3 * sc);
-    pgFaceBlob(c, elx, ely, ew + pad, eh + pad, info.skin);
-    pgFaceBlob(c, erx, ely, ew + pad, eh + pad, info.skin);
-    pgFaceBlob(c, mx, my, ew * 1.25 + pad, eh * 0.9 + pad, info.skin);
-    c.strokeStyle = info.ink; c.fillStyle = info.ink;
-    c.lineWidth = Math.max(4, 2.9 * sc);
-    c.lineCap = 'round'; c.lineJoin = 'round';
-    if (ex === 'joy'){
-      /* > < 눈웃음 */
-      c.beginPath();
-      c.moveTo(elx - ew * 0.72, ely - eh * 0.85);
-      c.lineTo(elx + ew * 0.62, ely);
-      c.lineTo(elx - ew * 0.72, ely + eh * 0.85);
-      c.stroke();
-      c.beginPath();
-      c.moveTo(erx + ew * 0.72, ely - eh * 0.85);
-      c.lineTo(erx - ew * 0.62, ely);
-      c.lineTo(erx + ew * 0.72, ely + eh * 0.85);
-      c.stroke();
-      c.beginPath();
-      c.moveTo(mx - ew * 0.92, my - eh * 0.5);
-      c.quadraticCurveTo(mx, my + eh * 2.1, mx + ew * 0.92, my - eh * 0.5);
-      c.closePath();
-      c.fillStyle = '#8B4A4A';
-      c.fill();
-    } else if (ex === 'happy'){
-      /* ⌒ ⌒ 반달 웃음눈 + 볼터치 + ◡ */
-      [elx, erx].forEach(function(ex0){
-        c.beginPath();
-        c.arc(ex0, ely + eh * 0.42, ew * 0.92, Math.PI * 1.08, Math.PI * 1.92);
-        c.stroke();
-      });
-      c.save();
-      c.globalAlpha = 0.42;
-      pgFaceBlob(c, elx - ew * 1.15, ely + eh * 1.5, ew * 0.62, eh * 0.5, '#FF9DB2');
-      pgFaceBlob(c, erx + ew * 1.15, ely + eh * 1.5, ew * 0.62, eh * 0.5, '#FF9DB2');
-      c.restore();
-      c.beginPath();
-      c.arc(mx, my - eh * 0.7, ew * 0.72, Math.PI * 0.15, Math.PI * 0.85);
-      c.stroke();
-    } else {
-      /* ˘ ˘ 편안히 감은 눈 + 잔잔한 미소 */
-      [elx, erx].forEach(function(ex0){
-        c.beginPath();
-        c.arc(ex0, ely - eh * 0.5, ew * 0.86, Math.PI * 0.19, Math.PI * 0.81);
-        c.stroke();
-      });
-      c.beginPath();
-      c.arc(mx, my - eh * 0.5, ew * 0.5, Math.PI * 0.22, Math.PI * 0.78);
-      c.stroke();
-    }
-    c.globalCompositeOperation = 'destination-in';      /* 얼굴 밖으로 새지 않게 */
-    c.drawImage(img, bx0, by0, bw, bh, 0, 0, bw, bh);
-    c.globalCompositeOperation = 'source-over';
-    var tx = pgCanvasTex(cv);
-    PG.faceTex[key] = tx;
-    PG.faceOrder = (PG.faceOrder || []).filter(function(q){ return q !== key; });
-    PG.faceOrder.push(key);
-    if (PG.faceOrder.length > 40){
-      var ok2 = PG.faceOrder.shift();
-      if (ok2 !== key && PG.faceTex[ok2]){ try { PG.faceTex[ok2].dispose(); } catch(e){} delete PG.faceTex[ok2]; }
-    }
-    return tx;
-  }
-  function pgWalkFrames(k, back){
-    var key = back ? (k + '|b') : k;
-    if (PG.walkTex[key]) return PG.walkTex[key];
-    var src = PG.tex[k], img = src && src.image;
-    if (!img || !img.width) return null;         /* 원본이 아직 안 실렸으면 다음 프레임에 다시 */
-    var L = pgLegOf(k), N = PG_WALK.N, W = img.width, H = img.height;
-    var legL = pgLegLayer(img, L, -1), legR = pgLegLayer(img, L, 1);
-    var body = back ? pgBackBodyLayer(img, L, k) : pgBodyLayer(img, L);
-    if (!body) body = pgBodyLayer(img, L);
-    var hip = Math.max(0, L.ly - 2), legLen = Math.max(8, L.by - hip);
-    var out = [], cv, c, i, j, ph, s, ls, px, ang, dy, bY;
-    for (i = 0; i < N; i++){
-      cv = document.createElement('canvas'); cv.width = Math.round(W / 2); cv.height = Math.round(H / 2);
-      c = cv.getContext('2d'); c.scale(0.5, 0.5);      /* 폰 화면엔 충분한 해상도 — 텍스처 메모리 1/4 */
-      ph = i / N * Math.PI * 2; s = Math.sin(ph);
-      for (j = 0; j < 2; j++){
-        ls = j ? -s : s;
-        px = j ? L.rcx : L.lcx;
-        ang = ls * PG_WALK.ANG;
-        dy = legLen * (1 - Math.cos(ang)) - Math.max(0, ls) * PG_WALK.LIFT;
-        c.save();
-        c.translate(ls * PG_WALK.STRIDE, dy);
-        c.translate(px, hip); c.rotate(ang); c.translate(-px, -hip);
-        c.drawImage(j ? legR : legL, 0, 0);
-        c.restore();
-      }
-      bY = -Math.abs(Math.sin(ph)) * PG_WALK.BOB;
-      c.save();
-      c.translate(W / 2, hip + 12); c.rotate(Math.sin(ph) * PG_WALK.BROT); c.translate(-W / 2, -(hip + 12));
-      c.translate(0, bY);
-      c.drawImage(body, 0, 0);
-      c.restore();
-      out.push(pgCanvasTex(cv));
-    }
-    PG.walkTex[key] = out;
-    PG.walkOrder = PG.walkOrder.filter(function(x){ return x !== key; });
-    PG.walkOrder.push(key);
-    if (pgWalkTexCount() > PG_WALK.MAX){        /* 캐릭터가 아주 많아도 메모리가 넘치지 않게 */
-      var wvictim = '';
-      for (var q = 0; q < PG.walkOrder.length; q++){
-        var old = PG.walkOrder[q];
-        if (old === key) continue;
-        if (pgKeyShown('w', old)) continue;         /* 지금 화면에 쓰는 그림은 절대 버리지 않는다 */
-        wvictim = old; break;
-      }
-      if (wvictim) pgDropWalkTex(wvictim);
-    }
-    return out;
-  }
-  /* ============================================================
-     🎠 놀이기구 탑승 전용 다리 움직임 (10프레임 캔버스)
-     · 걷기와 같이 다리·상체를 오린 레이어를 다시 그려 만든다 (발이 땅에 닿는 걷기 그림은 그대로)
-     · mode
-         kick  — 앉아서 두 발을 번갈아(또는 함께) 앞으로 차며 흔들기
-         swing — 그네 박자에 맞춰 앞으로는 쭉 뻗고 뒤로는 굽히기
-         climb — 오르막·계단을 오르듯 다리를 번갈아 성큼성큼
-         slide — 미끄러져 내려올 때 두 다리 앞으로 쭉
-         jump  — 공중에서 다리를 벌리거나 접었다 펴기
-     ============================================================ */
-  var PG_RIDE = { N:10, MAX:30 };
-  var PG_RIDE_MODE = {
-    swing:'swing', carousel:'kick', horse:'kick', ferris:'kick', viking:'kick', coaster:'kick',
-    teacup:'kick', drop:'kick', balloon:'kick', bumper:'kick', seesaw:'kick', bench:'kick',
-    zip:'kick', sand:'kick', ladder:'climb', jungle:'climb', bars:'climb',
-    slide:'climb', tramp:'jump', rope:'jump'
-  };
 
   /* ============================================================
-     🙌 팔 모션 — 놀이기구마다 다른 팔 동작 (24종 캐릭터 × 15가지)
-     · 원본 그림에서 팔(주머니에 넣은 손·옆으로 내린 팔)과 소품을 지운
-       '몸통 레이어'(bodyA) 위에, 어깨에서 뻗는 새 팔을 캔버스로 그립니다.
-     · 서기·걷기는 원본 그림 그대로이고, 기구에 탈 때만 이 팔을 씁니다.
-     · 좌표는 400×400 원본 기준
-        cx 몸통 중심 · hw 몸통 반폭 · sy 어깨 y · len 어깨→손 길이 · w 소매 두께
-        ss 1=반소매(아래팔이 피부) · slv 소매색 · cuff 커프색 · skin 손 색
-        clr 소품을 지울 사각형 [x0,y0,x1,y1]
+     🧍 다리 · 팔 · 몸통 · 머리 — 관절 피벗으로 세운다
      ============================================================ */
-  var PG_ARM = {
-    angel_wing:     { cx:196, hw:40, sy:228, len:50, w:16, ss:1, slv:'#CFE2F3', cuff:'#EAF3FB', skin:'#FADFC8' },
-    astronaut_suit: { cx:206, hw:46, sy:224, len:52, w:18, ss:0, slv:'#FBF6EC', cuff:'#A9C4DF', skin:'#FBE4D2' },
-    bear_hood:      { cx:202, hw:47, sy:224, len:52, w:18, ss:0, slv:'#F0D6A8', cuff:'#FBE7C6', skin:'#FADFC8' },
-    beret_study:    { cx:205, hw:42, sy:226, len:50, w:16, ss:0, slv:'#FCF4E6', cuff:'#E7D3B8', skin:'#F8DCC4', clr:[[150,234,240,292]] },
-    berry_twin:     { cx:205, hw:45, sy:230, len:50, w:18, ss:0, slv:'#FBF0DC', cuff:'#F6E2C8', skin:'#FBDEC9' },
-    bun_ribbon:     { cx:203, hw:42, sy:224, len:50, w:16, ss:1, slv:'#F5C3CC', cuff:'#FBE0E4', skin:'#FADCC6' },
-    cap_track:      { cx:210, hw:42, sy:216, len:52, w:18, ss:0, slv:'#2F3D66', cuff:'#FBFBF8', skin:'#F9DDC6' },
-    cat_ribbon:     { cx:200, hw:38, sy:226, len:50, w:16, ss:0, slv:'#3E3742', cuff:'#7E6A85', skin:'#F6D8C2' },
-    dino_pajama:    { cx:203, hw:44, sy:232, len:52, w:18, ss:1, slv:'#CFE8C8', cuff:'#E4F4DE', skin:'#FBE0C8' },
-    flower_wave:    { cx:202, hw:40, sy:230, len:50, w:16, ss:1, slv:'#DCE8F5', cuff:'#F0F6FC', skin:'#FADCC2' },
-    fox_sailor:     { cx:203, hw:42, sy:226, len:50, w:17, ss:0, slv:'#D9C5E4', cuff:'#F6EFFB', skin:'#FADDC5' },
-    hanbok_pastel:  { cx:201, hw:45, sy:226, len:52, w:18, ss:0, slv:'#E9EFDF', cuff:'#FFF6EE', skin:'#F9DBC0' },
-    mint_hood:      { cx:205, hw:48, sy:222, len:52, w:18, ss:0, slv:'#CFE7CE', cuff:'#E7F5E4', skin:'#FADFC8' },
-    panda_hood:     { cx:202, hw:44, sy:226, len:52, w:18, ss:0, slv:'#33312E', cuff:'#EFE8D8', skin:'#F9DCC4' },
-    patissier_chef: { cx:204, hw:43, sy:228, len:50, w:17, ss:1, slv:'#F5B9BC', cuff:'#FDE6E7', skin:'#FBDFC9' },
-    pearl_denim:    { cx:200, hw:40, sy:222, len:52, w:18, ss:0, slv:'#A6C2DE', cuff:'#DDE8F3', skin:'#F8DAC2' },
-    picnic_cherry:  { cx:201, hw:43, sy:226, len:50, w:17, ss:1, slv:'#FBF4E6', cuff:'#FFFFFF', skin:'#FADFC6' },
-    pony_star:      { cx:199, hw:39, sy:224, len:52, w:18, ss:1, slv:'#FFDE73', cuff:'#FFF0BC', skin:'#F9DCC2' },
-    prince_royal:   { cx:204, hw:41, sy:220, len:52, w:18, ss:0, slv:'#FAF4E8', cuff:'#E2D8C4', skin:'#FBE3CF' },
-    princess_tiara: { cx:202, hw:43, sy:232, len:50, w:16, ss:1, slv:'#F8CBD8', cuff:'#FDE8EE', skin:'#FBDFC7' },
-    rabbit_pajama:  { cx:206, hw:43, sy:226, len:52, w:18, ss:0, slv:'#E3D6F2', cuff:'#F3EAFB', skin:'#FADBC4' },
-    rock_headset:   { cx:201, hw:43, sy:224, len:52, w:18, ss:0, slv:'#B7DFC9', cuff:'#F4FBF5', skin:'#FADFC8' },
-    soccer_sport:   { cx:206, hw:43, sy:220, len:52, w:18, ss:1, slv:'#BFDDEE', cuff:'#EFF8FC', skin:'#F9DBC1' },
-    wizard_robe:    { cx:198, hw:42, sy:218, len:52, w:18, ss:0, slv:'#A98BC0', cuff:'#CBB4DA', skin:'#F8D9C2' },
-    /* v18 추가 12종 */
-    chick_raincoat:  { cx:200, hw:42, sy:226, len:51, w:17, ss:0, slv:'#F5D95E', cuff:'#FFF0A8', skin:'#FADFC8' },
-    shark_pajama:    { cx:198, hw:43, sy:226, len:51, w:18, ss:0, slv:'#BFD8EC', cuff:'#EEF6FC', skin:'#FADCC4' },
-    bee_hood:        { cx:189, hw:42, sy:222, len:51, w:18, ss:0, slv:'#F2CE4E', cuff:'#FFF3C8', skin:'#F9DCC2' },
-    ballerina_tutu:  { cx:201, hw:38, sy:230, len:50, w:16, ss:1, slv:'#FBD7E2', cuff:'#FFF0F5', skin:'#FBDFC7' },
-    detective_coat:  { cx:201, hw:43, sy:224, len:51, w:17, ss:0, slv:'#DCC39B', cuff:'#F0E3C8', skin:'#F9DBC1' },
-    moon_witch:      { cx:195, hw:42, sy:228, len:50, w:17, ss:0, slv:'#CDB8E4', cuff:'#F1E8FA', skin:'#F8DCC4' },
-    mermaid_tail:    { cx:190, hw:40, sy:228, len:50, w:16, ss:1, slv:'#D7F0EC', cuff:'#F2FBFA', skin:'#F8E0CA' },
-    safari_explorer: { cx:199, hw:42, sy:224, len:51, w:17, ss:1, slv:'#D8C69B', cuff:'#EFE6CE', skin:'#F7D8BE' },
-    doctor_nurse:    { cx:207, hw:42, sy:226, len:51, w:17, ss:0, slv:'#FDFBF4', cuff:'#DCEFE4', skin:'#F9DDC6' },
-    skater_punk:     { cx:206, hw:44, sy:222, len:52, w:18, ss:0, slv:'#C9BCE8', cuff:'#EFEAFA', skin:'#FADCC4' },
-    snow_fairy:      { cx:203, hw:43, sy:226, len:51, w:17, ss:0, slv:'#DDEFF8', cuff:'#FAFDFF', skin:'#FBE3CF' },
-    cat_butler:      { cx:200, hw:42, sy:228, len:50, w:17, ss:0, slv:'#CFE1EE', cuff:'#FFF6E4', skin:'#F9DCC4' },
-    /* v19 추가 12종 */
-    firefighter_boy: { cx:207, hw:44, sy:228, len:51, w:17, ss:0, slv:'#FBEFD9', cuff:'#F5C0B4', skin:'#F9DCC4' },
-    pilot_captain:   { cx:209, hw:42, sy:226, len:51, w:17, ss:1, slv:'#30507F', cuff:'#DCE8F6', skin:'#F9DBC3' },
-    baseball_hero:   { cx:198, hw:43, sy:228, len:51, w:17, ss:1, slv:'#FBF3E6', cuff:'#31405F', skin:'#F9DCC4' },
-    royal_knight:    { cx:187, hw:45, sy:220, len:52, w:18, ss:0, slv:'#C6D6E4', cuff:'#B0C4D6', skin:'#FBE3CF' },
-    pirate_captain:  { cx:205, hw:42, sy:228, len:51, w:17, ss:0, slv:'#FBF0DC', cuff:'#F7E6CE', skin:'#F9DCC4' },
-    butterfly_fairy: { cx:205, hw:38, sy:232, len:50, w:16, ss:1, slv:'#D9F0DC', cuff:'#F4FCF5', skin:'#FBDFC7' },
-    melon_pajama:    { cx:194, hw:43, sy:228, len:51, w:17, ss:0, slv:'#FCF0E4', cuff:'#CFE8C4', skin:'#F9DDC6' },
-    snowman_cloak:   { cx:200, hw:45, sy:226, len:51, w:18, ss:0, slv:'#82AADF', cuff:'#F0878F', skin:'#FBDEC9' },
-    frog_raincoat:   { cx:200, hw:46, sy:226, len:51, w:18, ss:0, slv:'#A9DEB5', cuff:'#E2F7E7', skin:'#FADFC8' },
-    bunny_ribbon:    { cx:198, hw:40, sy:232, len:50, w:16, ss:1, slv:'#FBD3DE', cuff:'#FFF0F5', skin:'#FBDFC7' },
-    painter_beret:   { cx:198, hw:43, sy:226, len:51, w:17, ss:0, slv:'#FCF3E3', cuff:'#EDDCC2', skin:'#F9DCC4' },
-    barista_apron:   { cx:196, hw:40, sy:228, len:51, w:16, ss:1, slv:'#FDFBF4', cuff:'#C3E2CB', skin:'#F9DCC6' },
-    /* v20 추가 12종 */
-    police_officer:  { cx:196, hw:42, sy:236, len:44, w:16, ss:1, slv:'#AFCCE7', cuff:'#7C9BC4', skin:'#F9DCC4' },
-    taekwondo_dobok: { cx:203, hw:48, sy:238, len:44, w:17, ss:0, slv:'#BFCEDD', cuff:'#DCE7F1', skin:'#F9DCC4' },
-    basketball_jersey: { cx:205, hw:44, sy:236, len:44, w:16, ss:1, slv:'#9FC9E6', cuff:'#F0A76A', skin:'#F9DCC4' },
-    rock_guitar:     { cx:208, hw:40, sy:240, len:42, w:16, ss:1, slv:'#D24A45', cuff:'#2B2B30', skin:'#F8DCC4' },
-    magic_academy:   { cx:205, hw:42, sy:236, len:44, w:17, ss:0, slv:'#3A4463', cuff:'#C7A34E', skin:'#F9DCC4' },
-    penguin_padding: { cx:200, hw:48, sy:238, len:42, w:18, ss:0, slv:'#A9BCE0', cuff:'#E7EEF9', skin:'#F9DCC4' },
-    sailor_girl:     { cx:200, hw:45, sy:236, len:42, w:16, ss:1, slv:'#37435E', cuff:'#EFEADA', skin:'#FADCC6' },
-    cake_dress:      { cx:200, hw:50, sy:238, len:40, w:17, ss:1, slv:'#F9C8D3', cuff:'#FFF0F4', skin:'#FBDFC7' },
-    cherry_fairy:    { cx:203, hw:45, sy:238, len:40, w:16, ss:1, slv:'#FAD5DC', cuff:'#FFF2F5', skin:'#FBDFC7' },
-    bear_sweater:    { cx:202, hw:42, sy:234, len:44, w:18, ss:0, slv:'#F09BA8', cuff:'#F8C3CC', skin:'#F9DBC1' },
-    space_pajama:    { cx:207, hw:44, sy:232, len:45, w:18, ss:0, slv:'#39446E', cuff:'#C6B8DD', skin:'#F9DCC4' },
-    hamster_hood:    { cx:203, hw:48, sy:240, len:42, w:19, ss:0, slv:'#F7DD8C', cuff:'#FDF3CE', skin:'#FADFC8' }
-  };
-  var PG_ARM_DEF = { cx:201, hw:43, sy:226, len:51, w:17, ss:1, slv:'#F3E9DA', cuff:'#FFF8EE', skin:'#F9DCC4' };
-  function pgArmOf(k){ return PG_ARM[k] || PG_ARM_DEF; }
-  function pgHexToRgb(h){
-    h = String(h || '#FFFFFF').replace('#', '');
-    var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16);
-    return [isNaN(r) ? 255 : r, isNaN(g) ? 255 : g, isNaN(b) ? 255 : b];
-  }
-  function pgMixHex(h1, h2, t){
-    var a = pgHexToRgb(h1), b = pgHexToRgb(h2), o = '#';
-    for (var i = 0; i < 3; i++){
-      var v = Math.round(a[i] * (1 - t) + b[i] * t);
-      if (v < 0) v = 0; if (v > 255) v = 255;
-      o += (v < 16 ? '0' : '') + v.toString(16);
-    }
-    return o;
-  }
-  function pgArmPal(k){
-    if (PG.armPal[k]) return PG.armPal[k];
-    var a = pgArmOf(k);
-    var p = { slv: a.slv || '#F3E9DA', cuff: a.cuff || '#FFF8EE', skin: a.skin || '#F9DCC4' };
-    p.out = pgMixHex(p.slv, '#6B4A38', 0.48);      /* 소매보다 살짝 진한 따뜻한 갈색 테두리 */
-    PG.armPal[k] = p;
-    return p;
-  }
-  /* 둥근 사각(캡슐) 마스크 — 가장자리를 부드럽게 */
-  function pgCapsuleMask(w, h, feather){
-    var cv = document.createElement('canvas'); cv.width = Math.max(2, Math.ceil(w)); cv.height = Math.max(2, Math.ceil(h));
-    var c = cv.getContext('2d');
-    var r = Math.min(cv.width, cv.height) / 2;
-    try { c.filter = 'blur(' + (feather || 6) + 'px)'; } catch(e){}
-    c.fillStyle = '#fff';
-    c.beginPath();
-    c.moveTo(r, 0); c.lineTo(cv.width - r, 0); c.arc(cv.width - r, r, r, -Math.PI / 2, Math.PI / 2);
-    c.lineTo(r, cv.height); c.arc(r, cv.height - r, r, Math.PI / 2, Math.PI * 1.5);
-    c.closePath(); c.fill();
-    return cv;
-  }
-  /* 팔·주머니 손·소품을 지운 몸통 레이어 — 실루엣(알파)은 원본 그대로 */
-  function pgArmBody(img, L, cfg, pal){
-    var w = img.width || 400, h = img.height || 400;
-    var out = document.createElement('canvas'); out.width = w; out.height = h;
-    var c = out.getContext('2d');
-    /* 🔻 원본 그림을 통째로 깔면 잘라 둔 다리 2개가 다시 들어온다 — 몸통 레이어만 쓴다 */
-    var body = pgBodyLayer(img, L);
-    c.drawImage(body, 0, 0, w, h);
-    var y0 = Math.max(0, Math.round(cfg.sy - 14));
-    var y1 = Math.round(Math.min(h, Math.min(L.ly + 2, cfg.sy + cfg.len + 22)));
-    var bh = y1 - y0;
-    if (bh < 10) return out;
-    [-1, 1].forEach(function(side){
-      var bw = 26;                                    /* 지울 팔 밴드 폭 */
-      var xin = cfg.cx + side * (cfg.hw - 2);         /* 몸통 쪽 기준선 */
-      var x0 = xin, x1 = xin + side * bw, t;
-      if (x0 > x1){ t = x0; x0 = x1; x1 = t; }
-      var sx = side < 0 ? xin : xin - bw;             /* 기준선에서 안쪽을 거울처럼 */
-      var tmp = document.createElement('canvas'); tmp.width = bw; tmp.height = bh;
-      var tc = tmp.getContext('2d');
-      tc.save();
-      tc.translate(bw, 0); tc.scale(-1, 1);
-      try { tc.filter = 'blur(4px)'; } catch(e){}
-      tc.drawImage(img, sx, y0, bw, bh, 0, 0, bw, bh);
-      tc.restore();
-      tc.globalCompositeOperation = 'destination-in';
-      tc.drawImage(pgCapsuleMask(bw, bh, 6), 0, 0);
-      tc.globalCompositeOperation = 'source-over';
-      c.drawImage(tmp, Math.round(x0), y0);
-    });
-    (cfg.clr || []).forEach(function(r){               /* 책·지팡이 같은 소품 지우기 */
-      var pw = Math.round(r[2] - r[0]), ph = Math.round(r[3] - r[1]);
-      var pc = document.createElement('canvas'); pc.width = pw; pc.height = ph;
-      var pctx = pc.getContext('2d');
-      pctx.fillStyle = pal.slv; pctx.fillRect(0, 0, pw, ph);
-      pctx.globalCompositeOperation = 'destination-in';
-      pctx.drawImage(pgCapsuleMask(pw, ph, 7), 0, 0);
-      c.drawImage(pc, Math.round(r[0]), Math.round(r[1]));
-    });
-    c.globalCompositeOperation = 'destination-in';     /* 실루엣 유지 (다리 아래는 비운 채로) */
-    c.drawImage(body, 0, 0, w, h);
-    c.globalCompositeOperation = 'source-over';
-    return out;
-  }
-  function pgQuadPt(p0, p1, p2, t){
-    var it = 1 - t;
-    return { x: it * it * p0.x + 2 * it * t * p1.x + t * t * p2.x,
-             y: it * it * p0.y + 2 * it * t * p1.y + t * t * p2.y };
-  }
-  function pgQuadPts(S, C, H, n){
-    var a = [];
-    for (var i = 0; i <= n; i++) a.push(pgQuadPt(S, C, H, i / n));
-    return a;
-  }
-  /* 곡선 구간 t0~t1 을 굵기 w0→w1 로 부풀린 폴리곤 (어깨 굵고 손목 가늘게) */
-  function pgTaperPoly(pts, w, t0, t1, w0, w1){
-    var n = pts.length - 1;
-    var i0 = Math.round(t0 * n), i1 = Math.round(t1 * n);
-    if (i1 <= i0) i1 = Math.min(n, i0 + 1);
-    if (i1 >= n){ i1 = n; }
-    var Lp = [], Rp = [], i;
-    for (i = i0; i <= i1; i++){
-      var p = pts[i];
-      var tt = i0 === i1 ? t0 : (t0 + (t1 - t0) * ((i - i0) / (i1 - i0)));
-      var ww = w * (w0 + (w1 - w0) * tt) / 2;
-      var qa = pts[Math.max(i0, i - 1)], qb = pts[Math.min(i1, i + 1)];
-      var dx = qb.x - qa.x, dy = qb.y - qa.y, dl = Math.sqrt(dx * dx + dy * dy) || 1;
-      var nx = -dy / dl, ny = dx / dl;
-      Lp.push(p.x + nx * ww, p.y + ny * ww);
-      Rp.push(p.x - nx * ww, p.y - ny * ww);
-    }
-    var out = Lp.slice();
-    for (var q = Rp.length - 2; q >= 0; q -= 2) out.push(Rp[q], Rp[q + 1]);
-    return out;
-  }
-  function pgFillPoly(c, poly, col){
-    c.beginPath();
-    c.moveTo(poly[0], poly[1]);
-    for (var i = 2; i < poly.length; i += 2) c.lineTo(poly[i], poly[i + 1]);
-    c.closePath();
-    c.fillStyle = col; c.fill();
-  }
-  /* 어깨 S 에서 각도 a(0=아래 · π/2=옆 · π=위)로 뻗는 팔 한 개 */
-  function pgArmStroke(c, S, a, bow, k, cfg, pal, side){
-    var len = cfg.len * k, w = cfg.w;
-    var H = { x: S.x + side * Math.sin(a) * len, y: S.y + Math.cos(a) * len };
-    var C = { x: (S.x + H.x) / 2 + side * Math.cos(a) * bow, y: (S.y + H.y) / 2 - Math.sin(a) * bow };
-    var pts = pgQuadPts(S, C, H, 22);
-    var split = cfg.ss ? 0.46 : 1;
-    /* 겉선 → 소매 */
-    pgFillPoly(c, pgTaperPoly(pts, w, 0, split, 1.04, cfg.ss ? 0.98 : 0.74), pal.out);
-    pgFillPoly(c, pgTaperPoly(pts, w - 3.0, 0.02, split, 1.04, cfg.ss ? 0.98 : 0.74), pal.slv);
-    if (cfg.ss){
-      /* 반소매 — 아래팔은 피부 */
-      pgFillPoly(c, pgTaperPoly(pts, w * 0.86, split, 1, 1.0, 0.78), pal.out);
-      pgFillPoly(c, pgTaperPoly(pts, w * 0.86 - 2.8, split + 0.02, 0.99, 1.0, 0.78), pal.skin);
-      var m = pgQuadPt(S, C, H, split);
-      c.beginPath(); c.arc(m.x, m.y, w * 0.52, 0, 6.2832);
-      c.fillStyle = pal.slv; c.fill();
-      c.strokeStyle = pal.out; c.lineWidth = 2; c.stroke();
-    } else {
-      var wp = pgQuadPt(S, C, H, 0.9);
-      c.beginPath(); c.arc(wp.x, wp.y, w * 0.40, 0, 6.2832);
-      c.fillStyle = pal.cuff; c.fill();
-    }
-    /* 둥근 손 */
-    c.beginPath(); c.arc(H.x, H.y, w * 0.60, 0, 6.2832);
-    c.fillStyle = pal.skin; c.fill();
-    c.strokeStyle = pal.out; c.lineWidth = 2; c.stroke();
-  }
-  /* 기구별 팔 동작 — u 는 0~1 한 바퀴 위상, side -1=왼팔 1=오른팔 */
-  function pgArmAt(mode, u, side){
-    var tw = Math.PI * 2, s = Math.sin(u * tw), cs = Math.cos(u * tw);
-    if (mode === 'cheer')      return { a: 2.02 + 0.20 * s, bow: 9, k: 1.06 };      /* 만세 + 흔들기 */
-    if (mode === 'dropUp')     return { a: 2.10 + 0.16 * s, bow: 11, k: 1.08 };     /* 하강 만세! */
-    if (mode === 'dropHold')   return { a: 0.28 + 0.05 * s, bow: -8, k: 0.76 };     /* 올라갈 때 움츠림 */
-    if (mode === 'hold')       return { a: 2.18 + 0.10 * Math.sin(u * tw + (side > 0 ? 1.0 : 0)), bow: 6, k: 1.14 }; /* 줄·봉 잡기 */
-    if (mode === 'swingArms')  return { a: 1.94 + 0.30 * Math.sin(u * Math.PI), bow: 8, k: 1.10 };  /* 그네 박자 */
-    if (mode === 'climb')      return { a: 1.58 + 0.62 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: 7, k: 1.04 };
-    if (mode === 'slideArms')  return { a: 1.72 + 0.34 * s, bow: 14, k: 1.08 };     /* 활짝 벌려 내려오기 */
-    if (mode === 'jumpUp')     return { a: 2.06 + 0.10 * s, bow: 10, k: 1.06 };     /* 점프 만세 */
-    if (mode === 'jumpDown')   return { a: 0.54 + 0.12 * s, bow: -6, k: 0.90 };     /* 착지 */
-    if (mode === 'rope')       return { a: 0.92 + 0.42 * s, bow: 18 * cs, k: 1.00 };/* 줄 돌리기 */
-    if (mode === 'carWave'){
-      if (side > 0) return { a: 1.44 + 0.05 * s, bow: 5, k: 0.95 };                 /* 손잡이 잡기 */
-      return { a: 1.80 + 0.26 * s, bow: 11, k: 1.08 };                              /* 바깥으로 흔들기 */
-    }
-    if (mode === 'wave')       return { a: 1.68 + 0.26 * s, bow: 11, k: 1.06 };
-    if (mode === 'steer')      return { a: -0.10 + 0.17 * s * side, bow: -7 - 4 * cs, k: 0.84 };  /* 핸들·고삐 */
-    if (mode === 'dig')        return { a: 0.28 + 0.44 * (0.5 + 0.5 * Math.sin(u * tw + (side > 0 ? Math.PI : 0))), bow: -9, k: 0.86 };
-    if (mode === 'bench')      return { a: 0.14 + 0.06 * s, bow: -6, k: 0.68 };     /* 무릎에 손 */
-    return { a: 0.12 + 0.05 * s, bow: 0, k: 1 };
-  }
-  /* 놀이기구 → 팔 모션 */
-  var PG_ARM_MODE = {
-    coaster:'cheer', viking:'cheer', drop:'dropHold', zip:'hold', bars:'hold',
-    swing:'swingArms', ladder:'climb', jungle:'climb', slide:'climb',
-    tramp:'jumpUp', rope:'rope', carousel:'carWave', ferris:'wave', balloon:'wave',
-    bumper:'steer', teacup:'steer', horse:'steer', seesaw:'steer', sand:'dig', bench:'bench'
-  };
-  /* 기구에 앉는 자리 — 좌석 높이에서 '엉덩이만큼' 빼야 목마·그네 위에 딱 앉는다 */
-  var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
-  /* 목마처럼 몸 뒤로 기구가 가려지는 탈것은 카메라 쪽으로 살짝 내밀어 목마 위에 앉은 게 보이게 */
-  var PG_MOUNT_OFF = { carousel:0.3, horse:0.24 };
-  function pgSitOff(k){
-    var L = pgLegOf(k);
-    return (L.by - L.ly) / 400 * 1.75 * 0.9;
-  }
-  /* 다리·상체 레이어는 캐릭터마다 한 번만 오린다 */
-  function pgLegLayers(k){
-    if (PG.legLayers[k]) return PG.legLayers[k];
-    var src = PG.tex[k], img = src && src.image;
-    if (!img || !img.width) return null;
-    var L = pgLegOf(k), acfg = pgArmOf(k);
-    var bodyA = pgBodyLayer(img, L);
-    try { bodyA = pgArmBody(img, L, acfg, pgArmPal(k)); } catch(e){ bodyA = pgBodyLayer(img, L); }
-    var bodyB = pgBackBodyLayer(img, L, k);
-    PG.legLayers[k] = {
-      img: img, L: L,
-      legL: pgLegLayer(img, L, -1), legR: pgLegLayer(img, L, 1), body: pgBodyLayer(img, L),
-      bodyA: bodyA, bodyB: bodyB
-    };
-    return PG.legLayers[k];
-  }
-  function pgStampLeg(c, ly, j, ang, fy, dx, dy){
-    var L = ly.L, hip = Math.max(0, L.ly - 2);
-    var px = j ? L.rcx : L.lcx;
-    c.save();
-    c.translate(px + (dx || 0), hip + (dy || 0));
-    c.rotate(ang || 0);
-    c.scale(1, fy || 1);
-    c.translate(-px, -hip);
-    c.drawImage(j ? ly.legR : ly.legL, 0, 0);
-    c.restore();
-  }
-  function pgRideTexCount(){ var n = 0; for (var q in PG.rideTex) if (PG.rideTex[q]) n++; return n; }
-  function pgRideTexUsed(key){
-    var pk = String(key).split('|')[0];
-    for (var i = 0; i < PG.charOrder.length; i++){
-      var c = PG.chars[PG.charOrder[i]];
-      if (c && c.data.ride && c.data.preset === pk) return true;   /* 지금 타고 있는 캐릭터의 그림은 남긴다 */
-    }
-    return false;
-  }
-  function pgDropRideTex(key){
-    if (!PG.rideTex[key]) return;
-    PG.rideTex[key].forEach(function(tx){ try { tx.dispose(); } catch(e){} });
-    delete PG.rideTex[key];
-    PG.rideOrder = PG.rideOrder.filter(function(x){ return x !== key; });
-  }
-  function pgRideFrames(k, mode, arm, back){
-    arm = arm || 'cheer';
-    var key = k + '|' + mode + '|' + arm + (back ? '|b' : '');
-    if (PG.rideTex[key]) return PG.rideTex[key];
-    var ly = pgLegLayers(k);
-    if (!ly) return null;                        /* 그림이 아직 안 실렸으면 다음 프레임에 */
-    var L = ly.L, N = PG_RIDE.N, W = ly.img.width, H = ly.img.height;
-    var hip = Math.max(0, L.ly - 2), legLen = Math.max(8, L.by - hip);
-    var out = [], i, j, cv, c, ph, s, u, uc, bob, brot, w, f, ang, dy;
-    var pac = pgArmOf(k), pal = pgArmPal(k);
-    for (i = 0; i < N; i++){
-      cv = document.createElement('canvas'); cv.width = Math.round(W / 2); cv.height = Math.round(H / 2);
-      c = cv.getContext('2d'); c.scale(0.5, 0.5);      /* 폰 화면엔 충분한 해상도 — 텍스처 메모리 1/4 */
-      ph = i / N * Math.PI * 2; s = Math.sin(ph); u = N > 1 ? i / (N - 1) : 0; uc = i / N;
-      bob = 0; brot = 0;
-      if (mode === 'kick'){
-        /* 왼발·오른발 번갈아 앞으로 차기 — 발 끝이 확실히 보이게 크게 */
-        for (j = 0; j < 2; j++){
-          var lp = ph + (j ? Math.PI : 0);
-          var kick = 0.5 - 0.5 * Math.cos(lp);
-          pgStampLeg(c, ly, j, (j ? -1 : 1) * (0.14 + 0.34 * kick), 1 - 0.5 * kick, (j ? -1 : 1) * 3 * kick, -0.06 * kick * legLen);
-        }
-        bob = -Math.abs(s) * 5;
-        brot = s * 0.03;
-      } else if (mode === 'swing'){
-        /* 0% 뒤로 굽힘 → 50% 축 늘어짐 → 100% 앞으로 쭉 뻗기 */
-        if (u < 0.5){ w = u / 0.5; f = 0.5 + 0.5 * w; ang = -0.26 * (1 - w); dy = -0.05 * (1 - w) * legLen; }
-        else { w = (u - 0.5) / 0.5; f = 1 - 0.62 * w; ang = 0.3 * w; dy = -0.09 * w * legLen; }
-        pgStampLeg(c, ly, 0, ang, f, 0, dy);
-        pgStampLeg(c, ly, 1, ang * 1.12, f * 0.96, 0, dy * 0.9);
-        bob = Math.sin(u * Math.PI) * 4;
-        brot = Math.sin(u * Math.PI) * 0.05;
-      } else if (mode === 'climb'){
-        /* 다리를 번갈아 크게 들어 올리며 오르기 */
-        for (j = 0; j < 2; j++){
-          var ls = j ? -s : s;
-          pgStampLeg(c, ly, j, ls * 0.6, 1 - Math.max(0, ls) * 0.36, ls * 7, -Math.max(0, ls) * 0.14 * legLen);
-        }
-        bob = -Math.abs(s) * 6;
-        brot = s * 0.035;
-      } else if (mode === 'slide'){
-        /* 두 다리 앞으로 쭉 — 살짝 파닥이는 정도 */
-        var fl = Math.sin(u * Math.PI * 2) * 0.09;
-        pgStampLeg(c, ly, 0, 0.32 + fl, 0.78, 4, -0.03 * legLen);
-        pgStampLeg(c, ly, 1, 0.26 - fl, 0.76, -4, -0.03 * legLen);
-        bob = Math.sin(u * Math.PI * 2) * 3;
-        brot = -0.04;
-      } else {
-        /* jump — 다리를 활짝 벌렸다 접었다 */
-        var sp = Math.sin(u * Math.PI * 2);
-        pgStampLeg(c, ly, 0, 0.34 + 0.26 * sp, 0.78 + 0.2 * sp, 5, -0.08 * legLen * (0.5 + 0.5 * sp));
-        pgStampLeg(c, ly, 1, -(0.34 + 0.26 * sp), 0.78 + 0.2 * sp, -5, -0.08 * legLen * (0.5 + 0.5 * sp));
-        bob = -Math.abs(sp) * 5;
-        brot = sp * 0.025;
-      }
-      c.save();
-      c.translate(W / 2, hip + 12); c.rotate(brot); c.translate(-W / 2, -(hip + 12));
-      c.translate(0, bob);
-      c.drawImage(back ? (ly.bodyB || ly.bodyA || ly.body) : (ly.bodyA || ly.body), 0, 0);
-      /* 🙌 몸통 위로 어깨에서 뻗는 팔 */
-      for (var sd = -1; sd <= 1; sd += 2){
-        var ap = pgArmAt(arm, uc, sd);
-        pgArmStroke(c, { x: pac.cx + sd * (pac.hw - 2), y: pac.sy }, ap.a, ap.bow, ap.k, pac, pal, sd);
-      }
-      c.restore();
-      out.push(pgCanvasTex(cv));
-    }
-    PG.rideTex[key] = out;
-    PG.rideOrder = PG.rideOrder.filter(function(x){ return x !== key; });
-    PG.rideOrder.push(key);
-    if (pgRideTexCount() > PG_RIDE.MAX){
-      var victim = '';
-      for (var q = 0; q < PG.rideOrder.length; q++){
-        var old = PG.rideOrder[q];
-        if (old === key) continue;
-        if (pgKeyShown('r', old)) continue;         /* 지금 쓰는 그림은 절대 버리지 않는다 */
-        victim = old; break;
-      }
-      if (victim) pgDropRideTex(victim);
-    }
-    return out;
-  }
-  /* 지금 기구에 맞는 그림(모드)과 몇 번째 프레임인지 */
-  function pgRideFramePick(d, c, t, ph){
-    var mode = PG_RIDE_MODE[d.ride] || 'kick', arm = PG_ARM_MODE[d.ride] || 'cheer', N = PG_RIDE.N, idx = 0;
-    if (d.ride === 'swing'){
-      var a = pgSwingAng(c.rideIdx % 2, t);
-      var p = (1 - a / PG_SWING.maxA) / 2;     /* 뒤 끝 0 → 가운데 0.5 → 앞 끝 1 */
-      idx = Math.round(Math.max(0, Math.min(1, p)) * (N - 1));
-    } else if (d.ride === 'slide'){
-      if (ph < 0.55){ mode = 'climb'; arm = 'climb'; idx = Math.floor((ph / 0.55) * N * 1.6 + c.ph) % N; }
-      else { mode = 'slide'; arm = 'slideArms'; idx = Math.floor((t * 2.4 + c.ph * 3) * N) % N; }
-    } else if (mode === 'climb'){
-      idx = Math.floor((t * 1.15 + c.ph) * N) % N;
-    } else if (mode === 'jump'){
-      idx = Math.floor((t * 1.9 + c.ph) * N) % N;
-    } else {
-      idx = Math.floor((t * 1.5 + c.ph * 1.3) * N) % N;
-    }
-    if (idx < 0) idx = 0;
-    return { mode: mode, arm: arm, idx: idx };
-  }
-  /* 멈춰 있거나 기구를 탈 때 — 원래 정지 그림으로 되돌린다 */
-  function pgCharMap(c, txF, txB){
-    if (!c || !c.sp || !c.sp.userData) return;
-    var mf = c.sp.userData.front, mb = c.sp.userData.back;
-    if (mf && txF && mf.material.map !== txF){ mf.material.map = txF; mf.material.needsUpdate = true; }
-    if (mb && txB && mb.material.map !== txB){ mb.material.map = txB; mb.material.needsUpdate = true; }
-  }
-  function pgCharStill(c){
-    var p = c.data.preset;
-    var tx = PG.tex[p], tb = pgBackTex(p) || tx;
-    pgCharMap(c, tx, tb);
-  }
-  /* 🧍 앞·뒤 두 장으로 세운 3D 캐릭터 — 스프라이트처럼 늘 카메라만 보지 않는다 */
-  function pgCharPlaneMat(tx){
-    return new THREE.MeshBasicMaterial({ map: tx, transparent: true, alphaTest: 0.08,
-      depthWrite: true, side: THREE.FrontSide, toneMapped: false });
-  }
-  function pgCharMesh(preset, id){
+  function pg3Leg(S, side, root){
     var g = new THREE.Group();
-    var geo = new THREE.PlaneGeometry(1.75, 1.75);
-    var txF = PG.tex[preset] || pgTex(preset);
-    var txB = pgBackTex(preset) || txF;
-    var mf = new THREE.Mesh(geo, pgCharPlaneMat(txF));
-    mf.position.set(0, 0.875, 0.022);
-    var mb = new THREE.Mesh(geo, pgCharPlaneMat(txB));
-    mb.position.set(0, 0.875, -0.022);
-    mb.rotation.y = Math.PI;
-    g.add(mf); g.add(mb);
-    /* 😊 표정 레이어 — 눈·입만 덮는 작은 판 */
-    var fm = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.06, depthWrite: false,
-        side: THREE.FrontSide, toneMapped: false }));
-    fm.position.set(0, 0.875, 0.048);
-    fm.visible = false;
-    fm.renderOrder = 9;
-    g.add(fm);
-    g.userData.front = mf; g.userData.back = mb; g.userData.face = fm;
-    var tag = { type:'char', id: id };
+    g.position.set(0.10 * side, PG3.HIP, 0);
+    var pants = S.pants || S.legs;
+    var thMat = pg3Mat(pants || S.skin);
+    g.add(pg3Cyl(thMat, 0.079, 0.070, PG3.THIGH, 0, -PG3.THIGH / 2, 0));
+    var knee = new THREE.Group();
+    knee.position.y = -PG3.THIGH;
+    g.add(knee);
+    var shinMat = pg3Mat(pants || S.sock || S.skin);
+    knee.add(pg3Cyl(shinMat, 0.064, 0.055, PG3.SHIN, 0, -PG3.SHIN / 2, 0));
+    if (S.sock && !pants) knee.add(pg3Cyl(pg3Mat(S.sock), 0.058, 0.054, 0.09, 0, -PG3.SHIN + 0.045, 0));
+    var shoe = pg3Ball(pg3Mat(S.shoe), 0, -PG3.SHIN - 0.028, 0.024, 0.078, 0.054, 0.108);
+    knee.add(shoe);
+    root.add(g);
+    return { g: g, knee: knee };
+  }
+  function pg3Arm(S, side, up, J){
+    var g = new THREE.Group();
+    g.position.set(0.172 * side, PG3.SHO, 0);
+    var slvMat = pg3Mat(S.sleeve || S.top);
+    var skinMat = pg3Mat(S.skin);
+    var foreMat = S.long ? slvMat : skinMat;
+    g.add(pg3Ball(slvMat, 0.006 * side, 0.010, 0, 0.064, 0.060, 0.064));
+    g.add(pg3Cyl(slvMat, 0.055, 0.047, 0.150, 0, -0.074, 0));
+    var elb = new THREE.Group();
+    elb.position.y = -0.145;
+    g.add(elb);
+    elb.add(pg3Cyl(foreMat, 0.046, 0.038, 0.140, 0, -0.070, 0));
+    elb.add(pg3Ball(pg3Mat(S.skin), 0, -0.148, 0, 0.056, 0.060, 0.052));
+    g.rotation.z = -0.10 * side;
+    up.add(g);
+    return { g: g, elb: elb };
+  }
+  function pg3Hair(headG, S){
+    var R = PG3.HR, cy = PG3.HCY, hs = S.hs || 'bob';
+    if (S.hat === 'helmet') return;                          /* 헬멧은 머리 전체를 덮는다 */
+    var hm = pg3Mat(pg3Shade(S.hair));
+    var capT = (hs === 'short' || hs === 'spiky') ? 0.42 : 0.45;
+    var capG = pg3Geo('cap' + capT, function(){
+      return new THREE.SphereGeometry(1, 30, 16, 0, Math.PI * 2, 0, Math.PI * capT);
+    });
+    if (S.hat !== 'hood'){
+      var cap = new THREE.Mesh(capG, hm);
+      cap.scale.setScalar(R * 1.045); cap.position.y = cy;
+      headG.add(cap);
+      /* 뒤통수 아래(목덜미)까지 — 뒤에서 봐도 살갗이 드러나지 않게 */
+      var napG = pg3Geo('nape', function(){
+        return new THREE.SphereGeometry(1, 26, 10, Math.PI / 2 + 0.95, Math.PI * 2 - 1.90, Math.PI * 0.44, Math.PI * 0.32);
+      });
+      var nap = new THREE.Mesh(napG, hm);
+      nap.scale.setScalar(R * 1.045); nap.position.y = cy;
+      headG.add(nap);
+    }
+    /* 앞머리 — 눈썹 위까지 */
+    var bgG = pg3Geo('bang', function(){
+      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.88, 1.76, Math.PI * 0.20, Math.PI * 0.185);
+    });
+    var bg = new THREE.Mesh(bgG, hm);
+    bg.scale.setScalar(S.hat === 'hood' ? R * 1.02 : R * 1.065); bg.position.y = cy;
+    headG.add(bg);
+
+    /* 옆머리 */
+    if (S.hat === 'hood'){
+      /* 후드 안 — 옆·뒷머리는 후드가 덮으므로 앞머리만 */
+      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
+      headG.add(pg3Ball(hm, R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
+    } else if (hs !== 'short' && hs !== 'spiky'){
+      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.16, -0.26, 0.050, 0.130, 0.085));
+      headG.add(pg3Ball(hm, R * 0.92, cy - 0.16, -0.26, 0.050, 0.130, 0.085));
+      /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
+      headG.add(pg3Ball(hm, -R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
+      headG.add(pg3Ball(hm, R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
+      headG.add(pg3Ball(hm, 0, cy - 0.08, -0.19, 0.255, 0.235, 0.165));
+    }
+    if (hs === 'twin' || hs === 'twinlong'){
+      var tl = (hs === 'twinlong') ? 0.30 : 0.245;
+      [-1, 1].forEach(function(sd){
+        var t = pg3Ball(hm, 0.335 * sd, cy - 0.30, -0.12, 0.088, tl, 0.090);
+        t.rotation.z = -0.24 * sd;
+        headG.add(t);
+        headG.add(pg3Ball(pg3Mat(S.acc), 0.305 * sd, cy - 0.045, -0.10, 0.045, 0.042, 0.045));
+      });
+    } else if (hs === 'bun'){
+      headG.add(pg3Ball(hm, -0.185, cy + 0.39, -0.03, 0.135, 0.130, 0.135));
+      headG.add(pg3Ball(hm, 0.185, cy + 0.39, -0.03, 0.135, 0.130, 0.135));
+      headG.add(pg3Ball(pg3Mat(S.acc), 0.20, cy + 0.36, 0.10, 0.050, 0.045, 0.045));
+    } else if (hs === 'pony'){
+      var po = pg3Ball(hm, 0, cy + 0.10, -0.36, 0.125, 0.215, 0.135);
+      po.rotation.x = 0.42; headG.add(po);
+      headG.add(pg3Ball(pg3Mat(S.acc), 0, cy + 0.24, -0.30, 0.055, 0.050, 0.055));
+    } else if (hs === 'long' || hs === 'wavy'){
+      headG.add(pg3Ball(hm, -0.230, cy - 0.30, -0.14, 0.115, 0.240, 0.135));
+      headG.add(pg3Ball(hm, 0.230, cy - 0.30, -0.14, 0.115, 0.240, 0.135));
+      headG.add(pg3Ball(hm, 0, cy - 0.34, -0.16, 0.255, 0.230, 0.165));
+      if (hs === 'wavy'){
+        headG.add(pg3Ball(hm, -0.285, cy - 0.50, -0.06, 0.085, 0.130, 0.095));
+        headG.add(pg3Ball(hm, 0.285, cy - 0.50, -0.06, 0.085, 0.130, 0.095));
+      }
+    } else if (hs === 'braid'){
+      [-1, 1].forEach(function(sd){
+        for (var i = 0; i < 3; i++){
+          headG.add(pg3Ball(hm, (0.255 + i * 0.012) * sd, cy - 0.12 - i * 0.155, -0.10, 0.085 - i * 0.012, 0.095, 0.085));
+        }
+        headG.add(pg3Ball(pg3Mat(S.acc), 0.27 * sd, cy - 0.56, -0.10, 0.042, 0.038, 0.042));
+      });
+    } else if (hs === 'spiky'){
+      var sp = [[0, 0.36, 0.02, 0.10, 0.16, -0.1], [-0.16, 0.33, 0.06, 0.09, 0.15, -0.35], [0.16, 0.33, 0.06, 0.09, 0.15, 0.35],
+                [-0.06, 0.34, -0.14, 0.09, 0.15, 0.2], [0.10, 0.34, -0.14, 0.09, 0.15, -0.2], [0, 0.32, 0.16, 0.08, 0.13, 0.1]];
+      sp.forEach(function(p){
+        var cn = pg3Cone(hm, p[3], p[4], p[0], cy + p[1] - 0.04, p[2]);
+        cn.rotation.z = p[5]; cn.rotation.x = -0.18;
+        headG.add(cn);
+      });
+    }
+  }
+  function pg3Ears(headG, S){
+    var R = PG3.HR, cy = PG3.HCY, e = S.ears;
+    if (!e) return;
+    var em = pg3Mat(S.earCol || S.hair), im = pg3Mat('#F7BFCE');
+    if (e === 'cat' || e === 'fox'){
+      [-1, 1].forEach(function(sd){
+        var c1 = pg3Cone(em, 0.115, 0.215, 0.205 * sd, cy + 0.325, 0.02);
+        c1.rotation.z = -0.28 * sd; headG.add(c1);
+        var c2 = pg3Cone(im, 0.062, 0.125, 0.205 * sd, cy + 0.320, 0.065);
+        c2.rotation.z = -0.28 * sd; headG.add(c2);
+      });
+    } else if (e === 'bear' || e === 'panda' || e === 'hamster'){
+      [-1, 1].forEach(function(sd){
+        var eo = (S.hat === 'hood') ? 0.335 : 0.245;
+        var ey2 = (S.hat === 'hood') ? cy + 0.345 : cy + 0.295;
+        headG.add(pg3Ball(e === 'panda' ? pg3Mat('#2E2E33') : em, eo * sd, ey2, -0.02, 0.115, 0.115, 0.075));
+        headG.add(pg3Ball(im, eo * sd, ey2 - 0.005, 0.035, 0.062, 0.062, 0.030));
+      });
+    } else if (e === 'bunny'){
+      [-1, 1].forEach(function(sd){
+        var b1 = pg3Ball(em, 0.135 * sd, cy + 0.55, -0.01, 0.068, 0.235, 0.055);
+        b1.rotation.z = -0.16 * sd; headG.add(b1);
+        var b2 = pg3Ball(im, 0.135 * sd, cy + 0.55, 0.015, 0.036, 0.175, 0.030);
+        b2.rotation.z = -0.16 * sd; headG.add(b2);
+      });
+    } else if (e === 'chick'){
+      var tuft = pg3Cone(em, 0.055, 0.12, 0, cy + 0.40, 0.02);
+      tuft.rotation.z = 0.2; headG.add(tuft);
+      var beak = pg3Cone(pg3Mat('#F0A84C'), 0.05, 0.07, 0, cy - 0.02, 0.36);
+      beak.rotation.x = Math.PI / 2; headG.add(beak);
+    } else if (e === 'bee'){
+      [-1, 1].forEach(function(sd){
+        var an = pg3Cone(pg3Mat('#3A3226'), 0.022, 0.16, 0.10 * sd, cy + 0.47, 0.05);
+        an.rotation.z = -0.35 * sd; headG.add(an);
+        headG.add(pg3Ball(pg3Mat('#3A3226'), 0.135 * sd, cy + 0.54, 0.05, 0.030, 0.030, 0.030));
+      });
+    } else if (e === 'frog'){
+      [-1, 1].forEach(function(sd){
+        headG.add(pg3Ball(em, 0.185 * sd, cy + 0.335, 0.05, 0.105, 0.105, 0.105));
+        headG.add(pg3Ball(pg3Mat('#2E2E33'), 0.185 * sd, cy + 0.345, 0.135, 0.042, 0.042, 0.030));
+      });
+    }
+  }
+  function pg3Hat(headG, S){
+    var R = PG3.HR, cy = PG3.HCY, h = S.hat;
+    if (!h) return;
+    var m = pg3Mat(S.hatCol || S.top), acc = pg3Mat(S.acc);
+    if (h === 'hood'){
+      var hg = pg3Geo('hood', function(){
+        return new THREE.SphereGeometry(1, 30, 20, Math.PI / 2 + 0.56, Math.PI * 2 - 1.12, 0, Math.PI * 0.80);
+      });
+      var hm2 = new THREE.Mesh(hg, m);
+      hm2.scale.set(R * 1.26, R * 1.28, R * 1.26); hm2.position.y = cy + 0.01;
+      headG.add(hm2);
+      if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.42, 0.29, 0.27, 0.15));  /* 뒤 모자 볼륨 */
+    } else if (h === 'beret'){
+      var b = pg3Ball(m, 0.015, cy + 0.272, -0.02, 0.300, 0.095, 0.290);
+      b.rotation.z = -0.16; b.rotation.x = 0.14; headG.add(b);
+      headG.add(pg3Ball(m, 0.02, cy + 0.335, -0.04, 0.030, 0.038, 0.030));
+    } else if (h === 'cap'){
+      var cg = pg3Geo('caphat', function(){
+        return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.44);
+      });
+      var cm = new THREE.Mesh(cg, m);
+      cm.scale.set(R * 1.10, R * 0.94, R * 1.10); cm.position.y = cy + 0.035;
+      headG.add(cm);
+      var brim = pg3Cyl(m, 0.29, 0.31, 0.032, 0, cy + 0.10, 0.25);
+      brim.rotation.x = -0.16; headG.add(brim);
+      headG.add(pg3Ball(acc, 0, cy + 0.35, 0.02, 0.030, 0.030, 0.030));
+    } else if (h === 'chef'){
+      headG.add(pg3Cyl(m, 0.245, 0.235, 0.16, 0, cy + 0.36, 0));
+      headG.add(pg3Ball(m, -0.10, cy + 0.50, 0, 0.135, 0.115, 0.135));
+      headG.add(pg3Ball(m, 0.10, cy + 0.50, 0, 0.135, 0.115, 0.135));
+      headG.add(pg3Ball(m, 0, cy + 0.53, -0.06, 0.115, 0.10, 0.115));
+    } else if (h === 'crown'){
+      headG.add(pg3Cyl(m, 0.215, 0.215, 0.09, 0, cy + 0.34, 0));
+      for (var i = 0; i < 5; i++){
+        var a = (i / 5) * Math.PI * 2;
+        headG.add(pg3Cone(m, 0.045, 0.10, Math.sin(a) * 0.20, cy + 0.42, Math.cos(a) * 0.20));
+      }
+      headG.add(pg3Ball(pg3Mat('#E85F5F'), 0, cy + 0.40, 0.215, 0.030, 0.030, 0.030));
+    } else if (h === 'tiara'){
+      var tr = pg3Ring(m, 0.20, 0.022, 0, cy + 0.30, 0.10);
+      tr.rotation.x = -0.30; headG.add(tr);
+      headG.add(pg3Ball(acc, 0, cy + 0.36, 0.16, 0.052, 0.052, 0.035));
+      headG.add(pg3Ball(acc, -0.13, cy + 0.32, 0.13, 0.032, 0.032, 0.025));
+      headG.add(pg3Ball(acc, 0.13, cy + 0.32, 0.13, 0.032, 0.032, 0.025));
+    } else if (h === 'wizard'){
+      var wn = pg3Cone(m, 0.275, 0.52, 0.02, cy + 0.56, -0.03, 20);
+      wn.rotation.z = -0.10; wn.rotation.x = -0.08; headG.add(wn);
+      var wb = pg3Cyl(m, 0.34, 0.35, 0.035, 0, cy + 0.31, 0);
+      wb.rotation.x = 0.03; headG.add(wb);
+      headG.add(pg3Ball(acc, 0.10, cy + 0.52, 0.20, 0.035, 0.035, 0.02));
+      headG.add(pg3Ball(acc, -0.08, cy + 0.66, 0.12, 0.028, 0.028, 0.02));
+    } else if (h === 'helmet'){
+      var hlg = pg3Geo('helmet', function(){
+        return new THREE.SphereGeometry(1, 26, 16, 0, Math.PI * 2, 0, Math.PI * 0.66);
+      });
+      var hl = new THREE.Mesh(hlg, pg3Mat(S.hatCol, 'metal'));
+      hl.scale.setScalar(R * 1.16); hl.position.y = cy + 0.015; headG.add(hl);
+      headG.add(pg3Box(pg3Mat('#9AA8B8', 'metal'), 0.20, 0.05, 0.07, 0, cy + 0.02, 0.36));
+      var pl = pg3Cone(pg3Mat('#D8E8F8'), 0.07, 0.30, 0, cy + 0.42, -0.14);
+      pl.rotation.x = 0.5; headG.add(pl);
+    } else if (h === 'headset'){
+      var hs2 = pg3Ring(m, 0.375, 0.032, 0, cy + 0.03, 0, Math.PI / 2);
+      headG.add(hs2);
+      var cupL = pg3Cyl(m, 0.075, 0.075, 0.05, -0.335, cy + 0.03, 0);
+      cupL.rotation.z = Math.PI / 2; headG.add(cupL);
+      var cupR = pg3Cyl(m, 0.075, 0.075, 0.05, 0.335, cy + 0.03, 0);
+      cupR.rotation.z = Math.PI / 2; headG.add(cupR);
+      headG.add(pg3Ball(pg3Mat(S.acc), 0.335, cy + 0.03, 0.055, 0.030, 0.030, 0.012));
+    } else if (h === 'headband'){
+      var hb = pg3Ring(m, 0.345, 0.028, 0, cy + 0.10, 0, Math.PI / 2);
+      hb.rotation.z = 0.0; headG.add(hb);
+      headG.add(pg3Ball(m, 0.22, cy + 0.34, 0.05, 0.075, 0.055, 0.055));
+    } else if (h === 'beanie'){
+      var bg2 = pg3Geo('beanie', function(){
+        return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.56);
+      });
+      var bn = new THREE.Mesh(bg2, m);
+      bn.scale.set(R * 1.12, R * 1.06, R * 1.12); bn.position.y = cy + 0.02; headG.add(bn);
+      headG.add(pg3Cyl(m, 0.39, 0.39, 0.09, 0, cy + 0.12, 0));
+      headG.add(pg3Ball(pg3Mat('#F7F7F2'), 0, cy + 0.45, 0, 0.075, 0.075, 0.075));
+    } else if (h === 'straw' || h === 'safari'){
+      headG.add(pg3Cyl(m, 0.44, 0.46, 0.028, 0, cy + 0.30, 0));
+      headG.add(pg3Ball(m, 0, cy + 0.36, 0, 0.255, 0.135, 0.255));
+      if (h === 'straw') headG.add(pg3Cyl(pg3Mat(S.acc), 0.265, 0.265, 0.045, 0, cy + 0.32, 0));
+      else headG.add(pg3Cyl(pg3Mat('#8A6A4A'), 0.265, 0.265, 0.045, 0, cy + 0.32, 0));
+    } else if (h === 'nurse'){
+      headG.add(pg3Box(m, 0.24, 0.10, 0.16, 0.02, cy + 0.38, 0.02));
+      headG.add(pg3Box(pg3Mat('#D94838'), 0.07, 0.035, 0.03, 0.02, cy + 0.39, 0.11));
+    } else if (h === 'police' || h === 'pilot' || h === 'fire'){
+      var capCol = m;
+      var cg2 = pg3Geo('caphat2', function(){
+        return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.58);
+      });
+      var cm2 = new THREE.Mesh(cg2, capCol);
+      cm2.scale.set(R * 1.14, R * 1.02, R * 1.14); cm2.position.y = cy + 0.02; headG.add(cm2);
+      var br2 = pg3Cyl(capCol, 0.315, 0.33, 0.04, 0, cy + 0.10, 0.235);
+      br2.rotation.x = -0.20; headG.add(br2);
+      if (h === 'police') headG.add(pg3Ball(pg3Mat('#F0C24B'), 0, cy + 0.34, 0.19, 0.055, 0.055, 0.02));
+      if (h === 'pilot') headG.add(pg3Ball(pg3Mat('#F0C24B'), 0, cy + 0.34, 0.19, 0.075, 0.045, 0.02));
+      if (h === 'fire') headG.add(pg3Ball(pg3Mat('#F0C24B'), 0, cy + 0.35, 0.20, 0.05, 0.05, 0.02));
+    } else if (h === 'pirate'){
+      headG.add(pg3Cyl(m, 0.33, 0.35, 0.10, 0, cy + 0.35, 0));
+      headG.add(pg3Box(m, 0.62, 0.06, 0.30, 0, cy + 0.40, 0.02));
+      headG.add(pg3Cyl(pg3Mat(S.acc), 0.365, 0.365, 0.045, 0, cy + 0.14, 0));
+      headG.add(pg3Ball(pg3Mat('#F7F2E4'), 0.16, cy + 0.38, 0.18, 0.035, 0.035, 0.02));
+    } else if (h === 'deerstalker'){
+      headG.add(pg3Ball(m, 0, cy + 0.33, 0, 0.315, 0.145, 0.315));
+      headG.add(pg3Box(m, 0.30, 0.03, 0.20, 0, cy + 0.30, 0.30));
+      headG.add(pg3Box(m, 0.30, 0.03, 0.20, 0, cy + 0.30, -0.30));
+      headG.add(pg3Box(pg3Mat('#6B4A32'), 0.63, 0.03, 0.12, 0, cy + 0.36, 0));
+    } else if (h === 'flower'){
+      for (var f = 0; f < 6; f++){
+        var ang = -0.9 + f * 0.36;
+        headG.add(pg3Ball(acc, Math.sin(ang) * 0.31, cy + 0.27 + Math.cos(ang) * 0.10, 0.13, 0.052, 0.052, 0.045));
+      }
+      headG.add(pg3Ring(pg3Mat('#A8D8B8'), 0.315, 0.020, 0, cy + 0.18, 0.02));
+    }
+  }
+  function pg3Extra(up, headG, S, J){
+    if (S.collar){
+      var cr = pg3Ring(pg3Mat(S.collar), 0.082, 0.022, 0, 0.455, 0.01);
+      cr.rotation.x = Math.PI / 2; up.add(cr);
+    }
+    if (S.apron){
+      var ap = pg3Box(pg3Mat(S.apron), 0.20, 0.30, 0.025, 0, 0.24, 0.145);
+      up.add(ap);
+    }
+    if (S.bag){
+      var bm = pg3Mat(S.bag);
+      up.add(pg3Box(bm, 0.13, 0.15, 0.07, 0.20, 0.22, 0.02));
+      var st = pg3Cyl(bm, 0.016, 0.016, 0.44, 0.09, 0.30, 0.02);
+      st.rotation.z = 0.42; up.add(st);
+    }
+    if (S.cape || S.cloak){
+      var cm = pg3Mat(S.cape || S.cloak);
+      var cg = pg3Geo('cape', function(){
+        return new THREE.CylinderGeometry(0.19, 0.31, 0.52, 18, 1, true, -Math.PI * 0.62, Math.PI * 1.24);
+      });
+      var cp = new THREE.Mesh(cg, cm);
+      cp.position.set(0, 0.26, -0.01); cp.rotation.y = Math.PI / 2;
+      up.add(cp);
+    }
+    if (S.robe){
+      var rm = pg3Mat(S.robe);
+      var rg = pg3Geo('robe', function(){
+        return new THREE.CylinderGeometry(0.155, 0.33, 0.62, 18, 1, true);
+      });
+      var rb = new THREE.Mesh(rg, rm);
+      rb.position.y = 0.20; up.add(rb);
+      up.add(pg3Ring(pg3Mat(S.acc), 0.20, 0.016, 0, 0.42, 0.02));
+    }
+    J.wings = [];
+    if (S.wings){
+      var wm = pg3Mat(S.wings === 'angel' ? '#FBFBFF' : (S.wings === 'bee' ? '#EAF6FF' : S.acc));
+      [-1, 1].forEach(function(sd){
+        var w = pg3Ball(wm, 0.20 * sd, 0.34, -0.17, 0.16, 0.24, 0.035);
+        w.rotation.z = 0.45 * sd; w.rotation.y = -0.35 * sd;
+        w.userData.wo = 0.02 * sd;
+        up.add(w); J.wings.push(w);
+        if (S.wings === 'butterfly'){
+          var w2 = pg3Ball(pg3Mat('#FBE6F2'), 0.20 * sd, 0.14, -0.15, 0.12, 0.16, 0.03);
+          w2.rotation.z = 0.25 * sd; w2.userData.wo = -0.02 * sd;
+          up.add(w2); J.wings.push(w2);
+        }
+      });
+    }
+    if (S.tail === 'fox' || S.tail === 'cat'){
+      var tm = pg3Mat(S.tail === 'fox' ? '#F3DCC0' : S.hair);
+      var t = pg3Cone(tm, 0.085, 0.44, 0, 0.30, -0.20);
+      t.rotation.x = 2.55; up.add(t);
+      if (S.tail === 'fox') up.add(pg3Ball(pg3Mat('#FBF3E6'), 0, 0.20, -0.40, 0.055, 0.055, 0.055));
+    } else if (S.tail === 'dino' || S.tail === 'shark'){
+      var dm = pg3Mat(S.tail === 'dino' ? '#A8D8A0' : '#A8C8DC');
+      var d = pg3Cone(dm, 0.090, 0.46, 0, 0.24, -0.24);
+      d.rotation.x = 2.35; up.add(d);
+    }
+    if (S.wings === 'bee') { /* 날개 위쪽에 붙임 */ }
+  }
+  function pg3Doll(preset, id){
+    var S = pg3Style(preset);
+    var g = new THREE.Group();
+    var J = { skin: S.skin, preset: preset };
+    var tag = { type: 'char', id: id };
     g.userData.__pgTag = tag;
-    mf.userData.__pgTag = tag; mb.userData.__pgTag = tag; fm.userData.__pgTag = tag;
+    /* 다리 · 인어 꼬리 */
+    if (S.tail === 'mermaid'){
+      var tg = new THREE.Group();
+      tg.position.set(0, PG3.HIP, 0);
+      g.add(tg);
+      var tm = pg3Mat(S.shoe);
+      var tc = pg3Cone(tm, 0.175, 0.50, 0, -0.25, 0);
+      tc.rotation.x = Math.PI; tg.add(tc);
+      var fin = pg3Ball(tm, 0, -0.50, 0.03, 0.215, 0.045, 0.135);
+      tg.add(fin);
+      var fin2 = pg3Ball(pg3Mat(S.top), 0, -0.10, 0.02, 0.155, 0.16, 0.135);
+      tg.add(fin2);
+      J.tail = tg;
+      J.legL = null; J.legR = null;
+    } else {
+      var lL = pg3Leg(S, -1, g), lR = pg3Leg(S, 1, g);
+      J.legL = lL.g; J.kneeL = lL.knee;
+      J.legR = lR.g; J.kneeR = lR.knee;
+    }
+    /* 몸통 */
+    var up = new THREE.Group();
+    up.position.y = PG3.HIP;
+    g.add(up);
+    J.up = up;
+    var topMat = pg3Mat(S.top);
+    up.add(pg3Cyl(topMat, 0.156, 0.176, 0.46, 0, 0.245, 0));
+    up.add(pg3Ball(topMat, 0, 0.452, 0, 0.168, 0.086, 0.138));
+    if (S.skirt){
+      var sk = pg3Cyl(pg3Mat(S.skirt), 0.160, 0.295, 0.25, 0, 0.115, 0);
+      up.add(sk);
+      up.add(pg3Ring(pg3Mat(S.skirt), 0.168, 0.018, 0, 0.235, 0));
+    }
+    if (S.shorts){
+      up.add(pg3Cyl(pg3Mat(S.shorts), 0.155, 0.175, 0.16, 0, 0.06, 0));
+    }
+    if (S.pants){
+      up.add(pg3Cyl(pg3Mat(S.pants), 0.158, 0.17, 0.10, 0, 0.05, 0));
+    }
+    /* 팔 */
+    var aL = pg3Arm(S, -1, up, J), aR = pg3Arm(S, 1, up, J);
+    J.armL = aL.g; J.elbL = aL.elb;
+    J.armR = aR.g; J.elbR = aR.elb;
+    /* 머리 */
+    var headG = new THREE.Group();
+    headG.position.set(0, 0.50, 0);
+    up.add(headG);
+    J.headG = headG;
+    var hm = pg3FaceTex(S.skin, 'normal');
+    var head = new THREE.Mesh(pg3Geo('head', function(){ return new THREE.SphereGeometry(1, 32, 24); }), hm);
+    head.scale.set(PG3.HR, PG3.HR * 0.97, PG3.HR * 0.94);
+    head.position.y = PG3.HCY;
+    headG.add(head);
+    J.head = head; J.headMat = hm;
+    headG.add(pg3Cyl(pg3Mat(S.skin), 0.062, 0.070, 0.09, 0, 0.045, 0));
+    pg3Hair(headG, S);
+    pg3Ears(headG, S);
+    pg3Hat(headG, S);
+    pg3Extra(up, headG, S, J);
+    /* 모든 자식 메시에 픽 태그 (드래그·탭이 어느 부위든 잡히게) */
+    g.traverse(function(o){ if (o.isMesh) o.userData.__pgTag = tag; });
+    g.userData.j = J;
     return g;
   }
-  function pgFaceSet(c, ex){
-    if (!c || !c.sp || !c.sp.userData || !c.sp.userData.face) return;
-    var fm = c.sp.userData.face;
-    if (!ex || ex === 'normal'){ if (fm.visible) fm.visible = false; return; }
-    var tex = pgFaceTex(c.data.preset, ex);
-    if (!tex){ if (fm.visible) fm.visible = false; return; }
-    var info = pgFaceInfo(c.data.preset);
-    if (!info){ fm.visible = false; return; }
-    var bw = Math.max(4, info.x1 - info.x0), bh = Math.max(4, info.y1 - info.y0);
-    fm.scale.set(bw * 1.75 / 400, bh * 1.75 / 400, 1);
-    fm.position.set(1.75 * (((info.x0 + info.x1) / 2) / 400 - 0.5),
-                    1.75 * (1 - ((info.y0 + info.y1) / 2) / 400), 0.048);
-    if (fm.material.map !== tex){ fm.material.map = tex; fm.material.needsUpdate = true; }
-    if (!fm.visible) fm.visible = true;
+
+  /* ============================================================
+     🕺 관절 애니메이션 — 걷기·인사·춤·의자 앉기·기구 탑승
+     오른손 좌표계: rotation.x < 0 이면 팔·다리가 앞(+Z)으로 나간다
+     ============================================================ */
+  var PG_SIT_RIDES = { carousel:1, horse:1, swing:1, bench:1, seesaw:1 };
+  var PG_MOUNT_OFF = { carousel:0.3, horse:0.24 };
+  var PG3_RIDE = {
+    slide:'climb', seesaw:'sit', jungle:'climb', ladder:'climb', bars:'hold', rope:'rope',
+    horse:'sit', sand:'dig', zip:'hold', tramp:'jump', bench:'sit',
+    ferris:'wave', carousel:'sit', coaster:'cheer', viking:'cheer', teacup:'sit', drop:'drop',
+    balloon:'wave', bumper:'steer', swing:'swing'
+  };
+  function pgSitOff(k){ return PG3.HIP; }
+  function pgWrapAng(a){
+    while (a > Math.PI) a -= 6.283185307;
+    while (a < -Math.PI) a += 6.283185307;
+    return a;
   }
+  function pgLerpAng(a, b, t){
+    if (b === undefined || b === null) return a || 0;
+    var d = pgWrapAng(b - (a || 0));
+    return (a || 0) + d * (t > 1 ? 1 : (t < 0 ? 0 : t));
+  }
+  /* 360° 자유 회전 — 3D 인형이라 옆·뒤에서도 종잇장이 되지 않는다 */
+  function pgRenderYaw(c){ return c.yaw || 0; }
+  /* 🎠 기구마다 자연스러운 몸 방향 (접선·중앙·내려오는 쪽) */
+  function pgRideYaw(c){
+    var key = c.data.ride;
+    var R = key ? PG.rides[key] : null;
+    if (!R) return c.yawT;
+    var base = R.g.rotation.y || 0;
+    var spot = R.spots.length ? R.spots[c.rideIdx % R.spots.length] : { x: 0, z: 0 };
+    if (key === 'carousel') return base + Math.atan2(spot.x, spot.z) + Math.PI / 2;
+    if (key === 'seesaw') return base + Math.atan2(-spot.x, -spot.z);
+    if (key === 'slide') return base + Math.PI;
+    if (key === 'zip') return base - Math.PI / 2;
+    return base;
+  }
+  var PG_RIDE_EXPR = { coaster:'joy', viking:'joy', drop:'joy', tramp:'joy', zip:'joy', rope:'joy',
+    swing:'happy', carousel:'happy', slide:'happy', ferris:'happy', balloon:'happy',
+    teacup:'happy', horse:'happy', seesaw:'happy', bumper:'happy', ladder:'happy',
+    jungle:'happy', bars:'happy', sand:'happy', bench:'chill' };
+  function pg3Apply(c, T, oL, oR, kL, kR, aL, aR, dt){
+    var J = c.j, P = c.pp || (c.pp = {}), k = Math.min(1, dt * 10), q;
+    for (q in T){
+      if (P[q] === undefined) P[q] = T[q];
+      else P[q] += (T[q] - P[q]) * k;
+    }
+    if (J.legL){
+      J.legL.rotation.x = P.legL + oL;
+      J.legR.rotation.x = P.legR + oR;
+      J.kneeL.rotation.x = P.kneeL + kL;
+      J.kneeR.rotation.x = P.kneeR + kR;
+    }
+    if (J.tail) J.tail.rotation.x = P.legL * 0.5 + oL * 0.6;
+    J.armL.rotation.x = P.armL + aL;
+    J.armR.rotation.x = P.armR + aR;
+    J.armL.rotation.z = P.armLz;
+    J.armR.rotation.z = P.armRz;
+    J.elbL.rotation.x = -P.elbL;
+    J.elbR.rotation.x = -P.elbR;
+    J.elbL.rotation.z = P.elbLz;
+    J.elbR.rotation.z = P.elbRz;
+    J.up.position.y = PG3.HIP + P.bob;
+    J.up.rotation.x = P.lean;
+    J.up.rotation.y = P.hip;
+    J.headG.rotation.x = P.headX;
+    J.headG.rotation.y = P.headY;
+    J.headG.rotation.z = P.headZ;
+    if (J.wings && J.wings.length){
+      var wf = Math.sin(PG.time * 6) * 0.18;
+      for (var i = 0; i < J.wings.length; i++) J.wings[i].rotation.z = (i % 2 ? -1 : 1) * (0.45 + wf * 0.4);
+    }
+  }
+  function pgPose(t, dt){
+    dt = dt || 0.016;
+    PG.charOrder.forEach(function(id){
+      var c = PG.chars[id];
+      if (!c || !c.j) return;
+      var d = c.data, J = c.j;
+      var lx = 0, ly = 0, lz = 0;
+      var R = (d.ride && PG.rides[d.ride]) ? PG.rides[d.ride] : null;
+      var seat = (c.seatId && PG.seats[c.seatId]) ? PG.seats[c.seatId] : null;
+      var ex = 'normal';
+      var T = { legL:0, legR:0, kneeL:0.05, kneeR:0.05, armL:0, armR:0,
+                armLz:-0.16, armRz:0.16, elbL:0.14, elbR:0.14, elbLz:0, elbRz:0,
+                lean:0, hip:0, headX:0, headY:0, headZ:0, bob:0 };
+      var oL = 0, oR = 0, kL = 0, kR = 0, aL = 0, aR = 0;
+      var tilt = 0, sx = 1, sy = 1;
+
+      if (c.held){
+        /* 손가락에 들려 있는 동안 — 둥실 떠오름 */
+        pg3Face(c, 'normal');
+        c.lift = Math.min(0.55, c.lift + 0.06);
+        T.armLz = -2.2; T.armRz = 2.2; T.legL = 0.30; T.legR = -0.20;
+        T.elbL = 0.25; T.elbR = 0.25;
+        var hby0 = pgBridgeY(d.x, d.z);
+        c.sp.position.set(d.x, Math.max(0.25, hby0 + 0.22) + c.lift, d.z);
+        c.sp.scale.set(1.05, 1.05, 1.05);
+        c.sp.rotation.y = c.yaw || 0;
+        c.sp.rotation.z = 0;
+        pg3Apply(c, T, 0, 0, 0, 0, 0, 0, dt);
+        c.sh.position.set(d.x, hby0 + 0.02, d.z);
+        c.sh.scale.set(1.1, 1.1, 1);
+        c.sh.material.opacity = 0.1;
+        return;
+      }
+      c.lift = Math.max(0, c.lift - 0.05);
+
+      /* 탭하면 한 번 껑충 */
+      var hop = 0;
+      if (PG.time - c.hopAt < 0.75){
+        var u = (PG.time - c.hopAt) / 0.75;
+        hop = Math.sin(u * Math.PI) * 0.55;
+      }
+
+      /* 🧭 몸 방향 — 기구·의자·인사·춤은 정해진 방향, 걸을 땐 진행 방향 */
+      var yawT = c.yawT;
+      if (seat) yawT = seat.yaw;
+      else if (R) yawT = pgRideYaw(c);
+      else if (c.actMode) yawT = PG.azim;
+      c.yaw = pgLerpAng(c.yaw || 0, yawT, Math.min(1, dt * ((R || seat || c.actMode) ? 10 : 7)));
+      var ryaw = pgRenderYaw(c);
+      if (c.sp.rotation.y !== ryaw) c.sp.rotation.y = ryaw;
+      /* 가만히 서 있으면 2~3초마다 천천히 두리번 */
+      if (!R && !seat && !c.actMode && c.aiMode !== 'walk' && PG.time > (c.lookAt || 0)){
+        c.lookAt = PG.time + pgAIrand(2.0, 3.6);
+        c.yawT = (c.yaw || 0) + (Math.random() - 0.5) * 1.3;
+      }
+
+      if (seat){
+        /* 🪑 앉기 — 엉덩이를 좌석에, 다리는 앞으로 굽혀 발을 흔든다 */
+        T.legL = -1.42; T.legR = -1.42; T.kneeL = 1.46; T.kneeR = 1.46;
+        T.armL = -0.10; T.armR = -0.10; T.armLz = -0.24; T.armRz = 0.24;
+        T.elbL = 0.48; T.elbR = 0.48;
+        oL = Math.sin(t * 3.0 + c.ph) * 0.16;
+        oR = -oL;
+        kL = Math.max(0, Math.sin(t * 3.0 + c.ph)) * 0.16;
+        kR = Math.max(0, -Math.sin(t * 3.0 + c.ph)) * 0.16;
+        c.sp.position.set(seat.x, seat.y - PG3.HIP + 0.02, seat.z);
+        c.sh.position.set(seat.x, 0.03, seat.z);
+        c.sh.scale.set(0.8, 0.8, 1);
+        c.sh.material.opacity = 0.1;
+        tilt = Math.sin(t * 1.1 + c.ph) * 0.01;
+        ex = 'chill';
+      } else if (R){
+        var L = R.g, ph = 0;
+        if (d.ride === 'slide'){
+          ph = (t * 0.19 + c.ph * 0.16) % 1;               /* 55%는 계단 오르기, 나머지는 미끄러지기 */
+          var kk = ph < 0.55 ? (ph / 0.55) : (1 - (ph - 0.55) / 0.45);
+          lx = 0; lz = 2.55 - 2.35 * kk; ly = 0.28 + 1.82 * kk;
+          if (ph < 0.55) tilt = -0.12;
+        } else if (d.ride === 'zip'){
+          var zp = t * 0.5 + c.ph;
+          lx = Math.sin(zp) * 1.12; lz = 0; ly = 1.42 + Math.sin(zp * 2) * 0.03;
+          tilt = Math.cos(zp) * 0.6;
+        } else if (R.pose){
+          var pz = R.pose(c.rideIdx, t) || { x: 0, y: 0, z: 0 };
+          lx = pz.x; ly = pz.y; lz = pz.z;
+          if (pz.tilt) tilt = pz.tilt;
+        } else {
+          var spot = R.spots.length ? R.spots[c.rideIdx % R.spots.length] : { x: 0, y: 0, z: 0 };
+          lx = spot.x; ly = spot.y; lz = spot.z;
+          if (d.ride === 'tramp'){
+            ly += Math.abs(Math.sin(t * 3.1 + c.ph * 0.4)) * 0.85;
+            sy = (1 - 0.05 * Math.cos(t * 6.2 + c.ph));
+          } else if (d.ride === 'seesaw'){
+            ly += Math.sin(t * 1.5) * spot.x * 0.18;
+            tilt = -Math.sin(t * 1.5) * 0.12;
+          } else if (d.ride === 'horse'){
+            ly += Math.sin(t * 1.9 + 0.4) * 0.06;
+            tilt = Math.sin(t * 1.9) * 0.1;
+          } else if (d.ride === 'rope'){
+            ly += Math.abs(Math.sin(t * 2.5 + c.ph * 0.3)) * 0.5;
+            sy = (1 - 0.04 * Math.abs(Math.sin(t * 2.5)));
+          } else if (d.ride === 'jungle'){
+            ly += (0.5 + 0.5 * Math.sin(t * 0.8 + c.ph)) * 0.85;
+          } else if (d.ride === 'ladder'){
+            ly += (0.4 + 0.4 * Math.sin(t * 0.7 + c.ph)) * 1.0;
+          } else if (d.ride === 'bars'){
+            ly += 0.25 + 0.25 * Math.sin(t * 1.1 + c.ph);
+            tilt = Math.sin(t * 1.1) * 0.08;
+          } else if (d.ride === 'sand'){
+            sy = (0.92 + 0.03 * Math.sin(t * 2.2 + c.ph));
+          } else if (d.ride === 'bench'){
+            ly += Math.sin(t * 1.4 + c.ph) * 0.012;
+          }
+        }
+        /* 앉아 타는 기구 — 엉덩이 높이를 좌석에 맞춘다 */
+        if (PG_SIT_RIDES[d.ride]) ly -= (PG3.HIP + 0.06);   /* 안장에 살짝 파묻히게 */
+        PG.vec.set(lx, ly, lz).applyMatrix4(L.matrixWorld);
+        var mo = PG_MOUNT_OFF[d.ride] || 0;
+        if (mo && PG.camera){
+          var cdx = PG.camera.position.x - PG.vec.x, cdz = PG.camera.position.z - PG.vec.z;
+          var cdl = Math.sqrt(cdx * cdx + cdz * cdz) || 1;
+          PG.vec.x += cdx / cdl * mo; PG.vec.z += cdz / cdl * mo;
+        }
+        c.sp.position.set(PG.vec.x, PG.vec.y + hop, PG.vec.z);
+        c.sh.position.set(PG.vec.x, 0.035, PG.vec.z);
+        c.sh.scale.set(0.75, 0.75, 1);
+        c.sh.material.opacity = 0.1;
+        ex = PG_RIDE_EXPR[d.ride] || 'happy';
+        /* 🎠 기구별 3D 자세 */
+        var mode = PG3_RIDE[d.ride] || 'sit';
+        if (mode === 'sit' || mode === 'swing'){
+          T.legL = -1.30; T.legR = -1.30; T.kneeL = 1.26; T.kneeR = 1.26;
+          T.elbL = 0.45; T.elbR = 0.45;
+          oL = Math.sin(t * 2.6 + c.ph) * (d.ride === 'swing' ? 0.30 : 0.18);
+          oR = -oL;
+          if (d.ride === 'swing'){ T.armLz = -2.0; T.armRz = 2.0; }
+          else if (d.ride === 'carousel' || d.ride === 'horse'){ T.armL = -0.9; T.armR = -0.9; T.armLz = -0.35; T.armRz = 0.35; }
+        } else if (mode === 'cheer'){
+          T.armLz = -2.45; T.armRz = 2.45; T.elbL = 0.10; T.elbR = 0.10;
+          T.legL = -1.05; T.legR = -1.05; T.kneeL = 1.0; T.kneeR = 1.0;
+          aL = Math.sin(t * 4.2 + c.ph) * 0.20; aR = -aL;
+          T.bob = Math.abs(Math.sin(t * 3.0)) * 0.02;
+        } else if (mode === 'climb'){
+          T.armLz = -1.55; T.armRz = 1.55;
+          aL = -0.55 + Math.sin(t * 3.0 + c.ph) * 0.55;
+          aR = -0.55 - Math.sin(t * 3.0 + c.ph) * 0.55;
+          T.legL = -0.55; T.legR = -0.55;
+          oL = Math.sin(t * 3.0 + c.ph) * 0.45;
+          oR = -oL;
+          kL = 0.7; kR = 0.7;
+          T.elbL = 0.55; T.elbR = 0.55;
+        } else if (mode === 'hold' || mode === 'rope'){
+          T.armLz = -2.55; T.armRz = 2.55;
+          T.armL = -0.10; T.armR = -0.10;
+          T.legL = -0.30 + Math.sin(t * 2.2 + c.ph) * 0.25;
+          T.legR = -0.30 - Math.sin(t * 2.2 + c.ph) * 0.25;
+          kR = 0.5; kL = 0.5;
+          T.elbL = 0.10; T.elbR = 0.10;
+        } else if (mode === 'jump'){
+          T.armLz = -2.5; T.armRz = 2.5;
+          T.legL = -0.45; T.legR = -0.45; T.kneeL = 0.8; T.kneeR = 0.8;
+          oL = Math.sin(t * 5) * 0.15; oR = -oL;
+        } else if (mode === 'wave'){
+          T.armRz = 2.3; T.armLz = -0.35;
+          aR = 0; T.elbRz = Math.sin(t * 5.0) * 0.45 - 0.10;
+          T.elbR = 0.30;
+        } else if (mode === 'steer'){
+          T.armL = -1.25; T.armR = -1.25; T.armLz = -0.28; T.armRz = 0.28;
+          T.elbL = 0.30; T.elbR = 0.30;
+          T.legL = -1.25; T.legR = -1.25; T.kneeL = 1.2; T.kneeR = 1.2;
+        } else if (mode === 'dig'){
+          T.armL = -1.05; T.armR = -1.05; T.legL = -1.2; T.legR = -1.2;
+          T.kneeL = 1.1; T.kneeR = 1.1; T.lean = 0.25;
+          aL = Math.sin(t * 4.0) * 0.25; aR = aL;
+        } else if (mode === 'drop'){
+          var du = (t % 7.6) / 7.6;
+          if (du >= 0.66){ T.armLz = -2.7; T.armRz = 2.7; T.legL = -0.25; T.legR = -0.25; kL = 0.7; kR = 0.7; }
+          else { T.armLz = -0.55; T.armRz = 0.55; T.elbL = 1.7; T.elbR = 1.7; T.legL = -1.25; T.legR = -1.25; T.kneeL = 1.2; T.kneeR = 1.2; }
+        }
+      } else {
+        /* 혼자 걷기 · 두리번 쉬기 */
+        if (c.aiMode === 'walk'){
+          var wspd = (PG.follow && c.data.id === PG.followId) ? 4.4 : c.spd;
+          var p = t * (wspd * 1.55) + c.ph * 3;
+          var sw = Math.sin(p);
+          oL = -sw * 0.62; oR = sw * 0.62;
+          kL = Math.max(0, Math.sin(p + 1.1)) * 0.75;
+          kR = Math.max(0, Math.sin(p + 1.1 + Math.PI)) * 0.75;
+          aL = sw * 0.42; aR = -sw * 0.42;
+          T.lean = 0.05;
+          T.bob = Math.abs(Math.sin(p)) * 0.022;
+          T.headZ = Math.sin(p) * 0.03;
+        } else if (c.aiMode === 'idle' || c.aiMode === 'sit'){
+          T.bob = Math.sin(t * 2.0 + c.ph) * 0.008;
+          T.armLz = -0.18 + Math.sin(t * 1.7 + c.ph) * 0.03;
+          T.armRz = 0.18 - Math.sin(t * 1.7 + c.ph) * 0.03;
+          T.headY = Math.sin(t * 0.7 + c.ph) * 0.10;
+          sy = 1 + Math.sin(t * 2.0 + c.ph) * 0.008;
+        } else {
+          T.headZ = Math.sin(t * 1.2 + c.ph) * 0.03;
+          T.bob = Math.sin(t * 1.6 + c.ph) * 0.006;
+        }
+        var by = pgBridgeY(d.x, d.z);           /* 🌉 연못 다리 위면 판자 높이만큼 올린다 */
+        c.sp.position.set(d.x, by + 0.03 + hop, d.z);
+        c.sh.position.set(d.x, by + 0.03, d.z);
+        c.sh.scale.set(1, 1, 1);
+        c.sh.material.opacity = by > 0.02 ? 0.12 : 0.17;
+        if (hop > 0.06) ex = 'happy';
+      }
+      /* 👋 인사 · 💃 춤 — 버튼으로 시키는 생동감 있는 모션 */
+      if (c.actMode && !R && !seat){
+        if (PG.time >= c.actEnd) pgActEnd(c);
+        else if (PG.time >= c.actStart){
+          var au = PG.time - c.actStart, isW = (c.actMode === 'wave');
+          if (isW){
+            T.armRz = 2.25; T.armLz = -0.24;
+            T.elbR = 0.34; T.elbRz = Math.sin(au * 9) * 0.42;
+            T.headZ = -0.10;
+            T.bob = Math.abs(Math.sin(au * 5)) * 0.05;
+            ex = 'joy';
+          } else {
+            T.armLz = -2.4; T.armRz = 2.4;
+            T.elbL = 0.25; T.elbR = 0.25;
+            aL = Math.sin(au * 7.5) * 0.35; aR = -aL;
+            T.hip = Math.sin(au * 7.5) * 0.32;
+            T.bob = Math.abs(Math.sin(au * 7.5)) * 0.10;
+            T.headZ = Math.sin(au * 7.5) * 0.12;
+            oL = Math.sin(au * 3.75) * 0.12; oR = -oL;
+            ex = 'happy';
+          }
+          tilt = Math.sin(au * (isW ? 9 : 15)) * (isW ? 0.05 : 0.09);
+          var sq = Math.sin(au * (isW ? 9 : 15)) * (isW ? 0.01 : 0.04);
+          sx = 1 - sq; sy = 1 + sq;
+        }
+      }
+      c.sp.scale.set(sx, sy, 1);
+      c.sp.rotation.z = tilt;
+      pg3Face(c, ex);
+      pg3Apply(c, T, oL, oR, kL, kR, aL, aR, dt);
+    });
+  }
+
+  /* 🧸 캐릭터 메시 — 종이 두 장 대신 진짜 3D 관절 인형 */
+  function pgCharMesh(preset, id){ return pg3Doll(preset, id); }
+
   function pgAddChar(rec){
     if (!rec || !rec.id || PG.chars[rec.id]) return;
     var sp = pgCharMesh(rec.preset, rec.id);
@@ -17344,7 +17267,7 @@ async function finishBoot(){
     PG.scene.add(sp); PG.scene.add(sh);
     var c = {
       data: { id: rec.id, preset: rec.preset, x: Number(rec.x) || 0, z: Number(rec.z) || 0, ride: rec.ride || '' },
-      sp: sp, sh: sh, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false,
+      sp: sp, sh: sh, j: sp.userData.j, pp: null, ph: Math.random() * 6.28, rideIdx: 0, lift: 0, hopAt: -9, held: false,
       /* 자율 행동 — aiMode: 'walk' | 'play' | 'idle' (메모리 전용) */
       aiMode: 'idle', aiTimer: 0, wx: Number(rec.x) || 0, wz: Number(rec.z) || 0,
       tx: 0, tz: 0, aiAim: '', curRide: '', spd: pgAIrand(1.8, 2.5), face: 1, aiHome: false,
@@ -17365,11 +17288,7 @@ async function finishBoot(){
     var c = PG.chars[id];
     if (!c) return;
     try { PG.scene.remove(c.sp); PG.scene.remove(c.sh); } catch(e){}
-    try {
-      if (c.sp && c.sp.children) c.sp.children.forEach(function(m){
-        if (m.material){ try { m.material.dispose(); } catch(e){} }
-      });
-    } catch(e){}
+    /* 🧸 3D 인형의 재질·기하는 캐릭터끼리 나눠 쓰므로 여기서 버리지 않는다 */
     PG.chars[id] = null;
     delete PG.chars[id];
     PG.charOrder = PG.charOrder.filter(function(x){ return x !== id; });
@@ -18282,246 +18201,6 @@ async function finishBoot(){
       d.x = c.wx; d.z = c.wz;
       if (Math.sqrt(Math.pow(c.tx - c.wx, 2) + Math.pow(c.tz - c.wz, 2)) <= 0.32) pgAIArrive(c);
     }
-  }
-
-  /* ---------- 캐릭터 자세 · 놀이 애니메이션 ---------- */
-  var PG_CHAR_S = 1.75;
-  var PG_SIDE_LIM = 1.16;              /* 정측면에서 종잇장처럼 사라지지 않게 ±66° */
-  function pgWrapAng(a){
-    while (a > Math.PI) a -= 6.283185307;
-    while (a < -Math.PI) a += 6.283185307;
-    return a;
-  }
-  function pgLerpAng(a, b, t){
-    if (b === undefined || b === null) return a || 0;
-    var d = pgWrapAng(b - (a || 0));
-    return (a || 0) + d * (t > 1 ? 1 : (t < 0 ? 0 : t));
-  }
-  function pgRenderYaw(c){
-    var d = pgWrapAng((c.yaw || 0) - PG.azim);
-    var lim = PG_SIDE_LIM;
-    if (Math.abs(d) > lim && Math.abs(d) < Math.PI - lim) d = d > 0 ? lim : -lim;
-    return PG.azim + d;
-  }
-  /* 🎠 기구마다 자연스러운 몸 방향 (접선·중앙·내려오는 쪽) */
-  function pgRideYaw(c){
-    var key = c.data.ride;
-    var R = key ? PG.rides[key] : null;
-    if (!R) return c.yawT;
-    var base = R.g.rotation.y || 0;
-    var spot = R.spots.length ? R.spots[c.rideIdx % R.spots.length] : { x: 0, z: 0 };
-    if (key === 'carousel') return base + Math.atan2(spot.x, spot.z) + Math.PI / 2;
-    if (key === 'seesaw') return base + Math.atan2(-spot.x, -spot.z);
-    if (key === 'slide') return base + Math.PI;
-    if (key === 'zip') return base - Math.PI / 2;
-    return base;
-  }
-  var PG_RIDE_EXPR = { coaster:'joy', viking:'joy', drop:'joy', tramp:'joy', zip:'joy', rope:'joy',
-    swing:'happy', carousel:'happy', slide:'happy', ferris:'happy', balloon:'happy',
-    teacup:'happy', horse:'happy', seesaw:'happy', bumper:'happy', ladder:'happy',
-    jungle:'happy', bars:'happy', sand:'happy', bench:'chill' };
-  function pgPose(t, dt){
-    dt = dt || 0.016;
-    PG.charOrder.forEach(function(id){
-      var c = PG.chars[id];
-      if (!c) return;
-      var d = c.data;
-      var lx, ly, lz, tilt = 0, sy = 1, sx = 1;
-      var R = (d.ride && PG.rides[d.ride]) ? PG.rides[d.ride] : null;
-      var seat = (c.seatId && PG.seats[c.seatId]) ? PG.seats[c.seatId] : null;
-
-      if (c.held){
-        /* 손가락에 들려 있는 동안 — 둥실 떠오름 */
-        pgCharStill(c);
-        pgFaceSet(c, 'normal');
-        c.lift = Math.min(0.55, c.lift + 0.06);
-        var hby = pgBridgeY(d.x, d.z);          /* 🌉 다리 위로 들고 가도 판자 위에 */
-        c.sp.position.set(d.x, Math.max(0.25, hby + 0.22) + c.lift, d.z);
-        c.sp.scale.set(1.086, 1.086, 1);
-        c.sp.rotation.z = 0;
-        c.sh.position.set(d.x, hby + 0.02, d.z);
-        c.sh.scale.set(1.1, 1.1, 1);
-        c.sh.material.opacity = 0.1;
-        return;
-      }
-      c.lift = Math.max(0, c.lift - 0.05);
-
-      /* 탭하면 한 번 껑충 */
-      var hop = 0;
-      if (PG.time - c.hopAt < 0.75){
-        var u = (PG.time - c.hopAt) / 0.75;
-        hop = Math.sin(u * Math.PI) * 0.55;
-      }
-
-      /* 🧭 몸 방향 — 기구·의자·인사·춤은 정해진 방향, 걸을 땐 진행 방향 */
-      var yawT = c.yawT;
-      if (seat) yawT = seat.yaw;
-      else if (R) yawT = pgRideYaw(c);
-      else if (c.actMode) yawT = PG.azim;                 /* 나(카메라)를 보고 인사·춤 */
-      c.yaw = pgLerpAng(c.yaw || 0, yawT, Math.min(1, dt * ((R || seat || c.actMode) ? 10 : 7)));
-      var ryaw = pgRenderYaw(c);
-      if (c.sp.rotation.y !== ryaw) c.sp.rotation.y = ryaw;
-      var isBack = Math.abs(pgWrapAng(ryaw - PG.azim)) > Math.PI / 2;
-      /* 가만히 서 있으면 2~3초마다 천천히 두리번 */
-      if (!R && !seat && !c.actMode && c.aiMode !== 'walk' && PG.time > (c.lookAt || 0)){
-        c.lookAt = PG.time + pgAIrand(2.0, 3.6);
-        c.yawT = (c.yaw || 0) + (Math.random() - 0.5) * 1.3;
-      }
-      var ex = 'normal';
-
-      if (seat){
-        /* 🪑 앉기 — 좌석 높이에 엉덩이를 맞추고 두 발을 살짝 흔든다 */
-        var sArr = pgRideFrames(d.preset, 'kick', 'bench', isBack);
-        c.rideKey = d.preset + '|kick|bench' + (isBack ? '|b' : '');
-        if (sArr && sArr.length){
-          var si = Math.floor(t * 3.2 + c.ph * 4) % sArr.length;
-          if (isBack) pgCharMap(c, null, sArr[si]); else pgCharMap(c, sArr[si], null);
-        } else pgCharStill(c);
-        sy = 1 + Math.sin(t * 1.6 + c.ph) * 0.012;
-        tilt = Math.sin(t * 1.1 + c.ph) * 0.012;
-        c.sp.position.set(seat.x, seat.y - pgSitOff(d.preset) + 0.08, seat.z);
-        c.sh.position.set(seat.x, 0.03, seat.z);
-        c.sh.scale.set(0.8, 0.8, 1);
-        c.sh.material.opacity = 0.1;
-        ex = 'chill';
-      } else if (R){
-        var L = R.g, ph = 0;
-        if (d.ride === 'slide'){
-          ph = (t * 0.19 + c.ph * 0.16) % 1;               /* 55%는 계단 오르기, 나머지는 미끄러지기 */
-          var k = ph < 0.55 ? (ph / 0.55) : (1 - (ph - 0.55) / 0.45);
-          lx = 0; lz = 2.55 - 2.35 * k; ly = 0.28 + 1.82 * k;
-          if (ph < 0.55) tilt = -0.12;
-        } else if (d.ride === 'zip'){
-          var zp = t * 0.5 + c.ph;
-          lx = Math.sin(zp) * 1.12; lz = 0; ly = 1.42 + Math.sin(zp * 2) * 0.03;
-          tilt = Math.cos(zp) * 0.6;
-        } else if (R.pose){
-          /* 🎡 움직이는 놀이기구 — 기구가 계산한 좌석 좌표를 그대로 따릅니다 */
-          var pz = R.pose(c.rideIdx, t) || { x:0, y:0, z:0 };
-          lx = pz.x; ly = pz.y; lz = pz.z;
-          if (pz.tilt) tilt = pz.tilt;
-        } else {
-          var spot = R.spots.length ? R.spots[c.rideIdx % R.spots.length] : { x:0, y:0, z:0 };
-          lx = spot.x; ly = spot.y; lz = spot.z;
-          if (d.ride === 'tramp'){
-            ly += Math.abs(Math.sin(t * 3.1 + c.ph * 0.4)) * 0.85;
-            sy = (1 - 0.05 * Math.cos(t * 6.2 + c.ph));
-          } else if (d.ride === 'seesaw'){
-            ly += Math.sin(t * 1.5) * spot.x * 0.18;
-            tilt = -Math.sin(t * 1.5) * 0.12;
-          } else if (d.ride === 'horse'){
-            ly += Math.sin(t * 1.9 + 0.4) * 0.06;
-            tilt = Math.sin(t * 1.9) * 0.1;
-          } else if (d.ride === 'rope'){
-            ly += Math.abs(Math.sin(t * 2.5 + c.ph * 0.3)) * 0.5;
-            sy = (1 - 0.04 * Math.abs(Math.sin(t * 2.5)));
-          } else if (d.ride === 'jungle'){
-            ly += (0.5 + 0.5 * Math.sin(t * 0.8 + c.ph)) * 0.85;
-          } else if (d.ride === 'ladder'){
-            ly += (0.4 + 0.4 * Math.sin(t * 0.7 + c.ph)) * 1.0;
-          } else if (d.ride === 'bars'){
-            ly += 0.25 + 0.25 * Math.sin(t * 1.1 + c.ph);
-            tilt = Math.sin(t * 1.1) * 0.08;
-          } else if (d.ride === 'sand'){
-            sy = (0.92 + 0.03 * Math.sin(t * 2.2 + c.ph));
-          } else if (d.ride === 'bench'){
-            ly += Math.sin(t * 1.4 + c.ph) * 0.012;
-          }
-        }
-        /* 앉아 타는 기구 — 좌석 높이에서 엉덩이만큼 내려 목마·그네에 딱 붙인다 */
-        if (PG_SIT_RIDES[d.ride]) ly -= pgSitOff(d.preset) * sy;
-        /* 기구에 맞는 다리 움직임 그림으로 갈아 끼운다 (걷기 그림은 땅에서만) */
-        var rf = pgRideFramePick(d, c, t, ph);
-        if (d.ride === 'drop'){
-          var du = (t % 7.6) / 7.6;                 /* 자이로드롭 실제 상승/하강 위상 */
-          rf.arm = (du >= 0.66) ? 'dropUp' : 'dropHold';   /* 오를 땐 움츠림 · 떨어질 때 만세 */
-        } else if (d.ride === 'tramp'){
-          rf.arm = Math.abs(Math.sin(t * 3.1 + c.ph * 0.4)) > 0.55 ? 'jumpUp' : 'jumpDown';
-        } else if (d.ride === 'viking' || d.ride === 'coaster'){
-          rf.arm = 'cheer';
-        }
-        var rArr = pgRideFrames(d.preset, rf.mode, rf.arm, isBack);
-        c.rideKey = d.preset + '|' + rf.mode + '|' + rf.arm + (isBack ? '|b' : '');
-        if (rArr && rArr.length){
-          var rfi = rf.idx % rArr.length;
-          if (isBack) pgCharMap(c, null, rArr[rfi]); else pgCharMap(c, rArr[rfi], null);
-        } else {
-          pgCharStill(c);               /* 그림이 아직 안 실렸을 때만 정지 그림 */
-        }
-        PG.vec.set(lx, ly, lz).applyMatrix4(L.matrixWorld);
-        /* 목마에 앉으면 꽁무니·다리가 말 몸에 가리지 않게 카메라 쪽으로 살짝 */
-        var mo = PG_MOUNT_OFF[d.ride] || 0;
-        if (mo && PG.camera){
-          var cdx = PG.camera.position.x - PG.vec.x, cdz = PG.camera.position.z - PG.vec.z;
-          var cdl = Math.sqrt(cdx * cdx + cdz * cdz) || 1;
-          PG.vec.x += cdx / cdl * mo; PG.vec.z += cdz / cdl * mo;
-        }
-        c.sp.position.set(PG.vec.x, PG.vec.y + hop, PG.vec.z);
-        c.sh.position.set(PG.vec.x, 0.035, PG.vec.z);
-        c.sh.scale.set(0.75, 0.75, 1);
-        c.sh.material.opacity = 0.1;
-        ex = PG_RIDE_EXPR[d.ride] || 'happy';
-      } else {
-        /* 혼자 걷기 · 두리번 쉬기 — 통통 튀지 않고 발을 딛고 아장아장 */
-        if (c.aiMode === 'walk'){
-          /* 12프레임 걷기 그림으로 갈아 끼운다 (발이 땅에 붙어 있으므로 상하는 0) */
-          var wspd = (PG.follow && c.data.id === PG.followId) ? 4.4 : c.spd;
-          var wArr = pgWalkFrames(d.preset, isBack);
-          c.walkKey = isBack ? (d.preset + '|b') : d.preset;
-          if (wArr && wArr.length){
-            var wi = Math.floor((((t * (wspd * 1.45) + c.ph) % 1) * wArr.length)) % wArr.length;
-            if (isBack) pgCharMap(c, null, wArr[wi]); else pgCharMap(c, wArr[wi], null);
-            c.walkIdx = wi;
-          } else {
-            pgCharStill(c);
-          }
-        } else if (c.aiMode === 'idle' || c.aiMode === 'sit'){
-          /* 멈춰 설 땐 두 발을 딛고 아주 조용히 숨쉬기만 */
-          pgCharStill(c);
-          sy = (1 + Math.sin(t * 2.2 + c.ph) * 0.012);
-          tilt = Math.sin(t * 1.4 + c.ph) * 0.015;
-        } else {
-          pgCharStill(c);
-          tilt = Math.sin(t * 1.2 + c.ph) * 0.02;
-        }
-        var by = pgBridgeY(d.x, d.z);           /* 🌉 연못 다리 위면 판자 높이만큼 올린다 */
-        c.sp.position.set(d.x, by + 0.03 + hop, d.z);
-        c.sh.position.set(d.x, by + 0.03, d.z);
-        c.sh.scale.set(1, 1, 1);
-        c.sh.material.opacity = by > 0.02 ? 0.12 : 0.17;
-        if (hop > 0.06) ex = 'happy';
-      }
-      /* 👋 인사 · 💃 춤 — 버튼으로 시키는 생동감 있는 모션 */
-      if (c.actMode){
-        if (PG.time >= c.actEnd) pgActEnd(c);
-        else if (PG.time >= c.actStart){
-          var au = PG.time - c.actStart, isW = (c.actMode === 'wave');
-          var armN = isW ? ((Math.floor(au * 5) % 2) ? 'cheer' : 'wave')
-                         : PG_DANCE_ARMS[Math.floor(au * 7.5) % PG_DANCE_ARMS.length];
-          var aArr = pgRideFrames(d.preset, 'jump', armN, isBack);
-          c.rideKey = d.preset + '|jump|' + armN + (isBack ? '|b' : '');
-          if (aArr && aArr.length){
-            var ai = Math.floor(au * (isW ? 16 : 9)) % aArr.length;
-            if (isBack) pgCharMap(c, null, aArr[ai]); else pgCharMap(c, aArr[ai], null);
-          }
-          ex = isW ? 'joy' : 'happy';                  /* >< 눈웃음 / 신난 웃음 */
-          var beat = isW ? 9 : 7.5;
-          c.sp.position.y += Math.abs(Math.sin(au * (isW ? 5 : 7.5))) * (isW ? 0.20 : 0.34);
-          if (!isW){
-            var stp = Math.sin(au * 7.5) * 0.16;          /* 좌우 스텝 */
-            c.sp.position.x += Math.cos(PG.azim) * stp;
-            c.sp.position.z += (-Math.sin(PG.azim)) * stp;
-          }
-          tilt = Math.sin(au * beat) * (isW ? 0.13 : 0.18);
-          var sq = Math.sin(au * (isW ? 9 : 15)) * (isW ? 0.02 : 0.06);
-          sx = (1 - sq);
-          sy = (1 + sq);
-        }
-      }
-      c.sp.scale.set(sx, sy, 1);
-      c.sp.rotation.z = tilt;
-      pgFaceSet(c, ex);
-    });
   }
 
   /* ---------- 카메라 ---------- */
