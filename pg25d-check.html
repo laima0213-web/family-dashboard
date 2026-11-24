@@ -17379,6 +17379,11 @@ async function finishBoot(){
       depthWrite: true, side: THREE.DoubleSide, toneMapped: false });
     return PG.rimMat;
   }
+  /* sRGB(0~255) → 선형 (three.js 정점색은 선형으로 다룬다) */
+  function pgSrgb2Lin(v){
+    var s = Math.max(0, Math.min(255, v)) / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  }
   /* 실루엣 가장자리 → 두께 벽 (한 캐릭터당 한 번만 만든다) */
   function pgRimGeo(k){
     if (!PG.rimGeo) PG.rimGeo = {};
@@ -17432,7 +17437,8 @@ async function finishBoot(){
     var pos = [], col = [];
     function tri(ax, ay, az, bx, by, bz, cx2, cy2, cz2, cc){
       pos.push(ax, ay, az, bx, by, bz, cx2, cy2, cz2);
-      var r0 = Math.min(255, cc[0]) / 255, g0 = Math.min(255, cc[1]) / 255, b0 = Math.min(255, cc[2]) / 255;
+      /* sRGB 값을 선형으로 바꿔 넣어야 화면에서 원래 색으로 보인다 */
+      var r0 = pgSrgb2Lin(cc[0]), g0 = pgSrgb2Lin(cc[1]), b0 = pgSrgb2Lin(cc[2]);
       for (var q = 0; q < 3; q++) col.push(r0, g0, b0);
     }
     /* 가장자리 셀마다 바깥을 향한 벽 한 장 */
