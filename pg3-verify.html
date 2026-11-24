@@ -16572,6 +16572,13 @@ async function finishBoot(){
       var cap = new THREE.Mesh(capG, hm);
       cap.scale.setScalar(R * 1.045); cap.position.y = cy;
       headG.add(cap);
+      /* 뒤통수 아래(목덜미)까지 — 뒤에서 봐도 살갗이 드러나지 않게 */
+      var napG = pg3Geo('nape', function(){
+        return new THREE.SphereGeometry(1, 26, 10, Math.PI / 2 + 0.95, Math.PI * 2 - 1.90, Math.PI * 0.44, Math.PI * 0.32);
+      });
+      var nap = new THREE.Mesh(napG, hm);
+      nap.scale.setScalar(R * 1.045); nap.position.y = cy;
+      headG.add(nap);
     }
     /* 앞머리 — 눈썹 위까지 */
     var bgG = pg3Geo('bang', function(){
