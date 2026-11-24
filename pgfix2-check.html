@@ -16521,7 +16521,19 @@ async function finishBoot(){
       var cc = rowCol[y]; if (!cc) continue;
       hr += cc[0]; hg += cc[1]; hb += cc[2]; hn++;
     }
-    var hair = hn ? [hr / hn, hg / hn, hb / hn] : [246, 222, 194];
+    var hairTop = hn ? [hr / hn, hg / hn, hb / hn] : [246, 222, 194];
+    /* 얼굴 높이의 양옆(귀밑 머리·후드) 색도 섞어 모자만 뽑히지 않게 */
+    var sr = 0, sg2 = 0, sb2 = 0, sn2 = 0;
+    var fyE = Math.round((top + chinY) / 2 + (chinY - top) * 0.08);
+    for (y = fyE - Math.round((chinY - top) * 0.14); y <= fyE + Math.round((chinY - top) * 0.14); y++){
+      var ra2 = rowA[y], rb2 = rowB[y];
+      if (ra2 < 0) continue;
+      var span2 = rb2 - ra2;
+      for (x = ra2; x <= ra2 + span2 * 0.16; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ sr += px[i]; sg2 += px[i + 1]; sb2 += px[i + 2]; sn2++; } }
+      for (x = rb2 - span2 * 0.16; x <= rb2; x++){ i = (y * w + x) * 4; if (px[i + 3] > 170){ sr += px[i]; sg2 += px[i + 1]; sb2 += px[i + 2]; sn2++; } }
+    }
+    var hair = hairTop;
+    if (sn2 > 20) hair = [hairTop[0] * 0.45 + (sr / sn2) * 0.55, hairTop[1] * 0.45 + (sg2 / sn2) * 0.55, hairTop[2] * 0.45 + (sb2 / sn2) * 0.55];
     function hx(v){ var q = Math.round(v); q = q < 0 ? 0 : (q > 255 ? 255 : q); var t = q.toString(16); return t.length < 2 ? '0' + t : t; }
     var hairCss = '#' + hx(hair[0]) + hx(hair[1]) + hx(hair[2]);
     /* ③ 얼굴 자리만 머리색으로 부드럽게 덮는다 (모자·후드 테두리는 그대로) */
@@ -16550,11 +16562,11 @@ async function finishBoot(){
     c.strokeStyle = 'rgba(0,0,0,0.085)';
     c.lineWidth = Math.max(1.4, w / 210);
     c.lineCap = 'round';
-    for (var s2 = 0; s2 < 5; s2++){
-      var sx0 = hcx + (s2 - 2) * (hrr * 0.36);
+    for (var s2 = 0; s2 < 3; s2++){
+      var sx0 = hcx + (s2 - 1) * (hrr * 0.42);
       c.beginPath();
-      c.moveTo(sx0, top + 6);
-      c.quadraticCurveTo(sx0 + (s2 - 2) * 4, hcy, sx0 + (s2 - 2) * 9, chinY + 4);
+      c.moveTo(sx0, top + (chinY - top) * 0.18);
+      c.quadraticCurveTo(sx0 + (s2 - 1) * 5, hcy, sx0 + (s2 - 1) * 11, chinY - (chinY - top) * 0.18);
       c.stroke();
     }
     var grd = c.createLinearGradient(hcx - frx * 1.1, 0, hcx + frx * 1.1, 0);
@@ -16618,8 +16630,8 @@ async function finishBoot(){
     var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
     var c = cv.getContext('2d'); c.drawImage(img, 0, 0);
     var d = c.getImageData(0, 0, w, h).data;
-    var X0 = Math.round(138 * sc), X1 = Math.round(262 * sc);
-    var Y0 = Math.round(94 * sc), Y1 = Math.round(208 * sc);
+    var X0 = Math.round(150 * sc), X1 = Math.round(250 * sc);
+    var Y0 = Math.round(122 * sc), Y1 = Math.round(202 * sc);
     var lx = 0, ly = 0, ln = 0, rx = 0, ry = 0, rn = 0;
     var minx = 9999, maxx = -1, miny = 9999, maxy = -1;
     var ir = 0, ig = 0, ib = 0, inn = 0;
@@ -16638,10 +16650,14 @@ async function finishBoot(){
     }
     if (ln < 5 || rn < 5) return PG_FACE_DEF;
     var clx = lx / ln, cly = ly / ln, crx = rx / rn, cry = ry / rn;
-    if (Math.abs(clx - crx) < 12 * sc) return PG_FACE_DEF;
-    if (Math.abs(cly - cry) > 24 * sc) return PG_FACE_DEF;
+    /* 눈 두 점이 '얼굴'다운 크기·위치일 때만 믿는다 (머리카락을 눈으로 오인 방지) */
+    var gapx = Math.abs(clx - crx);
+    if (gapx < 14 * sc || gapx > 68 * sc) return PG_FACE_DEF;
+    if (Math.abs(cly - cry) > 10 * sc) return PG_FACE_DEF;
+    if ((maxy - miny) > 34 * sc) return PG_FACE_DEF;
+    if ((maxx - minx) > 96 * sc) return PG_FACE_DEF;
     var ey = (cly + cry) / 2;
-    if (ey < 100 * sc || ey > 200 * sc) return PG_FACE_DEF;
+    if (ey < 128 * sc || ey > 200 * sc) return PG_FACE_DEF;
     var cx = (clx + crx) / 2;
     var eww = Math.abs(crx - clx) * 0.42;
     var ehh = Math.max(4 * sc, Math.min(13 * sc, (maxy - miny) * 0.35 + 4 * sc));
@@ -16833,7 +16849,7 @@ async function finishBoot(){
          slide — 미끄러져 내려올 때 두 다리 앞으로 쭉
          jump  — 공중에서 다리를 벌리거나 접었다 펴기
      ============================================================ */
-  var PG_RIDE = { N:10, MAX:20 };
+  var PG_RIDE = { N:10, MAX:14 };
   var PG_RIDE_MODE = {
     swing:'swing', carousel:'kick', horse:'kick', ferris:'kick', viking:'kick', coaster:'kick',
     teacup:'kick', drop:'kick', balloon:'kick', bumper:'kick', seesaw:'kick', bench:'kick',
@@ -18334,12 +18350,10 @@ async function finishBoot(){
 
       if (seat){
         /* 🪑 앉기 — 좌석 높이에 엉덩이를 맞추고 두 발을 살짝 흔든다 */
-        var sF = pgRideFrames(d.preset, 'kick', 'bench', false);
-        var sB = pgRideFrames(d.preset, 'kick', 'bench', true);
-        var sArr = isBack ? (sB || sF) : sF;
+        var sArr = pgRideFrames(d.preset, 'kick', 'bench', isBack);
         if (sArr && sArr.length){
           var si = Math.floor(t * 3.2 + c.ph * 4) % sArr.length;
-          pgCharMap(c, sF ? sF[si % sF.length] : null, sB ? sB[si % sB.length] : (sF ? sF[si % sF.length] : null));
+          if (isBack) pgCharMap(c, null, sArr[si]); else pgCharMap(c, sArr[si], null);
         } else pgCharStill(c);
         sy = 1 + Math.sin(t * 1.6 + c.ph) * 0.012;
         tilt = Math.sin(t * 1.1 + c.ph) * 0.012;
@@ -18404,13 +18418,10 @@ async function finishBoot(){
         } else if (d.ride === 'viking' || d.ride === 'coaster'){
           rf.arm = 'cheer';
         }
-        var rF = pgRideFrames(d.preset, rf.mode, rf.arm, false);
-        var rB = pgRideFrames(d.preset, rf.mode, rf.arm, true);
-        var rArr = isBack ? (rB || rF) : rF;
+        var rArr = pgRideFrames(d.preset, rf.mode, rf.arm, isBack);
         if (rArr && rArr.length){
           var rfi = rf.idx % rArr.length;
-          pgCharMap(c, rF ? rF[rfi % rF.length] : null,
-                       rB ? rB[rfi % rB.length] : (rF ? rF[rfi % rF.length] : null));
+          if (isBack) pgCharMap(c, null, rArr[rfi]); else pgCharMap(c, rArr[rfi], null);
         } else {
           pgCharStill(c);               /* 그림이 아직 안 실렸을 때만 정지 그림 */
         }
@@ -18432,13 +18443,10 @@ async function finishBoot(){
         if (c.aiMode === 'walk'){
           /* 12프레임 걷기 그림으로 갈아 끼운다 (발이 땅에 붙어 있으므로 상하는 0) */
           var wspd = (PG.follow && c.data.id === PG.followId) ? 4.4 : c.spd;
-          var wF = pgWalkFrames(d.preset, false);
-          var wB = pgWalkFrames(d.preset, true);
-          var wArr = isBack ? (wB || wF) : wF;
+          var wArr = pgWalkFrames(d.preset, isBack);
           if (wArr && wArr.length){
             var wi = Math.floor((((t * (wspd * 1.45) + c.ph) % 1) * wArr.length)) % wArr.length;
-            pgCharMap(c, wF ? wF[wi % wF.length] : null,
-                         wB ? wB[wi % wB.length] : (wF ? wF[wi % wF.length] : null));
+            if (isBack) pgCharMap(c, null, wArr[wi]); else pgCharMap(c, wArr[wi], null);
             c.walkIdx = wi;
           } else {
             pgCharStill(c);
@@ -18466,13 +18474,10 @@ async function finishBoot(){
           var au = PG.time - c.actStart, isW = (c.actMode === 'wave');
           var armN = isW ? ((Math.floor(au * 5) % 2) ? 'cheer' : 'wave')
                          : PG_DANCE_ARMS[Math.floor(au * 7.5) % PG_DANCE_ARMS.length];
-          var aF = pgRideFrames(d.preset, 'jump', armN, false);
-          var aB = pgRideFrames(d.preset, 'jump', armN, true);
-          var aArr = isBack ? (aB || aF) : aF;
+          var aArr = pgRideFrames(d.preset, 'jump', armN, isBack);
           if (aArr && aArr.length){
             var ai = Math.floor(au * (isW ? 16 : 9)) % aArr.length;
-            pgCharMap(c, aF ? aF[ai % aF.length] : null,
-                         aB ? aB[ai % aB.length] : (aF ? aF[ai % aF.length] : null));
+            if (isBack) pgCharMap(c, null, aArr[ai]); else pgCharMap(c, aArr[ai], null);
           }
           ex = isW ? 'joy' : 'happy';                  /* >< 눈웃음 / 신난 웃음 */
           var beat = isW ? 9 : 7.5;
