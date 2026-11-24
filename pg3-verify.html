@@ -17113,7 +17113,7 @@ async function finishBoot(){
           }
         }
         /* 앉아 타는 기구 — 엉덩이 높이를 좌석에 맞춘다 */
-        if (PG_SIT_RIDES[d.ride]) ly -= PG3.HIP;
+        if (PG_SIT_RIDES[d.ride]) ly -= (PG3.HIP + 0.06);   /* 안장에 살짝 파묻히게 */
         PG.vec.set(lx, ly, lz).applyMatrix4(L.matrixWorld);
         var mo = PG_MOUNT_OFF[d.ride] || 0;
         if (mo && PG.camera){
