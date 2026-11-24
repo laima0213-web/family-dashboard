@@ -17405,7 +17405,8 @@ async function finishBoot(){
     var pos = [], col = [];
     function tri(ax, ay, az, bx, by, bz, cx2, cy2, cz2, cc){
       pos.push(ax, ay, az, bx, by, bz, cx2, cy2, cz2);
-      for (var q = 0; q < 3; q++) col.push(cc[0], cc[1], cc[2]);
+      var r0 = Math.min(255, cc[0]) / 255, g0 = Math.min(255, cc[1]) / 255, b0 = Math.min(255, cc[2]) / 255;
+      for (var q = 0; q < 3; q++) col.push(r0, g0, b0);
     }
     /* 옆면 색 — 실루엣 바로 안쪽(3칸 들어간) 색을 쓴다.
        가장자리 픽셀은 수채화 번짐이라 거의 흰색이기 때문 */
