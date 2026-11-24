@@ -20086,6 +20086,49 @@ async function finishBoot(){
 window.__err = [];
 window.addEventListener('error', function(e){ window.__err.push((e.message||'err') + ' @' + (e.lineno||0)); });
 window.addEventListener('unhandledrejection', function(e){ window.__err.push('promise:' + (e.reason && e.reason.message || e.reason)); });
+window.__t = (function(){
+  function PG(){ return window.__pg.state; }
+  function G(){ return window.__pg; }
+  return {
+    prep: function(list, X, az, pol, d, ty){
+      var gg = G(); if (!gg.state.on) gg.open('k1');
+      return new Promise(function(res){
+        setTimeout(function(){
+          gg.zone('village');
+          var app = gg.app(), P = PG();
+          app.playground.k1 = list;
+          gg.refresh();
+          if (P.follow && gg.game) gg.game();
+          P.follow = false; P.camTween = null;
+          P.charOrder.forEach(function(id){ var c = P.chars[id]; c.aiMode='idle'; c.aiTimer=999; c.lookAt=1e9; c.yaw=0; c.yawT=0; });
+          P.target.set(X, ty === undefined ? 0.95 : ty, 0); P.azim = az || 0; P.polar = pol || 1.22; P.distGoal = d || 5.2; P.dist = d || 5.2;
+          setTimeout(function(){ res(P.charOrder.length); }, 700);
+        }, 900);
+      });
+    },
+    cam: function(x, y, z, az, pol, d){ var P = PG(); P.camTween = null; P.target.set(x, y, z); P.azim = az; P.polar = pol; P.distGoal = d; P.dist = d; return 'ok'; },
+    act: function(mode, dur){ var P = PG(), c = P.chars[P.charOrder[0]]; if (!c) return 'nochar'; c.actMode = mode; c.actStart = P.time; c.actEnd = P.time + (dur || 9); return c.data.preset; },
+    walk: function(){ var P = PG(); P.charOrder.forEach(function(id){ var c = P.chars[id]; c.aiMode = 'walk'; c.tx = c.wx; c.tz = c.wz + 8; c.aiTimer = 999; }); return 'ok'; },
+    seat: function(){ var P = PG(), id = P.seatList[0]; if (!id) return 'noseat'; var s = P.seats[id], c = P.chars[P.charOrder[0]]; if (!c) return 'nochar';
+      c.seatId = id; c.wx = s.x; c.wz = s.z; c.data.x = s.x; c.data.z = s.z; c.tx = s.x; c.tz = s.z; c.yaw = s.yaw; c.yawT = s.yaw; c.aiMode = 'sit';
+      P.camTween = null; P.target.set(s.x, s.y + 0.35, s.z); P.azim = s.yaw + Math.PI * 0.75; P.polar = 1.28; P.distGoal = 2.8; P.dist = 2.8;
+      return id + ':' + s.label + ':' + s.x.toFixed(1) + ',' + s.z.toFixed(1); },
+    ride: function(key, prep){
+      var P = PG(), ids = P.charOrder.slice();
+      if (prep && ids.length){ var c = P.chars[ids[0]]; }
+      var R = P.rides[key]; if (!R) return 'noride';
+      var rec = prep ? prep : null;
+      return key;
+    },
+    rideAt: function(key, az, pol, d, ty){
+      var P = PG(), R = P.rides[key]; if (!R) return 'noride';
+      var g = R.g.position;
+      P.camTween = null; P.target.set(g.x, ty === undefined ? 1.6 : ty, g.z); P.azim = az || 0.5; P.polar = pol || 1.15; P.distGoal = d || 9; P.dist = d || 9;
+      var out = P.charOrder.map(function(id){ var c = P.chars[id]; return c.data.preset + '@' + (c.data.ride || '-'); });
+      return JSON.stringify(out);
+    }
+  };
+})();
 (function(){
   var tries = 0;
   function go(){
