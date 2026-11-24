@@ -16398,7 +16398,7 @@ async function finishBoot(){
     hamster_hood:    { ly:330, by:392, gs:202, ge:214, sx:208, lcx:184, rcx:246 }
   };
   var PG_LEG_DEF = { ly:336, by:390, gs:196, ge:204, sx:200, lcx:178, rcx:224 };
-  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:14 };
+  var PG_WALK = { N:12, ANG:0.28, LIFT:9, STRIDE:3, FADE:5, BOB:3, BROT:0.022, MAX:10 };
   function pgLegOf(k){ return PG_LEG[k] || PG_LEG_DEF; }
   function pgWalkTexCount(){ var n = 0; for (var q in PG.walkTex) if (PG.walkTex[q]) n++; return n; }
   function pgPresetWalking(k){
@@ -16839,8 +16839,8 @@ async function finishBoot(){
     var hip = Math.max(0, L.ly - 2), legLen = Math.max(8, L.by - hip);
     var out = [], cv, c, i, j, ph, s, ls, px, ang, dy, bY;
     for (i = 0; i < N; i++){
-      cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-      c = cv.getContext('2d');
+      cv = document.createElement('canvas'); cv.width = Math.round(W / 2); cv.height = Math.round(H / 2);
+      c = cv.getContext('2d'); c.scale(0.5, 0.5);      /* 폰 화면엔 충분한 해상도 — 텍스처 메모리 1/4 */
       ph = i / N * Math.PI * 2; s = Math.sin(ph);
       for (j = 0; j < 2; j++){
         ls = j ? -s : s;
@@ -16882,7 +16882,7 @@ async function finishBoot(){
          slide — 미끄러져 내려올 때 두 다리 앞으로 쭉
          jump  — 공중에서 다리를 벌리거나 접었다 펴기
      ============================================================ */
-  var PG_RIDE = { N:10, MAX:14 };
+  var PG_RIDE = { N:10, MAX:12 };
   var PG_RIDE_MODE = {
     swing:'swing', carousel:'kick', horse:'kick', ferris:'kick', viking:'kick', coaster:'kick',
     teacup:'kick', drop:'kick', balloon:'kick', bumper:'kick', seesaw:'kick', bench:'kick',
@@ -17203,8 +17203,8 @@ async function finishBoot(){
     var out = [], i, j, cv, c, ph, s, u, uc, bob, brot, w, f, ang, dy;
     var pac = pgArmOf(k), pal = pgArmPal(k);
     for (i = 0; i < N; i++){
-      cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-      c = cv.getContext('2d');
+      cv = document.createElement('canvas'); cv.width = Math.round(W / 2); cv.height = Math.round(H / 2);
+      c = cv.getContext('2d'); c.scale(0.5, 0.5);      /* 폰 화면엔 충분한 해상도 — 텍스처 메모리 1/4 */
       ph = i / N * Math.PI * 2; s = Math.sin(ph); u = N > 1 ? i / (N - 1) : 0; uc = i / N;
       bob = 0; brot = 0;
       if (mode === 'kick'){
