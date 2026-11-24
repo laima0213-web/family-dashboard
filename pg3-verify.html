@@ -16380,15 +16380,15 @@ async function finishBoot(){
   var PG3_HAIRDARK = new THREE.Color('#6B4A38');
   function pg3Shade(hex){
     var c = new THREE.Color(hex), hsl = c.getHSL({ h: 0, s: 0, l: 0 });
-    if (hsl.l > 0.52) c.lerp(PG3_HAIRDARK, 0.34);
-    else if (hsl.l > 0.38) c.lerp(PG3_HAIRDARK, 0.18);
+    if (hsl.l > 0.62) c.lerp(PG3_HAIRDARK, 0.22);
     return '#' + c.getHexString();
   }
   function pg3Mat(col, kind){
     if (!col) col = '#F5E9DA';
     var key = col + '|' + (kind || '');
     if (PG3.mat[key]) return PG3.mat[key];
-    var o = { color: new THREE.Color(col), roughness: 0.88, metalness: 0.0 };
+    /* 놀이터 조명이 밝아(하늘+해) 색이 하얗게 타므로 재질 색을 미리 눌러 둔다 */
+    var o = { color: new THREE.Color(col).multiplyScalar(0.70), roughness: 0.92, metalness: 0.0 };
     if (kind === 'metal'){ o.roughness = 0.34; o.metalness = 0.28; }
     if (kind === 'matte'){ o.roughness = 1.0; }
     var m = new THREE.MeshStandardMaterial(o);
