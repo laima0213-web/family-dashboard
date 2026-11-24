@@ -16447,12 +16447,12 @@ async function finishBoot(){
       g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
       c.fillStyle = g;
       c.beginPath(); c.ellipse(x, ey, 16, 19, 0, 0, 6.2832); c.fill();
-      c.fillStyle = '#8B5A3C';
+      c.fillStyle = '#A06A45';
       c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
       c.beginPath(); c.ellipse(x, ey + 7, 6.8, 7.4, 0, 0, 6.2832); c.fill();
       c.fillStyle = 'rgba(255,255,255,0.98)';
-      c.beginPath(); c.arc(x - 5.8, ey - 7, 6.8, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x - 5.6, ey - 7, 7.6, 0, 6.2832); c.fill();
       c.beginPath(); c.arc(x + 5.4, ey + 9, 3.0, 0, 6.2832); c.fill();
       c.strokeStyle = ink; c.lineWidth = 1.7;   /* 윗눈꺼풀 */
       c.beginPath(); c.arc(x, ey + 1, 16, Math.PI * 1.20, Math.PI * 1.80); c.stroke();
@@ -16668,14 +16668,11 @@ async function finishBoot(){
     var m = pg3Mat(S.hatCol || S.top), acc = pg3Mat(S.acc);
     if (h === 'hood'){
       var hg = pg3Geo('hood', function(){
-        return new THREE.SphereGeometry(1, 30, 20, Math.PI / 2 + 0.60, Math.PI * 2 - 1.20, 0, Math.PI * 0.78);
+        return new THREE.SphereGeometry(1, 30, 20, Math.PI / 2 + 0.56, Math.PI * 2 - 1.12, 0, Math.PI * 0.80);
       });
       var hm2 = new THREE.Mesh(hg, m);
-      hm2.scale.set(R * 1.28, R * 1.30, R * 1.28); hm2.position.y = cy + 0.01;
+      hm2.scale.set(R * 1.26, R * 1.28, R * 1.26); hm2.position.y = cy + 0.01;
       headG.add(hm2);
-      /* 얼굴 둘레 테두리 — 열린 셸 가장자리를 가린다 */
-      var hrim = pg3Ring(m, R * 1.28 * Math.sin(0.60), 0.030, 0, cy + 0.01, R * 1.28 * Math.cos(0.60));
-      headG.add(hrim);
       if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.42, 0.29, 0.27, 0.15));  /* 뒤 모자 볼륨 */
     } else if (h === 'beret'){
       var b = pg3Ball(m, 0.015, cy + 0.272, -0.02, 0.300, 0.095, 0.290);
