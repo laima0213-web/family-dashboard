@@ -16575,19 +16575,33 @@ async function finishBoot(){
         px[i + 2] = px[i + 2] * (1 - m5) + cC[2] * sh5 * m5;
       }
     }
-    /* ③ 뒷머리 — 정수리·모자 대표색으로 눈·앞머리까지 완전히 덮는다 */
-    var fiH = null;
-    try { fiH = pgFaceInfo(k); } catch(e){ fiH = null; }
-    var eyY = (fiH ? fiH.ey : 156) * (w / 400);
-    var capTop = Math.round(Math.min(eyY - (chinY - top) * 0.20, top + (chinY - top) * 0.30));
+    /* ③ 뒷머리 — 머리 옆(귀밑 머리·후드) 대표색으로 눈·앞머리까지 완전히 덮는다 */
+    var hTall = chinY - top;
+    function pgRowPts(y0, y1, frac){
+      var pts = [];
+      for (var yy = y0; yy <= y1 && yy < h; yy++){
+        var ra = rowA[yy], rb = rowB[yy];
+        if (ra < 0 || rb <= ra) continue;
+        var sp = rb - ra, sw = Math.max(1, Math.round(sp * frac)), x2;
+        for (x2 = ra; x2 <= ra + sw && x2 < w; x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235) pts.push([px[i], px[i + 1], px[i + 2]]); }
+        for (x2 = Math.max(ra, rb - sw); x2 <= rb && x2 < w; x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235) pts.push([px[i], px[i + 1], px[i + 2]]); }
+      }
+      return pts;
+    }
+    var hairSide = pgModeCol(pgRowPts(Math.round(chinY - hTall * 0.45), Math.round(chinY - hTall * 0.15), 0.08)) || hairM;
+    var topBand = pgModeCol(pgRowPts(top + 2, Math.round(top + hTall * 0.22), 0.55)) || hairM;
+    var dTop = Math.sqrt(Math.pow(topBand[0] - hairSide[0], 2) + Math.pow(topBand[1] - hairSide[1], 2) + Math.pow(topBand[2] - hairSide[2], 2));
+    var capTop;
+    if (dTop < 46) capTop = Math.round(top + hTall * 0.10);      /* 후드·모자로 머리 전체가 덮인 캐릭터 */
+    else capTop = Math.round(Math.max(top + hTall * 0.18, eyY - hTall * 0.26));
     if (capTop < top + 2) capTop = top + 2;
-    var capFeather = Math.max(5, Math.round((chinY - capTop) * 0.22));
+    var capFeather = Math.max(5, Math.round(hTall * 0.18));
     for (y = capTop; y <= chinY && y < h; y++){
       var ra6 = rowA[y], rb6 = rowB[y];
       if (ra6 < 0 || rb6 <= ra6) continue;
       var span6 = rb6 - ra6;
       var kf = y < capTop + capFeather ? (y - capTop + 1) / capFeather : 1;
-      var gk = 1 - 0.10 * Math.max(0, (y - capTop) / Math.max(1, chinY - capTop));
+      var gk = 1 - 0.10 * Math.max(0, (y - capTop) / Math.max(1, hTall));
       for (x = ra6; x <= rb6; x++){
         i = (y * w + x) * 4;
         if (px[i + 3] <= 10) continue;
@@ -16595,9 +16609,9 @@ async function finishBoot(){
         var e6 = Math.min(1, Math.min(t6, 1 - t6) / 0.055);
         var m6 = 0.985 * (0.10 + 0.90 * e6) * kf;
         var sh6 = (1 - 0.12 * Math.pow(Math.abs(t6 - 0.5) * 2, 1.7)) * gk;
-        px[i]     = px[i]     * (1 - m6) + hairM[0] * sh6 * m6;
-        px[i + 1] = px[i + 1] * (1 - m6) + hairM[1] * sh6 * m6;
-        px[i + 2] = px[i + 2] * (1 - m6) + hairM[2] * sh6 * m6;
+        px[i]     = px[i]     * (1 - m6) + hairSide[0] * sh6 * m6;
+        px[i + 1] = px[i + 1] * (1 - m6) + hairSide[1] * sh6 * m6;
+        px[i + 2] = px[i + 2] * (1 - m6) + hairSide[2] * sh6 * m6;
       }
     }
     c.putImageData(d, 0, 0);
