@@ -17407,34 +17407,44 @@ async function finishBoot(){
       pos.push(ax, ay, az, bx, by, bz, cx2, cy2, cz2);
       for (var q = 0; q < 3; q++) col.push(cc[0], cc[1], cc[2]);
     }
+    /* 옆면 색 — 실루엣 바로 안쪽(3칸 들어간) 색을 쓴다.
+       가장자리 픽셀은 수채화 번짐이라 거의 흰색이기 때문 */
+    function inner(i, j, dx, dy){
+      for (var s2 = 3; s2 >= 1; s2--){
+        var ii = i + dx * s2, jj = j + dy * s2;
+        if (ii < 0 || jj < 0 || ii >= N || jj >= N) continue;
+        if (al(ii, jj) < 200) continue;
+        return rgb(ii, jj);
+      }
+      return rgb(i, j);
+    }
     /* 가장자리 셀마다 바깥을 향한 벽 한 장 */
     for (var j = 0; j < N; j++){
       for (var i = 0; i < N; i++){
         if (al(i, j) < 128) continue;
         var x0 = -H + i * S, x1 = x0 + S;
         var y1 = H - j * S, y0 = y1 - S;
-        var base = rgb(i, j);
-        function shade(m){
-          return [Math.min(255, base[0] * m), Math.min(255, base[1] * m), Math.min(255, base[2] * m)];
-        }
-        /* 두께 벽은 살짝 어둡게 — 앞판 그림이 도드라지고 옆면이 면으로 읽힌다 */
         if (al(i + 1, j) < 128){                       /* 오른쪽 면 (빛 반대쪽) */
-          var cr = shade(0.80);
+          var bR = inner(i, j, -1, 0);
+          var cr = [bR[0] * 0.80, bR[1] * 0.80, bR[2] * 0.80];
           tri(x1, y0, -Z, x1, y1, -Z, x1, y1, Z, cr);
           tri(x1, y0, -Z, x1, y1, Z, x1, y0, Z, cr);
         }
         if (al(i - 1, j) < 128){                       /* 왼쪽 면 */
-          var cl2 = shade(0.92);
+          var bL = inner(i, j, 1, 0);
+          var cl2 = [bL[0] * 0.92, bL[1] * 0.92, bL[2] * 0.92];
           tri(x0, y0, Z, x0, y1, Z, x0, y1, -Z, cl2);
           tri(x0, y0, Z, x0, y1, -Z, x0, y0, -Z, cl2);
         }
         if (al(i, j - 1) < 128){                       /* 윗면 (빛을 받는 쪽) */
-          var ct = shade(1.06);
+          var bT = inner(i, j, 0, 1);
+          var ct = [bT[0] * 1.05, bT[1] * 1.05, bT[2] * 1.05];
           tri(x0, y1, Z, x0, y1, -Z, x1, y1, -Z, ct);
           tri(x0, y1, Z, x1, y1, -Z, x1, y1, Z, ct);
         }
         if (al(i, j + 1) < 128){                       /* 아랫면 */
-          var cb = shade(0.74);
+          var bB = inner(i, j, 0, -1);
+          var cb = [bB[0] * 0.74, bB[1] * 0.74, bB[2] * 0.74];
           tri(x0, y0, -Z, x0, y0, Z, x1, y0, Z, cb);
           tri(x0, y0, -Z, x1, y0, Z, x1, y0, -Z, cb);
         }
