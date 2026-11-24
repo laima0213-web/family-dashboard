@@ -16380,8 +16380,8 @@ async function finishBoot(){
   function pg3Shade(hex){
     var c = new THREE.Color(hex);
     var l = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
-    if (l > 0.60) c.multiplyScalar(0.86);
-    else if (l > 0.45) c.multiplyScalar(0.93);
+    if (l > 0.60) c.multiplyScalar(0.78);
+    else if (l > 0.45) c.multiplyScalar(0.90);
     return '#' + c.getHexString();
   }
   function pg3Mat(col, kind){
@@ -16454,13 +16454,13 @@ async function finishBoot(){
       var g = c.createLinearGradient(0, ey - 20, 0, ey + 20);
       g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(x, ey, 17, 20, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey, 18.5, 21.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#A06A45';
       c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
       c.beginPath(); c.ellipse(x, ey + 7, 6.8, 7.4, 0, 0, 6.2832); c.fill();
       c.fillStyle = 'rgba(255,255,255,0.98)';
-      c.beginPath(); c.arc(x - 5.6, ey - 7, 7.6, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x - 6, ey - 7.5, 8.2, 0, 6.2832); c.fill();
       c.beginPath(); c.arc(x + 5.4, ey + 9, 3.0, 0, 6.2832); c.fill();
       /* 눈꺼풀 선은 두지 않는다 — 또렷한 눈알과 흰 반짝임만 */
     }
@@ -16586,8 +16586,8 @@ async function finishBoot(){
       headG.add(pg3Ball(hm, -R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
       headG.add(pg3Ball(hm, R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
     } else if (hs !== 'short' && hs !== 'spiky'){
-      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.12, -0.14, 0.062, 0.150, 0.100));
-      headG.add(pg3Ball(hm, R * 0.92, cy - 0.12, -0.14, 0.062, 0.150, 0.100));
+      headG.add(pg3Ball(hm, -R * 0.90, cy - 0.14, -0.22, 0.058, 0.150, 0.105));
+      headG.add(pg3Ball(hm, R * 0.90, cy - 0.14, -0.22, 0.058, 0.150, 0.105));
       /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
       headG.add(pg3Ball(hm, -R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
       headG.add(pg3Ball(hm, R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
@@ -16596,10 +16596,10 @@ async function finishBoot(){
     if (hs === 'twin' || hs === 'twinlong'){
       var tl = (hs === 'twinlong') ? 0.30 : 0.245;
       [-1, 1].forEach(function(sd){
-        var t = pg3Ball(hm, 0.345 * sd, cy - 0.10, -0.04, 0.112, tl, 0.112);
-        t.rotation.z = -0.30 * sd;
+        var t = pg3Ball(hm, 0.315 * sd, cy - 0.12, -0.22, 0.105, tl, 0.105);
+        t.rotation.z = -0.26 * sd;
         headG.add(t);
-        headG.add(pg3Ball(pg3Mat(S.acc), 0.315 * sd, cy + 0.09, -0.01, 0.052, 0.048, 0.052));
+        headG.add(pg3Ball(pg3Mat(S.acc), 0.300 * sd, cy + 0.10, -0.14, 0.050, 0.046, 0.050));
       });
     } else if (hs === 'bun'){
       headG.add(pg3Ball(hm, -0.185, cy + 0.39, -0.03, 0.135, 0.130, 0.135));
