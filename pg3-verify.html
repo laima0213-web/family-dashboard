@@ -16435,23 +16435,23 @@ async function finishBoot(){
     var c = cv.getContext('2d');
     c.fillStyle = skin; c.fillRect(0, 0, W, H);
     var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
-    var ey = 272, dx = 24, ink = '#3B2A22';
+    var ey = 284, dx = 25, ink = '#3B2A22';
     /* 볼터치 */
     c.fillStyle = 'rgba(244,150,150,0.30)';
-    [[cx - 44, ey + 24], [cx + 44, ey + 24]].forEach(function(p){
+    [[cx - 46, ey + 22], [cx + 46, ey + 22]].forEach(function(p){
       c.beginPath(); c.ellipse(p[0], p[1], 15, 9, 0, 0, 6.2832); c.fill();
     });
     function eyeOval(x){
       var g = c.createLinearGradient(0, ey - 18, 0, ey + 18);
       g.addColorStop(0, '#4A2F22'); g.addColorStop(1, '#2B1A12');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(x, ey, 16, 19.5, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey, 17.5, 21, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#7A4B33';
-      c.beginPath(); c.ellipse(x, ey + 5, 9.5, 10, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey + 6, 10.5, 11, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
       c.beginPath(); c.ellipse(x, ey + 6, 6.5, 7, 0, 0, 6.2832); c.fill();
       c.fillStyle = 'rgba(255,255,255,0.95)';
-      c.beginPath(); c.arc(x - 5.5, ey - 6, 5.4, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x - 6, ey - 7, 6.2, 0, 6.2832); c.fill();
       c.beginPath(); c.arc(x + 5, ey + 9, 2.6, 0, 6.2832); c.fill();
       c.strokeStyle = ink; c.lineWidth = 2.2;   /* 윗눈꺼풀 */
       c.beginPath(); c.arc(x, ey + 2, 17, Math.PI * 1.10, Math.PI * 1.90); c.stroke();
@@ -16489,10 +16489,12 @@ async function finishBoot(){
     } else {
       eyeOval(cx - dx); eyeOval(cx + dx);
       /* 코·입 */
-      c.fillStyle = 'rgba(210,120,105,0.85)';
-      c.beginPath(); c.ellipse(cx, ey + 40, 8, 5.5, 0, 0, Math.PI); c.fill();
+      c.fillStyle = '#C4645C';
+      c.beginPath(); c.ellipse(cx, ey + 36, 9, 7, 0, 0, Math.PI); c.fill();
+      c.fillStyle = '#F2A8A0';
+      c.beginPath(); c.ellipse(cx, ey + 40, 5.5, 3, 0, 0, Math.PI); c.fill();
       c.strokeStyle = '#B65A52'; c.lineWidth = 2.6;
-      c.beginPath(); c.moveTo(cx - 9, ey + 33); c.quadraticCurveTo(cx, ey + 38, cx + 9, ey + 33); c.stroke();
+      c.beginPath(); c.moveTo(cx - 10, ey + 29); c.quadraticCurveTo(cx, ey + 33, cx + 10, ey + 29); c.stroke();
     }
     var tx = new THREE.CanvasTexture(cv);
     if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
@@ -16570,8 +16572,8 @@ async function finishBoot(){
     headG.add(pg3Ball(hm, 0.115, cy + 0.175, R * 0.87, 0.052, 0.036, 0.040));
     /* 옆머리 */
     if (hs !== 'short' && hs !== 'spiky'){
-      headG.add(pg3Ball(hm, -R * 0.94, cy - 0.10, -0.04, 0.072, 0.165, 0.130));
-      headG.add(pg3Ball(hm, R * 0.94, cy - 0.10, -0.04, 0.072, 0.165, 0.130));
+      headG.add(pg3Ball(hm, -R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
+      headG.add(pg3Ball(hm, R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       headG.add(pg3Ball(hm, 0, cy - 0.08, -0.19, 0.255, 0.235, 0.165));
     }
     if (hs === 'twin' || hs === 'twinlong'){
@@ -16667,14 +16669,14 @@ async function finishBoot(){
       var hm2 = new THREE.Mesh(hg, m);
       hm2.scale.set(R * 1.30, R * 1.32, R * 1.30); hm2.position.y = cy + 0.01;
       headG.add(hm2);
-      var rim = pg3Ring(m, R * 0.86, 0.048, 0, cy - 0.02, R * 0.55);
+      var rim = pg3Ring(m, R * 0.80, 0.038, 0, cy - 0.03, R * 0.62);
       rim.scale.set(1, 1.02, 1);
       headG.add(rim);
       if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.44, 0.30, 0.28, 0.16));  /* 뒤 모자 볼륨 */
     } else if (h === 'beret'){
-      var b = pg3Ball(m, 0.015, cy + 0.30, -0.02, 0.325, 0.098, 0.315);
-      b.rotation.z = -0.13; b.rotation.x = 0.09; headG.add(b);
-      headG.add(pg3Ball(m, 0.02, cy + 0.365, -0.03, 0.030, 0.040, 0.030));
+      var b = pg3Ball(m, 0.015, cy + 0.265, -0.02, 0.325, 0.105, 0.315);
+      b.rotation.z = -0.16; b.rotation.x = 0.14; headG.add(b);
+      headG.add(pg3Ball(m, 0.02, cy + 0.335, -0.04, 0.030, 0.038, 0.030));
     } else if (h === 'cap'){
       var cg = pg3Geo('caphat', function(){
         return new THREE.SphereGeometry(1, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.44);
