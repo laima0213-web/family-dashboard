@@ -16454,8 +16454,7 @@ async function finishBoot(){
       c.fillStyle = 'rgba(255,255,255,0.98)';
       c.beginPath(); c.arc(x - 5.6, ey - 7, 7.6, 0, 6.2832); c.fill();
       c.beginPath(); c.arc(x + 5.4, ey + 9, 3.0, 0, 6.2832); c.fill();
-      c.strokeStyle = ink; c.lineWidth = 1.7;   /* 윗눈꺼풀 */
-      c.beginPath(); c.arc(x, ey + 1, 16, Math.PI * 1.20, Math.PI * 1.80); c.stroke();
+      /* 눈꺼풀 선은 두지 않는다 — 또렷한 눈알과 흰 반짝임만 */
     }
     c.strokeStyle = ink; c.lineCap = 'round'; c.lineJoin = 'round';
     if (ex === 'joy'){
@@ -16552,27 +16551,33 @@ async function finishBoot(){
   }
   function pg3Hair(headG, S){
     var R = PG3.HR, cy = PG3.HCY, hs = S.hs || 'bob';
-    if (S.hat === 'hood' || S.hat === 'helmet') return;      /* 후드·헬멧은 머리 전체를 덮는다 */
+    if (S.hat === 'helmet') return;                          /* 헬멧은 머리 전체를 덮는다 */
     var hm = pg3Mat(S.hair);
     var capT = (hs === 'short' || hs === 'spiky') ? 0.52 : 0.60;
     var capG = pg3Geo('cap' + capT, function(){
       return new THREE.SphereGeometry(1, 30, 18, Math.PI / 2 + 0.96, Math.PI * 2 - 1.92, 0, Math.PI * capT);
     });
-    var cap = new THREE.Mesh(capG, hm);
-    cap.scale.setScalar(R * 1.045); cap.position.y = cy;
-    headG.add(cap);
+    if (S.hat !== 'hood'){
+      var cap = new THREE.Mesh(capG, hm);
+      cap.scale.setScalar(R * 1.045); cap.position.y = cy;
+      headG.add(cap);
+    }
     /* 앞머리 — 눈썹 위까지 */
     var bgG = pg3Geo('bang', function(){
       return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.86, 1.72, 0.010, Math.PI * 0.355);
     });
     var bg = new THREE.Mesh(bgG, hm);
-    bg.scale.setScalar(R * 1.065); bg.position.y = cy;
+    bg.scale.setScalar(S.hat === 'hood' ? R * 1.02 : R * 1.065); bg.position.y = cy;
     headG.add(bg);
     headG.add(pg3Ball(hm, 0, cy + 0.185, R * 0.955, 0.052, 0.032, 0.030));
     headG.add(pg3Ball(hm, -0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
     headG.add(pg3Ball(hm, 0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
     /* 옆머리 */
-    if (hs !== 'short' && hs !== 'spiky'){
+    if (S.hat === 'hood'){
+      /* 후드 안 — 옆·뒷머리는 후드가 덮으므로 앞머리만 */
+      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
+      headG.add(pg3Ball(hm, R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
+    } else if (hs !== 'short' && hs !== 'spiky'){
       headG.add(pg3Ball(hm, -R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       headG.add(pg3Ball(hm, R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
@@ -16634,8 +16639,10 @@ async function finishBoot(){
       });
     } else if (e === 'bear' || e === 'panda' || e === 'hamster'){
       [-1, 1].forEach(function(sd){
-        headG.add(pg3Ball(e === 'panda' ? pg3Mat('#2E2E33') : em, 0.245 * sd, cy + 0.295, 0.0, 0.115, 0.115, 0.075));
-        headG.add(pg3Ball(im, 0.245 * sd, cy + 0.290, 0.055, 0.062, 0.062, 0.030));
+        var eo = (S.hat === 'hood') ? 0.335 : 0.245;
+        var ey2 = (S.hat === 'hood') ? cy + 0.345 : cy + 0.295;
+        headG.add(pg3Ball(e === 'panda' ? pg3Mat('#2E2E33') : em, eo * sd, ey2, -0.02, 0.115, 0.115, 0.075));
+        headG.add(pg3Ball(im, eo * sd, ey2 - 0.005, 0.035, 0.062, 0.062, 0.030));
       });
     } else if (e === 'bunny'){
       [-1, 1].forEach(function(sd){
