@@ -16378,10 +16378,9 @@ async function finishBoot(){
   function pg3Sph(){ return pg3Geo('sph', function(){ return new THREE.SphereGeometry(1, 20, 14); }); }
   /* 밝은 머리색은 한 톤 진하게 — 피부와 붙어 보이지 않게 */
   function pg3Shade(hex){
-    var c = new THREE.Color(hex);
-    var l = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
-    if (l > 0.60) c.multiplyScalar(0.78);
-    else if (l > 0.45) c.multiplyScalar(0.90);
+    var c = new THREE.Color(hex), hsl = c.getHSL({ h: 0, s: 0, l: 0 });
+    if (hsl.l > 0.55){ c.setHSL(hsl.h, Math.min(1, hsl.s * 1.45), hsl.l * 0.74); }
+    else if (hsl.l > 0.40){ c.setHSL(hsl.h, Math.min(1, hsl.s * 1.25), hsl.l * 0.86); }
     return '#' + c.getHexString();
   }
   function pg3Mat(col, kind){
