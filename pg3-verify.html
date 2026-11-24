@@ -16434,8 +16434,9 @@ async function finishBoot(){
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var c = cv.getContext('2d');
     c.fillStyle = skin; c.fillRect(0, 0, W, H);
+    c.fillStyle = 'rgba(255,255,255,0.10)'; c.fillRect(0, 0, W, H);   /* 조명에 눌리지 않게 한 겹 */
     var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
-    var ey = 286, dx = 23, ink = '#3B2A22';
+    var ey = 286, dx = 21, ink = '#3B2A22';
     /* 볼터치 */
     c.fillStyle = 'rgba(244,150,150,0.30)';
     [[cx - 46, ey + 22], [cx + 46, ey + 22]].forEach(function(p){
@@ -16445,16 +16446,16 @@ async function finishBoot(){
       var g = c.createLinearGradient(0, ey - 20, 0, ey + 20);
       g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(x, ey, 17.5, 21, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey, 16, 19, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#8B5A3C';
       c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
       c.beginPath(); c.ellipse(x, ey + 7, 6.8, 7.4, 0, 0, 6.2832); c.fill();
       c.fillStyle = 'rgba(255,255,255,0.98)';
-      c.beginPath(); c.arc(x - 6.5, ey - 8, 7.4, 0, 6.2832); c.fill();
-      c.beginPath(); c.arc(x + 6, ey + 10, 3.4, 0, 6.2832); c.fill();
-      c.strokeStyle = ink; c.lineWidth = 2.4;   /* 윗눈꺼풀 */
-      c.beginPath(); c.arc(x, ey + 1, 18, Math.PI * 1.08, Math.PI * 1.92); c.stroke();
+      c.beginPath(); c.arc(x - 5.8, ey - 7, 6.8, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(x + 5.4, ey + 9, 3.0, 0, 6.2832); c.fill();
+      c.strokeStyle = ink; c.lineWidth = 1.7;   /* 윗눈꺼풀 */
+      c.beginPath(); c.arc(x, ey + 1, 16, Math.PI * 1.20, Math.PI * 1.80); c.stroke();
     }
     c.strokeStyle = ink; c.lineCap = 'round'; c.lineJoin = 'round';
     if (ex === 'joy'){
@@ -16567,16 +16568,16 @@ async function finishBoot(){
     var bg = new THREE.Mesh(bgG, hm);
     bg.scale.setScalar(R * 1.065); bg.position.y = cy;
     headG.add(bg);
-    headG.add(pg3Ball(hm, 0, cy + 0.175, R * 0.90, 0.062, 0.040, 0.045));
-    headG.add(pg3Ball(hm, -0.115, cy + 0.175, R * 0.87, 0.052, 0.036, 0.040));
-    headG.add(pg3Ball(hm, 0.115, cy + 0.175, R * 0.87, 0.052, 0.036, 0.040));
+    headG.add(pg3Ball(hm, 0, cy + 0.185, R * 0.955, 0.052, 0.032, 0.030));
+    headG.add(pg3Ball(hm, -0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
+    headG.add(pg3Ball(hm, 0.105, cy + 0.185, R * 0.925, 0.045, 0.028, 0.028));
     /* 옆머리 */
     if (hs !== 'short' && hs !== 'spiky'){
       headG.add(pg3Ball(hm, -R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       headG.add(pg3Ball(hm, R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
       /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
-      headG.add(pg3Ball(hm, -R * 0.80, cy - 0.04, 0.20, 0.050, 0.150, 0.055));
-      headG.add(pg3Ball(hm, R * 0.80, cy - 0.04, 0.20, 0.050, 0.150, 0.055));
+      headG.add(pg3Ball(hm, -R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
+      headG.add(pg3Ball(hm, R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
       headG.add(pg3Ball(hm, 0, cy - 0.08, -0.19, 0.255, 0.235, 0.165));
     }
     if (hs === 'twin' || hs === 'twinlong'){
@@ -16672,9 +16673,6 @@ async function finishBoot(){
       var hm2 = new THREE.Mesh(hg, m);
       hm2.scale.set(R * 1.30, R * 1.32, R * 1.30); hm2.position.y = cy + 0.01;
       headG.add(hm2);
-      var rim = pg3Ring(m, R * 0.80, 0.038, 0, cy - 0.03, R * 0.62);
-      rim.scale.set(1, 1.02, 1);
-      headG.add(rim);
       if (S.ears !== 'panda') headG.add(pg3Ball(m, 0, cy + 0.10, -0.44, 0.30, 0.28, 0.16));  /* 뒤 모자 볼륨 */
     } else if (h === 'beret'){
       var b = pg3Ball(m, 0.015, cy + 0.272, -0.02, 0.300, 0.095, 0.290);
