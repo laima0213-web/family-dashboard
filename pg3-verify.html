@@ -9684,6 +9684,10 @@ async function finishBoot(){
     lg.addColorStop(0.72, '#E9F7FF');
     lg.addColorStop(1, '#FFF4E4');
     g.fillStyle = lg; g.fillRect(0, 0, 8, 256);
+    /* 캔버스를 문서에 붙여 두어야 브라우저가 메모리 압박으로 그림을 비우지 않는다 */
+    cv.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+    cv.setAttribute('data-pg3face', key);
+    document.body.appendChild(cv);
     var tx = new THREE.CanvasTexture(cv);
     if ('colorSpace' in tx && THREE.SRGBColorSpace) tx.colorSpace = THREE.SRGBColorSpace;
     return tx;
