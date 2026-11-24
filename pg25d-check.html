@@ -16580,22 +16580,24 @@ async function finishBoot(){
     var fiH = null;
     try { fiH = pgFaceInfo(k); } catch(e){ fiH = null; }
     var eyY = (fiH ? fiH.ey : 156) * (w / 400);
-    function pgRowPts(y0, y1, frac){
+    function pgRowPts(y0, y1, frac, skipWhite){
       var pts = [];
+      var sc0 = w / 400;
+      var inA = Math.max(2, Math.round(6 * sc0)), inB = Math.max(inA + 2, Math.round(22 * sc0));
       for (var yy = y0; yy <= y1 && yy < h; yy++){
         var ra = rowA[yy], rb = rowB[yy];
         if (ra < 0 || rb <= ra) continue;
-        var sp = rb - ra, sw = Math.max(1, Math.round(sp * frac)), x2;
-        for (x2 = ra; x2 <= ra + sw && x2 < w; x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235) pts.push([px[i], px[i + 1], px[i + 2]]); }
-        for (x2 = Math.max(ra, rb - sw); x2 <= rb && x2 < w; x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235) pts.push([px[i], px[i + 1], px[i + 2]]); }
+        var x2;
+        for (x2 = ra + inA; x2 <= Math.min(rb, ra + inB); x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235){ if (!skipWhite || !(px[i] > 238 && px[i + 1] > 238 && px[i + 2] > 238)) pts.push([px[i], px[i + 1], px[i + 2]]); } }
+        for (x2 = Math.max(ra, rb - inB); x2 <= rb - inA; x2++){ i = (yy * w + x2) * 4; if (px[i + 3] > 235){ if (!skipWhite || !(px[i] > 238 && px[i + 1] > 238 && px[i + 2] > 238)) pts.push([px[i], px[i + 1], px[i + 2]]); } }
       }
       return pts;
     }
-    var hairSide = pgModeCol(pgRowPts(Math.round(chinY - hTall * 0.45), Math.round(chinY - hTall * 0.15), 0.08)) || hairM;
-    var topBand = pgModeCol(pgRowPts(top + 2, Math.round(top + hTall * 0.22), 0.55)) || hairM;
+    var hairSide = pgModeCol(pgRowPts(Math.round(top + hTall * 0.42), Math.round(top + hTall * 0.72), 0, true)) || hairM;
+    var topBand = pgModeCol(pgRowPts(top + 2, Math.round(top + hTall * 0.22), 0, false)) || hairM;
     var dTop = Math.sqrt(Math.pow(topBand[0] - hairSide[0], 2) + Math.pow(topBand[1] - hairSide[1], 2) + Math.pow(topBand[2] - hairSide[2], 2));
     var capTop;
-    if (dTop < 46) capTop = Math.round(top + hTall * 0.10);      /* 후드·모자로 머리 전체가 덮인 캐릭터 */
+    if (dTop < 52) capTop = Math.round(top + hTall * 0.10);      /* 후드·모자로 머리 전체가 덮인 캐릭터 */
     else capTop = Math.round(Math.max(top + hTall * 0.18, eyY - hTall * 0.26));
     if (capTop < top + 2) capTop = top + 2;
     var capFeather = Math.max(5, Math.round(hTall * 0.18));
