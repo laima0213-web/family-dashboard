@@ -16376,6 +16376,14 @@ async function finishBoot(){
     return PG3.geo[key];
   }
   function pg3Sph(){ return pg3Geo('sph', function(){ return new THREE.SphereGeometry(1, 20, 14); }); }
+  /* 밝은 머리색은 한 톤 진하게 — 피부와 붙어 보이지 않게 */
+  function pg3Shade(hex){
+    var c = new THREE.Color(hex);
+    var l = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+    if (l > 0.60) c.multiplyScalar(0.86);
+    else if (l > 0.45) c.multiplyScalar(0.93);
+    return '#' + c.getHexString();
+  }
   function pg3Mat(col, kind){
     if (!col) col = '#F5E9DA';
     var key = col + '|' + (kind || '');
@@ -16436,7 +16444,7 @@ async function finishBoot(){
     c.fillStyle = skin; c.fillRect(0, 0, W, H);
     c.fillStyle = 'rgba(255,255,255,0.10)'; c.fillRect(0, 0, W, H);   /* 조명에 눌리지 않게 한 겹 */
     var cx = PG3.FACE_U * W;                 /* 128 — 얼굴 한가운데 */
-    var ey = 286, dx = 21, ink = '#3B2A22';
+    var ey = 290, dx = 21, ink = '#3B2A22';
     /* 볼터치 */
     c.fillStyle = 'rgba(244,150,150,0.30)';
     [[cx - 46, ey + 22], [cx + 46, ey + 22]].forEach(function(p){
@@ -16446,7 +16454,7 @@ async function finishBoot(){
       var g = c.createLinearGradient(0, ey - 20, 0, ey + 20);
       g.addColorStop(0, '#7A4B33'); g.addColorStop(0.55, '#4A2E1E'); g.addColorStop(1, '#2A1A12');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(x, ey, 16, 19, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(x, ey, 17, 20, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#A06A45';
       c.beginPath(); c.ellipse(x, ey + 7, 11, 11.5, 0, 0, 6.2832); c.fill();
       c.fillStyle = '#2A1A12';
@@ -16552,7 +16560,7 @@ async function finishBoot(){
   function pg3Hair(headG, S){
     var R = PG3.HR, cy = PG3.HCY, hs = S.hs || 'bob';
     if (S.hat === 'helmet') return;                          /* 헬멧은 머리 전체를 덮는다 */
-    var hm = pg3Mat(S.hair);
+    var hm = pg3Mat(pg3Shade(S.hair));
     var capT = (hs === 'short' || hs === 'spiky') ? 0.52 : 0.60;
     var capG = pg3Geo('cap' + capT, function(){
       return new THREE.SphereGeometry(1, 30, 18, Math.PI / 2 + 0.96, Math.PI * 2 - 1.92, 0, Math.PI * capT);
@@ -16564,7 +16572,7 @@ async function finishBoot(){
     }
     /* 앞머리 — 눈썹 위까지 */
     var bgG = pg3Geo('bang', function(){
-      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.86, 1.72, 0.010, Math.PI * 0.355);
+      return new THREE.SphereGeometry(1, 26, 12, Math.PI / 2 - 0.86, 1.72, 0.010, Math.PI * 0.315);
     });
     var bg = new THREE.Mesh(bgG, hm);
     bg.scale.setScalar(S.hat === 'hood' ? R * 1.02 : R * 1.065); bg.position.y = cy;
@@ -16578,8 +16586,8 @@ async function finishBoot(){
       headG.add(pg3Ball(hm, -R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
       headG.add(pg3Ball(hm, R * 0.92, cy - 0.02, 0.06, 0.045, 0.135, 0.055));
     } else if (hs !== 'short' && hs !== 'spiky'){
-      headG.add(pg3Ball(hm, -R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
-      headG.add(pg3Ball(hm, R * 0.90, cy - 0.12, -0.16, 0.078, 0.175, 0.115));
+      headG.add(pg3Ball(hm, -R * 0.92, cy - 0.12, -0.14, 0.062, 0.150, 0.100));
+      headG.add(pg3Ball(hm, R * 0.92, cy - 0.12, -0.14, 0.062, 0.150, 0.100));
       /* 얼굴 옆 잔머리 — 모자·머리 이음매를 가린다 */
       headG.add(pg3Ball(hm, -R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
       headG.add(pg3Ball(hm, R * 0.86, cy - 0.05, 0.14, 0.040, 0.135, 0.042));
