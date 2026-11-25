@@ -9423,7 +9423,14 @@ function wZ(py){ return (py - PG.H / 2) / (PG.S * DZ) + PG.camZ; }
 var SPRC = {};
 function art(type){ return ART[type] || ART.bush; }
 function sprOf(type, variant, wU, hU){
-  var key = type + '|' + (variant || '') + '|' + wU + 'x' + hU;
+  /* 변형(v)이 객체면 JSON 으로 키를 만든다 — '[object Object]' 로 뭉쳐서
+     이정표 글씨·색이 전부 첫 번째 것으로만 그려지던 문제 수정 */
+  var vk = '';
+  if (variant){
+    if (typeof variant === 'object'){ try { vk = JSON.stringify(variant); } catch(e){ vk = String(variant); } }
+    else vk = String(variant);
+  }
+  var key = type + '|' + vk + '|' + wU + 'x' + hU;
   var hit = SPRC[key];
   if (hit) return hit;
   var w = Math.max(2, Math.ceil(wU * SPR)), h = Math.max(2, Math.ceil(hU * SPR));
@@ -9433,7 +9440,7 @@ function sprOf(type, variant, wU, hU){
   g.save();
   g.translate(w / 2, h - 1);
   g.scale(SPR, SPR);
-  try { art(type)(g, 1, variant || {}); } catch(e){ console.warn('[pg2d] art', type, e && e.message); }
+  try { art(type)(g, variant || {}); } catch(e){ console.warn('[pg2d] art', type, e && e.message); }
   g.restore();
   var rec = { cv: cv, wU: wU, hU: hU };
   SPRC[key] = rec;
@@ -10240,8 +10247,8 @@ function buildScene(k){
     S.rides.push({ k:'swing', x:-3.6, z:11.4 }, { k:'seesaw', x:2.8, z:9.0 }, { k:'sand', x:-0.6, z:14.2 });
     S.seats.push({ x:-4.6, z:6.6, t:'bench', n:'벤치' }, { x:10.6, z:10.6, t:'bench', n:'다리 옆 벤치' },
                  { x:-9.8, z:-4.6, t:'bench', n:'우물 옆 벤치' });
-    S.signs.push({ x:4.4, z:3.6, to:'beach', label:'바닷가', dir:'right' },
-                 { x:-6.8, z:-1.0, to:'park', label:'놀이공원', dir:'left' });
+    /* 바닷가 이정표는 다리 옆(signAt 5.6,3.0) 하나만 — 겹치던 4.4,3.6 중복 제거 */
+    S.signs.push({ x:-4.2, z:3.2, to:'park', label:'놀이공원', dir:'left' });
   }
 
   if (k === 'park'){
@@ -10278,8 +10285,8 @@ function buildScene(k){
                  { k:'viking', x:-15.2, z:2.4 }, { k:'teacup', x:5.0, z:5.4 });
     S.seats.push({ x:-5.6, z:7.6, t:'bench', n:'광장 벤치' }, { x:6.4, z:1.0, t:'bench', n:'광장 벤치' },
                  { x:-11.4, z:7.6, t:'bench', n:'광장 벤치' });
-    S.signs.push({ x:-21.0, z:3.0, to:'village', label:'동화마을', dir:'left' },
-                 { x:21.0, z:4.4, to:'beach', label:'바닷가', dir:'right' });
+    S.signs.push({ x:-6.0, z:0.8, to:'village', label:'동화마을', dir:'left' },
+                 { x:6.0, z:0.8, to:'beach', label:'바닷가', dir:'right' });
   }
 
   if (k === 'beach'){
@@ -10312,8 +10319,8 @@ function buildScene(k){
     S.rides.push({ k:'boat', x:12.2, z:7.6 }, { k:'sand', x:-7.0, z:4.0 });
     S.seats.push({ x:-8.6, z:-1.8, t:'lounger', n:'선베드' }, { x:1.6, z:-2.2, t:'lounger', n:'선베드' },
                  { x:7.4, z:-3.8, t:'lounger', n:'선베드' });
-    S.signs.push({ x:-12.4, z:-15.0, to:'village', label:'동화마을', dir:'left' },
-                 { x:13.2, z:-15.0, to:'camp', label:'숲속캠핑', dir:'right' });
+    S.signs.push({ x:-6.2, z:-6.0, to:'village', label:'동화마을', dir:'left' },
+                 { x:5.6, z:-8.4, to:'camp', label:'숲속캠핑', dir:'right' });
   }
 
   if (k === 'camp'){
@@ -10338,7 +10345,7 @@ function buildScene(k){
       { t:'pine', x:-11.4, z:12.6 }, { t:'pine', x:10.4, z:13.4 }, { t:'pine', x:-13.0, z:-10.4 },
       { t:'tree', x:-3.6, z:-16.4, v:{ tone:1 } }, { t:'tree', x:4.6, z:-15.4, v:{ tone:2 } },
       { t:'tree', x:13.4, z:-8.4, v:{ tone:0 } }, { t:'tree', x:-13.6, z:1.4, v:{ tone:2 } },
-      { t:'tree', x:5.6, z:11.6, v:{ tone:1 } },
+      { t:'tree', x:7.6, z:15.4, v:{ tone:1 } },
       { t:'bush', x:-4.6, z:4.4, v:{ berry:1 } }, { t:'bush', x:6.6, z:3.2 }, { t:'bush', x:8.0, z:-13.2 },
       { t:'rock', x:4.2, z:-2.4 }, { t:'rock', x:-8.6, z:12.4 }, { t:'rock', x:10.8, z:1.6 },
       { t:'stump', x:0.4, z:12.4 }, { t:'stump', x:-7.4, z:7.6 },
@@ -10353,8 +10360,8 @@ function buildScene(k){
     S.rides.push({ k:'hammock', x:-9.8, z:9.6 }, { k:'campfire', x:2.6, z:1.4 });
     S.seats.push({ x:-6.6, z:2.4, t:'picnic', n:'피크닉 테이블' }, { x:2.6, z:2.9, t:'logs', n:'통나무 의자' },
                  { x:0.4, z:12.4, t:'stump', n:'그루터기' });
-    S.signs.push({ x:11.0, z:-13.0, to:'winter', label:'겨울나라', dir:'right' },
-                 { x:-11.6, z:-13.4, to:'beach', label:'바닷가', dir:'left' });
+    /* 겨울나라 이정표는 다리 옆(signAt 4.4,8.4) 하나만 */
+    S.signs.push({ x:-6.6, z:4.6, to:'beach', label:'바닷가', dir:'left' });
   }
 
   if (k === 'winter'){
@@ -10386,8 +10393,8 @@ function buildScene(k){
     );
     S.rides.push({ k:'ice', x:5.6, z:4.4 }, { k:'sled', x:1.2, z:6.0 });
     S.seats.push({ x:-8.6, z:6.4, t:'bench', n:'얼음 벤치', ice:1 }, { x:2.4, z:12.2, t:'bench', n:'얼음 벤치', ice:1 });
-    S.signs.push({ x:-11.0, z:-2.0, to:'camp', label:'숲속캠핑', dir:'left' },
-                 { x:11.4, z:2.4, to:'park', label:'놀이공원', dir:'right' });
+    S.signs.push({ x:-5.8, z:3.2, to:'camp', label:'숲속캠핑', dir:'left' },
+                 { x:6.0, z:-0.6, to:'park', label:'놀이공원', dir:'right' });
   }
 
   scatterGround(S, k, b);
@@ -11519,10 +11526,19 @@ function goVillage(k, focusChar){
   PG.fadeT = 0;
 }
 function switchVillage(k){
+  if (!VIL[k]) return;
   PG.vil = k;
   PG.lastVil[PG.kid] = k;
-  zonePill(); heroChip();
+  /* 마을을 옮기면 주인공도 함께 간다 — 화면만 바뀌고 캐릭터가 남는 문제 방지 */
   var c = PG.chars[PG.hero];
+  if (c && c.vil !== k){
+    var sp = safeSpot(k, 0, 2);
+    c.vil = k; c.seat = null; c.ride = ''; c.act = '';
+    c.x = sp[0]; c.z = sp[1]; c.tx = sp[0]; c.tz = sp[1];
+    c.walk = false; c.msg = ''; c.msgT = 0; c.fixed = true;
+    pgSave();
+  }
+  zonePill(); heroChip();
   if (c && c.vil === k) focus(c.x, c.z + 1);
   else centerOnVillage();
   OBS[k] = null;
