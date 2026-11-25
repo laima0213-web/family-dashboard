@@ -9372,6 +9372,7 @@ var PG = {
   fade: 0, fadeTo: '', fadeFocus: '',
   labels: {}, labelT: 0,
   washing: false, tapGo: 0,
+  autoCam: false,            /* 바닥을 톡 눌러 걸어갈 때 카메라가 따라감 (게임시점 꺼져 있어도) */
   lastVil: {},
   hintT: 0, emptyShown: false
 };
@@ -10253,15 +10254,21 @@ function buildScene(k){
 
   if (k === 'park'){
     S.plaza = { x: 0, z: 0.5, r: 6.8 };
+    /* 큰 길 하나를 축으로, 기구 앞마다 곁길을 내어 길 따라 걸으며 구경하게 */
     S.paths = [
       [[-24, 7.5], [-15, 5.0], [-8, 3.0], [-2, 1.5]],
       [[2, 1.5], [9, 3.5], [16, 6.0], [24, 8.0]],
-      [[-3, -14], [-3, -6], [-2, -1]]
+      [[-2.4, -1.0], [-2.8, -4.0], [-2.8, -7.0], [-2.8, -9.8], [-3.4, -12.4]],
+      [[-8, 3.0], [-11.6, 1.2], [-14.6, -1.6], [-16.8, -4.6]],
+      [[2.0, 1.8], [5.6, 0.2], [8.4, -2.6], [9.6, -4.6]],
+      [[9.6, -4.6], [13.2, -6.8], [16.4, -8.4]],
+      [[-15.0, 5.0], [-14.9, 7.0], [-14.5, 8.8]],
+      [[16.0, 6.0], [15.8, 7.4], [15.4, 8.6]]
     ];
     S.props.push(
       { t:'fountain', x:0, z:-5.0 },
       { t:'balloon', x:13.4, z:2.2 },
-      { t:'hedge', x:-5.4, z:-8.2 }, { t:'hedge', x:-2.2, z:-8.2 }, { t:'hedge', x:1.0, z:-8.2 },
+      { t:'hedge', x:-5.4, z:-8.2 }, { t:'hedge', x:1.0, z:-8.2 },
       { t:'hedge', x:4.2, z:-8.2 }, { t:'hedge', x:7.4, z:-8.2 },
       { t:'hedge', x:-9.0, z:-6.2 }, { t:'hedge', x:9.0, z:-6.2 },
       { t:'lamp', x:-3.4, z:4.6 }, { t:'lamp', x:4.6, z:3.8 }, { t:'lamp', x:-12.0, z:-2.6 },
@@ -10277,12 +10284,15 @@ function buildScene(k){
       { t:'tree', x:21.6, z:-14.2, v:{ tone:2 } }, { t:'tree', x:15.2, z:-15.0, v:{ tone:0 } },
       { t:'tree', x:-21.6, z:13.2, v:{ tone:1 } }, { t:'tree', x:21.4, z:14.0, v:{ tone:0 } },
       { t:'tree', x:-19.6, z:0.6, v:{ tone:2 } }, { t:'tree', x:19.2, z:-1.0, v:{ tone:1 } },
-      { t:'cherry', x:-18.2, z:-6.0 }, { t:'cherry', x:18.4, z:-6.2 },
-      { t:'cherry', x:-11.6, z:11.6 }, { t:'cherry', x:12.4, z:11.0 },
-      { t:'rock', x:-15.6, z:6.4 }, { t:'rock', x:15.8, z:5.0 }
+      { t:'cherry', x:-21.2, z:-4.2 }, { t:'cherry', x:21.2, z:-4.4 },
+      { t:'cherry', x:-11.6, z:11.6 }, { t:'cherry', x:10.2, z:13.6 },
+      { t:'rock', x:-20.6, z:-1.2 }, { t:'rock', x:15.8, z:5.0 }
     );
     S.rides.push({ k:'carousel', x:-9.0, z:-2.6 }, { k:'ferris', x:9.6, z:-7.4 },
-                 { k:'viking', x:-15.2, z:2.4 }, { k:'teacup', x:5.0, z:5.4 });
+                 { k:'viking', x:-15.2, z:2.4 }, { k:'teacup', x:5.0, z:5.4 },
+                 { k:'bumper', x:-17.6, z:-8.9 }, { k:'drop', x:-3.4, z:-14.9 },
+                 { k:'balloon', x:18.2, z:-10.1 }, { k:'trampoline', x:-14.6, z:10.9 },
+                 { k:'coaster', x:16.2, z:11.9 });
     S.seats.push({ x:-5.6, z:7.6, t:'bench', n:'광장 벤치' }, { x:6.4, z:1.0, t:'bench', n:'광장 벤치' },
                  { x:-11.4, z:7.6, t:'bench', n:'광장 벤치' });
     S.signs.push({ x:-6.0, z:0.8, to:'village', label:'동화마을', dir:'left' },
@@ -10760,6 +10770,51 @@ function rideShadow(g, w, d){
   g.fillStyle = 'rgba(56,78,48,.16)'; g.fill();
 }
 
+/* ---------- 미니 롤러코스터 · 자이로드롭 · 열기구의 움직임 (그림과 탑승 위치가 같은 식을 쓴다) ---------- */
+function coasterX(t){ return 3.05 * Math.sin(t * 0.42); }
+function coasterH(x){
+  return 0.62 + Math.exp(-Math.pow((x - 0.35) / 1.50, 2)) * 2.05 + Math.exp(-Math.pow((x + 2.50) / 0.95, 2)) * 1.00;
+}
+function coasterZ(x){ return 0.10 * Math.sin(x * 0.75); }
+function dropLift(t){ return 1.15 + (Math.sin(t * 0.42) * 0.5 + 0.5) * 4.55; }
+function balloonLift(t){ return 1.18 + Math.sin(t * 0.9) * 0.10; }
+
+/* 범퍼카 — 기둥 · 차 한 대 */
+function bmPost(g, x, z){
+  ln(g, x, z, x, z - 0.78, '#8E9AA3', 0.09);
+  el(g, x, z - 0.80, 0.10, 0.07, '#F2C15B');
+}
+function bmCar(g, x, z, col, s){
+  s = s || 1;
+  g.save(); g.translate(x, z); g.scale(s, s);
+  el(g, 0, 0.02, 0.64, 0.22, 'rgba(60,70,74,.16)');
+  rr(g, -0.56, -0.52, 1.12, 0.54, 0.24, '#E8503F');
+  rr(g, -0.48, -0.48, 0.96, 0.46, 0.18, col);
+  rr(g, -0.48, -0.48, 0.96, 0.46, 0.18, null, 'rgba(120,70,70,.26)', 0.045);
+  rr(g, -0.29, -0.45, 0.58, 0.17, 0.07, 'rgba(240,252,255,.85)');
+  el(g, -0.32, -0.02, 0.14, 0.09, '#4A4A4A');
+  el(g, 0.32, -0.02, 0.14, 0.09, '#4A4A4A');
+  el(g, 0.33, -0.38, 0.05, 0.05, 'rgba(255,255,255,.9)');
+  g.restore();
+}
+
+/* 미니 롤러코스터 — 선로 위 기차 한 칸 */
+function coasterCar(g, x, h, z, dir, col){
+  g.save(); g.translate(x, z - h); g.scale(dir, 1);
+  g.beginPath();
+  g.moveTo(-0.46, -0.08);
+  g.quadraticCurveTo(-0.54, -0.44, 0, -0.46);
+  g.quadraticCurveTo(0.54, -0.44, 0.46, -0.08);
+  g.closePath();
+  g.fillStyle = col; g.fill();
+  g.strokeStyle = 'rgba(120,60,60,.32)'; g.lineWidth = 0.04; g.stroke();
+  rr(g, -0.34, -0.44, 0.68, 0.16, 0.06, 'rgba(245,252,255,.85)');
+  ln(g, -0.30, -0.10, -0.30, 0.06, '#6B7278', 0.07);
+  ln(g, 0.30, -0.10, 0.30, 0.06, '#6B7278', 0.07);
+  ell2(g, 0.36, -0.34, 0.05, 0.05, 'rgba(255,255,255,.9)');
+  g.restore();
+}
+
 /* ---------- 놀이기구 (매 프레임 그림, 단위 좌표) ---------- */
 var RIDE = {
   carousel: {
@@ -10975,6 +11030,206 @@ var RIDE = {
       g.restore();
     }
   },
+  bumper: {
+    w: 8.4, h: 4.4, label: '범퍼카', r: 2.6,
+    seat: function(r, t){ var a = t * 0.5; return [r.x + Math.cos(a) * 1.55, r.z + 0.55 + Math.sin(a) * 0.30]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, a;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 3.05, 1.05);
+      /* 아스팔트 바닥 */
+      el(g, 0, -0.18, 2.95, 1.55, '#AEB6BC');
+      el(g, 0, -0.24, 2.80, 1.42, '#D3DADF');
+      g.save();
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 0.06;
+      if (g.setLineDash) g.setLineDash([0.24, 0.20]);
+      g.beginPath(); g.ellipse(0, -0.24, 1.92, 0.92, 0, 0, 6.3); g.stroke();
+      g.restore();
+      if (g.setLineDash) g.setLineDash([]);
+      /* 뒤쪽 펜스 */
+      for (i = 0; i < 12; i++){
+        a = i * Math.PI / 6;
+        if (Math.sin(a) < 0) bmPost(g, Math.cos(a) * 2.95, -0.14 + Math.sin(a) * 1.50);
+      }
+      /* 차 세 대 */
+      var aa = t * 0.5;
+      bmCar(g, Math.cos(aa) * 1.55, 0.55 + Math.sin(aa) * 0.30, '#F2705E', 1);
+      bmCar(g, Math.cos(-t * 0.38 + 2.2) * 1.42, 0.20 + Math.sin(-t * 0.38 + 2.2) * 0.62, '#5AAEE8', 0.84);
+      bmCar(g, Math.cos(t * 0.30 + 4.1) * 1.28, 0.30 + Math.sin(t * 0.30 + 4.1) * 0.56, '#F5C64E', 0.78);
+      /* 앞쪽 펜스 */
+      for (i = 0; i < 12; i++){
+        a = i * Math.PI / 6;
+        if (Math.sin(a) >= 0) bmPost(g, Math.cos(a) * 2.95, -0.14 + Math.sin(a) * 1.50);
+      }
+      g.restore();
+    }
+  },
+  trampoline: {
+    w: 5.2, h: 2.6, label: '트램펄린', r: 1.2,
+    seat: function(r){ return [r.x, r.z + 0.25]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, a;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 1.90, 0.78);
+      /* 다리 — 네 기둥이 또렷하게 */
+      for (i = 0; i < 4; i++){
+        a = i * Math.PI / 2 + 0.62;
+        var lx = Math.cos(a) * 1.38, lz = Math.sin(a) * 0.56;
+        ln(g, lx * 1.10, lz * 1.10, lx, lz - 0.95, '#8E9BA3', 0.12);
+        el(g, lx * 1.10, lz * 1.10, 0.10, 0.05, '#6E7B83');
+      }
+      /* 프레임 · 매트 — 땅에서 떠 보이게 */
+      el(g, 0, -0.90, 1.80, 0.72, '#E0B85C');
+      el(g, 0, -0.92, 1.66, 0.64, '#3E6FA8');
+      g.save();
+      g.beginPath(); g.ellipse(0, -0.92, 1.66, 0.64, 0, 0, 6.3); g.clip();
+      for (i = 0; i < 3; i++){
+        var f = ((t * 0.9 + i * 0.33) % 1);
+        g.globalAlpha = 0.34 * (1 - f);
+        g.strokeStyle = '#CBEAFF'; g.lineWidth = 0.08;
+        g.beginPath(); g.ellipse(0, -0.92, 0.30 + f * 1.40, 0.12 + f * 0.50, 0, 0, 6.3); g.stroke();
+      }
+      g.restore();
+      g.globalAlpha = 1;
+      /* 스프링 */
+      for (i = 0; i < 12; i++){
+        a = i * Math.PI / 6;
+        ln(g, Math.cos(a) * 1.78, -0.90 + Math.sin(a) * 0.71, Math.cos(a) * 1.62, -0.92 + Math.sin(a) * 0.62, '#8C99A2', 0.035);
+      }
+      /* 오르는 발판 */
+      ln(g, -1.98, 0.40, -1.86, -0.90, '#B6C2C9', 0.07);
+      ln(g, -1.70, 0.40, -1.58, -0.90, '#B6C2C9', 0.07);
+      for (i = 0; i < 3; i++) ln(g, -1.94 - i * 0.03, 0.10 - i * 0.36, -1.66 - i * 0.03, 0.10 - i * 0.36, '#9AA6AE', 0.05);
+      g.restore();
+    }
+  },
+  coaster: {
+    w: 9.2, h: 6.2, label: '미니 롤러코스터', r: 2.6,
+    seat: function(r, t){ var x = coasterX(t); return [r.x + x, r.z + 0.30 + coasterZ(x)]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, x, h, pass;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 3.55, 1.05);
+      /* 지지대 — 성기게 세우고 가운데 버팀대를 덧붙인다 */
+      for (i = 0; i <= 8; i++){
+        x = -3.2 + 6.4 * i / 8;
+        h = coasterH(x);
+        ln(g, x, coasterZ(x), x, coasterZ(x) - h, '#CAD3DA', Math.max(0.045, 0.085 - h * 0.012));
+        if (i % 2 === 0 && h > 1.05){
+          ln(g, x - 0.55, coasterZ(x) - h * 0.45, x + 0.55, coasterZ(x) - h * 0.45, '#DCE3E8', 0.04);
+        }
+      }
+      /* 선로 */
+      for (pass = 0; pass < 3; pass++){
+        g.beginPath();
+        for (i = 0; i <= 40; i++){
+          x = -3.2 + 6.4 * i / 40;
+          h = coasterH(x);
+          var py = coasterZ(x) - h;
+          if (i === 0) g.moveTo(x, py); else g.lineTo(x, py);
+        }
+        g.lineCap = 'round'; g.lineJoin = 'round';
+        g.strokeStyle = pass === 0 ? '#B4793C' : (pass === 1 ? '#F2D49E' : '#C98A4A');
+        g.lineWidth = pass === 0 ? 0.34 : (pass === 1 ? 0.24 : 0.07);
+        if (pass === 2){ g.setLineDash && g.setLineDash([0.12, 0.26]); }
+        g.stroke();
+        if (pass === 2 && g.setLineDash) g.setLineDash([]);
+      }
+      /* 기차 두 칸 */
+      var tx = coasterX(t), dir = Math.cos(t * 0.42) >= 0 ? 1 : -1;
+      coasterCar(g, tx, coasterH(tx), coasterZ(tx), dir, '#E8503F');
+      var tx2 = tx - dir * 0.82;
+      if (tx2 > -3.15 && tx2 < 3.15) coasterCar(g, tx2, coasterH(tx2), coasterZ(tx2), dir, '#F5C64E');
+      /* 승강장 */
+      rr(g, -3.95, -0.34, 1.05, 0.34, 0.06, '#E7D6B8');
+      rr(g, -3.95, -0.34, 1.05, 0.34, 0.06, null, '#CBB48C', 0.04);
+      ln(g, -3.90, -0.34, -3.90, -1.55, '#C6B096', 0.06);
+      ln(g, -2.95, -0.34, -2.95, -1.55, '#C6B096', 0.06);
+      rr(g, -4.10, -1.62, 1.36, 0.16, 0.06, '#F58BA8');
+      g.restore();
+    }
+  },
+  drop: {
+    w: 5.2, h: 10.4, label: '자이로드롭', r: 1.9,
+    seat: function(r, t){ var a = t * 0.32; return [r.x + Math.cos(a) * 0.92, r.z + 0.55 + Math.sin(a) * 0.15]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, a;
+      var h = dropLift(t);
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 2.10, 0.85);
+      /* 받침 */
+      el(g, 0, -0.14, 2.05, 0.72, '#C9D2D8');
+      el(g, 0, -0.20, 1.85, 0.62, '#E7EDF1');
+      /* 기둥 */
+      rr(g, -0.30, -9.55, 0.60, 9.40, 0.10, '#EDF2F5');
+      rr(g, -0.30, -9.55, 0.60, 9.40, 0.10, null, '#C2CDD4', 0.04);
+      for (i = 0; i < 7; i++){
+        rr(g, -0.26, -1.20 - i * 1.22, 0.52, 0.20, 0.06, i % 2 ? '#8FD8F2' : '#FFB3C7');
+      }
+      /* 안내 레일 */
+      ln(g, -0.62, -0.30, -0.62, -9.40, '#B7C3CA', 0.05);
+      ln(g, 0.62, -0.30, 0.62, -9.40, '#B7C3CA', 0.05);
+      /* 꼭대기 */
+      el(g, 0, -9.62, 1.30, 0.38, '#DCE6EC');
+      poly(g, [-1.30, -9.62, 0, -10.32, 1.30, -9.62], '#E8503F');
+      poly(g, [-1.30, -9.62, 0, -10.32, 1.30, -9.62], null, '#C33E2F', 0.04);
+      ln(g, 0, -10.30, 0, -11.05, '#B4864F', 0.05);
+      poly(g, [0, -11.05, 0.78, -10.86, 0, -10.64], '#F5C64E');
+      /* 승강 캐빈 — 캐릭터가 타는 자리와 같은 높이 */
+      var by = -h;
+      ell2(g, 0, by + 0.10, 1.12, 0.34, 'rgba(70,90,90,.14)');
+      el(g, 0, by, 1.14, 0.34, '#F4F8FA');
+      el(g, 0, by, 1.14, 0.34, null, '#E8807A', 0.07);
+      for (i = 0; i < 8; i++){
+        a = i * Math.PI / 4;
+        rr(g, Math.cos(a) * 1.00 - 0.14, by - 0.02 + Math.sin(a) * 0.26, 0.28, 0.20, 0.06, i % 2 ? '#FFB3C7' : '#8FD8F2');
+      }
+      g.restore();
+    }
+  },
+  balloon: {
+    w: 6.4, h: 9.2, label: '열기구', r: 1.6,
+    seat: function(r, t){ return [r.x, r.z + 0.45]; },
+    draw: function(g, r, t){
+      var u = PG.S, i;
+      var bob = Math.sin(t * 0.9) * 0.10;
+      var base = -1.18 - bob;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 1.45, 0.55);
+      /* 바구니 */
+      rr(g, -0.54, base - 0.56, 1.08, 0.60, 0.08, '#C08A4E');
+      rr(g, -0.54, base - 0.56, 1.08, 0.60, 0.08, null, '#96673A', 0.045);
+      for (i = 0; i < 3; i++) ln(g, -0.50, base - 0.44 + i * 0.16, 0.50, base - 0.44 + i * 0.16, 'rgba(150,103,58,.55)', 0.035);
+      /* 줄 */
+      ln(g, -0.44, base - 0.56, -0.78, base - 2.72, '#C6B8A6', 0.045);
+      ln(g, 0.44, base - 0.56, 0.78, base - 2.72, '#C6B8A6', 0.045);
+      ln(g, -0.10, base - 0.56, -0.32, base - 2.72, '#C6B8A6', 0.035);
+      ln(g, 0.10, base - 0.56, 0.32, base - 2.72, '#C6B8A6', 0.035);
+      /* 구 */
+      var cy = base - 4.62, ry = 1.95, rx = 1.85;
+      el(g, 0, cy, rx, ry, '#F7C0CE');
+      g.save();
+      g.beginPath(); g.ellipse(0, cy, rx, ry, 0, 0, 6.3); g.clip();
+      var cols = ['#F58BA8', '#FFD86B', '#8FD8F2', '#FFD86B', '#F58BA8'];
+      for (i = 0; i < 5; i++){
+        g.beginPath();
+        g.moveTo(-rx + i * rx * 0.40, cy - ry);
+        g.quadraticCurveTo(-rx * 0.30 + i * rx * 0.32, cy, -rx + i * rx * 0.40, cy + ry);
+        g.lineTo(-rx + (i + 1) * rx * 0.40, cy + ry);
+        g.quadraticCurveTo(-rx * 0.30 + (i + 1) * rx * 0.32, cy, -rx + (i + 1) * rx * 0.40, cy - ry);
+        g.closePath();
+        g.fillStyle = cols[i]; g.fill();
+      }
+      g.restore();
+      g.beginPath(); g.ellipse(0, cy, rx, ry, 0, 0, 6.3);
+      g.strokeStyle = 'rgba(180,120,130,.45)'; g.lineWidth = 0.05; g.stroke();
+      /* 고리 · 버너 불꽃 */
+      poly(g, [-0.78, base - 2.72, 0, base - 3.00, 0.78, base - 2.72], '#C6B8A6');
+      var fl = 1 + Math.sin(t * 7) * 0.18;
+      poly(g, [-0.16, base - 2.62, 0, base - 2.62 - 0.42 * fl, 0.16, base - 2.62], '#FFC24B');
+      g.restore();
+    }
+  },
   swing: {
     w: 4.4, h: 4.2, label: '그네', r: 1.1,
     seat: function(r, t){ var a = Math.sin(t * 1.6) * 0.5; return [r.x + Math.sin(a) * 0.95, r.z + 0.1]; },
@@ -11141,8 +11396,18 @@ var RIDE = {
   }
 };
 function rideOf(k){ return RIDE[k] || RIDE.swing; }
-var RIDE_MOUNT = { carousel:0.95, ferris:0.45, viking:0.55, teacup:0.35, swing:0.75, seesaw:0.35, boat:0.30, sled:0.30, hammock:0.55, ice:0.10, sand:0.10, campfire:0.10 };
+var RIDE_MOUNT = { carousel:0.95, ferris:0.45, viking:0.55, teacup:0.35, swing:0.75, seesaw:0.35, boat:0.30, sled:0.30, hammock:0.55, ice:0.10, sand:0.10, campfire:0.10,
+  bumper:0.30, trampoline:0.72, coaster:0.80, drop:1.15, balloon:1.18 };
 function rideMount(c){ return RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4; }
+/* 타는 동안 캐릭터가 떠 있는 높이 — 그림 속 기구와 같은 식을 써서 어긋나지 않게 */
+function rideSeatLift(c){
+  if (!c || !c.ride) return 0;
+  if (c.ride === 'trampoline') return 0.92 + Math.abs(Math.sin(PG.time * 3.4)) * 1.15;
+  if (c.ride === 'coaster') return coasterH(coasterX(PG.time));
+  if (c.ride === 'drop') return dropLift(PG.time);
+  if (c.ride === 'balloon') return balloonLift(PG.time);
+  return RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4;
+}
 
 /* ---------- 캐릭터 ---------- */
 function charName(c){ return pgPresetName(c.preset); }
@@ -11475,6 +11740,7 @@ function pgOpen(kid){
   pgResize();
   PG.S = PG.Sgoal = defaultScale();
   PG.follow = false;
+  PG.autoCam = false;
   followUI(false);
   pgTitle(); pgSwitch(); refreshChars();
   PG.vil = PG.lastVil[kid] || (PG.chars[PG.hero] ? PG.chars[PG.hero].vil : 'village');
@@ -11489,7 +11755,7 @@ function pgOpen(kid){
   PG.fade = 0;
   hideBuildBar();
   portalShow(true);
-  hint('한 마을씩 놀아요 · 다리나 이정표를 톡 누르면 옆 마을로! · 바닥을 톡 누르면 캐릭터가 걸어가요', 7000);
+  hint('한 마을씩 놀아요 · 다리나 이정표를 톡 누르면 옆 마을로! · 바닥을 톡 누르면 캐릭터를 따라 걸어가요', 7000);
   var ld = $('pgLoad');
   if (ld){ ld.hidden = false; ld.textContent = '🌳 놀이터 준비 중…'; setTimeout(function(){ ld.hidden = true; }, 320); }
   pgStart();
@@ -11538,6 +11804,7 @@ function switchVillage(k){
     c.walk = false; c.msg = ''; c.msgT = 0; c.fixed = true;
     pgSave();
   }
+  PG.autoCam = false;
   zonePill(); heroChip();
   if (c && c.vil === k) focus(c.x, c.z + 1);
   else centerOnVillage();
@@ -11780,6 +12047,7 @@ function followUI(on){
 function toggleGame(){
   if (!PG.charOrder.length){ if (typeof toast === 'function') toast('먼저 🎨 꾸미기에서 캐릭터를 데려와요', 1800); return; }
   PG.follow = !PG.follow;
+  PG.autoCam = false;
   followUI(PG.follow);
   if (PG.follow){
     var c = PG.chars[PG.hero] || PG.chars[PG.charOrder[0]];
@@ -11809,7 +12077,7 @@ function heroTagUpdate(){
   if (!t || !PG.follow) return;
   var c = PG.chars[PG.hero];
   if (!c){ t.hidden = true; return; }
-  var x = sX(c.x), y = sY(c.z) - CH_H * PG.S - 12;
+  var x = sX(c.x), y = sY(c.z) - CH_H * PG.S - 12 - (c.ride ? rideSeatLift(c) * PG.S : 0);
   t.style.left = x + 'px';
   t.style.top = y + 'px';
   t.innerHTML = '<img src="assets/avatars/face/' + escHtml(c.preset) + '.webp" alt="">' + escHtml(charName(c));
@@ -11894,7 +12162,8 @@ function drawLabels(g){
     var c = PG.chars[PG.charOrder[i]];
     if (!c || c.vil !== PG.vil) continue;
     if (PG.follow && c.id === PG.hero) continue;
-    var x = sX(c.x), y = sY(c.z) - CH_H * PG.S * 0.98 - 6;
+    var liftY = c.ride ? rideSeatLift(c) * PG.S : 0;
+    var x = sX(c.x), y = sY(c.z) - CH_H * PG.S * 0.98 - 6 - liftY;
     var txt = charName(c);
     g.font = '900 10px system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif';
     var w = g.measureText(txt).width + 12;
@@ -12031,7 +12300,7 @@ function drawOneChar(g, c){
     sceneOf(c.vil).rides.forEach(function(q){ if (q.k === c.ride) r0 = q; });
     if (r0){ var sp = rideOf(c.ride).seat(r0, PG.time); x = sp[0]; z = sp[1] - 0.55; }
     hs = 0.82;
-    lift = (RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4) * PG.S;
+    lift = rideSeatLift(c) * PG.S;
   } else {
     if (c.seat){ hs = 0.92; lift = 0.20 * PG.S; }
     shadowEllipse(g, c.x, c.z, 0.44, c.seat ? 0.12 : 0.20);
@@ -12041,10 +12310,18 @@ function drawOneChar(g, c){
 /* ---------- 상태 갱신 ---------- */
 function update(dt){
   PG.time += dt;
-  /* 카메라 */
+  /* 카메라 — 게임시점이 꺼져 있어도, 바닥을 톡 눌러 주인공이 걸어가기 시작하면 부드럽게 따라간다.
+     화면을 직접 끌어 둘러보거나 두 손가락으로 확대하는 중에는 사용자 조작을 방해하지 않는다. */
   if (PG.follow){
     var h = PG.chars[PG.hero];
     if (h){ PG.camXg = h.x; PG.camZg = h.z + 1.2; }
+  } else if (PG.autoCam){
+    var h2 = PG.chars[PG.hero];
+    var bb = VIL[PG.vil].b;
+    if (h2 && h2.vil === PG.vil && h2.walk && h2.autoGo && !PG.drag && !PG.pinch && !PG.joy.on){
+      PG.camXg = clamp(h2.x, bb.x0 + 1.5, bb.x1 - 1.5);
+      PG.camZg = clamp(h2.z + 1.0, bb.z0 + 1.5, bb.z1 - 1.0);
+    }
   }
   var kk = 1 - Math.pow(0.0015, dt);
   PG.camX = lerp(PG.camX, PG.camXg, kk);
@@ -12063,6 +12340,8 @@ function update(dt){
     }
     stepChar(c, dt);
   });
+  var hh = PG.chars[PG.hero];
+  if (hh && !hh.walk) hh.autoGo = false;
 
   /* 페이드 */
   if (PG.fadePhase === 'out'){
@@ -12213,6 +12492,7 @@ function onDown(e){
       mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2
     };
     PG.drag = null;
+    PG.autoCam = false;              /* 확대하는 동안은 카메라를 붙잡지 않는다 */
     return;
   }
   PG.ptrs = PG.ptrs || {};
@@ -12255,7 +12535,10 @@ function onMove(e){
     bl.x = clamp(wX(px) + PG.drag.dx, VIL[PG.vil].b.x0 + 1.4, VIL[PG.vil].b.x1 - 1.4);
     bl.z = clamp(wZ(py) + PG.drag.dz, VIL[PG.vil].b.z0 + 1.2, VIL[PG.vil].b.z1 - 1.2);
   } else {
-    /* 화면 이동 */
+    /* 화면 이동 — 직접 둘러보기 시작하면 자동 따라가기는 멈춘다 */
+    PG.autoCam = false;
+    var ch0 = PG.chars[PG.hero];
+    if (ch0) ch0.autoGo = false;
     PG.camXg -= (e.clientX - prev.x) / PG.S;
     PG.camZg -= (e.clientY - prev.y) / (PG.S * DZ);
     PG.camX -= (e.clientX - prev.x) / PG.S;
@@ -12293,6 +12576,8 @@ function onUp(e){
     var h = PG.chars[PG.hero];
     if (h && h.vil === PG.vil && walkable(PG.vil, wxp, wzp)){
       h.tx = wxp; h.tz = wzp; h.ride = ''; h.seat = null; h.act = '';
+      h.autoGo = true;
+      PG.autoCam = true;
       PG.tapGo++;
     } else if (!h){
       if (typeof toast === 'function') toast('🎨 꾸미기에서 캐릭터를 먼저 데려와요', 1800);
@@ -12373,6 +12658,7 @@ function syncSeatBtn(){
 function onWheel(e){
   if (!PG.on) return;
   e.preventDefault();
+  PG.autoCam = false;
   PG.Sgoal = clamp(PG.Sgoal * (e.deltaY > 0 ? 0.92 : 1.08), 7, 62);
   PG.S = PG.Sgoal;
 }
@@ -12437,12 +12723,12 @@ document.addEventListener('click', function(ev){
     try { if (typeof openAvatarSheet === 'function'){ openAvatarSheet(k2); if (typeof avatarTab !== 'undefined') avatarTab = 'build'; if (typeof renderAvatarSheet === 'function') renderAvatarSheet(); } } catch(e){}
     return;
   }
-  if (t.closest('#pgZoomIn')){ PG.Sgoal = clamp(PG.Sgoal * 1.22, 7, 62); return; }
-  if (t.closest('#pgZoomOut')){ PG.Sgoal = clamp(PG.Sgoal / 1.22, 7, 62); return; }
-  if (t.closest('#pgActZoomIn')){ PG.Sgoal = clamp(PG.Sgoal * 1.18, 7, 62); return; }
-  if (t.closest('#pgActZoomOut')){ PG.Sgoal = clamp(PG.Sgoal / 1.18, 7, 62); return; }
-  if (t.closest('#pgReset')){ centerOnVillage(); PG.Sgoal = defaultScale(); return; }
-  if (t.closest('#pgPanBtn')){ PG.Sgoal = clamp(fitScale(PG.vil), 7, 62); PG.camXg = (VIL[PG.vil].b.x0 + VIL[PG.vil].b.x1) / 2; PG.camZg = (VIL[PG.vil].b.z0 + VIL[PG.vil].b.z1) / 2; return; }
+  if (t.closest('#pgZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.22, 7, 62); return; }
+  if (t.closest('#pgZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.22, 7, 62); return; }
+  if (t.closest('#pgActZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.18, 7, 62); return; }
+  if (t.closest('#pgActZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.18, 7, 62); return; }
+  if (t.closest('#pgReset')){ PG.autoCam = false; centerOnVillage(); PG.Sgoal = defaultScale(); return; }
+  if (t.closest('#pgPanBtn')){ PG.autoCam = false; PG.Sgoal = clamp(fitScale(PG.vil), 7, 62); PG.camXg = (VIL[PG.vil].b.x0 + VIL[PG.vil].b.x1) / 2; PG.camZg = (VIL[PG.vil].b.z0 + VIL[PG.vil].b.z1) / 2; return; }
   if (t.closest('#pgZoneBtn')){ portalShow(false); var x = $('pgPortalClose'); if (x) x.hidden = false; return; }
   if (t.closest('#pgLocBtn')){ jumpToHero(); return; }
   if (t.closest('#pgPortalClose')){ portalHide(); return; }
