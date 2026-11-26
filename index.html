@@ -909,8 +909,8 @@ button{font:inherit;color:inherit}
 .av-txt small{font-size:11.5px;color:var(--sub);font-weight:700}
 .av-tip{font-size:10.5px;font-weight:800;color:#A99F92;background:#FFF6E9;border:1px solid #F3E6D2;
   border-radius:999px;padding:2px 8px;align-self:flex-start;margin-top:3px}
-.av-tabs{display:flex;gap:4px;margin:4px 0 2px}
-.avtab{flex:1;height:34px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
+.av-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px}
+.avtab{flex:1 1 calc(25% - 4px);min-width:0;height:34px;border:1px solid #E7DCCB;background:#FFFDF8;border-radius:10px;
   font-size:12.5px;font-weight:800;color:#8B7A63;cursor:pointer;white-space:nowrap;padding:0 2px}
 .avtab.on{background:#F5ECFB;border-color:#E2CFF2;color:#7B5AA6;font-weight:900;
   box-shadow:0 2px 6px rgba(150,120,190,.16)}
@@ -1449,8 +1449,8 @@ button.st{padding:0}
   letter-spacing:-.3px}
 .av-buy:active{transform:scale(.96)}
 /* 🔒 엄마·아빠 전용 구매 취소 — 보유 카드의 '보유 ✓' 아래에 붙는 버튼 */
-.av-refund{display:block;width:100%;margin-top:0;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
-  border-radius:8px;height:15px;font-size:7.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+.av-refund{display:block;width:100%;margin-top:0;border:1px solid #E5988B;background:#FFF0EC;color:#B84238;
+  border-radius:8px;height:16px;font-size:8px;font-weight:900;cursor:pointer;padding:0;line-height:1;
   white-space:nowrap;letter-spacing:-.3px}
 .av-refund:hover{background:#FDE9E4;border-color:#E3B0A5}
 .av-refund:active{transform:scale(.96);background:#FBDCD4}
@@ -2238,9 +2238,9 @@ body.myr-open{overflow:hidden}
   padding:0 4px;line-height:1.4}
 .myr-c .prc.own{background:#EFF7EF;border-color:#D6E9D8;color:#4F7A57}
 /* ↩ 취소 — 산 아이템 카드 아래에 붙는 작은 1P 환불 버튼 */
-.myr-c .myr-cx{display:block;width:100%;margin-top:1px;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
-  border-radius:7px;height:15px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
-  white-space:nowrap;letter-spacing:-.4px;font-family:inherit}
+.myr-c .myr-cx{display:block;width:100%;margin-top:1px;border:1px solid #E5988B;background:#FFF0EC;color:#B84238;
+  border-radius:7px;height:16px;font-size:9px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  white-space:nowrap;letter-spacing:-.3px;font-family:inherit;opacity:1;box-shadow:0 1px 0 rgba(229,152,139,.25)}
 .myr-c .myr-cx:active{transform:scale(.95);background:#FBDCD4}
 .myr-c:has(.myr-cx){padding-bottom:3px}
 .myr-tabs{display:flex;gap:4px;padding:7px 0 0;overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
@@ -2260,7 +2260,9 @@ body.myr-open{overflow:hidden}
 .myr-c .cnt{position:absolute;right:3px;top:2px;font-size:8.5px;font-weight:900;color:#9A6A2A;
   background:#FFF3D6;border:1px solid #F0DDB4;border-radius:999px;padding:0 4px;line-height:1.35}
 .myr-c .cnt.own{background:#FDEBF1;border-color:#F3CBDC;color:#C0507E;padding:0 3px}
-.myr-c.done{opacity:.5}
+/* 보유(done) 카드는 그림·이름·수량만 흐리게 — ↩ 취소 버튼은 또렷하게 남긴다 */
+.myr-c.done img,.myr-c.done .nm,.myr-c.done .cnt,.myr-c.done .prc{opacity:.5}
+.myr-c.done .myr-cx{opacity:1}
 .myr-c.done .cnt{background:#EFEAE0;border-color:#E2D8C8;color:#9A8F7C}
 .myr-empty{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;
   padding:14px 10px;color:#A79882}
@@ -4864,8 +4866,8 @@ function codexBarHtml(kid){
   return '<div class="cdx">'
     + '<div class="cdx-row">'
     +   '<span class="cdx-ttl">📖 내 도감 <b>' + own + '</b><span class="cdx-of"> / ' + total + '</span></span>'
-    +   '<span class="cdx-sets" title="모든 단계를 다 모은 세트 수 · 지금까지 받은 세트 선물 개수">🎁 세트 완성 ' + done + '/' + CODEX_SETS.length
-    +     (gifts ? ' · 선물 ' + gifts + '개' : '') + '</span>'
+    +   (AV_PLAYGROUND_UI ? '<span class="cdx-sets" title="모든 단계를 다 모은 세트 수 · 지금까지 받은 세트 선물 개수">🎁 세트 완성 ' + done + '/' + CODEX_SETS.length
+    +     (gifts ? ' · 선물 ' + gifts + '개' : '') + '</span>' : '')
     +   '<span class="cdx-pct">' + pct + '%</span>'
     + '</div>'
     + '<div class="cdx-bar"><i style="width:' + (pct < 2 ? 2 : pct) + '%"></i></div>'
@@ -4878,6 +4880,14 @@ function codexBarHtml(kid){
 /* '전체 | 보유만' 알약 + 도감 세트 미션 접기 */
 function codexToolsHtml(kid){
   var done = codexSetsDone(kid);
+  if (!AV_PLAYGROUND_UI){
+    /* '전체 | 보유만' 알약만 — 놀이터 세트 미션(codexSetsHtml)은 숨긴다(코드·기록 보존) */
+    if (!avIsMyrTab(avatarTab)) return '<div class="cdx-tools"><span class="cdx-flt">'
+      + '<button type="button" class="cdxpill' + (avOwnFilter === 'all' ? ' on' : '') + '" data-act="av-filter" data-f="all">전체</button>'
+      + '<button type="button" class="cdxpill' + (avOwnFilter === 'own' ? ' on' : '') + '" data-act="av-filter" data-f="own">보유만</button>'
+      + '</span></div>';
+    return '';
+  }
   return '<div class="cdx-tools">'
     + '<span class="cdx-flt">'
     +   '<button type="button" class="cdxpill' + (avOwnFilter === 'all' ? ' on' : '') + '" data-act="av-filter" data-f="all">전체</button>'
@@ -8370,11 +8380,23 @@ function openAvatarSheet(id, shopOnly){
   var pgift = giftPendAmt(id);
   if (pgift > 0 && !shopOnly) setTimeout(function(){ p3Open(id); }, 240);
 }
+/* 🏡 집·마을 탭과 놀이터 전용 도감 세트(바닷가 탐험대·겨울왕국 빌더·놀이공원 오너 등 AV_BUILDS 세트)는
+   놀이터를 화면에서 숨긴 2026-11-27부터 상점 UI에서도 감춘다.
+   · AV_BUILDS · CODEX_SETS · shop.unlocked의 build:* 는 하나도 지우지 않았다(그대로 보존)
+   · 놀이터를 다시 꺼낼 때 이 값을 true 로 바꾸면 탭과 세트 미션이 그대로 돌아온다 */
+var AV_PLAYGROUND_UI = false;
+/* 집꾸미기 상점 그리드(가구·소품·벽·동물) — 메인 상점에서 같은 렌더러로 바로 산다 */
+var AV_MYR_TABS = [ ['furn', '🛋️ 가구'], ['prop', '🧸 소품'], ['wall', '🖼️ 벽·테마'], ['pet', '🐾 동물'] ];
+function avIsMyrTab(t){ for (var i = 0; i < AV_MYR_TABS.length; i++) if (AV_MYR_TABS[i][0] === t) return true; return false; }
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
   var pts = pointsOf(kid), nm = (FAMILY[kid] || {}).name || '';
-  var tabs = [ ['preset', '🧒 캐릭터'], ['deco', '✨ 꾸미기'], ['build', '🏡 집·마을'], ['bg', '🎨 배경 색'] ];
+  var tabs = [ ['preset', '🧒 캐릭터'], ['deco', '✨ 꾸미기'] ]
+    .concat(AV_MYR_TABS)
+    .concat([ ['bg', '🎨 배경 색'] ]);
+  if (AV_PLAYGROUND_UI) tabs.splice(2, 0, ['build', '🏡 집·마을']);
+  if (!AV_PLAYGROUND_UI && avatarTab === 'build') avatarTab = 'preset';
   var pane = '';
   if (avatarTab === 'bg'){
     var bgList = avFilterList(AV_BGS, kid, 'bg');
@@ -8399,6 +8421,14 @@ function renderAvatarSheet(){
               + avDecoHtml(d.k) + '</span></span>';
           return avShopCard('deco', d.k, lab, pv, kid, av);
         }).join('') + '</div>' : avEmptyHtml('deco')) + '</div>';
+  } else if (avIsMyrTab(avatarTab)){
+    /* 집꾸미기 상점과 같은 그리드·같은 구매/취소 — myRoom/{kid}/inv 와 shop/spent/{kid} 를 그대로 쓴다 */
+    var mLab = (AV_MYR_TABS.filter(function(t){ return t[0] === avatarTab; })[0] || [])[1] || '집꾸미기';
+    var mGrid = (window.__myhome && typeof window.__myhome.grid === 'function')
+      ? window.__myhome.grid(avatarTab, kid)
+      : '<div class="cdx-empty">잠시 뒤에 다시 열어 주세요</div>';
+    pane = '<div class="av-sec"><div class="av-lab">' + mLab + '를 골라요 · 🏡 집꾸미기 보관함에 그대로 담겨요'
+      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>' + mGrid + '</div>';
   } else if (avatarTab === 'build'){
     var bList = avFilterList(AV_BUILDS, kid, 'build');
     pane = '<div class="av-sec"><div class="av-lab">집·마을을 골라요 · ' + avListNote(bList, AV_BUILDS.length, kid, 'build')
@@ -8435,8 +8465,7 @@ function renderAvatarSheet(){
       + '<small>아래 상점에서 입혀보고 💎 1P로 데려와 보세요 · 카드를 누르면 위에서 바로 보여요</small>'
       + '</div>';
   body.innerHTML =
-      '<button class="av-pgbtn" type="button" data-act="myrshop-open" data-m="' + kid + '">🛍️ 집꾸미기 상점에서 가구·소품·캐릭터 사기 ›</button>'
-    + topHtml
+      topHtml
     + '<div class="av-ptbar">'
     +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
     +   (giftPendAmt(kid) > 0 ? '<button type="button" class="av-ptgift" data-act="gift-open" title="눌러서 선물상자 3개 중 하나를 골라요">🎁 선물 도착! +' + giftPendAmt(kid) + 'P</button>' : '')
@@ -20619,7 +20648,7 @@ var MYR_ITEM = (function(){
   var BASE_FREE = ['bed','desk','rug_flower','table','window_arch','garland','frame_pic','clock_wall','wall_shelf'];
   function baseFree(k){ return BASE_FREE.indexOf(k) > -1; }
   function minKeep(k){ return baseFree(k) ? 1 : 0; }
-  function canRefund(k){
+  function canRefund(k){                     /* 그리드에서는 수량으로 직접 판정(shopPane) · 보관함 쪽 호환용 */
     return ownedCount(k) > minKeep(k);
   }
   /* 카드 한 장 — ↩ 취소 버튼이 붙는 카드만 <div>(버튼 안에 버튼은 안 되니까), 나머지는 기존 <button> 그대로 */
@@ -20633,19 +20662,18 @@ var MYR_ITEM = (function(){
                   : '<button type="button" class="' + cls + '"' + attrs + '>';
     return open + o.inner + cx + (cx ? '</div>' : '</button>');
   }
-  function renderShop(){
-    var tabs = $m('myrShopTabs'), body = $m('myrShopBody');
-    if (!tabs || !body) return;
-    var kid = MY.kid, r = room();
-    tabs.innerHTML = shopTabsHtml();
-    var pts = (typeof pointsOf === 'function') ? pointsOf(kid) : 0;
-    var note = $m('myrShopNote');
-    if (note) note.textContent = '💎 ' + pts + 'P · 1개 = 1P';
+  /* 상점 그리드 한 판 — 집꾸미기 상점(#myrShopBody)과 메인 🛍️ 상점(avatarSheet)이 같은 것을 쓴다
+     · 구매/환불도 같은 myrBuy/myrRefund → myRoom/{kid}/inv · shop/spent/{kid} 잎 경로를 공유한다 */
+  function shopPane(tab, kid){
+    tab = tab || MY.shopTab || 'furn';
+    kid = kid || MY.kid;
+    var r = (state && state.myRoom && state.myRoom[kid]) || null;
     var h = '<div class="myr-grid">';
-    if (MY.shopTab === 'preset'){
+    if (tab === 'preset'){
       (typeof AV_PRESETS === 'undefined' ? [] : AV_PRESETS).forEach(function(p){
         var own = (typeof avUnlocked === 'function') ? avUnlocked(kid, 'preset', p.k) : false;
-        var mine = own && (typeof avPaid === 'function') && avPaid(kid, 'preset', p.k);
+        var mine = own && !(typeof avIsFree === 'function' && avIsFree('preset', p.k))
+          && (typeof avPaid === 'function') && avPaid(kid, 'preset', p.k);
         h += myrCard({
           buy: 'preset:' + p.k, nm: p.n, pc: true, done: own,
           refund: mine ? 'preset:' + p.k : '',
@@ -20655,11 +20683,11 @@ var MYR_ITEM = (function(){
         });
       });
     } else {
-      var cats = MY.shopTab === 'wall' ? ['wall','theme'] : [MY.shopTab];
+      var cats = tab === 'wall' ? ['wall','theme'] : [tab];
       LIST.filter(function(o){ return cats.indexOf(o.cat) >= 0; }).forEach(function(o){
         var n = (r && Number((r.inv || {})[o.k])) || 0;
         h += myrCard({
-          buy: o.k, refund: canRefund(o.k) ? o.k : '',
+          buy: o.k, refund: n > minKeep(o.k) ? o.k : '',
           inner: '<img src="' + thumbOf(o.k) + '" alt="" loading="lazy" decoding="async">'
             + '<span class="nm">' + esc(o.n) + '</span>'
             + '<span class="prc' + (n ? ' own' : '') + '">' + (n ? '×' + n : '1P') + '</span>'
@@ -20667,7 +20695,17 @@ var MYR_ITEM = (function(){
       });
     }
     h += '</div><div class="pgd-tip">톡 누르면 💎 1P로 사요 · 산 물건은 🎒 보관함에 · ↩ 취소하면 1P 환불</div>';
-    body.innerHTML = h;
+    return h;
+  }
+  function renderShop(){
+    var tabs = $m('myrShopTabs'), body = $m('myrShopBody');
+    if (!tabs || !body) return;
+    var kid = MY.kid;
+    tabs.innerHTML = shopTabsHtml();
+    var pts = (typeof pointsOf === 'function') ? pointsOf(kid) : 0;
+    var note = $m('myrShopNote');
+    if (note) note.textContent = '💎 ' + pts + 'P · 1개 = 1P';
+    body.innerHTML = shopPane(MY.shopTab, kid);
   }
   function openShop(tab){
     var el = $m('myrShop'); if (!el || !MY.kid) return;
@@ -21120,22 +21158,38 @@ var MYR_ITEM = (function(){
     say(o.seat === 'bed' ? '침대에 누웠어요 🛏️' : '톡 앉았어요 🪑');
   }
 
+  /* 메인 🛍️ 상점이 열려 있으면 산 물건·취소 결과를 그 자리에서 다시 그린다 */
+  function syncMainShop(){
+    try {
+      var sh = document.getElementById('sheet');
+      if (!sh || sh.hidden) return;
+      if (typeof avatarDraft === 'undefined' || !avatarDraft) return;
+      var cardEl = document.querySelector('#sheet .sheet-card');   /* 실제로 스크롤되는 상자 */
+      var keepTop = cardEl ? cardEl.scrollTop : 0;
+      if (typeof renderAvatarSheet === 'function') renderAvatarSheet();
+      if (cardEl) cardEl.scrollTop = keepTop;
+    } catch(e){ console.warn('[dashboard] 상점 갱신:', e && e.message); }
+  }
+
   /* ---------- 바깥 클릭 ---------- */
   document.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
     var op = t.closest('[data-act="myhome-open"]');
     if (op){ ev.preventDefault(); ev.stopPropagation(); open(op.dataset.m || (typeof activeKid === 'function' ? activeKid() : null)); return; }
-    if (!MY.on) return;
+    /* 메인 🛍️ 상점(avatarSheet) 안의 가구·소품·벽·동물 탭도 같은 그리드를 쓰므로 구매·취소를 여기서도 받는다 */
+    var sheetEl = document.getElementById('sheet');
+    var inSheet = !!(sheetEl && !sheetEl.hidden);
+    if (!MY.on && !inSheet) return;
     if (t.closest('#myrExit')){ close(); return; }
     if (t.closest('#myrShopBtn')){ openShop(MY.shopTab || 'furn'); return; }
     if (t.closest('#myrShopX')){ closeShop(); return; }
     var st2 = t.closest('[data-myshoptab]');
     if (st2){ MY.shopTab = st2.dataset.myshoptab; renderShop(); return; }
     var rfx = t.closest('[data-myrrefund]');
-    if (rfx){ ev.preventDefault(); myrRefund(rfx.dataset.myrrefund); return; }
+    if (rfx){ ev.preventDefault(); myrRefund(rfx.dataset.myrrefund); syncMainShop(); return; }
     var by2 = t.closest('[data-myrbuy]');
-    if (by2){ myrBuy(by2.dataset.myrbuy); return; }
+    if (by2){ ev.preventDefault(); myrBuy(by2.dataset.myrbuy); syncMainShop(); return; }
     if (t.closest('#myrRoll')){ doRoll(); return; }
     var rl = t.closest('[data-myrroll]');
     if (rl){
@@ -21230,6 +21284,9 @@ var MYR_ITEM = (function(){
   window.__myhome = {
     state: MY, open: open, close: close, catalog: LIST, themes: THEMES, thumb: thumbOf,
     shop: function(t){ openShop(t || 'furn'); return MY.shopTab; },
+    grid: function(tab, kid){ if (kid) MY.kid = kid; MY.shopTab = tab || MY.shopTab; return shopPane(tab, kid); },
+    buy: function(k, kid){ if (kid) MY.kid = kid; myrBuy(k); },
+    refund: function(k, kid){ if (kid) MY.kid = kid; myrRefund(k); },
     room: function(){ return room(); },
     add: function(k){ var o = ITEM[k]; if (!o) return null; return placeItem(k, freeSpot(o)); },
     addChar: addChar, roll: doRoll, tray: function(t){ MY.tray = t || 'all'; buildTray(); return MY.tray; },
