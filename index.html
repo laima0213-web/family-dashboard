@@ -1444,6 +1444,8 @@ button.st{padding:0}
 .av-card.on .av-card-n{color:#3E7A54}
 .av-card-emoji{font-size:26px;line-height:1}
 .av-own{display:block;width:100%;text-align:center;font-size:8.5px;font-weight:900;color:#6FA97E;line-height:1.3;margin-top:auto}
+/* ✨ 꾸미기·🎨 배경 색 무료 배지 — '보유 ✓'와 다른 색으로 */
+.av-own.av-freeb{color:#4F8FB8}
 .av-buy{display:block;width:100%;margin-top:auto;border:1px solid #CBAAF2;background:#F6EFFF;color:#6D57A8;
   border-radius:8px;height:17px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;white-space:nowrap;
   letter-spacing:-.3px}
@@ -4415,6 +4417,9 @@ var AV_FREE = {
   bg: ['none'],                               /* '기본' 배경만 무료 기본값(판매 품목 아님) — 배경 12종은 상점 아이템 */
   deco: ['none']                              /* '꾸미기 안 함'만 기본 선택값(판매 품목 아님) — 꾸미기 12종은 상점 아이템 */
 };
+/* ✨ 꾸미기 · 🎨 배경 색은 2026-11-27부터 1P 없이 무료 — 48종을 그냥 골라 입는다
+   · shop.unlocked 의 옛 구매 기록은 지우지 않는다(환불 버튼만 뜨지 않게 avPaid 쪽에서 막는다) */
+var AV_FREE_KINDS = { deco: 1, bg: 1 };
 function shopRaw(){ return (state && state.shop) || {}; }
 /* 공부를 ✓ 한 날마다 +1P — 시작일부터 오늘까지 하루씩 (미래 날짜·중복·누락 없는 결정적 계산) */
 function pointsDays(kid){
@@ -4431,7 +4436,7 @@ function pointsRaw(kid){
   return pointsDays(kid) + (Number((sh.bonus || {})[kid]) || 0) - (Number((sh.spent || {})[kid]) || 0);
 }
 function pointsOf(kid){ var p = pointsRaw(kid); return p > 0 ? p : 0; }
-function avIsFree(kind, key){ return (AV_FREE[kind] || []).indexOf(key) > -1; }
+function avIsFree(kind, key){ return !!AV_FREE_KINDS[kind] || (AV_FREE[kind] || []).indexOf(key) > -1; }
 /* 보유 판정은 오직 shop.unlocked(실제 구매) + 무료 기본값만 — 예전에 착용해 둔 값은 보유로 치지 않는다 */
 /* src 를 넘기면 그 상점 값으로 판정한다 (불러오기 정규화처럼 state 가 아직 갱신 전일 때) */
 function avUnlocked(kid, kind, key, src){
@@ -4619,12 +4624,15 @@ function applyPointBonus(kid, delta){
 function avShopCard(kind, key, label, inner, kid, av){
   var on = (av[kind] === key), has = avUnlocked(kid, kind, key);
   var paid = avPaid(kid, kind, key) && !avIsFree(kind, key);   /* 1P 주고 산 아이템만 취소 가능 */
-  return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
-    + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? ' (보유)' : ' · 💎 1P') + '">'
+  var freeK = !!AV_FREE_KINDS[kind];   /* ✨ 꾸미기·🎨 배경 색 — 1P 없이 바로 고르는 무료 카드 */
+  return '<div class="av-card' + (on ? ' on' : '') + (has ? '' : ' locked') + (freeK ? ' free' : '') + '" data-act="av-pick" data-k="' + kind + '" data-v="' + key + '"'
+    + ' role="button" tabindex="0" aria-label="' + esc(label) + (has ? (freeK ? ' (무료)' : ' (보유)') : ' · 💎 1P') + '">'
     + inner
     + '<span class="av-card-n">' + esc(label) + '</span>'
     + (has
-        ? '<span class="av-own">보유 ✓</span>'
+        ? (freeK
+            ? '<span class="av-own av-freeb">' + (on ? '착용 중 ✓' : '무료') + '</span>'
+            : '<span class="av-own">보유 ✓</span>')
           + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="구매를 취소하고 💎 1P를 돌려받아요">↩ 취소</button>' : '')
         : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '" title="💎 1P로 구매">1P로 구매</button>')
     + '</div>';
@@ -4650,18 +4658,17 @@ function avItemLabel(kind, key){
    · 연속: 3·5·7·10·14·21·30일 연속 공부를 달성하면 선물상자 1개 (마일스톤당 1번)
    · 선물상자를 열면 상자 3개 중 1개 고르기 → 꽝 없이 1P, 행운 상자는 2P
    ============================================================ */
-/* 도감에 들어가는 유료 품목 수 — 캐릭터 + 꾸미기('없음' 제외) + 집·마을 + 배경 색('기본' 제외) */
+/* 도감에 들어가는 유료 품목 수 — 캐릭터 + 집·마을
+   ✨ 꾸미기·🎨 배경 색 96종은 2026-11-27부터 무료라 도감 목표(N)와 모은 수에서 뺀다 */
 function codexTotal(){
   return (typeof AV_PRESETS === 'undefined' ? 0 : AV_PRESETS.length)
-       + (typeof AV_DECOS   === 'undefined' ? 0 : Math.max(0, AV_DECOS.length - 1))
-       + (typeof AV_BUILDS  === 'undefined' ? 0 : AV_BUILDS.length)
-       + (typeof AV_BGS     === 'undefined' ? 0 : Math.max(0, AV_BGS.length - 1));
+       + (typeof AV_BUILDS  === 'undefined' ? 0 : AV_BUILDS.length);
 }
-/* 실제로 모은 도감 카드 수 — '없음/기본' 무료값은 카드가 아니다 */
-function codexOwned(kid){ return avOwnedCount(kid); }
+/* 실제로 모은 도감 카드 수 — '없음/기본' 무료값과 무료가 된 꾸미기·배경 색은 카드가 아니다 */
+function codexOwned(kid){ return codexKeys(kid).length; }
 function codexKeys(kid){
   return (((shopRaw().unlocked || {})[kid]) || []).filter(function(x){
-    return x !== 'deco:none' && x !== 'bg:none';
+    return x !== 'deco:none' && x !== 'bg:none' && x.indexOf('deco:') !== 0 && x.indexOf('bg:') !== 0;
   });
 }
 function codexHasKind(kid, kind){
@@ -4844,13 +4851,14 @@ function codexSyncClaims(silent){
 }
 /* 상점 탭 그리드 — '전체 | 보유만' */
 function avListNote(list, total, kid, kind){
+  if (AV_FREE_KINDS[kind]) return Math.max(0, list.length - 1) + '종';
   if (avOwnFilter === 'own') return '보유 ' + list.length + '개';
   return total + '종';
 }
 var avOwnFilter = 'all';
 var codexSetsOpen = true;
 function avFilterList(list, kid, kind){
-  if (avOwnFilter !== 'own') return list;
+  if (avOwnFilter !== 'own' || AV_FREE_KINDS[kind]) return list;   /* 무료 탭은 전부 고를 수 있어 '보유만'도 전체 */
   return list.filter(function(x){ return !avIsFree(kind, x.k) && avUnlocked(kid, kind, x.k); });
 }
 function avEmptyHtml(kind){
@@ -8392,16 +8400,17 @@ function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
   var av = avatarDraft.av, kid = avatarDraft.kid;
   var pts = pointsOf(kid), nm = (FAMILY[kid] || {}).name || '';
-  var tabs = [ ['preset', '🧒 캐릭터'], ['deco', '✨ 꾸미기'] ]
+  /* 2026-11-27 은혜님 요청 — ✨ 꾸미기·🎨 배경 색을 맨 뒤로: 🧒 캐릭터 · 가구 · 소품 · 벽·테마 · 동물 · 꾸미기 · 배경 색 */
+  var tabs = [ ['preset', '🧒 캐릭터'] ]
     .concat(AV_MYR_TABS)
-    .concat([ ['bg', '🎨 배경 색'] ]);
-  if (AV_PLAYGROUND_UI) tabs.splice(2, 0, ['build', '🏡 집·마을']);
+    .concat([ ['deco', '✨ 꾸미기'], ['bg', '🎨 배경 색'] ]);
+  if (AV_PLAYGROUND_UI) tabs.splice(tabs.length - 2, 0, ['build', '🏡 집·마을']);
   if (!AV_PLAYGROUND_UI && avatarTab === 'build') avatarTab = 'preset';
   var pane = '';
   if (avatarTab === 'bg'){
     var bgList = avFilterList(AV_BGS, kid, 'bg');
     pane = '<div class="av-sec"><div class="av-lab">배경을 골라요 · ' + avListNote(bgList, AV_BGS.length - 1, kid, 'bg')
-      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + ' <span class="av-lab-note">무료 · 1P 없이 골라요</span></div>'
       + (bgList.length ? '<div class="av-bggrid">' + bgList.map(function(bx){
           return avShopCard('bg', bx.k, bx.n,
             '<span class="av-card-img"><span class="av-bgdot" style="background:' + bx.c + '"></span></span>', kid, av);
@@ -8411,7 +8420,7 @@ function renderAvatarSheet(){
     var pvPreset = av.preset || 'bun_ribbon', pvBg = avBgColor(av.bg);
     var dList = avFilterList(AV_DECOS, kid, 'deco');
     pane = '<div class="av-sec"><div class="av-lab">꾸미기를 골라요 · ' + avListNote(dList, AV_DECOS.length - 1, kid, 'deco')
-      + ' <span class="av-lab-note">1개 = 💎 1P</span></div>'
+      + ' <span class="av-lab-note">무료 · 1P 없이 골라요</span></div>'
       + (dList.length ? '<div class="av-grid">' + dList.map(function(d){
           var lab = (d.k === 'none') ? '없음' : d.n.replace(/^\S+\s*/, '');
           var pv = (d.k === 'none')
@@ -8476,7 +8485,7 @@ function renderAvatarSheet(){
     +     '<button type="button" data-act="pt-bonus" data-d="1" title="엄마·아빠 PIN을 눌러야 선물할 수 있어요">＋1P</button>'
     +     '<button type="button" data-act="pt-bonus" data-d="-1" title="엄마·아빠 PIN을 눌러야 조정할 수 있어요">－1P</button>'
     +   '</span>'
-    +   '<span class="av-ptnote">공부를 ✓ 완료한 날마다 하루 +1P씩 쌓여요 · 아이템은 1개당 💎 1P</span>'
+    +   '<span class="av-ptnote">공부를 ✓ 완료한 날마다 하루 +1P씩 쌓여요 · ✨ 꾸미기 · 🎨 배경 색은 무료!</span>'
     +   '<span class="av-ptfoot"><button type="button" class="av-plink" data-act="pt-parent">🔒 부모 PIN 변경</button></span>'
     + '</div>'
     + codexBarHtml(kid)
