@@ -2237,6 +2237,12 @@ body.myr-open{overflow:hidden}
   background:linear-gradient(120deg,#FFF0BE,#FFD45C);border:1px solid #EFBF45;border-radius:999px;
   padding:0 4px;line-height:1.4}
 .myr-c .prc.own{background:#EFF7EF;border-color:#D6E9D8;color:#4F7A57}
+/* ↩ 취소 — 산 아이템 카드 아래에 붙는 작은 1P 환불 버튼 */
+.myr-c .myr-cx{display:block;width:100%;margin-top:1px;border:1px solid #EDC7BE;background:#FFF4F1;color:#B0635A;
+  border-radius:7px;height:15px;font-size:8.5px;font-weight:900;cursor:pointer;padding:0;line-height:1;
+  white-space:nowrap;letter-spacing:-.4px;font-family:inherit}
+.myr-c .myr-cx:active{transform:scale(.95);background:#FBDCD4}
+.myr-c:has(.myr-cx){padding-bottom:3px}
 .myr-tabs{display:flex;gap:4px;padding:7px 0 0;overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
 .myr-tray .pgd-body{flex:1 1 auto;min-height:0}
 .myr-tabs::-webkit-scrollbar{display:none}
@@ -4617,7 +4623,7 @@ function avShopCard(kind, key, label, inner, kid, av){
     + '<span class="av-card-n">' + esc(label) + '</span>'
     + (has
         ? '<span class="av-own">보유 ✓</span>'
-          + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="엄마·아빠 PIN으로 구매를 취소할 수 있어요">🔒 취소</button>' : '')
+          + (paid ? '<button class="av-refund" type="button" data-act="av-refund" data-k="' + kind + '" data-v="' + key + '" title="구매를 취소하고 💎 1P를 돌려받아요">↩ 취소</button>' : '')
         : '<button class="av-buy" type="button" data-act="av-buy" data-k="' + kind + '" data-v="' + key + '" title="💎 1P로 구매">1P로 구매</button>')
     + '</div>';
 }
@@ -5337,6 +5343,18 @@ function avRefund(kid, kind, key){
       var kept = s.playground[kid].filter(function(r){ return !(r && r.preset === key); });
       pgCleaned = s.playground[kid].length - kept.length;
       if (pgCleaned > 0) s.playground[kid] = kept;
+    }
+    /* 4-2) 🏡 집꾸미기 방에 불러 둔 그 캐릭터도 함께 정리 (그 방의 내 캐릭터는 남긴다) */
+    if (kind === 'preset' && s.myRoom){
+      Object.keys(s.myRoom).forEach(function(rid){
+        var rm = s.myRoom[rid];
+        if (!rm || !Array.isArray(rm.chars)) return;
+        var keptC = rm.chars.filter(function(c){ return !(c && !c.me && c.k === key); });
+        if (keptC.length !== rm.chars.length){
+          pgCleaned += rm.chars.length - keptC.length;
+          rm.chars = keptC;
+        }
+      });
     }
     /* 5) 🏡 놀이터에 지어 둔 그 건물도 함께 철무 (소유권만 취소되므로 재구매 후 다시 지을 수 있음) */
     if (kind === 'build' && s.pgBuilds && Array.isArray(s.pgBuilds[kid])){
@@ -8424,7 +8442,7 @@ function renderAvatarSheet(){
     +   (giftPendAmt(kid) > 0 ? '<button type="button" class="av-ptgift" data-act="gift-open" title="눌러서 선물상자 3개 중 하나를 골라요">🎁 선물 도착! +' + giftPendAmt(kid) + 'P</button>' : '')
     +   '<span class="av-ptunit">1개 = 💎 1P</span>'
     +   '<span class="av-ptown">👗 보유한 아이템: ' + (ownCount ? ownCount + '개' : '없음') + '</span>'
-    +   '<span class="av-ptlock">🔒 엄마·아빠 전용</span>'
+    +   '<span class="av-ptlock">🔒 ＋1P·－1P는 부모만</span>'
     +   '<span class="av-ptadj">'
     +     '<button type="button" data-act="pt-bonus" data-d="1" title="엄마·아빠 PIN을 눌러야 선물할 수 있어요">＋1P</button>'
     +     '<button type="button" data-act="pt-bonus" data-d="-1" title="엄마·아빠 PIN을 눌러야 조정할 수 있어요">－1P</button>'
@@ -8517,13 +8535,12 @@ document.addEventListener('click', function(ev){
     var rKid = avatarDraft.kid, rKind = el.dataset.k, rKey = el.dataset.v;
     if (avIsFree(rKind, rKey) || !avPaid(rKid, rKind, rKey)){ toast('이미 보유하지 않은 아이템이에요'); return; }
     var rMsg = '「' + avItemLabel(rKind, rKey) + '」 구매를 취소하고 1P를 돌려줄까요?'
-             + (rKind === 'preset' ? '\n(놀이터에 나와 있는 캐릭터도 함께 정리돼요)' : '')
+             + (rKind === 'preset' ? '\n(놀이터·집꾸미기에 나와 있는 캐릭터도 함께 정리돼요)' : '')
              + (rKind === 'build' ? '\n(놀이터에 지어 둔 그 건물도 함께 빼야 해요)' : '');
-    /* 엄마·아빠 PIN을 통과해야만 — 3분 유지 중이라도 실수 방지를 위해 한 번 더 묻는다 */
-    requireParentPin(function(){
-      if (!window.confirm(rMsg)) return;
-      avRefund(rKid, rKind, rKey);
-    });
+    /* 11-26 은혜님 "애들이 캐릭터나 이런 거 샀을 때 자기들이 취소하고 할 수 있게 해줘"
+       — 부모 PIN 없이 아이가 확인 창만 거치고 직접 취소(1P 환불)한다 */
+    if (!window.confirm(rMsg)) return;
+    avRefund(rKid, rKind, rKey);
     return;
   }
   if (act === 'pt-bonus'){
@@ -18321,7 +18338,9 @@ var MYR_ITEM = (function(){
   var ITEM = C.map, LIST = C.list, P = C.P || {}, KX = C.KX || 0.36, KZ = C.KZ || 0.70;
 
   /* ---------- 집 구조 (11-26 3단 개편: 왼쪽 옆벽 + 넓은 위층 · 가운데 아치 문 · 앞쪽 잔디 테라스) ---------- */
-  var HX0 = -4.4, HX1 = 4.4;          /* 집 폭 8.8m — 인형의 집처럼 아기자기하게 */
+  /* 11-26 은혜님 "근데 좀 더 넓어야겠다 가로 2배로 넓혀줘. 애들이 캐릭터 많이 사니까"
+     — 집 폭 8.8m → 17.6m. 배율(S≈46)은 그대로 두고 카메라만 좌우로 더 움직인다. */
+  var HX0 = -8.8, HX1 = 8.8;          /* 집 폭 17.6m */
   var D1 = 4.0;                       /* 위층(단) 깊이 — 아늑하게 넓힘 */
   var ZD = 8.2;                       /* 아치 문·반칸막이 경계 (실내 ↔ 야외 테라스) */
   var HZ1 = 15.0;                     /* 야외 잔디 테라스 끝 — 테라스 마루·계단만큼 앞으로 넓힘 */
@@ -18338,7 +18357,8 @@ var MYR_ITEM = (function(){
   var ZP = ZD + 1.02;                 /* 테라스 마루 끝 · 오른쪽 3단 계단이 시작되는 z */
   var TER_Z = ZP + 1.10;              /* 오른쪽 3단 계단이 끝나고 잔디가 시작되는 z */
   var TER_N = 3, TER_H = -TERR_E/3;   /* 내려가는 계단 3단 — 0.2m씩 */
-  var RSX0 = 2.26, RSX1 = HX1 - 0.06; /* 오른쪽 3단 계단 폭 (유리 난간 오른쪽 ~ 오른쪽 벽) */
+  /* 오른쪽 3단 계단 — 집이 넓어져도 계단 폭(2.08m)은 그대로, 아치 문 바로 오른쪽에 둔다 */
+  var RSX0 = ARC_W + 1.08, RSX1 = RSX0 + 2.08;
   var TBL_Z = TER_Z + 2.34;           /* 잔디 가운데 정원 테이블 */
   var TBL = { x: 0.05, z: TBL_Z, r: 1.30 };   /* 캐릭터·동물이 돌아서 걷는 반경 */
   var GRASS_D = { a:'#DEF0CB', b:'#D5EBC0', base:'#DAEFC8', line:'rgba(146,192,132,.20)' };
@@ -19220,6 +19240,19 @@ var MYR_ITEM = (function(){
     { z: TER_Z + 2.54, f: function(g){ roseBush(g, HX1 - 1.02, TER_Z + 2.54, 1.14); } },
     { z: TER_Z + 3.44, f: function(g){ topiary(g, HX1 - 0.90, TER_Z + 3.44, 1.12); } },
     { z: TER_Z + 4.05, f: function(g){ daisies(g, HX1 - 0.78, TER_Z + 4.05, 1.05); } },
+    /* 오른쪽 마루 끝 — 넓어진 집의 오른쪽도 왼쪽과 같은 결로 채운다 */
+    { z: ZP - 0.38, e: 0, f: function(g){ roseBush(g, HX1 - 0.68, ZP - 0.38, 1.30); } },
+    { z: ZP - 0.36, e: 0, f: function(g){ lavenderPot(g, HX1 - 1.36, ZP - 0.36, 1.24); } },
+    { z: ZP - 0.38, e: 0, f: function(g){ hydrangea(g, HX1 - 2.06, ZP - 0.38, 1.34); } },
+    /* 넓어진 잔디 마당 — 가운데 정원 테이블 좌우에도 화분을 고루 */
+    { z: TER_Z + 0.72, f: function(g){ roseBush(g, -2.92, TER_Z + 0.72, 1.22); } },
+    { z: TER_Z + 3.86, f: function(g){ daisies(g, -2.74, TER_Z + 3.86, 1.06); } },
+    { z: TER_Z + 0.78, f: function(g){ hydrangea(g, 5.24, TER_Z + 0.78, 1.24); } },
+    { z: TER_Z + 3.90, f: function(g){ topiary(g, 5.06, TER_Z + 3.90, 1.12); } },
+    /* 왼쪽 잔디에도 작은 정원 세트 하나 — 넓어진 마당이 비지 않게 */
+    { z: TBL_Z - 0.05, f: function(g){ gardenChair(g, -5.02 - 1.24, TBL_Z - 0.14); } },
+    { z: TBL_Z - 0.02, f: function(g){ gardenChair(g, -5.02 + 1.24, TBL_Z - 0.20); } },
+    { z: TBL_Z + 0.02, f: function(g){ gardenTable(g, -5.02, TBL_Z); } },
     /* 잔디 가운데 — 의자 둘 · 테이블 (z 순서를 따로 두어 캐릭터가 사이에 서도 자연스럽게) */
     { z: TBL_Z - 0.05, f: function(g){ gardenChair(g, TBL.x - 1.32, TBL.z - 0.12); } },
     { z: TBL_Z - 0.02, f: function(g){ gardenChair(g, TBL.x + 1.32, TBL.z - 0.20); } },
@@ -19247,8 +19280,8 @@ var MYR_ITEM = (function(){
     g.strokeStyle='#EBDCC4'; g.lineWidth=1.2; g.stroke();
   }
   /* 잔디 가운데 정원 테이블 — 은혜님 "화단에도 저렇게 테이블 놓고" */
-  function gardenTable(g){
-    var S = MY.S, X = px(TBL.x, TBL.z), Y = py(TBL.z, 0);
+  function gardenTable(g, gx, gz){
+    var S = MY.S, X = px(gx == null ? TBL.x : gx, gz == null ? TBL.z : gz), Y = py(gz == null ? TBL.z : gz, 0);
     g.save(); g.globalAlpha = .17; g.fillStyle = '#5E7C52';
     g.beginPath(); g.ellipse(X, Y, 0.84*S, 0.29*S, 0, 0, Math.PI*2); g.fill(); g.restore();
     /* 받침·기둥 */
@@ -19288,7 +19321,7 @@ var MYR_ITEM = (function(){
     }
     /* 앞면으로 흘러내리는 아이비 */
     g.save();
-    for (var i=0;i<26;i++){
+    for (var i=0;i<46;i++){
       var ix = HX0 + 0.15 + ((i*53)%100)/100*(HX1-HX0-0.3);
       var iy = py(z1, 0) - 0.02*S + ((i*29)%100)/100*0.26*S;
       g.beginPath(); g.ellipse(px(ix, z1), iy, 0.075*S, 0.045*S, (i%2?0.6:-0.6), 0, Math.PI*2);
@@ -20049,7 +20082,7 @@ var MYR_ITEM = (function(){
     if (czMin <= czMax) cz = clamp(cz, czMin, czMax);
     else cz = (czMin + czMax)/2;
     MY.camZg = cz;
-    MY.camXg = clamp(h.x + (h.z - cz)*KX, HX0 + 1.0, HX1 - 1.0);
+    MY.camXg = clamp(h.x + (h.z - cz)*KX, camXLim()[0], camXLim()[1]);
     if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
   }
   /* 보관함·상점을 열고 닿을 때 — 추적 중이면 고정 배율 유지한 채 다시 잡는다 */
@@ -20073,16 +20106,23 @@ var MYR_ITEM = (function(){
     }
     var r = room(); if (!r) return;
     var h = hero(r); if (!h) return;
-    MY.camXg = clamp(h.x, HX0+2, HX1-2);
+    MY.camXg = clamp(h.x, camXLim()[0], camXLim()[1]);
     MY.camZg = clamp(h.z - 1.4, 1.2, HZ1-1.5);
     if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
   }
   /* 11-26 은혜님 "확대축소 없애줘" — 버튼·핀치·휠 모두 막고 고정 배율만 쓴다 */
   function zoomBy(){ MY.Sgoal = baseS(); }
+  /* 넓어진 집(±8.8m)에서 좌우 끝까지 볼 수 있게 — 화면 절반 폭만큼만 여유를 두고 막는다
+     (집 밖 빈 배경이 화면을 채우지 않도록 끝에 붙는 자리가 한계) */
+  function camXLim(){
+    var half = Math.min((HX1 - HX0)/2, (MY.W/2) / Math.max(1, MY.S));
+    return [HX0 + half, HX1 - half];
+  }
   function clampCam(){
-    MY.camX = clamp(MY.camX, HX0-9, HX1+9);
+    var xl = camXLim();
+    MY.camX = clamp(MY.camX, xl[0], xl[1]);
     MY.camZ = clamp(MY.camZ, -2, HZ1+3);
-    MY.camXg = clamp(MY.camXg, HX0-9, HX1+9);
+    MY.camXg = clamp(MY.camXg, xl[0], xl[1]);
     MY.camZg = clamp(MY.camZg, -2, HZ1+3);
   }
   function easeCam(dt){
@@ -20213,7 +20253,7 @@ var MYR_ITEM = (function(){
     for (var li=0; li<levels.length; li++){
       var L = levels[li];
       var zs = L ? [3.5, 2.9, 2.1, 1.3, 0.7] : [6.2, 7.0, 7.7, 8.6, 10.7, 11.5, 12.4, 13.3, 14.2];
-      var xs = [0, 1.5, -1.5, 3.0, -3.0, 4.4, -4.4, 5.5, -5.5];
+      var xs = [0, 1.5, -1.5, 3.0, -3.0, 4.4, -4.4, 5.9, -5.9, 7.2, -7.2];
       for (var zi=0; zi<zs.length; zi++) for (var xi=0; xi<xs.length; xi++){
         var cx = xs[xi], cz = zs[zi];
         if (cx - w/2 < HX0 + 0.3 || cx + w/2 > HX1 - 0.3) continue;
@@ -20229,7 +20269,7 @@ var MYR_ITEM = (function(){
         if (!occupied) return { x:+cx.toFixed(2), z:+cz.toFixed(2), lvl:L };
       }
     }
-    return { x: (Math.random()*8-4).toFixed(2)*1, z: 7.5 + Math.random()*3, lvl:0 };
+    return { x: (Math.random()*15.6-7.8).toFixed(2)*1, z: 7.5 + Math.random()*3, lvl:0 };
   }
   function freeCharSpot(preset){
     var r = room(); if (!r) return { x:1.5, z:8 };
@@ -20466,6 +20506,26 @@ var MYR_ITEM = (function(){
     var f = AV_PRESETS.filter(function(p){ return p.k === k; })[0];
     return f ? f.n : k;
   }
+  /* ---------- ↩ 구매 취소 — 아이가 직접 1P 환불 ----------
+     · 기본 9종(bed·desk·rug_flower·table·window_arch·garland·frame_pic·clock_wall·wall_shelf)의
+       맨 처음 1개는 무료로 주는 것이라 취소할 수 없고, 더 산 2개째부터 취소된다 */
+  var BASE_FREE = ['bed','desk','rug_flower','table','window_arch','garland','frame_pic','clock_wall','wall_shelf'];
+  function baseFree(k){ return BASE_FREE.indexOf(k) > -1; }
+  function minKeep(k){ return baseFree(k) ? 1 : 0; }
+  function canRefund(k){
+    return ownedCount(k) > minKeep(k);
+  }
+  /* 카드 한 장 — ↩ 취소 버튼이 붙는 카드만 <div>(버튼 안에 버튼은 안 되니까), 나머지는 기존 <button> 그대로 */
+  function myrCard(o){
+    var cls = 'myr-c' + (o.pc ? ' pc' : '') + (o.done ? ' done' : '');
+    var attrs = ' data-myrbuy="' + esc(o.buy) + '"' + (o.nm ? ' data-nm="' + esc(o.nm) + '"' : '');
+    var cx = o.refund
+      ? '<button type="button" class="myr-cx" data-myrrefund="' + esc(o.refund) + '" title="구매를 취소하고 💎 1P를 돌려받아요">↩ 취소</button>'
+      : '';
+    var open = cx ? '<div class="' + cls + '" role="button" tabindex="0"' + attrs + '>'
+                  : '<button type="button" class="' + cls + '"' + attrs + '>';
+    return open + o.inner + cx + (cx ? '</div>' : '</button>');
+  }
   function renderShop(){
     var tabs = $m('myrShopTabs'), body = $m('myrShopBody');
     if (!tabs || !body) return;
@@ -20478,24 +20538,28 @@ var MYR_ITEM = (function(){
     if (MY.shopTab === 'preset'){
       (typeof AV_PRESETS === 'undefined' ? [] : AV_PRESETS).forEach(function(p){
         var own = (typeof avUnlocked === 'function') ? avUnlocked(kid, 'preset', p.k) : false;
-        h += '<button type="button" class="myr-c pc' + (own ? ' done' : '') + '" data-myrbuy="preset:' + esc(p.k) + '" data-nm="' + esc(p.n) + '">'
-          + '<img class="fr" loading="lazy" decoding="async" src="assets/avatars/' + esc(p.k) + '.webp" alt="">'
-          + '<span class="nm">' + esc(p.n) + '</span>'
-          + '<span class="prc' + (own ? ' own' : '') + '">' + (own ? '보유' : '1P') + '</span>'
-          + '</button>';
+        var mine = own && (typeof avPaid === 'function') && avPaid(kid, 'preset', p.k);
+        h += myrCard({
+          buy: 'preset:' + p.k, nm: p.n, pc: true, done: own,
+          refund: mine ? 'preset:' + p.k : '',
+          inner: '<img class="fr" loading="lazy" decoding="async" src="assets/avatars/' + esc(p.k) + '.webp" alt="">'
+            + '<span class="nm">' + esc(p.n) + '</span>'
+            + '<span class="prc' + (own ? ' own' : '') + '">' + (own ? '보유' : '1P') + '</span>'
+        });
       });
     } else {
       var cats = MY.shopTab === 'wall' ? ['wall','theme'] : [MY.shopTab];
       LIST.filter(function(o){ return cats.indexOf(o.cat) >= 0; }).forEach(function(o){
         var n = (r && Number((r.inv || {})[o.k])) || 0;
-        h += '<button type="button" class="myr-c" data-myrbuy="' + esc(o.k) + '">'
-          + '<img src="' + thumbOf(o.k) + '" alt="" loading="lazy" decoding="async">'
-          + '<span class="nm">' + esc(o.n) + '</span>'
-          + '<span class="prc' + (n ? ' own' : '') + '">' + (n ? '×' + n : '1P') + '</span>'
-          + '</button>';
+        h += myrCard({
+          buy: o.k, refund: canRefund(o.k) ? o.k : '',
+          inner: '<img src="' + thumbOf(o.k) + '" alt="" loading="lazy" decoding="async">'
+            + '<span class="nm">' + esc(o.n) + '</span>'
+            + '<span class="prc' + (n ? ' own' : '') + '">' + (n ? '×' + n : '1P') + '</span>'
+        });
       });
     }
-    h += '</div><div class="pgd-tip">토톡 누르면 💎 1P로 사요 · 산 물건은 🎒 보관함에서 집에 놓아요</div>';
+    h += '</div><div class="pgd-tip">톡 누르면 💎 1P로 사요 · 산 물건은 🎒 보관함에 · ↩ 취소하면 1P 환불</div>';
     body.innerHTML = h;
   }
   function openShop(tab){
@@ -20544,6 +20608,68 @@ var MYR_ITEM = (function(){
     if (isP) say('🎀 ' + nm + ' — 보관함 👥 사람 탭에 생겼어요');
     renderShop(); refreshHead();
     try { buildTray(); } catch(e){}
+  }
+
+  /* ↩ 구매 취소 — 수량 1 줄이고 💎 1P 환불 · 방에 놓인 게 남은 수량보다 많으면 마지막 하나를 치운다 */
+  function myrRefund(key){
+    var kid = MY.kid; if (!kid) return;
+    var r = room(true); if (!r) return;
+    var isP = key.indexOf('preset:') === 0;
+    if (isP){
+      var pk = key.slice(7);
+      if (typeof avPaid !== 'function' || !avPaid(kid, 'preset', pk)){
+        if (typeof toast === 'function') toast('이미 보유하지 않은 캐릭터예요');
+        return;
+      }
+      var okC = (typeof window.confirm === 'function')
+        ? window.confirm('「' + presetNm(pk) + '」 캐릭터를 취소하고 💎 1P를 돌려받을까요?\n(집꾸미기에 불러 둔 그 친구도 함께 나가요)')
+        : true;
+      if (!okC) return;
+      if (typeof avRefund === 'function') avRefund(kid, 'preset', pk);
+      renderShop(); refreshHead();
+      try { buildTray(); } catch(e){}
+      return;
+    }
+    var o = ITEM[key]; if (!o) return;
+    var own = ownedCount(key), keep = minKeep(key);
+    if (own <= keep){
+      if (typeof toast === 'function') toast(baseFree(key) ? '기본으로 주는 1개는 취소할 수 없어요' : '이미 보유하지 않은 아이템이에요');
+      return;
+    }
+    var pl = placedCount(key);
+    var msg = '「' + o.n + '」 1개를 취소하고 💎 1P를 돌려받을까요?';
+    if (pl > own - 1 && o.cat !== 'theme') msg += '\n(집에 놓아 둔 것 1개도 함께 치워요)';
+    if (o.cat === 'theme' && r.theme === o.theme && own - 1 <= 0) msg += '\n(지금 입힌 테마라 기본 우드 테마로 돌아가요)';
+    if (typeof window.confirm === 'function' && !window.confirm(msg)) return;
+    mutate(function(s){
+      var rr = s.myRoom && s.myRoom[kid]; if (!rr) return;
+      rr.inv = rr.inv || {};
+      var n = Number(rr.inv[key]) || 0;
+      if (n > keep){
+        if (n - 1 > 0) rr.inv[key] = n - 1;
+        else delete rr.inv[key];
+      }
+      /* 💎 1P 환불 */
+      s.shop = s.shop || {};
+      s.shop.spent = s.shop.spent || {};
+      s.shop.spent[kid] = Math.max(0, (Number(s.shop.spent[kid]) || 0) - 1);
+      /* 방에 놓인 게 남은 수량보다 많으면 마지막에 놓은 것부터 치운다 */
+      var left = Number(rr.inv[key]) || 0;
+      if (o.cat !== 'theme'){
+        var mine = (rr.items || []).filter(function(it){ return it.k === key; });
+        while (mine.length > left){
+          var it2 = mine.pop();
+          rr.items = (rr.items || []).filter(function(x){ return x.id !== it2.id; });
+          if (PET.a[it2.id]) delete PET.a[it2.id];
+        }
+      }
+      /* 입히고 있던 테마를 취소했으면 기본 우드로 */
+      if (o.cat === 'theme' && left <= 0 && rr.theme === o.theme) rr.theme = 'wood';
+    });
+    renderShop(); refreshHead();
+    try { buildTray(); } catch(e){}
+    say('↩ ' + o.n + ' 취소했어요 · 💎 +1P');
+    if (typeof toast === 'function') toast('↩ ' + o.n + ' 구매를 취소했어요 · 💎 +1P 환불', 2400);
   }
 
   /* ---------- 테마 ---------- */
@@ -20890,6 +21016,8 @@ var MYR_ITEM = (function(){
     if (t.closest('#myrShopX')){ closeShop(); return; }
     var st2 = t.closest('[data-myshoptab]');
     if (st2){ MY.shopTab = st2.dataset.myshoptab; renderShop(); return; }
+    var rfx = t.closest('[data-myrrefund]');
+    if (rfx){ ev.preventDefault(); myrRefund(rfx.dataset.myrrefund); return; }
     var by2 = t.closest('[data-myrbuy]');
     if (by2){ myrBuy(by2.dataset.myrbuy); return; }
     if (t.closest('#myrRoll')){ doRoll(); return; }
