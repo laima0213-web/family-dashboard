@@ -19698,13 +19698,13 @@ var MYR_ITEM = (function(){
   };
   /* 침대 눕기 — e:매트리스 윗면(m), fz:발끝 z(깊이 비율), rot:기울기, sc:크기, x:좌우 보정(m) */
   var LIE = {
-    _bed:        { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
-    bed:         { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
-    canopy_bed:  { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
-    bed_kid:     { e:0.44, fz:0.20, rot:-0.30*Math.PI, sc:0.66, x:0.28 },
-    bunk:        { e:0.20, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 },
-    bunk_luxe:   { e:0.34, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 },
-    bunk_pink:   { e:0.45, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 }
+    _bed:        { e:0.52, fz:0.46, rot:-0.48*Math.PI, sc:0.82, x:0.50 },
+    bed:         { e:0.52, fz:0.46, rot:-0.48*Math.PI, sc:0.82, x:0.50 },
+    canopy_bed:  { e:0.47, fz:0.46, rot:-0.48*Math.PI, sc:0.82, x:0.50 },
+    bed_kid:     { e:0.46, fz:0.46, rot:-0.48*Math.PI, sc:0.64, x:0.36 },
+    bunk:        { e:0.20, fz:0.46, rot:-0.48*Math.PI, sc:0.58, x:0.34 },
+    bunk_luxe:   { e:0.23, fz:0.46, rot:-0.48*Math.PI, sc:0.58, x:0.36 },
+    bunk_pink:   { e:0.34, fz:0.46, rot:-0.48*Math.PI, sc:0.58, x:0.36 }
   };
   /* 앉거나 누운 캐릭터의 자세 — 없으면 null(서 있음) */
   function seatPose(c, size){
@@ -19715,8 +19715,10 @@ var MYR_ITEM = (function(){
       var L = LIE[it.k] || LIE._bed;
       var d = Number(o.d) || 1.2;
       var fz = (L.fz != null) ? L.fz : 0.16;
-      var lx = it.x + (L.x || 0), lz = it.z - d*fz;
-      return { lie:true, X:px(lx, lz), Y:py(lz, elevOf(it) + L.e), rot:L.rot, sc:L.sc };
+      /* 침대를 좌우로 돌렸으면(it.r) 머리 쪽도 좌우로 뒤집는다 — x·rot 부호 반전 */
+      var mir = !!it.r;
+      var lx = it.x + (L.x || 0) * (mir ? -1 : 1), lz = it.z - d*fz;
+      return { lie:true, X:px(lx, lz), Y:py(lz, elevOf(it) + L.e), rot:(mir ? -L.rot : L.rot), sc:L.sc };
     }
     var S2 = SIT_POSE[it.k] || SEAT_POSE[o.seat] || SEAT_POSE.chair;
     /* 가구를 좌우로 돌렸으면(r) 앉는 자리도 좌우로 뒤집는다 */
