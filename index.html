@@ -249,13 +249,12 @@ button{font:inherit;color:inherit}
 .br-c.miss .br-x{display:grid}
 .br-c.today{border-color:#8FC7A2;box-shadow:0 0 0 2px rgba(143,199,162,.55);background:#F6FCF7}
 .br-c.today .br-d{color:#4E8F65}
-.br-tot{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
-.br-tot>div{display:flex;flex-direction:column;gap:1px;border-radius:12px;padding:5px 9px;
+.br-tot{display:flex;gap:5px;margin-top:7px}
+.br-tot>div{flex:1;display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  border-radius:12px;padding:6px 11px;
   background:linear-gradient(160deg,#F3FAFF,#EAF4FD);border:1px solid #D9E9F6}
-.br-tot>div:last-child{background:linear-gradient(160deg,#FFF8E6,#FEF2D8);border-color:#F0E0B4}
-.br-tot span{font-size:10px;font-weight:900;color:#8C9AA6;letter-spacing:-.2px}
-.br-tot b{font-size:15px;font-weight:900;color:#3E7CB1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
-.br-tot>div:last-child b{color:#A9752F}
+.br-tot span{font-size:10px;font-weight:900;color:#8C9AA6;letter-spacing:-.2px;white-space:nowrap}
+.br-tot b{font-size:16px;font-weight:900;color:#3E7CB1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
 .br-hint{margin-top:5px;font-size:10px;font-weight:800;color:#B0A392;line-height:1.3}
 @media (max-width:374px){
   .br-coin{width:24px;height:24px;font-size:8.5px}
@@ -7182,7 +7181,7 @@ function renderBrush(){
       + '<span class="br-coin">100<i class="br-x">✕</i></span></button>';
   }
 
-  var okN = brushOkN(map), monWon = okN * 100, allWon = brushTotal(kid);
+  var okN = brushOkN(map), monWon = okN * 100;
   el.innerHTML =
       '<div class="h2">🏆 오늘도 치카 100원!<small>🔒 칸 수정은 엄마·아빠</small></div>'
     + '<div class="br-top"><div class="br-tabs">'
@@ -7202,7 +7201,6 @@ function renderBrush(){
     + '<div class="br-grid">' + wd + cells + '</div>'
     + '<div class="br-tot">'
     +   '<div><span>이번 달 합계</span><b>' + won(monWon) + '</b></div>'
-    +   '<div><span>전체 누적 합계</span><b>' + won(allWon) + '</b></div>'
     + '</div>'
     + '<div class="br-hint">칸을 톡 누르면 성공(O) → 실패(✕) → 되돌리기 · 성공 1번 = 100원</div>';
 }
