@@ -2817,6 +2817,7 @@ const LocalAdapter = {
   patch: function(paths){
     this.openChannel();
     if (!this.root) this.root = { auth:{}, config:null, state:null };
+    saveRescueSnapshot();                 /* 🛟 덮어쓰기 전에 살아 있던 기록을 한 벌 남긴다 */
     applyPatch(this.root, paths);
     try { localStorage.setItem(CONFIG.LOCAL_KEY, JSON.stringify(this.root)); } catch(e){}
     if (this.bc){ try { this.bc.postMessage({ t:'patch', paths:paths }); } catch(e){} }
@@ -9188,17 +9189,32 @@ async function unlockApp(afterPinSetup){
   var prRoot = resolveParentPin(root);
   if (prRoot) parentPinRec = prRoot;
   var isNew = !root.state;
-  /* 🌳 부지 대확장 — 옛 좌표를 새 좌표로 한 번 옮기고, 옮긴 결과를 DB에도 적어 둔다 */
+  /* 🌳 부지 대확장 — 옛 좌표를 새 좌표로 한 번 옮기고, 옮긴 결과를 DB에도 적어 둔다
+     ⚠️ 반드시 잎 경로('state/pgGeo')로 패치한다 — { state: {...} } 로 넘기면
+     RTDB update 가 state 노드 전체를 그 키들로 갈아 버려 shop·avatars·kids·reading·want 가 사라진다. */
   if (root.state && !(Number(root.state.pgGeo) >= 2)){
     try {
-      DB.patch({ state: { pgGeo: 2, playground: state.playground || {}, pgBuilds: state.pgBuilds || {}, pgRides: state.pgRides || {} } })
-        .catch(function(){});
+      var migPaths = { 'state/pgGeo': 2 };
+      ['playground', 'pgBuilds', 'pgRides', 'pgProps'].forEach(function(k){
+        var v = state[k];
+        if (v && typeof v === 'object' && Object.keys(v).length) migPaths['state/' + k] = v;
+      });
+      DB.patch(migPaths).catch(function(){});
     } catch(e){ console.warn('[dashboard] 놀이터 좌표 이전 저장:', e && e.message); }
   }
 
   ensureDay();
   studyWeeklyAuto();          /* 오늘 요일의 반복 공부를 목록에 채운다 */
   renderAll();
+
+  /* 🛟 서버 기록이 비었는제 이 폰에 살아 있는 기록이 있으면 복구 ( ?recover=1 이면 바로, 아니면 배너 ) */
+  try {
+    saveRescueSnapshot();
+    if (root && stateIsWiped(root.state) && localAliveState()){
+      if (wantRecover()) restoreFromLocal(false);
+      else showRecoverBar();
+    }
+  } catch(e){ console.warn('[dashboard] 복구 준비:', e && e.message); }
 
   setInterval(renderClock, 1000);
   setInterval(studyLockRefresh, 20000);   /* 3분 인증이 끝나면 공부 잠금 배지도 제자리로 */
@@ -9211,8 +9227,94 @@ async function unlockApp(afterPinSetup){
   }
   if (afterPinSetup && isNew) setText('#footStore', DB.isRemote() ? '가족 기기와 실시간으로 맞춰져요' : '이 기기에 저장돼요 · DB를 연결하면 가족과 함께 써요');
 }
+/* ============================================================
+   🛟 덮어쓰기 사고 복구 — 이 폰 localStorage 에 살아 있는 기록을 서버로 되돌린다
+   (2026-11-26 `DB.patch({ state: ... })` 사고: RTDB update 가 state 노드를 통째로 갈아 버려
+    shop·avatars·kids·reading·want 가 비었을 때, 비행기 모드 등으로 남아 있는 폰 기록을 살린다)
+   ============================================================ */
+var RECOVER_STORE = CONFIG.LOCAL_KEY + '.rescue';
+function stateIsWiped(s){
+  if (!s || typeof s !== 'object') return true;
+  var empty = function(v){ return !v || typeof v !== 'object' || !Object.keys(v).length; };
+  return empty(s.kids) && empty(s.shop) && empty(s.reading);
+}
+function readSnapState(key){
+  try {
+    var raw = JSON.parse(localStorage.getItem(key) || 'null');
+    return (raw && raw.state && typeof raw.state === 'object') ? raw.state : null;
+  } catch(e){ return null; }
+}
+function localAliveState(){
+  var a = readSnapState(CONFIG.LOCAL_KEY);
+  if (a && !stateIsWiped(a)) return a;
+  var b = readSnapState(RECOVER_STORE);
+  if (b && !stateIsWiped(b)) return b;
+  return null;
+}
+function saveRescueSnapshot(){
+  try {
+    if (localStorage.getItem(RECOVER_STORE)) return;      /* 살아 있던 첫 기록만 남긴다 */
+    var cur = localStorage.getItem(CONFIG.LOCAL_KEY);
+    if (!cur) return;
+    var s = JSON.parse(cur);
+    if (s && s.state && !stateIsWiped(s.state)) localStorage.setItem(RECOVER_STORE, cur);
+  } catch(e){}
+}
+function wantRecover(){ return /[?&]recover=1/.test(location.search || ''); }
+function recoverPaths(src){
+  var out = {};
+  Object.keys(src || {}).forEach(function(k){
+    var v = src[k];
+    if (v === undefined || v === null) return;
+    if (k === 'date' || k === 'mission' || k === 'sched') return;   /* 오늘 몫 날짜는 건드리지 않는다 */
+    out['state/' + k] = v;                                          /* 반드시 잎 경로로 */
+  });
+  return out;
+}
+function hideRecoverBar(){
+  var el = document.getElementById('recoverBar');
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+function showRecoverBar(){
+  if (document.getElementById('recoverBar')) return;
+  var d = document.createElement('div');
+  d.id = 'recoverBar';
+  d.style.cssText = 'position:fixed;left:10px;right:10px;bottom:92px;z-index:70;background:#FFF3D6;border:2px solid #F3C96B;border-radius:16px;padding:10px 12px;box-shadow:0 8px 22px rgba(120,90,40,.18);font-size:13px;line-height:1.45;color:#6B4E19;display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  d.innerHTML = '<div style="flex:1;min-width:170px">📥 이 폰에 살아 있는 포인트·독서 기록이 있어요. 지금 서버 기록이 비어 있어요 — 이 폰 기록으로 되돌릴까요?</div>'
+    + '<button type="button" id="recoverYes" style="border:0;border-radius:12px;background:#E9A23B;color:#fff;font-weight:700;padding:9px 14px;font-size:13px">복원</button>'
+    + '<button type="button" id="recoverNo" style="border:0;border-radius:12px;background:#EFE0C4;color:#7A6030;font-weight:700;padding:9px 12px;font-size:13px">나중에</button>';
+  document.body.appendChild(d);
+  var yes = document.getElementById('recoverYes'), no = document.getElementById('recoverNo');
+  if (yes) yes.addEventListener('click', function(){ restoreFromLocal(false); });
+  if (no) no.addEventListener('click', hideRecoverBar);
+}
+async function restoreFromLocal(loud){
+  var src = localAliveState();
+  if (!src) return false;
+  var paths = recoverPaths(src);
+  if (!Object.keys(paths).length) return false;
+  try {
+    await DB.patch(paths);
+  } catch(e){
+    console.warn('[dashboard] 복원 저장 실패:', e && e.message);
+    if (typeof toast === 'function') toast('복원 저장이 잠시 안 됐어요 · 연결되면 다시 시도해 주세요', 3200);
+    return false;
+  }
+  try { state = normalizeState(src); renderAll(); } catch(e){}
+  hideRecoverBar();
+  if (typeof toast === 'function') toast('📥 복원 완료! 이 폰에 살아 있던 포인트·독서 기록을 서버로 되돌렸어요', 5000);
+  return true;
+}
+
 function onRemoteRoot(root){
   if (!unlocked || !root) return;
+  /* 🛟 서버가 비었고 이 폰에 살아 있는 기록이 있으면, 빈 서버 기록을 화면에 앉히지 않고 복구를 먼저 권한다 */
+  if (stateIsWiped(root.state) && localAliveState() && !remoteSeen){
+    remoteSeen = true;
+    if (wantRecover()){ restoreFromLocal(true); return; }
+    showRecoverBar();
+    return;
+  }
   var prRec = resolveParentPin(root);        /* 부모 PIN은 다른 기기에서 정해도 바로 반영 */
   if (prRec) parentPinRec = prRec;
   var first = !remoteSeen;
@@ -13037,7 +13139,8 @@ function loop(ts){
 /* ---------- 화면 조작 ---------- */
 function pick(px, py){
   var best = null, bz = -1e9;
-  PG.charOrder.forEach(function(id){
+  /* ✋ 옮기기 중에는 캐릭터를 집지 않는다 — 캐릭터가 소품 앞을 막아도 소품을 고를 수 있게 */
+  if (!PG.move) PG.charOrder.forEach(function(id){
     var c = PG.chars[id];
     if (!c || c.vil !== PG.vil) return;
     var cx = sX(c.x), cy = sY(c.z);
@@ -13058,6 +13161,19 @@ function pick(px, py){
   if (best) return best;
   var wxp = wX(px), wzp = wZ(py);
   var S = sceneOf(PG.vil), hit = null;
+  /* ✋ 옮기기 — 기구 가운데(좁은 칼럼)를 탭하면 기구, 그 밖은 소품을 먼저 집는다 */
+  if (PG.move){
+    S.rides.forEach(function(r){
+      var R = rideOf(r.k);
+      var ax = sX(r.x), ay = sY(r.z);
+      var hw = Math.max(20, (R.w || 4) * PG.S * 0.46);
+      var up = Math.max(26, (R.h || 5) * PG.S);
+      if (px > ax - hw && px < ax + hw && py > ay - up && py < ay + Math.max(10, 0.2 * PG.S)) hit = { type:'ride', r: r };
+    });
+    if (hit) return hit;
+    var hp = pickProp(px, py);
+    if (hp) return hp;
+  }
   S.rides.forEach(function(r){
     var R = rideOf(r.k);
     var dx = wxp - r.x, dz = wzp - r.z;
@@ -13065,12 +13181,7 @@ function pick(px, py){
     if (Math.abs(dx) < rx && Math.abs(dz) < rz){ hit = { type:'ride', r: r }; }
   });
   if (hit) return hit;
-  /* ✋ 옮기기 모드 — 소품도 손가락으로 집을 수 있게 (그림 크기만큼 넉넉하게) */
-  if (PG.move){
-    var hp = pickProp(px, py);
-    if (hp) return hp;
-  }
-  S.signs.forEach(function(sg){
+  /* ✋ 옮기기 — 기구 발치 바깥쪽도 넓게 잡아 준다 */  S.signs.forEach(function(sg){
     if (Math.abs(wxp - sg.x) < 2.0 && Math.abs(wzp - sg.z) < 1.8) hit = { type:'sign', s: sg };
   });
   if (hit) return hit;
@@ -13088,18 +13199,39 @@ function pick(px, py){
   });
   return hit;
 }
+/* ✋ 옮기기 — 손가락으로 소품을 집는다.
+   큰 소품(나무·텐트·분수·눈사람·이글루 등)을 먼저 집고, 바닥 잔풀·꽃·버섯 같은 자잘한 장식은
+   그 위를 콕 집었을 때만 집는다. 상자를 손가락이 닿는 만큼(최소 30px) 넓히고, 아주 작은 물건은 18px까지
+   줄여서 — 5개 마을 어느 배율(확대·축소)에서나 큰 물건이 장식에 가로채이지 않게 한다. */
+var PROP_SMALL = { tuft:1, flowers:1, daisy:1, mushroom:1, rock:1, stump:1 };
 function pickProp(px, py){
   var S = sceneOf(PG.vil), best = null, bd = 1e9;
+  var rides = S.rides || [];
+  function onRide(x, z){                 /* 기구와 같은 자리에 붙어 있는 소품(모닥불 밑 통나무·썰매발판)도 기구로 집는다 */
+    for (var j = 0; j < rides.length; j++){
+      if (Math.abs(rides[j].x - x) < 0.55 && Math.abs(rides[j].z - z) < 0.55) return true;
+    }
+    return false;
+  }
   (S.props || []).forEach(function(p, i){
     if (p.t === 'bridge' || p.sign) return;      /* 다리는 옮기지 않는다 — 길을 잇는 다리라서 */
+    if (onRide(p.x, p.z)) return;
     var d = ARTD[p.t];
     if (!d) return;
     var sc = p.s || 1;
     var ax = sX(p.x), ay = sY(p.z);
-    var w = Math.max(15, d[0] * PG.S * sc), h = Math.max(16, d[1] * PG.S * sc);
-    if (px < ax - w * 0.52 || px > ax + w * 0.52) return;
-    if (py < ay - h * 0.95 || py > ay + Math.max(6, h * 0.16)) return;
-    var dd = Math.hypot(px - ax, (py - ay) * 1.4);
+    var wUnit = d[0] * sc, hUnit = d[1] * sc;
+    var small = !!PROP_SMALL[p.t];
+    var w = Math.max(small ? 18 : 30, wUnit * PG.S);
+    if (w > 320) w = 320;
+    var h = Math.max(small ? 18 : 30, hUnit * PG.S);
+    var up = h * (small ? 1.0 : 1.06), dn = Math.max(8, h * 0.18);
+    var hw = w * (small ? 0.52 : 0.58);
+    if (px < ax - hw || px > ax + hw) return;
+    if (py < ay - up || py > ay + dn) return;
+    /* 상자 안에서 얼마나 한가운데를 눌렀는지 — 자잘한 장식은 한 발 비켜 준다 */
+    var nx = (px - ax) / (hw + 1), ny = (py - ay) / ((py < ay ? up : dn) + 1);
+    var dd = Math.hypot(nx, ny * 0.8) + (small ? 0.55 : 0);
     if (dd < bd){ bd = dd; best = { type:'prop', p: p, i: i }; }
   });
   return best;
@@ -13126,8 +13258,15 @@ function onDown(e){
   var rect = PG.cv.getBoundingClientRect();
   var px = e.clientX - rect.left, py = e.clientY - rect.top;
   var hit = pick(px, py);
-  PG.tap = { hit: hit, x: px, y: py, t: performance.now(), moved: false };
-  if (hit && hit.type === 'char'){ PG.drag = { type:'char', c: hit.c, dx: hit.c.x - wX(px), dz: hit.c.z - wZ(py) }; }
+  PG.tap = { hit: hit, x: px, y: py, t: performance.now(), moved: false,
+             selAt: (PG.move && PG.moveSel && PG.moveSel.type) ? PG.moveSel.type : '' };
+  /* ✋ 옮기기에서 이미 하나를 골라 둔 상태 — 지금 누른 곳이 다른 물건이어도
+     손을 떼면 '여기에 놓기'다. 그래서 바로 집지 않고 기다렸다가, 정말 끌면 그때 그 물건으로 바꾼다. */
+  var selNow = !!(PG.move && PG.moveSel && PG.moveSel.type);
+  if (selNow && hit && (hit.type === 'prop' || hit.type === 'ride' || hit.type === 'build')){
+    PG.drag = { type:'pending', hit: hit, x: px, y: py };
+  }
+  else if (hit && hit.type === 'char'){ PG.drag = { type:'char', c: hit.c, dx: hit.c.x - wX(px), dz: hit.c.z - wZ(py) }; }
   else if (hit && hit.type === 'build'){ PG.drag = { type:'build', b: hit.b, dx: hit.b.x - wX(px), dz: hit.b.z - wZ(py) }, buildBarShow(hit.b); }
   else if (hit && hit.type === 'ride' && PG.move){ PG.drag = { type:'ride', r: hit.r, key: hit.r.k, dx: hit.r.x - wX(px), dz: hit.r.z - wZ(py) }, movePickRide(hit.r); }
   else if (hit && hit.type === 'prop' && PG.move){ PG.drag = { type:'prop', p: hit.p, i: hit.i, ox: hit.p.x, oz: hit.p.z, dx: hit.p.x - wX(px), dz: hit.p.z - wZ(py) }, movePickProp(hit.p, hit.i); }
@@ -13153,6 +13292,15 @@ function onMove(e){
   var px = e.clientX - rect.left, py = e.clientY - rect.top;
   if (PG.tap && (Math.abs(px - PG.tap.x) > 7 || Math.abs(py - PG.tap.y) > 7)) PG.tap.moved = true;
   if (!PG.drag) return;
+  /* 기다리던 손가락이 정말 끌렸다 — 그때는 고른 것을 바꿔 그 물건을 직접 끈다 */
+  if (PG.drag.type === 'pending'){
+    if (!PG.tap || !PG.tap.moved) return;
+    var ph = PG.drag.hit;
+    moveSelReset();
+    if (ph.type === 'prop') PG.drag = { type:'prop', p: ph.p, i: ph.i, ox: ph.p.x, oz: ph.p.z, dx: ph.p.x - wX(px), dz: ph.p.z - wZ(py) }, movePickProp(ph.p, ph.i);
+    else if (ph.type === 'ride') PG.drag = { type:'ride', r: ph.r, key: ph.r.k, dx: ph.r.x - wX(px), dz: ph.r.z - wZ(py) }, movePickRide(ph.r);
+    else { PG.drag = { type:'build', b: ph.b, dx: ph.b.x - wX(px), dz: ph.b.z - wZ(py) }; buildBarShow(ph.b); }
+  }
   if (PG.drag.type === 'char'){
     var c = PG.drag.c;
     var nx = clamp(wX(px) + PG.drag.dx, VIL[PG.vil].b.x0 + 0.6, VIL[PG.vil].b.x1 - 0.6);
@@ -13209,13 +13357,21 @@ function onUp(e){
   if (tap.moved) return;
   /* 톡 누르기 */
   var hit = tap.hit;
-  /* ✋ 옮기기 모드 — 기구·건물을 고르고, 바닥을 톡 누르면 그 자리로 */
+  /* ✋ 옮기기 모드 — 집·기구·소품을 톡 골라 두고, 다음 톡은 '여기에 놓기' */
   if (PG.move){
+    var sel = PG.moveSel || { type:'', key:'' };
+    if (sel.type && tap.selAt){                           /* 누를 때 이미 골라 둔 것이 있었으면 이번 톡은 놓기 */
+      if (movePlaceAt(wX(tap.x), wZ(tap.y))) moveSelReset();
+      return;
+    }
+    if (sel.type){                                        /* 끌다가 고른 것 — 손만 떼고 골라 둔 채로 둔다 */
+      return;
+    }
     if (hit && hit.type === 'ride'){ movePickRide(hit.r); return; }
     if (hit && hit.type === 'prop'){ movePickProp(hit.p, hit.i); return; }
     if (hit && hit.type === 'build'){ movePickBuild(hit.b); return; }
-    if (hit && hit.type === 'char'){ return; }
-    if (!hit || hit.type !== 'sign'){ movePlaceAt(wX(tap.x), wZ(tap.y)); return; }
+    hint('옮길 집·기구·소품을 먼저 톡 눌러 주세요', 2400);
+    return;
   }
   if (!hit){
     var wxp = wX(tap.x), wzp = wZ(tap.y);
