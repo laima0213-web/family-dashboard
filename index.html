@@ -18411,7 +18411,8 @@ var MYR_ITEM = (function(){
     on:false, kid:null, cv:null, ctx:null, W:390, H:844, dpr:1, inited:false,
     S:26, Sgoal:26, camX:0, camZ:7, camXg:0, camZg:7, follow:true, zoom:1,
     t:0, raf:0, last:0, move:false, sel:null, drag:null, pan:null, pinch:null,
-    tray:'all', trayOpen:true, tapId:0, walkT:0, hintT:9, rollTok:0, banner:''
+    tray:'all', trayOpen:true, tapId:0, walkT:0, hintT:9, rollTok:0, banner:'',
+    heroId:''            /* 11-26 — 톡 눌러 조종하는 캐릭터(윤이 말고 친구도 움직이게) */
   };
   var SPRC = {}, SPRES = {}, THUM = {}, IMGC = {};
 
@@ -19660,49 +19661,135 @@ var MYR_ITEM = (function(){
     }
     return 0;
   }
+  /* ---------- 🪑 앉기·🛏️ 눕기 자세 (11-26 전수 점검) ----------
+     가구마다 방바닥 기준 '좌판 높이'를 적어 두고, 캐릭터 엉덩이가 그 높이에 오도록 앉힌다.
+     침대는 눕는 각도·크기와 발끝 자리를 가구마다 지정한다.
+     HIPT = 스프라이트에서 치마 밑단(엉덩이)이 발끝에서 0.17×size 위 (400px 그림의 y≈330) */
+  var HIPT = 0.20;
+  var SPRH = 400;                        /* 아바타 그림 한 변(px) — assets/avatars/*.webp 400×400 */
+  /* 앉는 자리 — 가구 원점(앞-바닥 가운데)에서 화면 기준 오프셋(m). dy<0 은 위.
+     각 가구 그림의 좌판·방석 윗면에 엉덩이가 걸치도록 맞춘 값 (11-26 전수 점검) */
+  var SEAT_POSE = {
+    chair: { dx:-0.06, dy:-0.42 },
+    sofa:  { dx:-0.06, dy:-0.46 },
+    bench: { dx:0,     dy:-0.50 },
+    stool: { dx:-0.04, dy:-0.50 },
+    bed:   { dx:0,     dy:-0.48 }
+  };
+  var SIT_POSE = {
+    chair:               { dx:-0.06, dy:-0.42 },
+    chair_mint:          { dx:-0.06, dy:-0.42 },
+    chair_sky:           { dx:-0.06, dy:-0.42 },
+    sofa:                { dx:-0.06, dy:-0.46 },
+    sofa_l:              { dx:-0.14, dy:-0.42 },
+    cloud_sofa:          { dx:-0.04, dy:-0.50 },
+    bean_bag:            { dx:0,     dy:-0.62 },
+    daybed_cozy:         { dx:-0.04, dy:-0.46 },
+    bench:               { dx:0,     dy:-0.48 },
+    flower_arch_bench:   { dx:0,     dy:-0.50 },
+    stool:               { dx:-0.04, dy:-0.46 },
+    bar_stool:           { dx:-0.04, dy:-0.76 },
+    rocking:             { dx:-0.06, dy:-0.32 },
+    rattan_rock:         { dx:0,     dy:-0.58 },
+    swing_chair:         { dx:0,     dy:-0.86 },
+    hammock:             { dx:0,     dy:-0.45 },
+    hammock_egg:         { dx:0.04,  dy:-0.86 },
+    glass_balcony_chair: { dx:-0.03, dy:-0.58 }
+  };
+  /* 침대 눕기 — e:매트리스 윗면(m), fz:발끝 z(깊이 비율), rot:기울기, sc:크기, x:좌우 보정(m) */
+  var LIE = {
+    _bed:        { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
+    bed:         { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
+    canopy_bed:  { e:0.50, fz:0.20, rot:-0.30*Math.PI, sc:0.78, x:0.35 },
+    bed_kid:     { e:0.44, fz:0.20, rot:-0.30*Math.PI, sc:0.66, x:0.28 },
+    bunk:        { e:0.20, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 },
+    bunk_luxe:   { e:0.34, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 },
+    bunk_pink:   { e:0.45, fz:0.18, rot:-0.28*Math.PI, sc:0.62, x:0.16 }
+  };
+  /* 앉거나 누운 캐릭터의 자세 — 없으면 null(서 있음) */
+  function seatPose(c, size){
+    if (!c || !c.seat) return null;
+    var it = seatItem(c.seat); if (!it) return null;
+    var o = ITEM[it.k] || {};
+    if (o.seat === 'bed'){
+      var L = LIE[it.k] || LIE._bed;
+      var d = Number(o.d) || 1.2;
+      var fz = (L.fz != null) ? L.fz : 0.16;
+      var lx = it.x + (L.x || 0), lz = it.z - d*fz;
+      return { lie:true, X:px(lx, lz), Y:py(lz, elevOf(it) + L.e), rot:L.rot, sc:L.sc };
+    }
+    var S2 = SIT_POSE[it.k] || SEAT_POSE[o.seat] || SEAT_POSE.chair;
+    /* 가구를 좌우로 돌렸으면(r) 앉는 자리도 좌우로 뒤집는다 */
+    var ox2 = (it.r ? -S2.dx : S2.dx) * MY.S;
+    return { lie:false, X:px(it.x, it.z) + ox2, Y:py(it.z, elevOf(it)) + S2.dy*MY.S };
+  }
+  /* 이름표·누르기 판정에 쓰는 캐릭터 몸 상자 */
+  function charBox(c){
+    var size = (CH * (400/372)) * MY.S;
+    var ps = seatPose(c, size);
+    if (!ps){
+      var X = px(c.x, c.z), Y = py(c.z, charElev(c));
+      return { x0:X-size*0.30, x1:X+size*0.30, y0:Y-size*0.98, y1:Y+8, cy:Y-size*0.55 };
+    }
+    if (ps.lie){
+      var L = 0.93*size*ps.sc;
+      var hx = ps.X + Math.sin(ps.rot)*L, hy = ps.Y - Math.cos(ps.rot)*L;
+      var x0 = Math.min(ps.X, hx) - size*0.24, x1 = Math.max(ps.X, hx) + size*0.24;
+      var y0 = Math.min(ps.Y, hy) - size*0.34, y1 = Math.max(ps.Y, hy) + size*0.14;
+      return { x0:x0, x1:x1, y0:y0, y1:y1, cy:(y0+y1)/2 };
+    }
+    return { x0:ps.X-size*0.30, x1:ps.X+size*0.30, y0:ps.Y-size*1.05, y1:ps.Y+size*0.12, cy:ps.Y-size*0.62 };
+  }
   function drawCharEnt(g, c){
     var im = charImg(c.k); if (!im || !im.complete || !im.naturalWidth) return;
-    var X = px(c.x, c.z), Y = py(c.z, charElev(c));
     var size = (CH * (400/372)) * MY.S;
     var bob = c.bob ? Math.abs(Math.sin(c.bob)) * 0.045 * MY.S : 0;
-    var sit = !!c.seat;
+    var ps = seatPose(c, size);
+    var X = ps ? ps.X : px(c.x, c.z);
+    var Y = ps ? ps.Y : py(c.z, charElev(c));
+    var headX = X, headY = Y - size*0.93;
+    var cutH = SPRH;                      /* 앉을 때는 그림을 치마 밑단에서 잘라 그린다 */
     g.save();
-    g.translate(X, Y - bob);
+    g.translate(X, Y - (ps ? 0 : bob));
     if (MY.move && MY.sel && MY.sel.id === c.id){
       g.save(); g.globalAlpha=.30; g.fillStyle='#8FDDB0';
       g.beginPath(); g.ellipse(0, 0, size*0.24, size*0.11, 0, 0, Math.PI*2); g.fill(); g.restore();
     }
-    if (sit){
-      var seatIt = seatItem(c.seat) || {};
-      var seatKind = (ITEM[seatIt.k] || {}).seat;
-      if (seatKind === 'bed'){
-        /* 침대는 눕기 — 머리가 머리판(뒤쪽)으로 (자세 오프셋은 예전 그대로) */
-        g.translate(0, -0.34*MY.S);
-        g.rotate(-Math.PI*0.26);
-        g.translate(0, -0.18*MY.S);
+    if (ps){
+      if (ps.lie){
+        /* 침대 — 발끝을 매트리스 앞쪽에 두고 머리가 베개(뒤·왼쪽)로 가게 눕힌다 */
+        g.rotate(ps.rot);
+        if (ps.sc !== 1) g.scale(1, ps.sc);
+        headX = X + Math.sin(ps.rot)*0.93*size*ps.sc;
+        headY = Y - Math.cos(ps.rot)*0.93*size*ps.sc;
       } else {
-        g.beginPath(); g.rect(-size*0.6, -size*1.02, size*1.2, size*0.60); g.clip();
-        /* 11-26 캐릭터가 작아져도 의자에 파묻혀 보이지 않게 —
-           잘리는 허리 높이를 예전(1.95m 시절)과 같게 맞춰 앉힌다 */
-        g.translate(0, -(0.42*MY.S + 0.42*(1.95 - CH)*(400/372)*MY.S));
+        /* 의자·소파 — 엉덩이(발끝에서 0.20×size)를 좌판 높이에 올리고,
+           그 아래 다리는 좌판에 걸터앉은 모양이 되도록 그림에서 잘라낸다(치마 단 높이) */
+        g.translate(0, HIPT*size);
+        cutH = SPRH - HIPT*SPRH;
+        headX = X; headY = Y - size*(0.93 - HIPT);
       }
     }
     if (c.flip) g.scale(-1, 1);
-    g.drawImage(im, -size*0.5, -size + size*(4/400)*1.0, size, size);
+    if (cutH < SPRH){
+      /* 소스 그림을 치마 밑단까지만 잘라 그리기 — 다리가 좌판을 뚫지 않는다 */
+      g.drawImage(im, 0, 0, SPRH, cutH,
+                  -size*0.5, -size + size*(4/400)*1.0, size, size*(cutH/SPRH));
+    } else {
+      g.drawImage(im, -size*0.5, -size + size*(4/400)*1.0, size, size);
+    }
     g.restore();
     /* 이름표 */
-    if (!sit || true){
-      var nm = c.nm || famName(c.me ? MY.kid : '') || '친구';
-      g.save();
-      g.font = '800 9px "Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif';
-      var tw = g.measureText(nm).width;
-      var ly = Y - size*(372/400) - 6;
-      g.fillStyle = 'rgba(255,253,245,.92)';
-      roundRect(g, X - tw/2 - 5, ly - 10, tw + 10, 13, 6); g.fill();
-      g.fillStyle = '#6B5138'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(nm, X, ly - 3.5);
-      g.restore();
-    }
+    var nm = c.nm || famName(c.me ? MY.kid : '') || '친구';
+    g.save();
+    g.font = '800 9px "Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif';
+    var tw = g.measureText(nm).width;
+    var ly = headY - 6;
+    g.fillStyle = 'rgba(255,253,245,.92)';
+    roundRect(g, headX - tw/2 - 5, ly - 10, tw + 10, 13, 6); g.fill();
+    g.fillStyle = '#6B5138'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(nm, headX, ly - 3.5);
+    g.restore();
   }
   function seatItem(id){
     var r = room(); if (!r) return null;
@@ -19964,13 +20051,26 @@ var MYR_ITEM = (function(){
   /* 11-26 — 소품이 가구에 가려 뒤로 숨던 문제.
      같은 자리 근처에서는 접시·꽃병·조명 같은 소품을 가구보다 늘 나중(앞)에 그리고,
      바닥 러그는 늘 먼저 깔리게 정렬 열쇠를 보정한다. */
+  function itemKey(it){
+    var z = Number(it.z) || 0, k2 = z;
+    var k = (it && it.k) || '', cat = (ITEM[it.k] && ITEM[it.k].cat) || '';
+    if (/^rug_/.test(k)) k2 = z - 1.2;
+    else if (cat === 'prop' || cat === 'pet') k2 = z + 0.9;
+    return k2;
+  }
   function ordK(e){
-    var z = Number(e.z) || 0, k2 = z;
-    if (e.t === 'i'){
-      var k = (e.d && e.d.k) || '', cat = (e.o && e.o.cat) || '';
-      if (/^rug_/.test(k)) k2 = z - 1.2;
-      else if (cat === 'prop' || cat === 'pet') k2 = z + 0.9;
+    var z = Number(e.z) || 0, k2;
+    /* 11-26 — 앉거나 누운 캐릭터는 그 가구보다 확실히 앞(위)에 그린다.
+       침대 머리판·소파 등받이 뒤로 정수리만 빼꼼 나오던 문제의 원인. */
+    if (e.t === 'c' && e.d && e.d.seat){
+      var si = seatItem(e.d.seat);
+      if (si){
+        var raw = itemKey(si), sz = Number(si.z) || 0;
+        if (sz < D1) return Math.min(raw + 0.05, D1 - 0.055);  /* 위층 난간은 넘지 않게 */
+        return raw + 0.05;
+      }
     }
+    k2 = (e.t === 'i') ? itemKey(e.d) : z;
     /* 난간(D1) 앞뒤는 넘지 않게 — 위층 소품이 난간을 뚫고 앞층에 그려지지 않도록 */
     if (z < D1) k2 = Math.min(k2, D1 - 0.06);
     else if (k2 < D1) k2 = D1 + 0.02;
@@ -20133,10 +20233,15 @@ var MYR_ITEM = (function(){
   }
 
   /* ---------- 캐릭터 움직임 ---------- */
+  /* 11-26 은혜님 "윤이 말고 다른 캐릭터는 어떻게 자리 이동해? 안 움직여?"
+     — 캐릭터를 톡 누르면 그 친구가 조종 대상(MY.heroId)이 된다. 없거나 지워졌으면 내 캐릭터로. */
   function hero(r){
     r = r || room(); if (!r) return null;
-    var h = (r.chars || []).filter(function(c){ return c.me; })[0];
-    if (!h) h = (r.chars || [])[0];
+    var arr = r.chars || [];
+    var h = null;
+    if (MY.heroId) h = arr.filter(function(c){ return c.id === MY.heroId; })[0];
+    if (!h) h = arr.filter(function(c){ return c.me; })[0];
+    if (!h) h = arr[0];
     return h || null;
   }
   function stairRun(c, fromUp){
@@ -20721,6 +20826,7 @@ var MYR_ITEM = (function(){
     resize();
     MY.on = true;
     MY.move = false; MY.sel = null;
+    MY.heroId = '';
     var mb = $m('myrMove'); if (mb){ mb.classList.remove('on'); mb.setAttribute('aria-pressed','false'); }
     MY.tray = 'all'; MY.trayOpen = true;
     MY.shopOpen = false;
@@ -20816,10 +20922,9 @@ var MYR_ITEM = (function(){
     var r = room(); if (!r) return null;
     var best = null, bd = 1e9;
     (r.chars || []).forEach(function(c){
-      var X = px(c.x, c.z), Y = py(c.z, charElev(c));
-      var h = CH*MY.S;
-      if (x > X-h*0.28 && x < X+h*0.28 && y > Y-h*1.0 && y < Y+6){
-        var d = Math.abs(y - (Y-h*0.5));
+      var b = charBox(c);
+      if (x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1){
+        var d = Math.abs(y - b.cy);
         if (d < bd){ bd = d; best = { t:'c', d:c }; }
       }
     });
@@ -20951,7 +21056,16 @@ var MYR_ITEM = (function(){
     }
     var h = hero(r);
     if (hit && hit.t === 'c'){
-      say(hit.d.nm || '친구');
+      /* 11-26 은혜님 "윤이 말고 다른 캐릭터는 어떻게 자리 이동해? 안 움직여?"
+         — 톡 누른 친구가 조종 대상이 된다 (걷기·앉기·눕기 모두 그 친구로) */
+      var cd = hit.d, nm2 = cd.nm || famName(cd.me ? MY.kid : '') || '친구';
+      if (MY.heroId === cd.id){ say(nm2 + ' 지금 움직이고 있어요'); }
+      else {
+        MY.heroId = cd.id;
+        say(nm2 + ' 선택! 바닥이나 가구를 누르면 움직여요');
+      }
+      if (MY.follow) centerOnHero(false); else focusChar(false);
+      draw();
       return;
     }
     if (hit && hit.t === 'i'){
