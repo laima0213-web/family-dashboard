@@ -1736,6 +1736,7 @@ body.pg-open{overflow:hidden!important}
   white-space:nowrap;box-shadow:0 3px 12px rgba(60,110,70,.16);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .pg-tools button.off{opacity:.55}
+.pg-tools button.on{background:linear-gradient(160deg,#FFE1EA,#FFC2D3);color:#9A3552;border-color:#FFC9D8}
 .pg-tools button:active,.pg-switch button:active{transform:scale(.95)}
 /* 🗺 나라 이동 — 줄바꿈 없이 한눈에 다 보이게: 아래 줄 풀폭 3칸(모바일)·6칸(넓은 화면) */
 .pg-nations{flex:1 1 100%;align-self:stretch;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
@@ -2018,6 +2019,7 @@ body.pg-open{overflow:hidden!important}
 .pg-bbar button{flex:0 0 auto;border:1px solid #CFE7D9;background:#EFFAF2;color:#3F7A5C;border-radius:999px;
   height:28px;padding:0 10px;font-size:10.5px;font-weight:900;font-family:inherit;cursor:pointer;white-space:nowrap}
 .pg-bbar button.del{border-color:#F3C9C1;background:#FFF6F3;color:#C4553F}
+.pg-bbar button.mv{border-color:#F3CFDC;background:#FFF2F6;color:#A34A67}
 .pg-bbar button.x{width:28px;padding:0;border-color:#EADFCB;background:#FFF8EA;color:#8B7A63}
 .pg-bbar button:active{transform:scale(.95)}
 .pg-bbar.rbar{border-color:#C9E2F3}
@@ -2284,6 +2286,7 @@ body.pg-open{overflow:hidden!important}
       </div>
       <div class="pg-tools">
         <button type="button" id="pgDecoBtn">🎨 꾸미기</button>
+        <button type="button" id="pgMoveBtn" aria-pressed="false" title="집·건물과 놀이기구를 옮겨요">✋ 옮기기</button>
         <button type="button" id="pgLblBtn">🏷 이름표</button>
         <button type="button" id="pgGameBtn" class="pg-game-btn" aria-pressed="false" title="캐릭터 등 뒤에서 따라가는 게임 시점">🎮 게임시점</button>
       </div>
@@ -2391,15 +2394,16 @@ body.pg-open{overflow:hidden!important}
   <!-- 🏡 지은 건물을 콕 눌렀을 때 — 돌리기 · 빼기 (엄지 닿는 아래쪽) -->
   <div class="pg-bbar" id="pgBuildBar" hidden>
     <span class="pgb-name" id="pgbName">🏡 집</span>
+    <button type="button" data-pgb="move" class="mv">📍 옮기기</button>
     <button type="button" data-pgb="rot">↻ 45° 돌리기</button>
     <button type="button" data-pgb="del" class="del">🗑 빼기</button>
     <button type="button" data-pgb="close" class="x" aria-label="닫기">✕</button>
   </div>
 
-  <!-- 🎡 놀이기구를 꾹 눌렀을 때 — 돌리기 · 원래 자리 (엄지 닿는 아래쪽) -->
+  <!-- 🎡 놀이기구를 콕 눌렀을 때 — 옮기기 · 원래 자리 (엄지 닿는 아래쪽) -->
   <div class="pg-bbar rbar" id="pgRideBar" hidden>
     <span class="pgb-name" id="pgrName">🎡 놀이기구</span>
-    <button type="button" data-pgr="rot">↻ 45° 돌리기</button>
+    <button type="button" data-pgr="move" class="mv">📍 옮기기</button>
     <button type="button" data-pgr="home" class="home">🏠 원래 자리</button>
     <button type="button" data-pgr="close" class="x" aria-label="닫기">✕</button>
   </div>
@@ -3260,6 +3264,8 @@ function defaultState(){
     shop: { bonus:{}, spent:{}, unlocked:{}, pendingGift:{}, claimedSets:{}, claimedStreaks:{} },
     playground: {},                              /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 */
     pgBuilds: {},                                /* 🏡 놀이터에 직접 지은 집·건물 */
+    pgRides: {},                                 /* 🎡 옮겨 둔 놀이기구 */
+    pgGeo: 2,                                    /* 새 부지 좌표계 */
     sched: { date: t, items: [] },
     cal: {},
     mission: { idx: randInt(CFG.missions.length), done: false, date: t },
@@ -3395,6 +3401,47 @@ function normalizeRoutineRest(raw){
   });
   return out;
 }
+/* 🌳 놀이터 부지 좌표계 (2026-11-26 5개 마을 확대) — 저장 좌표 정리·이전용 */
+var PGG = {
+  order: ['park', 'village', 'beach', 'camp', 'winter'],
+  bands: {
+    park:    { cx:-102, x0:-44, x1: 44, z0:-32, z1: 32 },
+    village: { cx: -30, x0:-28, x1: 28, z0:-28, z1: 26 },
+    beach:   { cx:  24, x0:-26, x1: 26, z0:-28, z1: 24 },
+    camp:    { cx:  74, x0:-24, x1: 24, z0:-27, z1: 25 },
+    winter:  { cx: 122, x0:-24, x1: 24, z0:-27, z1: 25 }
+  },
+  old: {
+    park:    { cx:-62, x0:-24, x1: 24, z0:-17, z1: 17, sx:1.75, sz:1.80 },
+    village: { cx:-20, x0:-18, x1: 18, z0:-20, z1: 17, sx:1.55, sz:1.35 },
+    beach:   { cx:  14, x0:-16, x1: 16, z0:-20, z1: 16, sx:1.55, sz:1.35 },
+    camp:    { cx:  44, x0:-14, x1: 14, z0:-19, z1: 17, sx:1.55, sz:1.35 },
+    winter:  { cx:  72, x0:-14, x1: 14, z0:-19, z1: 17, sx:1.55, sz:1.35 }
+  }
+};
+function pgBandOf(x){
+  var best = 'village', bd = 1e9;
+  PGG.order.forEach(function(k){
+    var v = PGG.bands[k], d = Math.abs(x - v.cx);
+    if (x >= v.cx + v.x0 - 1 && x <= v.cx + v.x1 + 1 && d < bd){ bd = d; best = k; }
+  });
+  return best;
+}
+function pgFixXY(x, z){
+  var k = pgBandOf(x), v = PGG.bands[k];
+  return [Math.round(Math.min(Math.max(x, v.cx + v.x0 + 1), v.cx + v.x1 - 1) * 100) / 100,
+          Math.round(Math.min(Math.max(z, v.z0 + 1), v.z1 - 1) * 100) / 100];
+}
+function pgMigXY(x, z){
+  var k = 'village';
+  PGG.order.forEach(function(kk){
+    var o = PGG.old[kk];
+    if (x >= o.cx + o.x0 - 1 && x <= o.cx + o.x1 + 1) k = kk;
+  });
+  var o = PGG.old[k], v = PGG.bands[k];
+  return pgFixXY(v.cx + (x - o.cx) * o.sx, z * o.sz);
+}
+
 function normalizeState(raw){
   var base = defaultState();
   var r = (raw && typeof raw === 'object') ? raw : {};
@@ -3483,6 +3530,13 @@ function normalizeState(raw){
     : { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' };
   /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 [{ id, preset, x, z, ride }] */
   var pgRaw2 = (r.playground && typeof r.playground === 'object') ? r.playground : {};
+  var pgMig = !(Number(r.pgGeo) >= 2);          /* 2026-11-26 부지 확대 전에 저장된 좌표를 새 부지로 옮긴다 */
+  var pgFix = function(x, z){
+    var nx = Number(x), nz = Number(z);
+    if (!isFinite(nx)) nx = 0;
+    if (!isFinite(nz)) nz = 0;
+    return pgMig ? pgMigXY(nx, nz) : pgFixXY(nx, nz);
+  };
   var pgOut = {};
   KIDS.forEach(function(id){
     var arr = Array.isArray(pgRaw2[id]) ? pgRaw2[id] : null;
@@ -3492,11 +3546,8 @@ function normalizeState(raw){
       if (!x || typeof x !== 'object') return;
       if (typeof x.preset !== 'string' || !AV_PRESETS.some(function(p){ return p.k === x.preset; })) return;
       if (list.length >= 24) return;
-      var nx = Number(x.x), nz = Number(x.z);
-      if (!isFinite(nx)) nx = 0;
-      if (!isFinite(nz)) nz = 0;
-      var rr = Math.sqrt(nx * nx + nz * nz);
-      if (rr > 7.2){ nx = nx / rr * 7.2; nz = nz / rr * 7.2; }
+      var pp = pgFix(x.x, x.z);
+      var nx = pp[0], nz = pp[1];
       list.push({
         id: (typeof x.id === 'string' && x.id) ? x.id.slice(0, 24) : (id + '-pg' + i),
         preset: x.preset,
@@ -3522,8 +3573,8 @@ function normalizeState(raw){
       var bx = Number(x.x), bz = Number(x.z);
       if (!isFinite(bx)) bx = 0;
       if (!isFinite(bz)) bz = 0;
-      if (bx < -84) bx = -84; else if (bx > 84) bx = 84;
-      if (bz < -22) bz = -22; else if (bz > 22) bz = 22;
+      var bp = pgFix(bx, bz);
+      bx = bp[0]; bz = bp[1];
       var br2 = Number(x.rot);
       if (!isFinite(br2)) br2 = 0;
       br2 = ((br2 % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -3546,13 +3597,13 @@ function normalizeState(raw){
     if (!m2 || typeof m2 !== 'object' || Array.isArray(m2)) return;
     var oo = {};
     Object.keys(m2).forEach(function(k){
-      if (!/^[a-z]{2,12}$/.test(k)) return;
+      if (!/^[a-z]{2,16}(_[a-z]{2,12})?$/.test(k)) return;
       var it = m2[k];
       if (!it || typeof it !== 'object') return;
       var rx2 = Number(it.x), rz2 = Number(it.z), rt2 = Number(it.rot);
       if (!isFinite(rx2) || !isFinite(rz2)) return;
-      if (rx2 < -84) rx2 = -84; else if (rx2 > 84) rx2 = 84;
-      if (rz2 < -22) rz2 = -22; else if (rz2 > 22) rz2 = 22;
+      var rp = pgFix(rx2, rz2);
+      rx2 = rp[0]; rz2 = rp[1];
       if (!isFinite(rt2)) rt2 = 0;
       rt2 = ((rt2 % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
       oo[k] = { x: Math.round(rx2 * 100) / 100, z: Math.round(rz2 * 100) / 100, rot: Math.round(rt2 * 1000) / 1000 };
@@ -3560,6 +3611,7 @@ function normalizeState(raw){
     if (Object.keys(oo).length) rdsOut[id] = oo;
   });
   out.pgRides = rdsOut;
+  out.pgGeo = 2;                     /* 새 부지 좌표계 (한 번만 옮긴다) */
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
   if (sc && sc.date === todayKey()){
     out.sched = { date: sc.date, items: normalizeList(sc.items, [], 's') };
@@ -9106,6 +9158,13 @@ async function unlockApp(afterPinSetup){
   var prRoot = resolveParentPin(root);
   if (prRoot) parentPinRec = prRoot;
   var isNew = !root.state;
+  /* 🌳 부지 대확장 — 옛 좌표를 새 좌표로 한 번 옮기고, 옮긴 결과를 DB에도 적어 둔다 */
+  if (root.state && !(Number(root.state.pgGeo) >= 2)){
+    try {
+      DB.patch({ state: { pgGeo: 2, playground: state.playground || {}, pgBuilds: state.pgBuilds || {}, pgRides: state.pgRides || {} } })
+        .catch(function(){});
+    } catch(e){ console.warn('[dashboard] 놀이터 좌표 이전 저장:', e && e.message); }
+  }
 
   ensureDay();
   studyWeeklyAuto();          /* 오늘 요일의 반복 공부를 목록에 채운다 */
@@ -9374,17 +9433,19 @@ var PG = {
   washing: false, tapGo: 0,
   autoCam: false,            /* 바닥을 톡 눌러 걸어갈 때 카메라가 따라감 (게임시점 꺼져 있어도) */
   lastVil: {},
-  hintT: 0, emptyShown: false
+  hintT: 0, emptyShown: false,
+  move: false, moveSel: { type:'', key:'' }, rideSel: ''
 };
 
-/* 5개 마을 — 옛 3D 월드의 나라 중심(cx)을 그대로 기억해 두면 저장된 자리가 살아난다 */
+/* 5개 마을 — 2026-11-26 부지 대확장 · 5개 마을이 서로 겹치지 않게 나란히 놓는다 */
 var VLIST = [
-  { k:'park',    n:'놀이공원', ic:'🎡', cx:-62, b:{ x0:-24, x1:24, z0:-17, z1:17 } },
-  { k:'village', n:'동화마을', ic:'🏡', cx:-20, b:{ x0:-18, x1:18, z0:-20, z1:17 } },
-  { k:'beach',   n:'바닷가',   ic:'🏖️', cx: 14, b:{ x0:-16, x1:16, z0:-20, z1:16 } },
-  { k:'camp',    n:'숲속캠핑', ic:'🌲', cx: 44, b:{ x0:-14, x1:14, z0:-19, z1:17 } },
-  { k:'winter',  n:'겨울나라', ic:'❄️', cx: 72, b:{ x0:-14, x1:14, z0:-19, z1:17 } }
+  { k:'park',    n:'놀이공원', ic:'🎡', cx:-102, b:{ x0:-44, x1:44, z0:-32, z1:32 } },
+  { k:'village', n:'동화마을', ic:'🏡', cx:-30, b:{ x0:-28, x1:28, z0:-28, z1:26 } },
+  { k:'beach',   n:'바닷가',   ic:'🏖️', cx: 24, b:{ x0:-26, x1:26, z0:-28, z1:24 } },
+  { k:'camp',    n:'숲속캠핑', ic:'🌲', cx: 74, b:{ x0:-24, x1:24, z0:-27, z1:25 } },
+  { k:'winter',  n:'겨울나라', ic:'❄️', cx: 122, b:{ x0:-24, x1:24, z0:-27, z1:25 } }
 ];
+/* 옛 부지(2026-11-26 이전) 좌표는 state 정규화에서 한 번 옮긴다 (PGG · pgMigXY) */
 var VIL = {};
 VLIST.forEach(function(v){ VIL[v.k] = v; });
 function vilOf(k){ return VIL[k] || VIL.village; }
@@ -10202,6 +10263,128 @@ var ARTD = {
 /* ---------- 마을별 장면 ---------- */
 var SCN = {};
 
+/* ---------- 부지 대확장 (2026-11-26) — 손으로 놓은 자리를 새 부지 비율에 맞춰 펼친다 ---------- */
+var SPREAD = {
+  village: { sx:1.55, sz:1.35 }, beach: { sx:1.55, sz:1.35 },
+  camp: { sx:1.55, sz:1.35 }, winter: { sx:1.55, sz:1.35 }
+};
+function spreadScene(S, k){
+  var sp = SPREAD[k];
+  if (!sp || S.spread) return;
+  S.spread = true;
+  var sx = sp.sx, sz = sp.sz;
+  (S.paths || []).forEach(function(pts){ pts.forEach(function(p){ p[0] *= sx; p[1] *= sz; }); });
+  S.props.forEach(function(p){
+    p.x *= sx; p.z *= sz;
+    if (p.signAt){ p.signAt[0] *= sx; p.signAt[1] *= sz; }
+    if (p.v && p.v.w) p.v.w *= sx;
+  });
+  S.rides.forEach(function(r){ r.x *= sx; r.z *= sz; });
+  S.seats.forEach(function(s){ s.x *= sx; s.z *= sz; });
+  S.signs.forEach(function(s){ s.x *= sx; s.z *= sz; });
+  if (S.stream){ S.stream.c *= sx; S.stream.w *= sx; }
+  if (S.creek) S.creek.z *= sz;
+  if (S.pond){ S.pond.x *= sx; S.pond.z *= sz; S.pond.rx *= sx; S.pond.rz *= sz; }
+  if (S.shore != null) S.shore *= sz;
+  if (S.plaza){ S.plaza.x *= sx; S.plaza.z *= sz; S.plaza.r *= (sx + sz) / 2; }
+  S.pw = (sx + sz) / 2;
+}
+
+/* ---------- 넓어진 부지를 북적북적하게 — 길가·광장 둘레에 가벼운 소품을 흘뿌린다 ---------- */
+var DECO = {
+  park:   [['lamp',8], ['flowerbed',11], ['daisy',14], ['bush',7], ['mushroom',5], ['rock',5], ['stump',5], ['plantRow',7], ['hedge',4], ['tree',4], ['cherry',2]],
+  village:[['lamp',8], ['flowerbed',10], ['daisy',13], ['bush',8], ['mushroom',6], ['stump',7], ['plantRow',7], ['fence',4], ['tree',4], ['cherry',2]],
+  beach:  [['parasol',8], ['lounger',7], ['palm',5], ['rock',7], ['bush',7], ['daisy',11], ['stump',4], ['sandcastle',3]],
+  camp:   [['lamp',6], ['logs',7], ['firewood',5], ['mushroom',9], ['stump',8], ['rock',7], ['bush',8], ['pine',5], ['tree',3], ['daisy',9]],
+  winter: [['lamp',6], ['snowman',6], ['pine',5], ['rock',6], ['stump',7], ['bush',7], ['daisy',9], ['tree',2], ['firewood',4]]
+};
+function decoKind(k, rnd){
+  var set = DECO[k] || DECO.village, total = 0, i;
+  for (i = 0; i < set.length; i++) total += set[i][1];
+  var pick = rnd() * total;
+  for (i = 0; i < set.length; i++){ pick -= set[i][1]; if (pick <= 0) return set[i][0]; }
+  return set[0][0];
+}
+function decoVariant(kind, rnd, k){
+  if (kind === 'mushroom') return { cap: ['#E2635C', '#F2C15B', '#F0A0BC'][Math.floor(rnd() * 3)] };
+  if (kind === 'daisy') return { set: Math.floor(rnd() * 3) };
+  if (kind === 'tree') return { tone: Math.floor(rnd() * 3) };
+  if (kind === 'bush') return rnd() > 0.6 ? { berry:1 } : {};
+  if (kind === 'pine' && k === 'winter') return { snow:1 };
+  if (kind === 'bush' && k === 'winter') return { snow:1 };
+  if (kind === 'rock' && k === 'winter') return { snow:1 };
+  if (kind === 'parasol') return { c: ['#F58BA0', '#7FC7E8', '#F5C763', '#B9A6F2'][Math.floor(rnd() * 4)] };
+  return '';
+}
+function decorateScene(S, k, b){
+  var W = b.x1 - b.x0, D = b.z1 - b.z0;
+  var want = Math.round(W * D / (k === 'beach' ? 30 : 46));
+  if (want > 150) want = 150;
+  var blocked = [];
+  function addB(x, z, r){ blocked.push({ x:x, z:z, r:r }); }
+  S.props.forEach(function(p){ var d = ARTD[p.t]; addB(p.x, p.z, d ? Math.max(1.0, (d[2] || 0) + 1.1) : 1.2); });
+  S.rides.forEach(function(r){ var R = RIDE[r.k]; addB(r.x, r.z, (R ? R.w : 4) * 0.45 + 0.9); });
+  S.seats.forEach(function(s){ addB(s.x, s.z, 1.4); });
+  S.signs.forEach(function(s){ addB(s.x, s.z, 1.8); });
+  (S.paths || []).forEach(function(pts){
+    for (var i = 0; i < pts.length - 1; i++){
+      for (var f = 0; f <= 1.0001; f += 0.2) addB(lerp(pts[i][0], pts[i + 1][0], f), lerp(pts[i][1], pts[i + 1][1], f), 2.0);
+    }
+  });
+  if (S.plaza) addB(S.plaza.x, S.plaza.z, S.plaza.r + 0.6);
+  if (S.pond) addB(S.pond.x, S.pond.z, Math.max(S.pond.rx, S.pond.rz) + 1.2);
+  if (S.stream){ for (var zz = b.z0; zz <= b.z1; zz += 1.5) addB(S.stream.c + Math.sin(zz * 0.16) * 0.9, zz, 3.4); }
+  if (S.creek){ for (var xx = b.x0; xx <= b.x1; xx += 1.5) addB(xx, S.creek.z + Math.sin(xx * 0.2) * 0.45, 2.8); }
+  if (S.shore != null){ for (var xs = b.x0; xs <= b.x1; xs += 2.0) addB(xs, S.shore, 3.0); }
+  var rnd = seeded(k.length * 613 + 41);
+  var placed = 0, tries = 0;
+  while (placed < want && tries < want * 14){
+    tries++;
+    var x, z;
+    if (rnd() < 0.58 && S.paths && S.paths.length){
+      var pts2 = S.paths[Math.floor(rnd() * S.paths.length)];
+      var seg = Math.floor(rnd() * (pts2.length - 1));
+      var f2 = rnd();
+      var bx2 = lerp(pts2[seg][0], pts2[seg + 1][0], f2), bz2 = lerp(pts2[seg][1], pts2[seg + 1][1], f2);
+      var ang = rnd() * Math.PI * 2, dd = 2.6 + rnd() * 3.6;
+      x = bx2 + Math.cos(ang) * dd; z = bz2 + Math.sin(ang) * dd * 0.85;
+    } else {
+      x = b.x0 + 2.6 + rnd() * (W - 5.2);
+      z = b.z0 + 2.6 + rnd() * (D - 5.2);
+    }
+    if (x < b.x0 + 2.2 || x > b.x1 - 2.2 || z < b.z0 + 2.2 || z > b.z1 - 2.2) continue;
+    /* 바다·연못·개울물 위에는 놓지 않는다 */
+    if (S.shore != null && z > S.shore - 2.0) continue;
+    if (S.pond){
+      var pdx = (x - S.pond.x) / (S.pond.rx + 1.1), pdz = (z - S.pond.z) / (S.pond.rz + 1.1);
+      if (pdx * pdx + pdz * pdz < 1) continue;
+    }
+    var ok = true;
+    for (var i = 0; i < blocked.length; i++){
+      var o = blocked[i], dx = x - o.x, dz = z - o.z;
+      if (dx * dx + dz * dz < (o.r + 0.55) * (o.r + 0.55)){ ok = false; break; }
+    }
+    if (!ok) continue;
+    var kind = decoKind(k, rnd);
+    var d = ARTD[kind];
+    if (!d) continue;
+    /* 큰 나무는 부지 가장자리에만 — 기구·길이 가려지지 않게 */
+    if (kind === 'tree' || kind === 'cherry' || kind === 'pine' || kind === 'palm'){
+      if (Math.abs(x) < W * 0.34 && Math.abs(z) < D * 0.30) continue;
+    }
+    var hiccup = (rnd() < 0.12 && (kind === 'lamp' || kind === 'flowerbed' || kind === 'tree'));
+    if (hiccup) kind = 'bench';
+    if (kind === 'bench'){
+      S.seats.push({ x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10, t:'bench', n:'벤치' });
+      addB(x, z, 1.5);
+    } else {
+      S.props.push({ t:kind, x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10, v: decoVariant(kind, rnd, k) });
+      addB(x, z, Math.max(1.1, (d[2] || 0) + 1.0));
+    }
+    placed++;
+  }
+}
+
 function buildScene(k){
   var v = VIL[k], b = v.b, S = { props: [], rides: [], seats: [], signs: [], dots: [] };
 
@@ -10253,50 +10436,81 @@ function buildScene(k){
   }
 
   if (k === 'park'){
-    S.plaza = { x: 0, z: 0.5, r: 6.8 };
-    /* 큰 길 하나를 축으로, 기구 앞마다 곁길을 내어 길 따라 걸으며 구경하게 */
+    S.plaza = { x: 0, z: 0.5, r: 8.0 };
+    S.pw = 1.35;
+    /* 넓어진 부지 — 광장을 축으로 기구마다 곁길을 내고, 큰길은 양쪽 끝까지 뻗는다 */
     S.paths = [
-      [[-24, 7.5], [-15, 5.0], [-8, 3.0], [-2, 1.5]],
-      [[2, 1.5], [9, 3.5], [16, 6.0], [24, 8.0]],
-      [[-2.4, -1.0], [-2.8, -4.0], [-2.8, -7.0], [-2.8, -9.8], [-3.4, -12.4]],
-      [[-8, 3.0], [-11.6, 1.2], [-14.6, -1.6], [-16.8, -4.6]],
-      [[2.0, 1.8], [5.6, 0.2], [8.4, -2.6], [9.6, -4.6]],
-      [[9.6, -4.6], [13.2, -6.8], [16.4, -8.4]],
-      [[-15.0, 5.0], [-14.9, 7.0], [-14.5, 8.8]],
-      [[16.0, 6.0], [15.8, 7.4], [15.4, 8.6]]
+      [[-44, 12.0], [-34, 9.0], [-24, 6.5], [-14, 3.6], [-4, 1.6]],
+      [[4, 1.6], [14, 3.6], [24, 7.0], [34, 10.0], [44, 13.0]],
+      [[-1.5, -2.0], [-3.0, -8.0], [-4.0, -14.0], [-5.0, -18.6]],
+      [[-8, 2.2], [-11.0, 1.0], [-12.6, 0.2]],
+      [[-14, 3.6], [-18, 4.4], [-22.4, 6.2]],
+      [[-18, 9.0], [-21.0, 13.5], [-22.6, 16.6]],
+      [[-14, 4.0], [-21.0, -3.0], [-26.0, -9.0], [-27.6, -11.4]],
+      [[6.0, 0.4], [8.0, -8.0], [9.4, -14.6]],
+      [[14, 3.6], [19.0, 5.4], [21.2, 6.4]],
+      [[24, 7.0], [28.0, -2.0], [30.0, -9.0], [30.0, -18.4]],
+      [[21.2, 6.4], [26.0, 13.0], [27.4, 17.6]]
     ];
     S.props.push(
-      { t:'fountain', x:0, z:-5.0 },
-      { t:'balloon', x:13.4, z:2.2 },
-      { t:'hedge', x:-5.4, z:-8.2 }, { t:'hedge', x:1.0, z:-8.2 },
-      { t:'hedge', x:4.2, z:-8.2 }, { t:'hedge', x:7.4, z:-8.2 },
-      { t:'hedge', x:-9.0, z:-6.2 }, { t:'hedge', x:9.0, z:-6.2 },
-      { t:'lamp', x:-3.4, z:4.6 }, { t:'lamp', x:4.6, z:3.8 }, { t:'lamp', x:-12.0, z:-2.6 },
-      { t:'lamp', x:11.6, z:-2.2 }, { t:'lamp', x:-1.6, z:-11.4 }, { t:'lamp', x:6.6, z:9.6 },
-      { t:'lamp', x:-8.0, z:9.0 },
-      { t:'flowerbed', x:7.2, z:5.0 }, { t:'flowerbed', x:-7.6, z:5.2 },
-      { t:'flowerbed', x:-13.2, z:2.4 }, { t:'flowerbed', x:12.2, z:-4.6 },
-      { t:'daisy', x:-2.6, z:8.4, v:{ set:0 } }, { t:'daisy', x:3.0, z:8.6, v:{ set:1 } },
-      { t:'daisy', x:-6.0, z:-11.0, v:{ set:2 } }, { t:'daisy', x:9.2, z:7.0, v:{ set:0 } },
-      { t:'cart', x:10.6, z:8.0 },
-      { t:'bush', x:-14.4, z:-8.6 }, { t:'bush', x:14.0, z:-9.2 },
-      { t:'tree', x:-21.4, z:-14.0, v:{ tone:0 } }, { t:'tree', x:-16.0, z:-15.0, v:{ tone:1 } },
-      { t:'tree', x:21.6, z:-14.2, v:{ tone:2 } }, { t:'tree', x:15.2, z:-15.0, v:{ tone:0 } },
-      { t:'tree', x:-21.6, z:13.2, v:{ tone:1 } }, { t:'tree', x:21.4, z:14.0, v:{ tone:0 } },
-      { t:'tree', x:-19.6, z:0.6, v:{ tone:2 } }, { t:'tree', x:19.2, z:-1.0, v:{ tone:1 } },
-      { t:'cherry', x:-21.2, z:-4.2 }, { t:'cherry', x:21.2, z:-4.4 },
-      { t:'cherry', x:-11.6, z:11.6 }, { t:'cherry', x:10.2, z:13.6 },
-      { t:'rock', x:-20.6, z:-1.2 }, { t:'rock', x:15.8, z:5.0 }
+      { t:'fountain', x:0, z:-5.5 },
+      { t:'balloon', x:34.0, z:4.0 }, { t:'cart', x:14.6, z:2.6 },
+      { t:'well', x:-13.6, z:8.6 }, { t:'mail', x:-7.8, z:12.8 },
+      { t:'clock', x:-35.0, z:13.0 }, { t:'plantRow', x:36.0, z:16.0 },
+      /* 광장 가장자리 울타리·화단 */
+      { t:'hedge', x:-8.8, z:-9.0 }, { t:'hedge', x:-2.0, z:-9.8 }, { t:'hedge', x:4.8, z:-9.8 }, { t:'hedge', x:10.6, z:-8.6 },
+      { t:'hedge', x:-12.4, z:-5.6 }, { t:'hedge', x:12.4, z:-5.0 },
+      { t:'flowerbed', x:-9.6, z:7.4 }, { t:'flowerbed', x:-3.2, z:9.6 }, { t:'flowerbed', x:7.8, z:9.0 },
+      { t:'flowerbed', x:-16.0, z:1.2 }, { t:'flowerbed', x:18.4, z:1.0 },
+      /* 광장 안팎 화단·나무·불빛 */
+      { t:'flowerbed', x:-6.2, z:4.8 }, { t:'flowerbed', x:6.4, z:4.6 },
+      { t:'flowerbed', x:-4.4, z:-6.8 }, { t:'flowerbed', x:4.8, z:-6.6 },
+      { t:'daisy', x:-3.4, z:6.4, v:{ set:2 } }, { t:'daisy', x:3.6, z:6.2, v:{ set:1 } },
+      { t:'daisy', x:-2.6, z:-2.2, v:{ set:0 } }, { t:'daisy', x:3.0, z:-2.0, v:{ set:2 } },
+      { t:'plantRow', x:-8.6, z:3.0 }, { t:'plantRow', x:9.0, z:2.8 },
+      { t:'plantRow', x:11.4, z:11.2 }, { t:'plantRow', x:-11.2, z:11.6 }, { t:'plantRow', x:3.2, z:-12.4 },
+      /* 가로등 — 큰길·곁길을 따라 */
+      { t:'lamp', x:-6.0, z:3.4 }, { t:'lamp', x:6.0, z:3.4 }, { t:'lamp', x:-18.0, z:5.6 },
+      { t:'lamp', x:18.0, z:5.6 }, { t:'lamp', x:-30.0, z:9.0 }, { t:'lamp', x:30.0, z:9.0 },
+      { t:'lamp', x:-19.6, z:-6.6 }, { t:'lamp', x:22.0, z:-6.0 }, { t:'lamp', x:-3.4, z:-16.0 },
+      { t:'lamp', x:8.2, z:-11.0 }, { t:'lamp', x:27.4, z:-2.0 }, { t:'lamp', x:-20.0, z:13.0 },
+      { t:'lamp', x:22.6, z:14.6 },
+      /* 나무·수풀·바위 — 부지 가장자리와 기구 사이사이 */
+      { t:'bush', x:-16.2, z:-9.0 }, { t:'bush', x:13.0, z:-10.4, v:{ berry:1 } },
+      { t:'bush', x:-20.0, z:2.0, v:{ berry:1 } }, { t:'bush', x:19.6, z:-2.6 },
+      { t:'bush', x:-30.0, z:-2.0 }, { t:'bush', x:32.0, z:2.0 },
+      { t:'bush', x:-18.0, z:17.0 }, { t:'bush', x:14.0, z:18.0, v:{ berry:1 } },
+      { t:'tree', x:-40.0, z:-22.0, v:{ tone:0 } }, { t:'tree', x:-30.0, z:-24.0, v:{ tone:1 } },
+      { t:'tree', x:-40.0, z:6.0, v:{ tone:2 } }, { t:'tree', x:-38.0, z:22.0, v:{ tone:0 } },
+      { t:'tree', x:40.0, z:-24.0, v:{ tone:1 } }, { t:'tree', x:38.0, z:-6.0, v:{ tone:2 } },
+      { t:'tree', x:40.0, z:6.0, v:{ tone:0 } }, { t:'tree', x:38.0, z:26.0, v:{ tone:1 } },
+      { t:'tree', x:-12.0, z:-27.0, v:{ tone:2 } }, { t:'tree', x:2.0, z:-27.0, v:{ tone:0 } },
+      { t:'tree', x:22.0, z:-28.0, v:{ tone:1 } }, { t:'tree', x:-22.0, z:-28.0, v:{ tone:0 } },
+      { t:'tree', x:-2.0, z:27.0, v:{ tone:1 } }, { t:'tree', x:12.0, z:27.0, v:{ tone:2 } },
+      { t:'cherry', x:-34.0, z:-6.0 }, { t:'cherry', x:34.0, z:-8.0 },
+      { t:'cherry', x:-26.0, z:14.0 }, { t:'cherry', x:36.0, z:10.0 },
+      { t:'cherry', x:-8.0, z:19.0 }, { t:'cherry', x:8.0, z:19.6 },
+      { t:'pine', x:-42.0, z:-14.0 }, { t:'pine', x:42.0, z:-16.0 }, { t:'pine', x:42.0, z:14.0 },
+      { t:'rock', x:-27.0, z:-18.0 }, { t:'rock', x:20.0, z:-16.0 }, { t:'rock', x:-16.0, z:23.0 },
+      { t:'stump', x:-23.0, z:10.0 }, { t:'stump', x:16.0, z:14.0 }, { t:'stump', x:16.0, z:-6.0 },
+      { t:'mushroom', x:-11.4, z:-14.0, v:{ cap:'#E2635C' } }, { t:'mushroom', x:13.0, z:-14.6, v:{ cap:'#F2C15B' } },
+      { t:'mushroom', x:-22.0, z:3.0, v:{ cap:'#F0A0BC' } }, { t:'mushroom', x:24.0, z:16.0, v:{ cap:'#E2635C' } },
+      { t:'fence', x:-6.4, z:15.4 }, { t:'fence', x:-2.6, z:15.4 },
+      { t:'daisy', x:-4.4, z:6.6, v:{ set:0 } }, { t:'daisy', x:4.6, z:6.2, v:{ set:1 } },
+      { t:'daisy', x:-12.0, z:-17.0, v:{ set:2 } }, { t:'daisy', x:12.4, z:5.0, v:{ set:0 } },
+      { t:'daisy', x:-18.0, z:10.0, v:{ set:1 } }, { t:'daisy', x:20.0, z:11.0, v:{ set:2 } }
     );
-    S.rides.push({ k:'carousel', x:-9.0, z:-2.6 }, { k:'ferris', x:9.6, z:-7.4 },
-                 { k:'viking', x:-15.2, z:2.4 }, { k:'teacup', x:5.0, z:5.4 },
-                 { k:'bumper', x:-17.6, z:-8.9 }, { k:'drop', x:-3.4, z:-14.9 },
-                 { k:'balloon', x:18.2, z:-10.1 }, { k:'trampoline', x:-14.6, z:10.9 },
-                 { k:'coaster', x:16.2, z:11.9 });
-    S.seats.push({ x:-5.6, z:7.6, t:'bench', n:'광장 벤치' }, { x:6.4, z:1.0, t:'bench', n:'광장 벤치' },
-                 { x:-11.4, z:7.6, t:'bench', n:'광장 벤치' });
-    S.signs.push({ x:-6.0, z:0.8, to:'village', label:'동화마을', dir:'left' },
-                 { x:6.0, z:0.8, to:'beach', label:'바닷가', dir:'right' });
+    S.rides.push({ k:'carousel', x:-16.0, z:-1.5 }, { k:'ferris', x:10.0, z:-20.0 },
+                 { k:'viking', x:-26.0, z:6.5 }, { k:'teacup', x:24.0, z:8.0 },
+                 { k:'bumper', x:-30.0, z:-14.0 }, { k:'drop', x:-6.0, z:-22.0 },
+                 { k:'balloon', x:30.0, z:-22.0 }, { k:'trampoline', x:-24.0, z:20.0 },
+                 { k:'coaster', x:30.0, z:20.0 });
+    S.seats.push({ x:-6.6, z:12.4, t:'bench', n:'광장 벤치' }, { x:6.8, z:12.0, t:'bench', n:'광장 벤치' },
+                 { x:-14.6, z:5.4, t:'bench', n:'광장 벤치' }, { x:12.6, z:6.4, t:'bench', n:'광장 벤치' },
+                 { x:-5.2, z:-1.6, t:'bench', n:'분수 옆 벤치' }, { x:5.4, z:-1.8, t:'bench', n:'분수 옆 벤치' },
+                 { x:-21.0, z:-0.6, t:'bench', n:'벤치' }, { x:21.6, z:-0.4, t:'벤치' });
+    S.signs.push({ x:-9.8, z:1.2, to:'village', label:'동화마을', dir:'left' },
+                 { x:9.8, z:1.2, to:'beach', label:'바닷가', dir:'right' });
   }
 
   if (k === 'beach'){
@@ -10312,7 +10526,7 @@ function buildScene(k){
       { t:'parasol', x:1.6, z:-3.6, v:{ c:'#7FC7E8' } },
       { t:'parasol', x:7.4, z:-5.2, v:{ c:'#F5C763' } },
       { t:'lounger', x:-7.2, z:-1.8 }, { t:'lounger', x:3.0, z:-2.2 }, { t:'lounger', x:8.8, z:-3.8 },
-      { t:'palm', x:-13.2, z:3.4 }, { t:'palm', x:12.4, z:-7.4 }, { t:'palm', x:-10.2, z:-7.2 },
+      { t:'palm', x:-13.2, z:1.6 }, { t:'palm', x:12.4, z:-7.4 }, { t:'palm', x:-10.2, z:-7.2 },
       { t:'palm', x:13.4, z:-0.6 }, { t:'palm', x:-2.4, z:-12.4 },
       { t:'dock', x:9.4, z:5.6 },
       { t:'rock', x:-13.8, z:-15.6 }, { t:'rock', x:12.2, z:-13.4 }, { t:'rock', x:4.6, z:-14.6 },
@@ -10326,7 +10540,7 @@ function buildScene(k){
       { t:'tree', x:6.4, z:-17.0, v:{ tone:2 } }, { t:'tree', x:-9.0, z:-17.4, v:{ tone:0 } },
       { t:'parasol', x:-2.2, z:1.2, v:{ c:'#B9A6F2' } }
     );
-    S.rides.push({ k:'boat', x:12.2, z:7.6 }, { k:'sand', x:-7.0, z:4.0 });
+    S.rides.push({ k:'boat', x:12.2, z:7.6 }, { k:'sand', x:-7.0, z:0.6 });
     S.seats.push({ x:-8.6, z:-1.8, t:'lounger', n:'선베드' }, { x:1.6, z:-2.2, t:'lounger', n:'선베드' },
                  { x:7.4, z:-3.8, t:'lounger', n:'선베드' });
     S.signs.push({ x:-6.2, z:-6.0, to:'village', label:'동화마을', dir:'left' },
@@ -10407,6 +10621,8 @@ function buildScene(k){
                  { x:6.0, z:-0.6, to:'park', label:'놀이공원', dir:'right' });
   }
 
+  spreadScene(S, k);
+  decorateScene(S, k, VIL[k].b);
   scatterGround(S, k, b);
 
   /* 가장자리 숲 — 마을 밖이 숲으로 둘러싸이게 */
@@ -10424,7 +10640,9 @@ function buildScene(k){
 
   /* 바닥 장식 (풀·꽃·자갈) */
   var r2 = seeded(k.length * 313 + 7);
-  for (var i = 0; i < 130; i++){
+  var ndot = Math.round(130 * ((b.x1 - b.x0) * (b.z1 - b.z0)) / (48 * 34));
+  if (ndot > 460) ndot = 460;
+  for (var i = 0; i < ndot; i++){
     S.dots.push({ x: b.x0 + r2() * (b.x1 - b.x0), z: b.z0 + r2() * (b.z1 - b.z0), s: 0.6 + r2() * 0.9, v: i % 5 });
   }
   return S;
@@ -10457,7 +10675,7 @@ function scatterGround(S, k, b){
     for (var zb = 3.0; zb <= b.z1 + 2; zb += 1.0) blocked.push({ x: 0, z: zb, r: 40 });
   }
   if (k === 'winter') blocked.push({ x: S.pond.x, z: S.pond.z, r: S.pond.rx + 0.6 });
-  if (k === 'park') blocked.push({ x: 0, z: 0.5, r: 7.4 });
+  if (k === 'park') blocked.push({ x: S.plaza.x, z: S.plaza.z, r: S.plaza.r + 0.7 });
 
   var kinds = k === 'winter'
     ? [['tuft', 0], ['rock', 1], ['daisy', 0], ['stump', 0]]
@@ -10594,9 +10812,10 @@ function paintGround(g, k, t){
 
   /* 산책길 */
   (S.paths || []).forEach(function(pts){
-    strokePath(g, pts, 1.72, p.path[0]);
-    strokePath(g, pts, 1.36, p.path[1]);
-    strokePath(g, pts, 0.92, p.path[2]);
+    var pw = S.pw || 1;
+    strokePath(g, pts, 1.72 * pw, p.path[0]);
+    strokePath(g, pts, 1.36 * pw, p.path[1]);
+    strokePath(g, pts, 0.92 * pw, p.path[2]);
     var rnd = seeded(5 + pts.length * 13);
     for (var q = 0; q < 14; q++){
       var idx = Math.floor(rnd() * (pts.length - 1));
@@ -10818,7 +11037,7 @@ function coasterCar(g, x, h, z, dir, col){
 /* ---------- 놀이기구 (매 프레임 그림, 단위 좌표) ---------- */
 var RIDE = {
   carousel: {
-    w: 8.0, h: 6.4, label: '회전목마', r: 3.0,
+    w: 8.0, h: 6.4, label: '회전목마', r: 3.0, sc: 1.45,
     seat: function(r, t){ var a = t * 0.7; return [r.x + Math.cos(a) * 1.80, r.z + Math.sin(a) * 1.30]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -10903,7 +11122,7 @@ var RIDE = {
     g.restore();
   },
   ferris: {
-    w: 8.6, h: 8.6, label: '대관람차', r: 2.4,
+    w: 8.6, h: 8.6, label: '대관람차', r: 2.4, sc: 1.45,
     seat: function(r, t){ var a = t * 0.3; return [r.x + Math.cos(a) * 3.0, r.z + Math.sin(a) * 0.55]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -10943,7 +11162,7 @@ var RIDE = {
     }
   },
   viking: {
-    w: 7.4, h: 6.6, label: '바이킹', r: 2.1,
+    w: 7.4, h: 6.6, label: '바이킹', r: 2.1, sc: 1.45,
     seat: function(r, t){ var a = Math.sin(t * 0.9) * 0.5; return [r.x + Math.sin(a) * 1.1, r.z + 0.2]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -11000,7 +11219,7 @@ var RIDE = {
     }
   },
   teacup: {
-    w: 5.0, h: 3.0, label: '티컵', r: 1.7,
+    w: 5.0, h: 3.0, label: '티컵', r: 1.7, sc: 1.35,
     seat: function(r, t){ var a = t * 0.9; return [r.x + Math.cos(a) * 1.05, r.z + Math.sin(a) * 0.85]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -11031,7 +11250,7 @@ var RIDE = {
     }
   },
   bumper: {
-    w: 8.4, h: 4.4, label: '범퍼카', r: 2.6,
+    w: 8.4, h: 4.4, label: '범퍼카', r: 2.6, sc: 1.35,
     seat: function(r, t){ var a = t * 0.5; return [r.x + Math.cos(a) * 1.55, r.z + 0.55 + Math.sin(a) * 0.30]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11065,7 +11284,7 @@ var RIDE = {
     }
   },
   trampoline: {
-    w: 5.2, h: 2.6, label: '트램펄린', r: 1.2,
+    w: 5.2, h: 2.6, label: '트램펄린', r: 1.2, sc: 1.35,
     seat: function(r){ return [r.x, r.z + 0.25]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11104,7 +11323,7 @@ var RIDE = {
     }
   },
   coaster: {
-    w: 9.2, h: 6.2, label: '미니 롤러코스터', r: 2.6,
+    w: 9.2, h: 6.2, label: '미니 롤러코스터', r: 2.6, sc: 1.45,
     seat: function(r, t){ var x = coasterX(t); return [r.x + x, r.z + 0.30 + coasterZ(x)]; },
     draw: function(g, r, t){
       var u = PG.S, i, x, h, pass;
@@ -11150,7 +11369,7 @@ var RIDE = {
     }
   },
   drop: {
-    w: 5.2, h: 10.4, label: '자이로드롭', r: 1.9,
+    w: 5.2, h: 10.4, label: '자이로드롭', r: 1.9, sc: 1.45,
     seat: function(r, t){ var a = t * 0.32; return [r.x + Math.cos(a) * 0.92, r.z + 0.55 + Math.sin(a) * 0.15]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11188,7 +11407,7 @@ var RIDE = {
     }
   },
   balloon: {
-    w: 6.4, h: 9.2, label: '열기구', r: 1.6,
+    w: 6.4, h: 9.2, label: '열기구', r: 1.6, sc: 1.45,
     seat: function(r, t){ return [r.x, r.z + 0.45]; },
     draw: function(g, r, t){
       var u = PG.S, i;
@@ -11395,6 +11614,27 @@ var RIDE = {
     }
   }
 };
+/* ---------- 기구 확대 — 그림·충돌 반경·탑승 자리를 같은 배율로 키워 어깨지지 않게 ---------- */
+Object.keys(RIDE).forEach(function(k){
+  var R = RIDE[k];
+  if (!R || !R.sc || R.sc === 1 || typeof R.seat !== 'function') return;
+  var s = R.sc;
+  var rawSeat = R.seat, rawDraw = R.draw;
+  R.seat = function(r, t){
+    var p = rawSeat(r, t);
+    return [r.x + (p[0] - r.x) * s, r.z + (p[1] - r.z) * s];
+  };
+  R.draw = function(g, r, t){
+    g.save();
+    g.translate(sX(r.x), sY(r.z));
+    g.scale(s, s);
+    g.translate(-sX(r.x), -sY(r.z));
+    rawDraw(g, r, t);
+    g.restore();
+  };
+  R.r = (R.r || 0) * s;
+  R.w = R.w * s;
+});
 function rideOf(k){ return RIDE[k] || RIDE.swing; }
 var RIDE_MOUNT = { carousel:0.95, ferris:0.45, viking:0.55, teacup:0.35, swing:0.75, seesaw:0.35, boat:0.30, sled:0.30, hammock:0.55, ice:0.10, sand:0.10, campfire:0.10,
   bumper:0.30, trampoline:0.72, coaster:0.80, drop:1.15, balloon:1.18 };
@@ -11402,11 +11642,12 @@ function rideMount(c){ return RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 
 /* 타는 동안 캐릭터가 떠 있는 높이 — 그림 속 기구와 같은 식을 써서 어긋나지 않게 */
 function rideSeatLift(c){
   if (!c || !c.ride) return 0;
-  if (c.ride === 'trampoline') return 0.92 + Math.abs(Math.sin(PG.time * 3.4)) * 1.15;
-  if (c.ride === 'coaster') return coasterH(coasterX(PG.time));
-  if (c.ride === 'drop') return dropLift(PG.time);
-  if (c.ride === 'balloon') return balloonLift(PG.time);
-  return RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4;
+  var s = rideOf(c.ride).sc || 1;
+  if (c.ride === 'trampoline') return (0.92 + Math.abs(Math.sin(PG.time * 3.4)) * 1.15) * s;
+  if (c.ride === 'coaster') return coasterH(coasterX(PG.time)) * s;
+  if (c.ride === 'drop') return dropLift(PG.time) * s;
+  if (c.ride === 'balloon') return balloonLift(PG.time) * s;
+  return (RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4) * s;
 }
 
 /* ---------- 캐릭터 ---------- */
@@ -11424,6 +11665,47 @@ function pgPlaced(kid){
 function pgBuildRecords(kid){
   var b = (state && state.pgBuilds && state.pgBuilds[kid]);
   return Array.isArray(b) ? b : [];
+}
+/* 🎡 옮겨 둔 놀이기구 — state.pgRides[kid]['마을_기구'] = { x, z } */
+function pgRideRecords(kid){
+  var m = (state && state.pgRides && state.pgRides[kid]);
+  return (m && typeof m === 'object') ? m : {};
+}
+function pgRideRec(recs, vil, key){
+  var a = recs[vil + '_' + key];
+  if (a && typeof a === 'object') return a;
+  var b = recs[key];
+  return (b && typeof b === 'object') ? b : null;
+}
+/* 저장된 기구 자리를 모든 마을 장면에 다시 앉힌다 (아이별로 다르므로 열 때마다) */
+function applyRideMoves(){
+  var recs = pgRideRecords(PG.kid);
+  VLIST.forEach(function(v){
+    var S = sceneOf(v.k);
+    S.rides.forEach(function(r){
+      if (r.hx === undefined){ r.hx = r.x; r.hz = r.z; }
+      var rec = pgRideRec(recs, v.k, r.k);
+      if (rec && isFinite(Number(rec.x)) && isFinite(Number(rec.z))){
+        var p = toLocal(v.k, Number(rec.x), Number(rec.z));
+        r.x = p[0]; r.z = p[1];
+      } else { r.x = r.hx; r.z = r.hz; }
+    });
+  });
+  OBS = {};
+}
+function pgRideSave(key, r){
+  if (!state || !PG.kid || !r) return;
+  var kid = PG.kid, vil = PG.vil;
+  var w = toWorld(vil, r.x, r.z);
+  var home = (r.hx !== undefined && Math.abs(r.x - r.hx) < 0.06 && Math.abs(r.z - r.hz) < 0.06);
+  mutate(function(s){
+    s.pgRides = s.pgRides || {};
+    var m = Object.assign({}, s.pgRides[kid] || {});
+    if (home){ delete m[vil + '_' + key]; delete m[key]; }
+    else m[vil + '_' + key] = { x: fmt1(w[0]), z: fmt1(w[1]), rot: 0 };
+    if (Object.keys(m).length) s.pgRides[kid] = m;
+    else delete s.pgRides[kid];
+  });
 }
 function pgOwnedChars(kid){
   var out = [];
@@ -11449,6 +11731,13 @@ function toWorld(k, x, z){ var v = VIL[k]; return [v.cx + x, z]; }
 
 /* ---------- 걷기 가능 여부 ---------- */
 var OBS = {};
+function bridgeSpans(S){
+  if (S._bs) return S._bs;
+  var out = [];
+  S.props.forEach(function(p){ if (p.t === 'bridge') out.push([p.x, ((p.v && p.v.w) || 6) * 0.5, p.z]); });
+  S._bs = out;
+  return out;
+}
 function obstaclesOf(k){
   if (OBS[k]) return OBS[k];
   var S = sceneOf(k), list = [];
@@ -11467,15 +11756,23 @@ function walkable(k, x, z){
   var b = VIL[k].b;
   if (x < b.x0 + 0.5 || x > b.x1 - 0.5 || z < b.z0 + 0.4 || z > b.z1 - 0.4) return false;
   if (k === 'village'){
-    var sc = 9.8 + Math.sin(z * 0.16) * 1.0;
-    var onBridge = (z > -0.6 && z < 2.6 && x > 5.8 && x < 13.8);
-    if (Math.abs(x - sc) < 2.45 && !onBridge) return false;
+    var Sv = sceneOf('village');
+    var sc = Sv.stream.c + Math.sin(z * 0.16) * 0.9 + 0.8;
+    var onBridge = false;
+    bridgeSpans(Sv).forEach(function(bs){
+      if (x > bs[0] - bs[1] && x < bs[0] + bs[1] && Math.abs(z - bs[2]) < 2.5) onBridge = true;
+    });
+    if (Math.abs(x - sc) < 2.45 * (Sv.pw || 1) && !onBridge) return false;
   }
-  if (k === 'beach' && z > sceneOf('beach').shore - 0.6) return false;
+  if (k === 'beach' && z > sceneOf('beach').shore - 0.8) return false;
   if (k === 'camp'){
-    var cz2 = 7.8 + Math.sin(x * 0.2) * 0.5;
-    var onLog = (x > -1.8 && x < 3.6);
-    if (Math.abs(z - cz2) < 1.45 && !onLog) return false;
+    var Sz = sceneOf('camp');
+    var cz2 = Sz.creek.z + 1.9 + Math.sin(x * 0.2) * 0.6;
+    var onLog = false;
+    bridgeSpans(Sz).forEach(function(bs){
+      if (x > bs[0] - bs[1] && x < bs[0] + bs[1] && Math.abs(z - bs[2]) < 2.5) onLog = true;
+    });
+    if (Math.abs(z - cz2) < 1.96 && !onLog) return false;
   }
   var obs = obstaclesOf(k);
   for (var i = 0; i < obs.length; i++){
@@ -11496,13 +11793,23 @@ function onLand(k, x, z){
   var b = VIL[k].b;
   if (x < b.x0 + 0.8 || x > b.x1 - 0.8 || z < b.z0 + 0.6 || z > b.z1 - 0.6) return false;
   if (k === 'village'){
-    var sc = 9.0 + Math.sin(z * 0.16) * 0.9;
-    if (Math.abs(x - sc) < 2.8 && !(z > -0.6 && z < 2.6)) return false;
+    var Sv2 = sceneOf('village');
+    var sc2 = Sv2.stream.c + Math.sin(z * 0.16) * 0.9;
+    var ob2 = false;
+    bridgeSpans(Sv2).forEach(function(bs){
+      if (x > bs[0] - bs[1] && x < bs[0] + bs[1] && Math.abs(z - bs[2]) < 2.8) ob2 = true;
+    });
+    if (Math.abs(x - sc2) < 2.8 * (Sv2.pw || 1) && !ob2) return false;
   }
-  if (k === 'beach' && z > sceneOf('beach').shore - 1.0) return false;
+  if (k === 'beach' && z > sceneOf('beach').shore - 1.35) return false;
   if (k === 'camp'){
-    var cz2 = 6.4 + Math.sin(x * 0.2) * 0.45;
-    if (Math.abs(z - cz2) < 2.0 && !(x > -1.8 && x < 3.6)) return false;
+    var Sz2 = sceneOf('camp');
+    var cz3 = Sz2.creek.z + Math.sin(x * 0.2) * 0.6;
+    var ol2 = false;
+    bridgeSpans(Sz2).forEach(function(bs){
+      if (x > bs[0] - bs[1] && x < bs[0] + bs[1] && Math.abs(z - bs[2]) < 2.8) ol2 = true;
+    });
+    if (Math.abs(z - cz3) < 2.7 && !ol2) return false;
   }
   if (k === 'winter'){
     var P = sceneOf('winter').pond;
@@ -11548,6 +11855,7 @@ function refreshChars(){
   if (!PG.chars[PG.hero] && PG.charOrder.length) PG.hero = PG.charOrder[0];
   if (!PG.charOrder.length) PG.hero = '';
   refreshBuilds();
+  applyRideMoves();
   heroChip();
   drawEmpty();
 }
@@ -11713,13 +12021,13 @@ function pgResize(){
   PG.ctx.setTransform(PG.dpr, 0, 0, PG.dpr, 0, 0);
 }
 function defaultScale(){
-  return clamp(PG.W / 20, 15, 30);
+  return clamp(PG.W / 26, 13, 26);
 }
 function fitScale(k){
   var b = VIL[k].b;
   var sx = PG.W / ((b.x1 - b.x0 + 3) * 0.98);
   var sy = PG.H / ((b.z1 - b.z0 + 3) * DZ * 0.98);
-  return clamp(Math.min(sx, sy), 8, 40);
+  return clamp(Math.min(sx, sy), 4, 40);
 }
 function focus(x, z, s){
   PG.camXg = x; PG.camZg = z;
@@ -11754,8 +12062,12 @@ function pgOpen(kid){
   else focus((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2);
   PG.fade = 0;
   hideBuildBar();
+  hideRideBar();
+  PG.move = false; PG.moveSel = { type:'', key:'' };
+  var mvBtn = $('pgMoveBtn');
+  if (mvBtn){ mvBtn.classList.remove('on'); mvBtn.setAttribute('aria-pressed', 'false'); }
   portalShow(true);
-  hint('한 마을씩 놀아요 · 다리나 이정표를 톡 누르면 옆 마을로! · 바닥을 톡 누르면 캐릭터를 따라 걸어가요', 7000);
+  hint('한 마을씩 놀아요 · 다리·이정표로 옆 마을로 · 바닥을 톡 누르면 따라 걸어가요 · ✋ 옮기기로 집·기구를 옮겨요', 7000);
   var ld = $('pgLoad');
   if (ld){ ld.hidden = false; ld.textContent = '🌳 놀이터 준비 중…'; setTimeout(function(){ ld.hidden = true; }, 320); }
   pgStart();
@@ -11770,6 +12082,8 @@ function pgClose(){
   portalHide();
   decoShow(false);
   hideBuildBar();
+  hideRideBar();
+  moveToggle(false);
   if (PG.joy.on){ PG.joy.on = false; var j = $('pgJoy'); if (j) j.hidden = true; }
 }
 function pgStart(){
@@ -12030,6 +12344,83 @@ function hideBuildBar(){
   PG.selBuild = '';
 }
 
+/* ---------- ✋ 옮기기 — 집·건물과 놀이기구를 모든 마을에서 손으로 옮긴다 ---------- */
+function rideBarShow(key){
+  var bar = $('pgRideBar');
+  if (!bar || !key) return;
+  var nm = $('pgrName');
+  if (nm) nm.textContent = rideOf(key).label || '놀이기구';
+  PG.rideSel = key;
+  bar.hidden = false;
+}
+function hideRideBar(){
+  var bar = $('pgRideBar');
+  if (bar) bar.hidden = true;
+  PG.rideSel = '';
+}
+function moveToggle(on){
+  PG.move = (on === undefined) ? !PG.move : !!on;
+  var b = $('pgMoveBtn');
+  if (b){ b.classList.toggle('on', PG.move); b.setAttribute('aria-pressed', PG.move ? 'true' : 'false'); }
+  if (!PG.move){ PG.moveSel = { type:'', key:'' }; hideRideBar(); }
+  else hint('옮길 집이나 기구를 톡 누른 뒤, 원하는 바닥을 톡 누르세요', 6500);
+}
+function moveSelReset(){
+  PG.moveSel = { type:'', key:'' };
+  PG.selBuild = '';
+  hideRideBar();
+}
+function movePickBuild(b){
+  if (!b) return;
+  PG.moveSel = { type:'build', key: b.id };
+  hideRideBar();
+  buildBarShow(b);
+  if (typeof toast === 'function') toast('📍 ' + avBuildName(b.kind) + ' — 옮길 바닥을 톡 누르세요', 2200);
+}
+function movePickRide(r){
+  if (!r) return;
+  PG.moveSel = { type:'ride', key: r.k };
+  hideBuildBar();
+  rideBarShow(r.k);
+  if (typeof toast === 'function') toast('📍 ' + (rideOf(r.k).label || '놀이기구') + ' — 옮길 바닥을 톡 누르세요', 2200);
+}
+function movePlaceAt(wx, wz){
+  var sel = PG.moveSel;
+  if (!sel || !sel.type) return false;
+  var b = VIL[PG.vil].b;
+  var x = clamp(wx, b.x0 + 1.8, b.x1 - 1.8);
+  var z = clamp(wz, b.z0 + 1.6, b.z1 - 1.6);
+  if (sel.type === 'build'){
+    var bl = PG.builds[sel.key];
+    if (!bl) return false;
+    bl.x = x; bl.z = z;
+    pgSave(); renderDeco();
+    if (typeof toast === 'function') toast('📍 ' + avBuildName(bl.kind) + ' 자리를 옮겼어요', 1500);
+    return true;
+  }
+  if (sel.type === 'ride'){
+    var S = sceneOf(PG.vil), r = null;
+    S.rides.forEach(function(q){ if (q.k === sel.key) r = q; });
+    if (!r) return false;
+    r.x = x; r.z = z;
+    OBS = {};
+    pgRideSave(sel.key, r);
+    if (typeof toast === 'function') toast('📍 ' + (rideOf(sel.key).label || '놀이기구') + ' 자리를 옮겼어요', 1500);
+    return true;
+  }
+  return false;
+}
+function rideHome(key){
+  var S = sceneOf(PG.vil), r = null;
+  S.rides.forEach(function(q){ if (q.k === key) r = q; });
+  if (!r || r.hx === undefined) return;
+  r.x = r.hx; r.z = r.hz;
+  OBS = {};
+  pgRideSave(key, r);
+  PG.moveSel = { type:'ride', key: key };
+  if (typeof toast === 'function') toast('🏠 ' + (rideOf(key).label || '놀이기구') + ' 원래 자리로 돌아갔어요', 1800);
+}
+
 /* ---------- 게임 시점 ---------- */
 function followUI(on){
   var j = $('pgJoy'), a = $('pgActBox'), s = $('pgHeroSwap'), t = $('pgHeroTag');
@@ -12233,6 +12624,21 @@ function draw(dt){
     var R = rideOf(r.k);
     items.push({ z: r.z, f: function(){ R.draw(g, r, PG.time); } });
   });
+  /* ✋ 옮기기 — 고른 기구 밑에 분홍 테두리 */
+  if (PG.moveSel && PG.moveSel.type === 'ride'){
+    var sr = null;
+    S.rides.forEach(function(q){ if (q.k === PG.moveSel.key) sr = q; });
+    if (sr){
+      var rr3 = Math.max(1.6, (rideOf(sr.k).w || 4) * 0.5);
+      items.push({ z: sr.z - 0.02, f: function(){
+        g.save();
+        g.beginPath();
+        g.ellipse(sX(sr.x), sY(sr.z), rr3 * PG.S, rr3 * PG.S * DZ, 0, 0, 6.3);
+        g.strokeStyle = 'rgba(255,140,172,.95)'; g.lineWidth = 3.5; g.stroke();
+        g.restore();
+      } });
+    }
+  }
   PG.buildOrder.forEach(function(id){
     var bl = PG.builds[id];
     if (!bl || bl.vil !== PG.vil) return;
@@ -12503,6 +12909,7 @@ function onDown(e){
   PG.tap = { hit: hit, x: px, y: py, t: performance.now(), moved: false };
   if (hit && hit.type === 'char'){ PG.drag = { type:'char', c: hit.c, dx: hit.c.x - wX(px), dz: hit.c.z - wZ(py) }; }
   else if (hit && hit.type === 'build'){ PG.drag = { type:'build', b: hit.b, dx: hit.b.x - wX(px), dz: hit.b.z - wZ(py) }, buildBarShow(hit.b); }
+  else if (hit && hit.type === 'ride' && PG.move){ PG.drag = { type:'ride', r: hit.r, key: hit.r.k, dx: hit.r.x - wX(px), dz: hit.r.z - wZ(py) }, movePickRide(hit.r); }
   else PG.drag = { type:'pan' };
   if (PG.cv.setPointerCapture){ try { PG.cv.setPointerCapture(e.pointerId); } catch(err){} }
 }
@@ -12517,7 +12924,7 @@ function onMove(e){
     if (ids.length < 2) return;
     var a = PG.ptrs[ids[0]], b = PG.ptrs[ids[1]];
     var d = Math.hypot(a.x - b.x, a.y - b.y);
-    if (PG.pinch.d > 10) PG.Sgoal = clamp(PG.pinch.s * (d / PG.pinch.d), 7, 62);
+    if (PG.pinch.d > 10) PG.Sgoal = clamp(PG.pinch.s * (d / PG.pinch.d), 4, 62);
     PG.S = PG.Sgoal;
     return;
   }
@@ -12534,6 +12941,10 @@ function onMove(e){
     var bl = PG.drag.b;
     bl.x = clamp(wX(px) + PG.drag.dx, VIL[PG.vil].b.x0 + 1.4, VIL[PG.vil].b.x1 - 1.4);
     bl.z = clamp(wZ(py) + PG.drag.dz, VIL[PG.vil].b.z0 + 1.2, VIL[PG.vil].b.z1 - 1.2);
+  } else if (PG.drag.type === 'ride'){
+    var fr = PG.drag.r;
+    fr.x = clamp(wX(px) + PG.drag.dx, VIL[PG.vil].b.x0 + 1.6, VIL[PG.vil].b.x1 - 1.6);
+    fr.z = clamp(wZ(py) + PG.drag.dz, VIL[PG.vil].b.z0 + 1.4, VIL[PG.vil].b.z1 - 1.4);
   } else {
     /* 화면 이동 — 직접 둘러보기 시작하면 자동 따라가기는 멈춘다 */
     PG.autoCam = false;
@@ -12568,9 +12979,17 @@ function onUp(e){
   if (!tap) return;
   if (wasDrag && wasDrag.type === 'build' && tap.moved){ pgSave(); renderDeco(); return; }
   if (wasDrag && wasDrag.type === 'char' && tap.moved){ pgSave(); return; }
+  if (wasDrag && wasDrag.type === 'ride' && tap.moved){ OBS = {}; pgRideSave(wasDrag.key, wasDrag.r); return; }
   if (tap.moved) return;
   /* 톡 누르기 */
   var hit = tap.hit;
+  /* ✋ 옮기기 모드 — 기구·건물을 고르고, 바닥을 톡 누르면 그 자리로 */
+  if (PG.move){
+    if (hit && hit.type === 'ride'){ movePickRide(hit.r); return; }
+    if (hit && hit.type === 'build'){ movePickBuild(hit.b); return; }
+    if (hit && hit.type === 'char'){ return; }
+    if (!hit || hit.type !== 'sign'){ movePlaceAt(wX(tap.x), wZ(tap.y)); return; }
+  }
   if (!hit){
     var wxp = wX(tap.x), wzp = wZ(tap.y);
     var h = PG.chars[PG.hero];
@@ -12659,7 +13078,7 @@ function onWheel(e){
   if (!PG.on) return;
   e.preventDefault();
   PG.autoCam = false;
-  PG.Sgoal = clamp(PG.Sgoal * (e.deltaY > 0 ? 0.92 : 1.08), 7, 62);
+  PG.Sgoal = clamp(PG.Sgoal * (e.deltaY > 0 ? 0.92 : 1.08), 4, 62);
   PG.S = PG.Sgoal;
 }
 
@@ -12708,9 +13127,19 @@ document.addEventListener('click', function(ev){
     var bl = PG.selBuild ? PG.builds[PG.selBuild] : null;
     if (act === 'rot' && bl) buildFlip(bl.id);
     else if (act === 'del' && bl) buildDelete(bl.id);
+    else if (act === 'move' && bl){ moveToggle(true); movePickBuild(bl); }
     else if (act === 'close') hideBuildBar();
     return;
   }
+  var rbar = t.closest('#pgRideBar [data-pgr]');
+  if (rbar){
+    var ract = rbar.getAttribute('data-pgr');
+    if (ract === 'move' && PG.rideSel){ moveToggle(true); PG.moveSel = { type:'ride', key: PG.rideSel }; }
+    else if (ract === 'home' && PG.rideSel) rideHome(PG.rideSel);
+    else if (ract === 'close') hideRideBar();
+    return;
+  }
+  if (t.closest('#pgMoveBtn')){ moveToggle(); return; }
   var shop = t.closest('#pgdShop');
   if (shop){
     var k1 = PG.kid; pgClose();
@@ -12723,12 +13152,12 @@ document.addEventListener('click', function(ev){
     try { if (typeof openAvatarSheet === 'function'){ openAvatarSheet(k2); if (typeof avatarTab !== 'undefined') avatarTab = 'build'; if (typeof renderAvatarSheet === 'function') renderAvatarSheet(); } } catch(e){}
     return;
   }
-  if (t.closest('#pgZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.22, 7, 62); return; }
-  if (t.closest('#pgZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.22, 7, 62); return; }
-  if (t.closest('#pgActZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.18, 7, 62); return; }
-  if (t.closest('#pgActZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.18, 7, 62); return; }
+  if (t.closest('#pgZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.22, 4, 62); return; }
+  if (t.closest('#pgZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.22, 4, 62); return; }
+  if (t.closest('#pgActZoomIn')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal * 1.18, 4, 62); return; }
+  if (t.closest('#pgActZoomOut')){ PG.autoCam = false; PG.Sgoal = clamp(PG.Sgoal / 1.18, 4, 62); return; }
   if (t.closest('#pgReset')){ PG.autoCam = false; centerOnVillage(); PG.Sgoal = defaultScale(); return; }
-  if (t.closest('#pgPanBtn')){ PG.autoCam = false; PG.Sgoal = clamp(fitScale(PG.vil), 7, 62); PG.camXg = (VIL[PG.vil].b.x0 + VIL[PG.vil].b.x1) / 2; PG.camZg = (VIL[PG.vil].b.z0 + VIL[PG.vil].b.z1) / 2; return; }
+  if (t.closest('#pgPanBtn')){ PG.autoCam = false; PG.Sgoal = clamp(fitScale(PG.vil), 4, 62); PG.camXg = (VIL[PG.vil].b.x0 + VIL[PG.vil].b.x1) / 2; PG.camZg = (VIL[PG.vil].b.z0 + VIL[PG.vil].b.z1) / 2; return; }
   if (t.closest('#pgZoneBtn')){ portalShow(false); var x = $('pgPortalClose'); if (x) x.hidden = false; return; }
   if (t.closest('#pgLocBtn')){ jumpToHero(); return; }
   if (t.closest('#pgPortalClose')){ portalHide(); return; }
@@ -12795,7 +13224,10 @@ window.__pg = {
   view: function(){ return { vil: PG.vil, S: +PG.S.toFixed(2), camX: +PG.camX.toFixed(2), camZ: +PG.camZ.toFixed(2), W: PG.W, H: PG.H, dpr: PG.dpr }; },
   counts: function(){ return { chars: PG.charOrder.length, builds: PG.buildOrder.length }; },
   tapDbg: function(){ return { go: PG.tapGo }; },
-  labels: function(on){ PG.showLabels = on !== false; return PG.showLabels; }
+  labels: function(on){ PG.showLabels = on !== false; return PG.showLabels; },
+  app: function(){ return state; },
+  scene: function(k){ return sceneOf(k || PG.vil); },
+  rides: function(){ return sceneOf(PG.vil).rides.map(function(r){ return { k:r.k, x:+r.x.toFixed(2), z:+r.z.toFixed(2), hx:r.hx, hz:r.hz }; }); }
 };
 
 })();
