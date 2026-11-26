@@ -2231,6 +2231,12 @@ body.myr-open{overflow:hidden}
 
 .myr-tray{max-height:42%!important;z-index:8}
 .myr.bag .myr-tray{display:flex}
+/* 🛍️ 집꾸미기 상점 — 보관함과 같은 바텀시트, 조금 더 높게 */
+.myr-shop{z-index:9;max-height:68%!important}
+.myr-c .prc{position:absolute;left:3px;top:2px;font-size:8px;font-weight:900;color:#8A5A20;
+  background:linear-gradient(120deg,#FFF0BE,#FFD45C);border:1px solid #EFBF45;border-radius:999px;
+  padding:0 4px;line-height:1.4}
+.myr-c .prc.own{background:#EFF7EF;border-color:#D6E9D8;color:#4F7A57}
 .myr-tabs{display:flex;gap:4px;padding:7px 0 0;overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
 .myr-tray .pgd-body{flex:1 1 auto;min-height:0}
 .myr-tabs::-webkit-scrollbar{display:none}
@@ -2247,6 +2253,7 @@ body.myr-open{overflow:hidden}
   text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .myr-c .cnt{position:absolute;right:3px;top:2px;font-size:8.5px;font-weight:900;color:#9A6A2A;
   background:#FFF3D6;border:1px solid #F0DDB4;border-radius:999px;padding:0 4px;line-height:1.35}
+.myr-c .cnt.own{background:#FDEBF1;border-color:#F3CBDC;color:#C0507E;padding:0 3px}
 .myr-c.done{opacity:.5}
 .myr-c.done .cnt{background:#EFEAE0;border-color:#E2D8C8;color:#9A8F7C}
 .myr-empty{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;
@@ -2255,6 +2262,9 @@ body.myr-open{overflow:hidden}
 .myr-empty small{font-size:10.5px;font-weight:800;color:#B0A28C;line-height:1.45}
 .myr-empty button{margin-top:4px;border:1px solid #EFBF45;background:linear-gradient(120deg,#FFF3C4,#FFD45C);
   color:#7A4E00;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:900;font-family:inherit;cursor:pointer}
+.myr-empty-b{border:1px solid #E7B9CD;background:linear-gradient(120deg,#FFEFF5,#FFD9E6);
+  color:#A55070;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:900;font-family:inherit;cursor:pointer}
+.myr-empty-b:active{transform:scale(.97)}
 
 /* ---------- 🎁 뽑기 연출 ---------- */
 .myr-roll{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
@@ -6845,8 +6855,7 @@ function kidProfileHtml(id){
     +     '<button class="prof-edit prof-shop' + (giftPendAmt(id) > 0 ? ' gift' : '') + '" type="button" data-act="avatar-open" data-m="' + id + '" title="'
     +       (giftPendAmt(id) > 0 ? '🎁 선물 도착! 눌러서 선물상자를 열어요' : '캐릭터·배경·꾸미기 상점') + '">'
     +       (giftPendAmt(id) > 0 ? '🎁 선물 도착!' : '🛍️ 상점') + '</button>'
-    +     '<button class="prof-edit prof-play" type="button" data-act="playground-open" data-m="' + id + '" title="상점에서 산 캐릭터가 노는 자연 놀이터">🌳 놀이터</button>'
-    +     '<button class="prof-edit prof-home" type="button" data-act="myhome-open" data-m="' + id + '" title="넓은 마이홈에서 가구를 놓고 캐릭터와 함께 놀아요">🏡 마이홈</button>'
+    +     '<button class="prof-edit prof-home" type="button" data-act="myhome-open" data-m="' + id + '" title="넓은 집에서 가구를 놓고 캐릭터와 함께 꾸며요">🏡 집꾸미기</button>'
     +   '</span>'
     + '</div>';
 }
@@ -8377,9 +8386,7 @@ function renderAvatarSheet(){
       + (bList.length ? '<div class="av-grid">' + bList.map(function(bd){
           return avShopCard('build', bd.k, bd.n,
             '<span class="av-card-img"><span class="av-card-svg">' + avBuildSvg(bd.k) + '</span></span>', kid, av);
-        }).join('') + '</div>' : avEmptyHtml('build')) + '</div>'
-      + '<div class="av-bnote"><small>구매한 집·건물은 🌳 자연 놀이터 ›🎨 꾸미기 ›🏡 집·건물에서 원하는 곳에 직접 지을 수 있어요</small>'
-      +   '<button type="button" data-act="pg-from-shop" data-m="' + kid + '">🌳 자연 놀이터 가기 ›</button></div>';
+        }).join('') + '</div>' : avEmptyHtml('build')) + '</div>';
   } else {
     var pList = avFilterList(AV_PRESETS, kid, 'preset');
     pane = '<div class="av-sec"><div class="av-lab">캐릭터를 골라요 · ' + avListNote(pList, AV_PRESETS.length, kid, 'preset')
@@ -8408,7 +8415,7 @@ function renderAvatarSheet(){
       + '<small>아래 상점에서 입혀보고 💎 1P로 데려와 보세요 · 카드를 누르면 위에서 바로 보여요</small>'
       + '</div>';
   body.innerHTML =
-      '<button class="av-pgbtn" type="button" data-act="pg-from-shop" data-m="' + kid + '">🌳 자연 놀이터 가기 ›</button>'
+      '<button class="av-pgbtn" type="button" data-act="myrshop-open" data-m="' + kid + '">🛍️ 집꾸미기 상점에서 가구·소품·캐릭터 사기 ›</button>'
     + topHtml
     + '<div class="av-ptbar">'
     +   '<span class="av-ptbig">💎 보유 ' + pts + 'P</span>'
@@ -13926,6 +13933,14 @@ document.addEventListener('click', function(ev){
   if (!t || !t.closest) return;
   var open = t.closest('[data-act="playground-open"]');
   if (open){ ev.stopPropagation(); pgOpen(open.dataset.m || (typeof activeKid === 'function' ? activeKid() : null)); return; }
+  /* 🛍️ 메인 상점에서 집꾸미기 상점으로 바로 */
+  var myrShop = t.closest('[data-act="myrshop-open"]');
+  if (myrShop){
+    ev.stopPropagation();
+    try { if (typeof closeCommuteSheet === 'function') closeCommuteSheet(); } catch(e){}
+    try { if (typeof myrOpenShop === 'function') myrOpenShop(myrShop.dataset.m || (typeof activeKid === 'function' ? activeKid() : null)); } catch(e){}
+    return;
+  }
   var fromShop = t.closest('[data-act="pg-from-shop"]');
   if (fromShop){
     ev.stopPropagation();
@@ -14093,18 +14108,18 @@ window.__pg = {
 <!-- ============================================================
      🏡 마이홈 — 넓은 복층(단차) 집 · 1P 가구 뽑기 · 사람 배치
      ============================================================ -->
-<div class="myr" id="myr" hidden aria-label="마이홈">
+<div class="myr" id="myr" hidden aria-label="집꾸미기">
   <div id="myrStage"></div>
 
   <div class="pg-top myr-top">
     <div class="pg-l">
       <div class="pg-lrow">
-        <div class="pg-title" id="myrTitle">🏡 마이홈</div>
+        <div class="pg-title" id="myrTitle">🏡 집꾸미기</div>
         <span class="myr-pts" id="myrPts">💎 0P</span>
       </div>
       <div class="pg-lrow"><div class="pg-switch" id="myrSwitch"></div></div>
       <div class="pg-tools">
-        <button type="button" id="myrRoll" class="myr-rollbtn">🎁 1P 가구 뽑기</button>
+        <button type="button" id="myrShopBtn" class="myr-rollbtn">🛍️ 1P 상점</button>
         <button type="button" id="myrMove" aria-pressed="false" title="가구·사람을 끌어서 옮겨요">✋ 옮기기</button>
       </div>
     </div>
@@ -14115,7 +14130,7 @@ window.__pg = {
     <button type="button" id="myrIn" aria-label="확대"><span class="pgz-ico">＋</span><span class="pgz-txt">확대</span></button>
     <button type="button" id="myrOut" aria-label="축소"><span class="pgz-ico">－</span><span class="pgz-txt">축소</span></button>
     <button type="button" id="myrFit" aria-label="집 전체 보기"><span class="pgz-ico">🏠</span><span class="pgz-txt">전체</span></button>
-    <button type="button" id="myrBag" aria-label="보관함"><span class="pgz-ico">🎒</span><span class="pgz-txt">가구</span></button>
+    <button type="button" id="myrBag" aria-label="보관함"><span class="pgz-ico">🎒</span><span class="pgz-txt">보관함</span></button>
   </div>
 
   <div class="myr-sel" id="myrSel" hidden>
@@ -14123,6 +14138,16 @@ window.__pg = {
     <button type="button" data-m="r">↻ 돌리기</button>
     <button type="button" data-m="d" class="del">🗑 치우기</button>
     <button type="button" data-m="x" class="x" aria-label="닫기">✕</button>
+  </div>
+
+  <div class="pg-deco myr-shop" id="myrShop" hidden>
+    <div class="pgd-h">
+      <b>🛍️ 집꾸미기 상점</b>
+      <span class="pgd-note" id="myrShopNote">1P로 하나씩 사요</span>
+      <button type="button" id="myrShopX" aria-label="닫기">✕</button>
+    </div>
+    <div class="pgd-tabs myr-tabs" id="myrShopTabs"></div>
+    <div class="pgd-body" id="myrShopBody"></div>
   </div>
 
   <div class="pg-deco myr-tray" id="myrTray" hidden>
@@ -14149,7 +14174,7 @@ window.__pg = {
 var MYR_ITEM = (function(){
   var KX = 0.30, KZ = 0.60;
   var P = {
-    wood:'#BE7C45', woodD:'#96592B', woodL:'#DDA771', woodDD:'#77461F',
+    wood:'#C98F62', woodD:'#A87C58', woodL:'#E5BE93', woodDD:'#8A6247',
     cream:'#FFF8EC', creamD:'#EFDCC0', wall:'#F8E8CE',
     pink:'#FFC6D7', pinkD:'#EF9DBA', rose:'#FFDCE6',
     mint:'#C3EAD7', mintD:'#8FCFB0',
@@ -14157,7 +14182,7 @@ var MYR_ITEM = (function(){
     lemon:'#FFE7A3', butter:'#FFD06A', gold:'#EFAE39',
     lav:'#DDCDF5', lavD:'#B5A0E2',
     white:'#FFFEF9', grey:'#E6DCCC', greyD:'#C9BCA9',
-    ink:'#6B4F33', inkS:'#93795A', red:'#E67A62', orange:'#F6A961',
+    ink:'#8E675A', inkS:'#9A7466', red:'#E67A62', orange:'#F6A961',
     green:'#7CBE78', greenD:'#5E9E5C', brick:'#D08A6B', brickD:'#B06E51'
   };
   function rr(g,x,y,w,h,r,fill,stroke,lw){
@@ -14192,7 +14217,7 @@ var MYR_ITEM = (function(){
     var x0=cx-w/2, x1=cx+w/2;
     if (side) poly(g,[[x1,y],[x1-d*KX,y+d*KZ],[x1-d*KX,y+d*KZ+h],[x1,y+h]],side,st,lw);
     if (top)  poly(g,[[x0,y+h],[x1,y+h],[x1-d*KX,y+h+d*KZ],[x0-d*KX,y+h+d*KZ]],top,st,lw);
-    if (front){ g.fillStyle = front; g.fillRect(x0,y,w,h); if (st) g.strokeRect(x0,y,w,h); }
+    if (front){ g.fillStyle = front; rr(g,x0,y,w,h, Math.min(0.055, Math.min(Math.abs(w),Math.abs(h))*0.22), front, st, lw); }
   }
   /* 뒤쪽(깊이 dz)으로 옮겨 그리기 */
   function back(g,dz,fn){ g.save(); g.translate(-dz*KX, dz*KZ); fn(); g.restore(); }
@@ -16061,6 +16086,1233 @@ var MYR_ITEM = (function(){
     return 'rgb('+r+','+g2+','+b+')';
   }
 
+  /* ======================= 2026-11-26 추가 — 예쁜 가구 10종 ======================= */
+  it({ k:'dresser_royal', n:'로열 공주 화장대', cat:'furn', np:2, w:1.55, d:0.62, h:1.94, draw:function(g){
+    /* 아치 거울 + 왕관 (뒤) */
+    back(g,0.46,function(){
+      rr(g,-0.54,1.00,1.08,0.78,0.32,P.butter,P.gold,0.022);
+      rr(g,-0.45,1.08,0.90,0.62,0.26,'#DDECF7','#C6D8E7',0.016);
+      g.save(); g.globalAlpha=.6;
+      poly(g,[[-0.28,1.12],[-0.04,1.58],[0.12,1.12]],'#FFFFFF');
+      poly(g,[[-0.02,1.14],[0.14,1.44],[0.30,1.14]],'#FFFFFF');
+      g.restore();
+      poly(g,[[-0.22,1.74],[-0.12,1.58],[-0.02,1.70],[0.08,1.58],[0.18,1.74],[0.12,1.78],[-0.16,1.78]],P.butter,P.gold,0.014);
+      ci(g,-0.02,1.86,0.030,'#FFE9F2','#E7B9CE',0.010);
+    });
+    /* 다리 · 몸통 · 상판 */
+    rr(g,-0.70,0,0.11,0.16,0.04,P.butter,P.gold,0.012);
+    rr(g, 0.59,0,0.11,0.16,0.04,P.butter,P.gold,0.012);
+    bx(g,0,0.14,1.50,0.58,0.80,P.white,P.cream,P.creamD,'#E5D2B8',0.025);
+    rr(g,-0.76,0.92,1.52,0.08,0.03,P.butter,P.gold,0.016);
+    /* 서랍 3칸 · 골드 손잡이 */
+    for (var i=0;i<3;i++){
+      rr(g,-0.64,0.22+i*0.23,1.28,0.19,0.05,P.cream,P.creamD,0.014);
+      ci(g,-0.26,0.315+i*0.23,0.026,P.butter,P.gold,0.010);
+      ci(g, 0.26,0.315+i*0.23,0.026,P.butter,P.gold,0.010);
+    }
+    /* 향수 · 화장품 · 꽃병 */
+    back(g,0.28,function(){
+      ci(g,-0.52,1.00,0.060,'#FFD9E6','#F0AFC7',0.010);
+      rr(g,-0.44,1.00,0.10,0.05,0.02,'#F7C9DB',null);
+      rr(g,-0.28,1.00,0.07,0.11,0.02,'#D9EDF8','#BBD9EA',0.008);
+      ci(g, 0.30,1.03,0.075,'#FFF3FA','#EFC9E2',0.012);
+      ci(g, 0.30,1.12,0.026,P.rose,'#EFC9E2',0.008);
+      ln(g,0.56,1.00,0.56,1.22,'#9BC48F',0.018);
+      ci(g,0.56,1.24,0.045,'#FFDCE6','#EFB4C8',0.010);
+    });
+  }});
+  it({ k:'arcade_retro', n:'레트로 아케이드 게임기', cat:'furn', np:2, w:1.05, d:0.80, h:1.82, draw:function(g){
+    /* 캐비닛 몸통 */
+    bx(g,0,0,1.00,0.72,1.55,'#8E88AC','#7A7597','#6B6688','#595577',0.022);
+    /* 아래 받침 */
+    rr(g,-0.46,0,0.92,0.12,0.03,'#6E6A8E','#595577',0.012);
+    /* 화면 테두리 + 화면 */
+    rr(g,-0.40,0.86,0.80,0.62,0.07,'#1B1A2C','#0F0E1C',0.018);
+    var sc = g.createLinearGradient(0,0.90,0,1.44);
+    sc.addColorStop(0,'#4FD1F5'); sc.addColorStop(0.55,'#7C8CF8'); sc.addColorStop(1,'#F58AC8');
+    rr(g,-0.34,0.92,0.68,0.50,0.04,sc,null);
+    g.save(); g.globalAlpha=.85;
+    rr(g,-0.20,0.98,0.08,0.08,0.02,'#FFF3A8');
+    rr(g,-0.06,1.06,0.08,0.08,0.02,'#A8F5C9');
+    rr(g, 0.08,0.99,0.08,0.08,0.02,'#FFD1E6');
+    g.restore();
+    ln(g,-0.30,1.24,0.30,1.24,'#FFFFFF',0.014);
+    ln(g,-0.30,1.16,0.10,1.16,'rgba(255,255,255,.65)',0.012);
+    /* 조작판 */
+    rr(g,-0.44,0.62,0.88,0.20,0.05,'#F6E7D9','#DFC6B4',0.014);
+    ci(g,-0.24,0.72,0.045,'#E0574A','#A93C32',0.010);
+    ln(g,-0.24,0.72,-0.24,0.82,'#3E3D56',0.028);
+    ci(g,-0.24,0.84,0.040,'#F2C14E','#C99A2E',0.010);
+    ci(g, 0.02,0.72,0.038,'#4FA8E0','#2F7FB5',0.010);
+    ci(g, 0.16,0.72,0.038,'#7FD08B','#54A862',0.010);
+    ci(g, 0.30,0.72,0.038,'#F2C14E','#C99A2E',0.010);
+    /* 코인 슬롯 · 로고 */
+    rr(g,-0.14,0.30,0.28,0.16,0.03,'#1E1D2E','#12111F',0.012);
+    rr(g,-0.03,0.33,0.06,0.10,0.01,'#FFD873','#C99A2E',0.008);
+    g.save(); g.globalAlpha=.9;
+    rr(g,-0.30,1.50,0.60,0.16,0.05,'#FFB6CB','#E58CA9',0.014);
+    g.restore();
+    /* 사이드 네온 */
+    ln(g,-0.50,0.20,-0.50,1.50,'rgba(120,240,255,.75)',0.026);
+    ln(g, 0.50,0.20, 0.50,1.50,'rgba(255,140,220,.75)',0.026);
+  }});
+  it({ k:'rattan_rock', n:'라탄 흔들의자', cat:'furn', np:1, w:1.00, d:1.05, h:1.22, seat:'chair', draw:function(g){
+    /* 바닥 흔들 날개 */
+    g.beginPath(); g.moveTo(-0.50,0.12); g.quadraticCurveTo(0,-0.06,0.50,0.12);
+    g.strokeStyle='#C79A6E'; g.lineWidth=0.055; g.lineCap='round'; g.stroke();
+    g.beginPath(); g.moveTo(-0.44,0.17); g.quadraticCurveTo(0,0.01,0.44,0.17);
+    g.strokeStyle='#EBC79A'; g.lineWidth=0.038; g.stroke();
+    /* 다리 */
+    ln(g,-0.30,0.08,-0.30,0.38,'#C79A6E',0.050);
+    ln(g, 0.30,0.08, 0.30,0.38,'#C79A6E',0.050);
+    /* 둥근 등껍질 (뒤) */
+    back(g,0.30,function(){
+      g.beginPath(); g.moveTo(-0.36,0.40);
+      g.bezierCurveTo(-0.42,1.14,0.42,1.14,0.36,0.40);
+      g.closePath();
+      g.fillStyle='#F6E0C0'; g.fill(); g.strokeStyle='#D9B48C'; g.lineWidth=0.020; g.stroke();
+      g.save(); g.globalAlpha=.5;
+      for (var i=0;i<5;i++) ln(g,-0.28+i*0.14,0.46,-0.28+i*0.14,0.96,'#CBA57A',0.012);
+      for (var j=0;j<4;j++) ln(g,-0.30,0.56+j*0.13,0.30,0.56+j*0.13,'#CBA57A',0.012);
+      g.restore();
+    });
+    /* 좌판 · 쿠션 */
+    rr(g,-0.38,0.34,0.76,0.15,0.07,'#EBCFA8','#D3A87A',0.018);
+    rr(g,-0.30,0.47,0.60,0.16,0.08,'#FFD9E4','#E9AFC0',0.014);
+    rr(g,-0.22,0.59,0.44,0.15,0.07,'#FFF3F8','#EBC6D3',0.012);
+    /* 팔걸이 */
+    ln(g,-0.38,0.50,-0.38,0.64,'#C79A6E',0.034);
+    ln(g, 0.38,0.50, 0.38,0.64,'#C79A6E',0.034);
+    ln(g,-0.38,0.64,0.38,0.64,'#D9B48C',0.030);
+    /* 꽃 쿠션 디테일 */
+    ci(g,-0.15,0.66,0.048,'#FFC6D7','#E58CA9',0.010);
+    ci(g,-0.15,0.66,0.017,'#FFF3C0');
+    ci(g,0.06,0.66,0.030,'#FFF0C4','#E0C68A',0.008);
+  }});
+  it({ k:'rocket_tent', n:'로켓 우주선 텐트', cat:'furn', np:2, w:1.70, d:1.70, h:2.15, draw:function(g){
+    /* 지느러미 3장 */
+    poly(g,[[-0.72,0.10],[-0.46,0.62],[-0.20,0.10]],'#E8756A','#C4574D',0.020);
+    poly(g,[[ 0.72,0.10],[ 0.46,0.62],[ 0.20,0.10]],'#E8756A','#C4574D',0.020);
+    back(g,0.70,function(){ poly(g,[[-0.22,0.10],[0,0.66],[0.22,0.10]],'#D9635A','#B84E46',0.018); });
+    /* 동체 */
+    g.beginPath(); g.moveTo(-0.58,0.06);
+    g.bezierCurveTo(-0.60,0.86,-0.34,1.44, 0,1.94);
+    g.bezierCurveTo( 0.34,1.44, 0.60,0.86, 0.58,0.06);
+    g.closePath();
+    var rg = g.createLinearGradient(-0.6,0,0.6,0);
+    rg.addColorStop(0,'#FBFBFF'); rg.addColorStop(0.55,'#F1F1FA'); rg.addColorStop(1,'#DADCEF');
+    g.fillStyle=rg; g.fill(); g.strokeStyle='#BFC2DA'; g.lineWidth=0.022; g.stroke();
+    /* 빨간 띠 */
+    poly(g,[[-0.545,0.72],[-0.40,0.98],[0.40,0.98],[0.545,0.72],[0.50,0.62],[-0.50,0.62]],'#EE8177',null);
+    /* 창문 */
+    ci(g,0,1.10,0.235,'#AFD8F2','#8FB6D2',0.022);
+    ci(g,0,1.10,0.185,'#CFE9F9',null);
+    g.save(); g.globalAlpha=.7;
+    poly(g,[[-0.12,1.04],[-0.02,1.24],[0.08,1.04]],'#FFFFFF');
+    g.restore();
+    /* 노즐 */
+    poly(g,[[-0.26,0.02],[0.26,0.02],[0.34,-0.08],[-0.34,-0.08]],'#9AA0BC','#7B81A0',0.016);
+    /* 출입문 (열린 원단) */
+    rr(g,-0.20,0.10,0.40,0.44,0.18,'#8E93B4','#71769A',0.016);
+    rr(g,-0.15,0.12,0.30,0.40,0.14,'#6E7396',null);
+    /* 별 스티커 */
+    g.save(); g.globalAlpha=.9;
+    ci(g,-0.34,1.42,0.042,'#FFE38A'); ci(g,0.30,1.32,0.032,'#FFE38A'); ci(g,0.20,1.56,0.026,'#FFE38A');
+    ci(g,-0.22,0.30,0.030,'#FFE38A');
+    g.restore();
+  }});
+  it({ k:'aquarium_pano', n:'대형 파노라마 수족관', cat:'furn', np:2, w:2.00, d:0.55, h:1.45, draw:function(g){
+    /* 나무 받침 */
+    bx(g,0,0,1.90,0.52,0.62,'#E8CFAE','#F4E3CB','#D9BE9C','#C9A985',0.024);
+    rr(g,-0.18,0.24,0.36,0.20,0.03,'#C9A985','#B4956F',0.012);
+    ci(g,0,0.34,0.030,'#F4E3CB','#C9A985',0.008);
+    /* 유리 수조 */
+    var wg = g.createLinearGradient(0,0.62,0,1.40);
+    wg.addColorStop(0,'#BFE9F7'); wg.addColorStop(0.6,'#8FD3EE'); wg.addColorStop(1,'#61B6DE');
+    rr(g,-0.90,0.62,1.80,0.74,0.06,wg,'#8FB6CF',0.020);
+    /* 물결 표면 */
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.moveTo(-0.86,1.28);
+    for (var i=0;i<6;i++) g.quadraticCurveTo(-0.86+0.15+i*0.28,1.34,-0.72+i*0.28,1.28);
+    g.strokeStyle='#FFFFFF'; g.lineWidth=0.018; g.stroke();
+    g.restore();
+    /* 모래 · 돌 · 수초 */
+    g.fillStyle='rgba(240,226,190,.85)';
+    g.beginPath(); g.moveTo(-0.88,0.68);
+    g.quadraticCurveTo(-0.2,0.80,0.88,0.70); g.lineTo(0.88,0.64); g.lineTo(-0.88,0.64); g.fill();
+    g.save(); g.globalAlpha=.9;
+    ln(g,-0.62,0.70,-0.60,1.06,'#5FAF6C',0.030);
+    ln(g,-0.54,0.70,-0.52,0.98,'#7FC77F',0.026);
+    ln(g, 0.60,0.70, 0.62,1.04,'#5FAF6C',0.030);
+    ln(g, 0.68,0.70, 0.70,0.94,'#7FC77F',0.024);
+    g.restore();
+    el(g,-0.20,0.68,0.10,0.05,'#B9AE93');
+    el(g, 0.14,0.67,0.07,0.04,'#C9BE9F');
+    /* 물고기 */
+    g.save();
+    el(g,-0.34,1.04,0.11,0.06,'#FFB454','#E2913A',0.012);
+    poly(g,[[-0.45,1.04],[-0.56,1.10],[-0.56,0.98]],'#FFB454','#E2913A',0.010);
+    ci(g,-0.31,1.06,0.012,'#4A3A2A');
+    el(g, 0.24,0.90,0.09,0.05,'#FF8FA8','#E0708C',0.012);
+    poly(g,[[0.33,0.90],[0.43,0.95],[0.43,0.85]],'#FF8FA8','#E0708C',0.010);
+    ci(g,0.21,0.92,0.011,'#4A3A2A');
+    el(g, 0.06,1.16,0.07,0.04,'#8ED8E8','#66BCCF',0.010);
+    g.restore();
+    /* 기포 */
+    ci(g,-0.72,1.18,0.020,'rgba(255,255,255,.85)');
+    ci(g,-0.66,1.06,0.015,'rgba(255,255,255,.75)');
+    ci(g, 0.78,1.14,0.017,'rgba(255,255,255,.8)');
+    /* 위 뚜껑 테두리 · 조명 */
+    rr(g,-0.94,1.34,1.88,0.07,0.03,'#E7EEF6','#B9C8D8',0.014);
+    rr(g,-0.86,0.60,1.72,0.04,0.02,'#DCE7F1','#B9C8D8',0.012);
+    el(g,0,0.36,0.42,0.05,'rgba(255,240,180,.35)');
+  }});
+  it({ k:'synth_keys', n:'신디사이저 키보드', cat:'furn', np:2, w:1.50, d:0.50, h:1.05, draw:function(g){
+    /* X 스탠드 */
+    ln(g,-0.56,0.02,-0.30,0.62,'#C4BBD2',0.042);
+    ln(g, 0.56,0.02, 0.30,0.62,'#C4BBD2',0.042);
+    ln(g,-0.56,0.02, 0.30,0.62,'#B3A9C4',0.038);
+    ln(g, 0.56,0.02,-0.30,0.62,'#B3A9C4',0.038);
+    ln(g,-0.68,0.02,0.68,0.02,'#A8A0BC',0.038);
+    /* 본체 */
+    bx(g,0,0.62,1.46,0.44,0.20,'#B9B2CC','#A69FBC','#9891AE','#857E9C',0.020);
+    /* 건반 */
+    rr(g,-0.68,0.66,1.36,0.13,0.02,'#FDFDF8','#D5D5C8',0.012);
+    for (var i=0;i<17;i++) ln(g,-0.68+i*0.08,0.66,-0.68+i*0.08,0.79,'#C9C9BA',0.010);
+    for (var j=0;j<11;j++){
+      var bx0 = -0.64 + j*0.088;
+      if (j%7===2 || j%7===6) continue;
+      rr(g,bx0,0.72,0.046,0.08,0.012,'#2B2B33',null);
+    }
+    /* 조작부 · 노브 · LED */
+    rr(g,-0.68,0.80,1.36,0.06,0.02,'#CFC7DE',null);
+    ci(g,-0.50,0.83,0.024,'#FFC94D','#C99A2E',0.008);
+    ci(g,-0.38,0.83,0.024,'#FFC94D','#C99A2E',0.008);
+    ci(g,-0.26,0.83,0.020,'#7FE0A8','#4FAF78',0.008);
+    ci(g, 0.30,0.83,0.020,'#7FE0A8','#4FAF78',0.008);
+    ci(g, 0.42,0.83,0.020,'#FF8FA8','#D96782',0.008);
+    ci(g, 0.54,0.83,0.034,'#B9C4DA','#8C99B2',0.010);
+    /* 악보대 */
+    ln(g,0,0.82,0,1.00,'#8C99B2',0.022);
+    rr(g,-0.26,0.98,0.52,0.16,0.02,'#E8EDF6','#BFC8D8',0.010);
+    g.save(); g.globalAlpha=.5;
+    for (var k3=0;k3<3;k3++) ln(g,-0.20,1.02+k3*0.035,0.20,1.02+k3*0.035,'#9AA6B8',0.008);
+    g.restore();
+  }});
+  it({ k:'mirror_ball_table', n:'미러볼 파티 테이블', cat:'furn', np:2, w:1.40, d:1.20, h:1.30, draw:function(g){
+    /* 다리 */
+    ln(g,-0.44,0.02,-0.30,0.72,'#C9CDD8',0.048);
+    ln(g, 0.44,0.02, 0.30,0.72,'#C9CDD8',0.048);
+    ln(g,0,0.02,0,0.72,'#B4B9C6',0.040);
+    /* 테이블 상판 */
+    el(g,0,0.74,0.68,0.20,'#E8EAF2','#BFC4D2',0.018);
+    el(g,0,0.76,0.60,0.16,'#F6F7FB',null);
+    /* 미러볼 받침 · 볼 */
+    ln(g,0,0.76,0,0.96,'#AEB3C2',0.024);
+    ci(g,0,1.10,0.20,'#DCE4F5','#9FA9C2',0.018);
+    g.save(); g.globalAlpha=.85;
+    for (var r2=0;r2<4;r2++) for (var c2=0;c2<5;c2++){
+      ci(g,-0.13+c2*0.065,0.98+r2*0.062,0.018, 'rgba(255,255,255,.85)');
+    }
+    g.restore();
+    ci(g,-0.06,1.18,0.045,'rgba(255,255,255,.95)');
+    /* 빛줄기 */
+    g.save(); g.globalAlpha=.45;
+    ln(g,0.16,1.14,0.46,1.30,'#FFE38A',0.022);
+    ln(g,-0.18,1.06,-0.48,1.22,'#9BE0FF',0.020);
+    ln(g,0.10,0.98,0.36,0.86,'#FFB6CB',0.020);
+    g.restore();
+    /* 컵 · 과일 */
+    el(g,-0.40,0.78,0.055,0.045,'#FFD9E2','#E7AFC0',0.010);
+    rr(g,-0.44,0.78,0.08,0.10,0.02,'#FFF6FA','#E7CBD8',0.008);
+    ci(g,0.44,0.80,0.050,'#FF9EB5','#DC7089',0.010);
+    ci(g,0.36,0.79,0.038,'#FFC46B','#DDA043',0.010);
+  }});
+  it({ k:'trophy_case', n:'트로피 진열장', cat:'furn', np:2, w:1.50, d:0.45, h:1.95, draw:function(g){
+    /* 뒤판 · 옆판 */
+    back(g,0.40,function(){ rr(g,-0.72,0.10,1.44,1.78,0.05,'#B98A5E','#96693F',0.020); });
+    bx(g,0,0,1.44,0.42,1.80,P.wood,P.woodD,P.woodDD,'#5E3A18',0.024);
+    /* 유리장 (반투명) */
+    rr(g,-0.66,0.20,1.32,1.62,0.04,'rgba(226,242,251,.42)','#C8DCE8',0.016);
+    /* 선반 3단 */
+    for (var s2=0;s2<3;s2++){
+      rr(g,-0.66,0.52+s2*0.48,1.32,0.035,0.01,'#E8D3B4','#C9AE86',0.010);
+    }
+    /* 트로피들 */
+    function cup(cx,cy,sc){
+      rr(g,cx-0.06*sc,cy,0.12*sc,0.035*sc,0.01,'#8A6A3A',null);
+      ln(g,cx,cy+0.03*sc,cx,cy+0.10*sc,'#C99A2E',0.020*sc);
+      g.beginPath(); g.moveTo(cx-0.075*sc,cy+0.10*sc);
+      g.lineTo(cx+0.075*sc,cy+0.10*sc);
+      g.quadraticCurveTo(cx+0.065*sc,cy+0.20*sc,cx,cy+0.20*sc);
+      g.quadraticCurveTo(cx-0.065*sc,cy+0.20*sc,cx-0.075*sc,cy+0.10*sc);
+      g.closePath(); g.fillStyle='#FFD873'; g.fill();
+      g.strokeStyle='#D8A32E'; g.lineWidth=0.012; g.stroke();
+      g.save(); g.globalAlpha=.6;
+      g.fillStyle='#FFF3C0'; g.fillRect(cx-0.05*sc,cy+0.12*sc,0.022*sc,0.06*sc);
+      g.restore();
+    }
+    cup(-0.44,0.56,1.05); cup(-0.18,0.56,0.85); cup(0.16,0.56,1.0);
+    cup(-0.36,1.04,0.9); cup(0.36,1.04,1.1);
+    /* 메달 · 컵 · 사진 */
+    ci(g,0.44,0.60,0.070,'#EFD08A','#C99A2E',0.012);
+    ln(g,0.44,0.53,0.40,0.43,'#C0603F',0.024);
+    ln(g,0.44,0.53,0.48,0.43,'#C0603F',0.024);
+    rr(g,-0.30,1.10,0.26,0.20,0.02,'#FFFDF4','#E0CDB0',0.010);
+    ci(g,-0.17,1.19,0.030,'#A8D8F0');
+    /* 조명 · 손잡이 */
+    for (var l2=0;l2<3;l2++) el(g,0,1.76-l2*0.48,0.16,0.03,'rgba(255,236,170,.55)');
+    ci(g,0,1.86,0.020,P.butter,P.gold,0.008);
+  }});
+  it({ k:'flower_arch_bench', n:'플라워 아치 벤치', cat:'furn', np:2, w:1.75, d:0.75, h:1.95, seat:'chair', draw:function(g){
+    /* 아치 (뒤) */
+    g.save();
+    g.beginPath(); g.moveTo(-0.74,0.20); g.lineTo(-0.74,1.30);
+    g.bezierCurveTo(-0.74,1.80,0.74,1.80,0.74,1.30); g.lineTo(0.74,0.20);
+    g.strokeStyle=P.woodD; g.lineWidth=0.055; g.stroke();
+    g.strokeStyle='rgba(255,255,255,.35)'; g.lineWidth=0.018; g.stroke();
+    g.restore();
+    /* 아치 꽃장식 */
+    var fx = [-0.70,-0.55,-0.38,-0.18,0.02,0.22,0.40,0.56,0.70];
+    var fy = [1.02,1.30,1.52,1.66,1.70,1.66,1.52,1.30,1.02];
+    for (var i=0;i<fx.length;i++){
+      ci(g,fx[i],fy[i],0.075,i%2?'#FFC6D7':'#FFF0C4', i%2?'#E79CB3':'#E7C87A',0.010);
+      ci(g,fx[i]+0.03,fy[i]+0.03,0.028,i%2?'#FFF1F5':'#FFE7A3');
+      ci(g,fx[i]-0.05,fy[i]-0.02,0.045,'#9BD08F',null);
+    }
+    ln(g,-0.62,1.12,-0.30,0.94,'#7FC077',0.020);
+    ln(g, 0.62,1.12, 0.30,0.94,'#7FC077',0.020);
+    /* 등받이 살 */
+    for (var j=0;j<5;j++) ln(g,-0.48+j*0.24,0.62,-0.48+j*0.24,1.05,P.woodD,0.030);
+    rr(g,-0.56,1.02,1.12,0.07,0.03,P.woodL,P.woodDD,0.014);
+    /* 좌판 · 앞다리 */
+    bx(g,0,0.44,1.62,0.66,0.08,P.woodL,P.wood,P.woodD,P.woodDD,0.020);
+    rr(g,-0.58,0.50,1.16,0.06,0.02,'#FFDDE6','#EFB6C6',0.012);
+    ln(g,-0.66,0.02,-0.66,0.46,P.woodDD,0.055);
+    ln(g, 0.66,0.02, 0.66,0.46,P.woodDD,0.055);
+    ln(g,-0.30,0.02,-0.30,0.44,P.woodD,0.042);
+    ln(g, 0.30,0.02, 0.30,0.44,P.woodD,0.042);
+    /* 바닥 꽃잎 */
+    g.save(); g.globalAlpha=.7;
+    ci(g,-0.78,0.06,0.040,'#FFC6D7'); ci(g,0.80,0.05,0.034,'#FFF0C4'); ci(g,0.10,0.03,0.030,'#FFC6D7');
+    g.restore();
+  }});
+  it({ k:'daybed_cozy', n:'감성 코지 데이베드', cat:'furn', np:2, w:1.95, d:1.15, h:0.92, seat:'sofa', draw:function(g){
+    /* 등쿠션 (뒤) */
+    back(g,0.92,function(){
+      soft(g,0,0.34,1.80,0.34,0.50,0.16,'#EFE3D2','#DCCCB4',null,0.020);
+      rr(g,-0.70,0.50,0.52,0.28,0.14,'#FFE0C2','#E9C099',0.014);
+      rr(g,-0.06,0.50,0.52,0.28,0.14,'#F7D9E2','#E4B2C1',0.014);
+      rr(g, 0.56,0.52,0.26,0.20,0.10,'#DCEBE2','#B9D5C4',0.012);
+    });
+    /* 매트리스 */
+    bx(g,0,0.22,1.90,1.08,0.28,'#FBF4E8','#F0E4D0','#E2D2B9','#CDB99A',0.022);
+    /* 니트 담요 */
+    rr(g,-0.60,0.44,0.86,0.10,0.04,'#E4C7A6','#C9A983',0.012);
+    g.save(); g.globalAlpha=.55;
+    for (var i=0;i<7;i++) ln(g,-0.56+i*0.12,0.44,-0.50+i*0.12,0.54,'#C9A983',0.010);
+    g.restore();
+    /* 베개 2개 */
+    back(g,0.72,function(){
+      rr(g,-0.80,0.46,0.60,0.20,0.10,'#FFFFFF','#E6DCCC',0.012);
+      rr(g,-0.14,0.46,0.52,0.18,0.09,'#FFF3DC','#E7D3B4',0.012);
+    });
+    /* 목재 다리 */
+    rr(g,-0.80,0,0.10,0.24,0.03,P.wood,P.woodDD,0.012);
+    rr(g, 0.70,0,0.10,0.24,0.03,P.wood,P.woodDD,0.012);
+    /* 사이드 쿠션 · 작은 트레이 */
+    ci(g,0.62,0.58,0.075,'#FFD9A8','#E0B77A',0.012);
+    rr(g,0.30,0.52,0.24,0.04,0.02,'#E6D3B8','#C9AE86',0.010);
+    ci(g,0.40,0.58,0.035,'#FFF6F8','#E7CBD8',0.008);
+    rr(g,0.48,0.58,0.05,0.06,0.01,'#D9EDF8',null);
+  }});
+
+  /* ======================= 2026-11-26 추가 — 예쁜 소품 10종 ======================= */
+  it({ k:'moon_lamp', n:'달님 초승달 무드등', cat:'prop', np:2, w:0.55, d:0.42, h:0.98, draw:function(g){
+    /* 받침 · 기둥 */
+    el(g,0,0.03,0.18,0.05,'#E4D6C2','#C9B99F',0.014);
+    ln(g,0,0.05,0,0.52,'#D9C9AE',0.030);
+    /* 초승달 */
+    g.save();
+    g.beginPath();
+    g.arc(0,0.70,0.24,Math.PI*0.42,Math.PI*1.58,false);
+    g.arc(0.10,0.70,0.19,Math.PI*1.54,Math.PI*0.46,true);
+    g.closePath();
+    g.fillStyle='#FFE9A8'; g.fill();
+    g.strokeStyle='#E7C87A'; g.lineWidth=0.016; g.stroke();
+    g.restore();
+    /* 달 얼굴 */
+    ci(g,-0.10,0.76,0.016,'#B9985A');
+    ci(g,-0.10,0.66,0.012,'#B9985A');
+    g.beginPath(); g.arc(-0.07,0.71,0.035,Math.PI*0.15,Math.PI*0.85);
+    g.strokeStyle='#B9985A'; g.lineWidth=0.012; g.stroke();
+    /* 별 · 빛 */
+    g.save(); g.globalAlpha=.8;
+    ci(g,0.20,0.92,0.030,'#FFF3C0'); ci(g,0.28,0.60,0.022,'#FFF3C0'); ci(g,-0.24,0.94,0.018,'#FFF3C0');
+    ln(g,-0.06,0.98,-0.02,1.04,'#FFE9A8',0.012); ln(g,0.10,0.50,0.14,0.46,'#FFE9A8',0.012);
+    g.restore();
+    /* 작은 구름 */
+    el(g,-0.28,0.44,0.09,0.04,'rgba(255,255,255,.85)');
+    el(g,0.26,0.36,0.07,0.033,'rgba(255,255,255,.7)');
+  }});
+  it({ k:'snow_globe', n:'유리 스노우볼', cat:'prop', np:2, w:0.55, d:0.50, h:0.62, draw:function(g){
+    /* 나무 받침 */
+    bx(g,0,0,0.40,0.34,0.14,P.woodL,P.wood,P.woodD,P.woodDD,0.016);
+    rr(g,-0.13,0.03,0.26,0.06,0.02,'#D9AE6A','#B98A4E',0.008);
+    /* 유리 구 */
+    ci(g,0,0.36,0.235,'rgba(226,242,251,.92)','#AFCBDD',0.018);
+    /* 눈사람 · 나무 */
+    ci(g,-0.02,0.26,0.070,'#FFFFFF','#DDE7EF',0.010);
+    ci(g,-0.02,0.36,0.050,'#FFFFFF','#DDE7EF',0.010);
+    ci(g,-0.02,0.44,0.038,'#FFFFFF','#DDE7EF',0.008);
+    poly(g,[[-0.02,0.48],[-0.10,0.53],[-0.02,0.52],[0.04,0.55],[0.05,0.49]],'#E8756A',null);
+    ci(g,-0.045,0.45,0.007,'#4A3A2A'); ci(g,0.005,0.45,0.007,'#4A3A2A');
+    poly(g,[[0.11,0.24],[0.15,0.38],[0.19,0.24]],'#5E9E5C',null);
+    poly(g,[[0.11,0.30],[0.15,0.42],[0.19,0.30]],'#7CBE78',null);
+    /* 눈송이 */
+    g.save(); g.globalAlpha=.95;
+    for (var i=0;i<9;i++){
+      ci(g,-0.15+((i*47)%9)*0.036,0.20+((i*61)%7)*0.036,0.011,'#FFFFFF');
+    }
+    g.restore();
+    /* 유리 하이라이트 */
+    g.save(); g.globalAlpha=.6;
+    g.beginPath(); g.arc(-0.09,0.44,0.10,Math.PI*0.9,Math.PI*1.5); g.strokeStyle='#FFFFFF'; g.lineWidth=0.016; g.stroke();
+    g.restore();
+  }});
+  it({ k:'terrarium', n:'미니 온실 테라리움', cat:'prop', np:2, w:0.78, d:0.52, h:0.70, draw:function(g){
+    /* 받침 접시 */
+    el(g,0,0.04,0.26,0.075,'#E4D6C2','#C9B99F',0.014);
+    /* 자갈 */
+    for (var i=0;i<6;i++) ci(g,-0.16+i*0.065,0.06+((i*23)%3)*0.012,0.020+i*0.002,'#CFC6B4');
+    /* 유리 돔 */
+    g.beginPath(); g.arc(0,0.20,0.27,0,Math.PI,false); g.closePath();
+    g.fillStyle='rgba(232,246,252,.86)'; g.fill();
+    g.strokeStyle='#B6CEDC'; g.lineWidth=0.016; g.stroke();
+    /* 식물 */
+    ln(g,-0.10,0.08,-0.12,0.26,'#6BAF63',0.020);
+    el(g,-0.14,0.29,0.055,0.035,'#8FCF8A','#5E9E5C',0.010);
+    el(g,-0.06,0.32,0.045,0.030,'#A6DBA0','#5E9E5C',0.010);
+    ln(g, 0.08,0.08, 0.10,0.24,'#6BAF63',0.018);
+    el(g, 0.12,0.26,0.040,0.028,'#8FCF8A','#5E9E5C',0.010);
+    ci(g,0.02,0.16,0.050,'#D9C7A6','#BFAE8C',0.010);
+    ci(g,0.02,0.19,0.036,'#E8DCC2',null);
+    /* 무지개 반사 */
+    g.save(); g.globalAlpha=.5;
+    g.beginPath(); g.arc(-0.08,0.22,0.14,Math.PI*1.05,Math.PI*1.45);
+    g.strokeStyle='#FFFFFF'; g.lineWidth=0.014; g.stroke();
+    g.restore();
+    /* 리본 장식 */
+    ci(g,0,0.47,0.020,'#FFD9E2','#E7B6C6',0.008);
+  }});
+  it({ k:'bear_giant', n:'대형 곰돌이 인형', cat:'prop', np:2, w:1.00, d:0.88, h:1.55, draw:function(g){
+    /* 다리 */
+    el(g,-0.26,0.10,0.16,0.085,'#D9AE7E','#B98A5E',0.014);
+    el(g, 0.26,0.10,0.16,0.085,'#D9AE7E','#B98A5E',0.014);
+    ci(g,-0.26,0.11,0.070,'#F0D9B8',null); ci(g,0.26,0.11,0.070,'#F0D9B8',null);
+    /* 몸통 */
+    el(g,0,0.46,0.34,0.36,'#E2BE8E','#C9A173',0.020);
+    el(g,0,0.46,0.24,0.26,'#F4E3C8',null);
+    /* 팔 */
+    el(g,-0.36,0.52,0.13,0.20,'#E2BE8E','#C9A173',0.016);
+    el(g, 0.36,0.52,0.13,0.20,'#E2BE8E','#C9A173',0.016);
+    /* 머리 */
+    ci(g,0,1.06,0.30,'#EBC79A','#C9A173',0.020);
+    ci(g,-0.22,1.26,0.105,'#DDB37F','#C9A173',0.014);
+    ci(g, 0.22,1.26,0.105,'#DDB37F','#C9A173',0.014);
+    ci(g,-0.22,1.26,0.060,'#F7E3C6',null);
+    ci(g, 0.22,1.26,0.060,'#F7E3C6',null);
+    ci(g,0,1.02,0.135,'#F7E3C6');
+    /* 얼굴 */
+    ci(g,-0.10,1.12,0.030,'#4A3A2A'); ci(g,0.10,1.12,0.030,'#4A3A2A');
+    ci(g,-0.09,1.13,0.010,'#FFFFFF'); ci(g,0.11,1.13,0.010,'#FFFFFF');
+    el(g,0,1.02,0.038,0.028,'#3F3126');
+    g.beginPath(); g.arc(0,1.00,0.055,Math.PI*0.15,Math.PI*0.85);
+    g.strokeStyle='#8A6A4A'; g.lineWidth=0.012; g.stroke();
+    ci(g,-0.19,1.00,0.030,'rgba(247,180,190,.55)'); ci(g,0.19,1.00,0.030,'rgba(247,180,190,.55)');
+    /* 리본 · 하트 */
+    ci(g,-0.20,1.34,0.045,'#FF9EB5','#DC7089',0.010);
+    poly(g,[[-0.26,1.34],[-0.34,1.40],[-0.34,1.28]],'#FF9EB5','#DC7089',0.008);
+    poly(g,[[-0.14,1.34],[-0.06,1.40],[-0.06,1.28]],'#FF9EB5','#DC7089',0.008);
+    ci(g,0.02,0.78,0.045,'#FFF0F4','#EFC9D5',0.008);
+  }});
+  it({ k:'parfait_stand', n:'딸기 파르페 스탠드', cat:'prop', np:2, w:0.58, d:0.48, h:0.82, draw:function(g){
+    /* 접시 */
+    el(g,0,0.03,0.22,0.065,'#F6F1E8','#D8CFC0',0.012);
+    /* 스탠드 기둥 */
+    ln(g,0,0.05,0,0.34,'#C9CDD8',0.024);
+    el(g,0,0.34,0.13,0.04,'#E8EAF2','#BFC4D2',0.010);
+    /* 파르페 글라스 */
+    poly(g,[[-0.11,0.35],[0.11,0.35],[0.085,0.72],[-0.085,0.72]],'rgba(255,246,250,.85)','#D9C9D2',0.012);
+    /* 층층이 */
+    poly(g,[[-0.10,0.35],[0.10,0.35],[0.095,0.45],[-0.095,0.45]],'#FFD9E2',null);
+    poly(g,[[-0.095,0.45],[0.095,0.45],[0.088,0.54],[-0.088,0.54]],'#FFF6E8',null);
+    poly(g,[[-0.088,0.54],[0.088,0.54],[0.082,0.62],[-0.082,0.62]],'#FFC6D7',null);
+    poly(g,[[-0.082,0.62],[0.082,0.62],[0.076,0.68],[-0.076,0.68]],'#FFFDF6',null);
+    /* 휘핑 · 딸기 */
+    el(g,0,0.70,0.075,0.045,'#FFFFFF','#E8E0D2',0.010);
+    el(g,0,0.74,0.045,0.028,'#FFF9F0',null);
+    ci(g,-0.03,0.79,0.038,'#EF6A72','#C94E56',0.008);
+    poly(g,[[-0.03,0.82],[-0.06,0.86],[-0.02,0.84]],'#7CBE78',null);
+    ci(g,0.06,0.72,0.024,'#FF9EB5','#DC7089',0.006);
+    /* 옆 딸기 · 숟가락 */
+    ci(g,0.16,0.10,0.045,'#EF6A72','#C94E56',0.010);
+    poly(g,[[0.16,0.14],[0.13,0.19],[0.17,0.17]],'#7CBE78',null);
+    ln(g,0.22,0.06,0.30,0.24,'#C9CDD8',0.014);
+    ci(g,0.31,0.26,0.022,'#DCE0E8','#BFC4D2',0.006);
+    /* 하트 장식 */
+    ci(g,0,0.55,0.014,'#FFB6CB');
+  }});
+  it({ k:'gramophone', n:'레트로 축음기', cat:'prop', np:2, w:0.95, d:0.72, h:1.12, draw:function(g){
+    /* 나무 상자 */
+    bx(g,0,0,0.72,0.60,0.34,P.wood,P.woodD,P.woodDD,'#5E3A18',0.020);
+    rr(g,-0.30,0.06,0.60,0.22,0.03,'#B98A5E','#8A6438',0.010);
+    /* 턴테이블 · 레코드 */
+    el(g,0,0.36,0.26,0.085,'#3A2E28','#241C18',0.012);
+    el(g,0,0.365,0.17,0.055,'#4A3A32',null);
+    ci(g,0,0.37,0.030,'#D9AE6A');
+    ci(g,0,0.37,0.010,'#8A6438');
+    /* 톤암 */
+    ln(g,0.22,0.38,0.10,0.40,'#C9CDD8',0.016);
+    ci(g,0.10,0.40,0.016,'#AEB3C2');
+    /* 나팔 */
+    back(g,0.42,function(){
+      ln(g,-0.18,0.36,-0.30,0.86,'#C99A2E',0.030);
+      g.beginPath(); g.moveTo(-0.30,0.86);
+      g.quadraticCurveTo(-0.14,1.02,0.06,1.06);
+      g.lineTo(0.30,1.16);
+      g.lineTo(0.34,0.94);
+      g.lineTo(0.10,0.92);
+      g.quadraticCurveTo(-0.10,0.86,-0.30,0.86);
+      g.closePath();
+      var hg = g.createLinearGradient(-0.30,1.08,0.34,1.00);
+      hg.addColorStop(0,'#FFE9A8'); hg.addColorStop(0.55,'#EFC05A'); hg.addColorStop(1,'#C99A2E');
+      g.fillStyle=hg; g.fill(); g.strokeStyle='#A87E1E'; g.lineWidth=0.014; g.stroke();
+      g.save(); g.globalAlpha=.55;
+      el(g,0.32,1.05,0.035,0.11,'#FFF6D8');
+      g.restore();
+    });
+    /* 크랭크 · 장식 */
+    ln(g,0.36,0.20,0.48,0.20,'#B98A4E',0.018);
+    ln(g,0.48,0.20,0.48,0.04,'#B98A4E',0.018);
+    ci(g,-0.26,0.20,0.030,'#EFD08A','#C99A2E',0.008);
+    /* 음표 */
+    g.save(); g.globalAlpha=.8;
+    ci(g,0.44,1.02,0.030,'#8A6A4A'); ln(g,0.47,1.03,0.47,1.20,'#8A6A4A',0.012);
+    ci(g,0.56,0.92,0.022,'#8A6A4A'); ln(g,0.58,0.93,0.58,1.06,'#8A6A4A',0.010);
+    g.restore();
+  }});
+  it({ k:'prism_lamp', n:'크리스탈 프리즘 램프', cat:'prop', np:2, w:0.52, d:0.42, h:0.96, draw:function(g){
+    /* 받침 */
+    el(g,0,0.03,0.16,0.05,'#DCE0E8','#BFC4D2',0.014);
+    ln(g,0,0.05,0,0.40,'#C9CDD8',0.020);
+    /* 크리스탈 (다면체) */
+    poly(g,[[0,-0.02],[0.22,0.30],[0,0.80],[-0.22,0.30]],'rgba(196,236,255,.92)','#8FC6DE',0.016);
+    poly(g,[[0,-0.02],[0.22,0.30],[0,0.46]],'rgba(226,247,255,.95)',null);
+    poly(g,[[0,0.46],[-0.22,0.30],[0,-0.02]],'rgba(160,214,238,.9)',null);
+    poly(g,[[0,0.46],[0.22,0.30],[0,0.80]],'rgba(226,247,255,.8)',null);
+    poly(g,[[0,0.46],[-0.22,0.30],[0,0.80]],'rgba(186,226,246,.85)',null);
+    ln(g,0,0.46,0,0.80,'rgba(255,255,255,.8)',0.012);
+    /* 무지개 빛 */
+    g.save(); g.globalAlpha=.55;
+    ln(g,0.20,0.34,0.42,0.22,'#FFB6CB',0.020);
+    ln(g,0.22,0.26,0.44,0.10,'#FFE38A',0.018);
+    ln(g,-0.20,0.34,-0.42,0.24,'#9BD9FF',0.020);
+    ln(g,-0.22,0.24,-0.44,0.08,'#B6A8F0',0.018);
+    g.restore();
+    /* 별 반짝임 */
+    ci(g,0.08,0.66,0.022,'#FFFFFF'); ci(g,-0.10,0.20,0.016,'#FFFFFF');
+  }});
+  it({ k:'telescope', n:'별자리 천체 망원경', cat:'prop', np:2, w:1.05, d:0.58, h:1.48, draw:function(g){
+    /* 삼각대 */
+    ln(g,0,0.36,-0.40,0.02,'#8A6A4A',0.030);
+    ln(g,0,0.36, 0.40,0.02,'#8A6A4A',0.030);
+    back(g,0.44,function(){ ln(g,0,0.36,0,0.02,'#7A5C3E',0.028); });
+    /* 경통 */
+    g.save();
+    g.translate(0,0.86); g.rotate(-0.34);
+    rr(g,-0.50,-0.11,1.00,0.22,0.07,'#3E4A6B','#2C3550',0.018);
+    rr(g,0.42,-0.13,0.14,0.26,0.04,'#F2C14E','#C99A2E',0.012);
+    rr(g,-0.56,-0.10,0.10,0.20,0.03,'#2C3550','#1E2438',0.010);
+    g.save(); g.globalAlpha=.6;
+    rr(g,-0.42,-0.05,0.70,0.05,0.02,'rgba(255,255,255,.35)',null);
+    g.restore();
+    /* 파인더 */
+    rr(g,-0.10,0.10,0.24,0.06,0.03,'#5C6789','#3E4A6B',0.010);
+    g.restore();
+    /* 별지도 받침 · 별 */
+    el(g,0,0.42,0.05,0.04,'#5C6789');
+    g.save(); g.globalAlpha=.85;
+    ci(g,-0.34,1.16,0.026,'#FFE38A'); ci(g,0.30,1.24,0.020,'#FFE38A'); ci(g,0.42,0.94,0.016,'#FFE38A');
+    ci(g,-0.46,1.02,0.014,'#FFE38A');
+    g.restore();
+    /* 바닥 지도 */
+    el(g,0.30,0.04,0.16,0.05,'#DCE4F5','#BFC8D8',0.010);
+  }});
+  it({ k:'flamingo_tube', n:'플라밍고 튜브', cat:'prop', np:2, w:0.95, d:0.60, h:1.10, draw:function(g){
+    /* 튜브 (도넛) */
+    ci(g,-0.10,0.34,0.30,'#FF9EC0','#E4799E',0.020);
+    ci(g,-0.10,0.34,0.175,'#FFF6FA',null);
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.arc(-0.10,0.34,0.24,Math.PI*1.1,Math.PI*1.7); g.strokeStyle='#FFFFFF'; g.lineWidth=0.022; g.stroke();
+    g.restore();
+    /* 목 · 머리 */
+    g.beginPath(); g.moveTo(0.14,0.40);
+    g.bezierCurveTo(0.30,0.62,0.16,0.90,0.06,1.00);
+    g.lineTo(0.12,1.04);
+    g.bezierCurveTo(0.26,0.92,0.42,0.62,0.26,0.36);
+    g.closePath(); g.fillStyle='#FFB0CB'; g.fill();
+    g.strokeStyle='#E4799E'; g.lineWidth=0.016; g.stroke();
+    ci(g,0.05,1.04,0.105,'#FFB0CB','#E4799E',0.018);
+    ci(g,0.11,1.06,0.022,'#3F3126');
+    ci(g,0.115,1.065,0.008,'#FFFFFF');
+    poly(g,[[0.13,1.02],[0.25,0.99],[0.24,1.06]],'#3F3126',null);   /* 부리 */
+    poly(g,[[0.13,1.00],[0.22,0.97],[0.22,1.00]],'#5C4A3A',null);
+    /* 날개 · 물결 */
+    el(g,0.06,0.44,0.10,0.05,'#FFC6D7',null);
+    /* 물빛 그림자 */
+    el(g,-0.06,0.16,0.34,0.06,'rgba(140,200,230,.28)');
+  }});
+  it({ k:'cake_tray', n:'미니 케이크 트레이', cat:'prop', np:1, w:0.80, d:0.50, h:0.50, draw:function(g){
+    /* 트레이 */
+    el(g,0,0.09,0.34,0.095,'#E4C9A2','#C9AE86',0.014);
+    el(g,0,0.11,0.30,0.080,'#FFF0E4',null);
+    /* 컵케이크 (왼쪽) */
+    poly(g,[[-0.26,0.11],[-0.16,0.11],[-0.145,0.24],[-0.275,0.24]],'#F2C98E','#D9A868',0.010);
+    ln(g,-0.24,0.13,-0.255,0.22,'#D9A868',0.008); ln(g,-0.20,0.13,-0.205,0.22,'#D9A868',0.008);
+    el(g,-0.21,0.26,0.075,0.055,'#FFD3E6','#E7A9C4',0.010);
+    ci(g,-0.21,0.32,0.032,'#EF6A72','#C94E56',0.008);
+    ci(g,-0.25,0.28,0.018,'#FFF3C0');
+    /* 케이크 조각 (가운데) */
+    poly(g,[[-0.06,0.11],[0.08,0.11],[0.08,0.30],[-0.06,0.30]],'#FFE9EF','#E3BCCB',0.010);
+    poly(g,[[-0.06,0.25],[0.08,0.25],[0.08,0.30],[-0.06,0.30]],'#FFC6D7',null);
+    poly(g,[[-0.06,0.17],[0.08,0.17],[0.08,0.20],[-0.06,0.20]],'#FFD9E2',null);
+    ci(g,0.01,0.33,0.030,'#EF6A72','#C94E56',0.008);
+    ln(g,0.01,0.36,0.01,0.40,'#8FC487',0.008);
+    /* 컵케이크 (오른쪽) */
+    poly(g,[[0.15,0.11],[0.25,0.11],[0.24,0.23],[0.16,0.23]],'#E9B6C8','#CF93A8',0.010);
+    el(g,0.20,0.25,0.065,0.048,'#FFF3D8','#E7D3B4',0.010);
+    ci(g,0.20,0.30,0.022,'#7FD08B','#54A862',0.006);
+    /* 커피잔 */
+    rr(g,-0.36,0.12,0.10,0.10,0.02,'#FFFFFF','#DCD5C8',0.008);
+    el(g,-0.31,0.22,0.042,0.016,'#C9A78F');
+    g.beginPath(); g.arc(-0.25,0.17,0.028,-Math.PI*0.5,Math.PI*0.5); g.strokeStyle='#DCD5C8'; g.lineWidth=0.010; g.stroke();
+    g.save(); g.globalAlpha=.5;
+    g.beginPath(); g.moveTo(-0.32,0.25); g.quadraticCurveTo(-0.36,0.31,-0.31,0.37);
+    g.strokeStyle='#D8CFC0'; g.lineWidth=0.010; g.stroke();
+    g.restore();
+    /* 레이스 매트 */
+    el(g,0,0.065,0.42,0.105,'rgba(255,255,255,.6)');
+  }});
+
+  /* ======================= 2026-11-26 추가 — 가구 10종 더 ======================= */
+  it({ k:'bunk_pink', n:'핑크 2층 침대', cat:'furn', np:2, w:2.05, d:1.20, h:2.20, seat:'bed', draw:function(g){
+    /* 기둥 4개 */
+    rr(g,-1.00,0,0.10,2.12,0.03,'#F6C6D8','#DFA0B8',0.016);
+    rr(g, 0.90,0,0.10,2.12,0.03,'#F6C6D8','#DFA0B8',0.016);
+    back(g,1.10,function(){ rr(g,-1.00,0,0.10,2.12,0.03,'#EFB6CB',null); rr(g,0.90,0,0.10,2.12,0.03,'#EFB6CB',null); });
+    /* 위층 */
+    bx(g,0,1.16,1.90,1.04,0.22,'#FFFFFF','#FFF6FA','#F3E3EA','#DFC6D1',0.020);
+    bx(g,0,1.38,1.90,0.66,0.12,'#FFB6CD','#FF9EBE','#EF8FAE','#DFA0B8',0.016);
+    back(g,0.86,function(){ rr(g,-0.80,1.40,0.62,0.26,0.13,'#FFFFFF','#EFD8E2',0.014); });
+    /* 난간 */
+    rr(g,-1.00,1.50,1.98,0.08,0.03,'#F6C6D8','#DFA0B8',0.014);
+    for (var i=0;i<7;i++) ln(g,-0.88+i*0.28,1.50,-0.88+i*0.28,1.72,'#EFB6CB',0.018);
+    /* 아래층 */
+    bx(g,0,0.10,1.90,1.04,0.22,'#FFFFFF','#FFF6FA','#F3E3EA','#DFC6D1',0.020);
+    bx(g,0,0.32,1.90,0.66,0.12,'#FFD3E1','#FFC3D6','#F0B0C6','#DFA0B8',0.016);
+    back(g,0.86,function(){
+      rr(g,-0.80,0.34,0.62,0.26,0.13,'#FFFFFF','#EFD8E2',0.014);
+      rr(g,0.06,0.34,0.40,0.22,0.11,'#FFF3DC','#E7D3B4',0.012);
+    });
+    /* 사다리 */
+    ln(g,0.62,0.10,0.62,1.20,'#D9A0B6',0.048);
+    ln(g,0.80,0.10,0.80,1.20,'#D9A0B6',0.048);
+    for (var j=0;j<4;j++) ln(g,0.62,0.28+j*0.24,0.80,0.28+j*0.24,'#F0B6CC',0.030);
+    /* 캐노피 커튼 */
+    g.save(); g.globalAlpha=.5;
+    g.beginPath(); g.moveTo(-1.00,2.08); g.quadraticCurveTo(-0.90,1.50,-0.72,1.60);
+    g.lineTo(-0.60,1.66); g.quadraticCurveTo(-0.78,1.62,-0.86,2.06); g.closePath();
+    g.fillStyle='#FFE3EE'; g.fill();
+    g.restore();
+    /* 인형 · 별 */
+    ci(g,-0.50,1.52,0.055,'#FFF3FA','#E9C8D8',0.010);
+    ci(g,0.30,0.40,0.035,'#FFE38A');
+  }});
+  it({ k:'cloud_sofa', n:'구름 모양 소파', cat:'furn', np:2, w:2.15, d:1.00, h:1.00, seat:'sofa', draw:function(g){
+    /* 등받이 구름 */
+    back(g,0.86,function(){
+      ci(g,-0.62,0.66,0.36,'#FFFFFF','#E3EDF7',0.016);
+      ci(g,-0.10,0.76,0.42,'#FFFFFF','#E3EDF7',0.016);
+      ci(g, 0.44,0.70,0.38,'#FFFFFF','#E3EDF7',0.016);
+      ci(g, 0.78,0.52,0.26,'#FFFFFF','#E3EDF7',0.014);
+    });
+    /* 좌판 구름 */
+    bx(g,0,0,1.90,0.92,0.26,'#F7FBFF','#FFFFFF','#E8F1F9','#D9E6F2',0.018);
+    ci(g,-0.72,0.44,0.30,'#FFFFFF','#E3EDF7',0.016);
+    ci(g, 0.06,0.48,0.36,'#FFFFFF','#E3EDF7',0.016);
+    ci(g, 0.76,0.44,0.28,'#FFFFFF','#E3EDF7',0.016);
+    ci(g,-0.20,0.40,0.20,'#FFF6FA','#F0DEE8',0.012);
+    /* 팔걸이 구름 */
+    ci(g,-0.88,0.30,0.22,'#FFFFFF','#E3EDF7',0.014);
+    ci(g, 0.88,0.30,0.22,'#FFFFFF','#E3EDF7',0.014);
+    /* 쿠션 · 방울 */
+    rr(g,-0.34,0.46,0.42,0.16,0.08,'#D9ECFB','#BBD8EE',0.012);
+    ci(g,0.36,0.50,0.10,'#FFE3EE','#EFC6D6',0.012);
+    /* 짧은 다리 */
+    rr(g,-0.80,0,0.10,0.12,0.03,'#DCE7F1','#C4D4E2',0.010);
+    rr(g, 0.70,0,0.10,0.12,0.03,'#DCE7F1','#C4D4E2',0.010);
+    /* 무지개빛 하이라이트 */
+    g.save(); g.globalAlpha=.35;
+    g.beginPath(); g.arc(-0.10,0.52,0.22,Math.PI*1.1,Math.PI*1.6); g.strokeStyle='#FFD9E2'; g.lineWidth=0.020; g.stroke();
+    g.restore();
+  }});
+  it({ k:'hammock_egg', n:'둥근 해먹 의자', cat:'furn', np:2, w:1.05, d:1.05, h:1.85, seat:'chair', draw:function(g){
+    /* 스탠드 */
+    el(g,0,0.03,0.36,0.075,'#C9CDD8','#A8AEBE',0.014);
+    ln(g,0,0.05,0,1.62,'#B4B9C6',0.040);
+    ln(g,0.14,0.80,0.44,0.60,'#B4B9C6',0.022);
+    g.beginPath(); g.moveTo(0.14,1.52); g.quadraticCurveTo(0.52,1.30,0.46,0.62);
+    g.strokeStyle='#B4B9C6'; g.lineWidth=0.030; g.stroke();
+    /* 매다는 줄 */
+    ln(g,0,1.62,-0.10,1.24,'#9AA1B0',0.018);
+    ln(g,0,1.62, 0.34,1.10,'#9AA1B0',0.018);
+    /* 계란형 시트 */
+    el(g,0.06,0.86,0.42,0.40,'#EADCC8','#C9B99F',0.020);
+    el(g,0.06,0.86,0.34,0.32,'#FFF6E8','#E0D0B8',0.014);
+    /* 쿠션 */
+    el(g,0.06,0.80,0.30,0.20,'#FFD9E2','#E7B0C2',0.012);
+    rr(g,-0.14,0.72,0.40,0.12,0.06,'#F7EFE0','#E0D0B8',0.010);
+    /* 크로셰 패턴 */
+    g.save(); g.globalAlpha=.45;
+    for (var i=0;i<4;i++){ g.beginPath(); g.arc(0.06,0.86,0.28-i*0.055,Math.PI*0.9,Math.PI*1.6); g.strokeStyle='#C9A983'; g.lineWidth=0.012; g.stroke(); }
+    g.restore();
+    /* 작은 깃털 */
+    poly(g,[[0.30,0.98],[0.40,1.06],[0.34,1.00]],'#9BD08F',null);
+    ci(g,0.34,1.06,0.022,'#FFC6D7');
+  }});
+  it({ k:'vanity_bunny', n:'바니 화장대', cat:'furn', np:2, w:1.55, d:0.62, h:1.85, draw:function(g){
+    /* 토끼 귀 거울 */
+    back(g,0.46,function(){
+      el(g,-0.22,1.66,0.10,0.24,'#FFE3EE','#E7B6C8',0.014);
+      el(g, 0.22,1.66,0.10,0.24,'#FFE3EE','#E7B6C8',0.014);
+      el(g,-0.22,1.66,0.045,0.16,'#FFC6D7',null);
+      el(g, 0.22,1.66,0.045,0.16,'#FFC6D7',null);
+      ci(g,0,1.34,0.34,'#FFFFFF','#E7D3E0',0.018);
+      ci(g,0,1.34,0.28,'#DDECF7','#C6D8E7',0.012);
+      g.save(); g.globalAlpha=.5;
+      poly(g,[[-0.16,1.24],[-0.02,1.52],[0.10,1.24]],'#FFFFFF');
+      g.restore();
+      /* 토끼 얼굴 테두리 */
+      ci(g,-0.13,1.36,0.022,'#4A3A2A'); ci(g,0.13,1.36,0.022,'#4A3A2A');
+      el(g,0,1.28,0.030,0.022,'#EF9DB4');
+      ci(g,-0.22,1.28,0.024,'rgba(247,180,190,.6)'); ci(g,0.22,1.28,0.024,'rgba(247,180,190,.6)');
+    });
+    /* 몸통 */
+    bx(g,0,0.14,1.50,0.58,0.78,'#FFFFFF','#FFF6FA','#F3E3EA','#DFC6D1',0.024);
+    /* 서랍 · 하트 손잡이 */
+    for (var i=0;i<3;i++){
+      rr(g,-0.64,0.22+i*0.23,1.28,0.19,0.06,'#FFEFF5','#F0D6E2',0.012);
+      ci(g,-0.20,0.315+i*0.23,0.030,'#FFB6CB','#E58CA9',0.010);
+      ci(g, 0.20,0.315+i*0.23,0.030,'#FFB6CB','#E58CA9',0.010);
+    }
+    rr(g,-0.76,0.90,1.52,0.08,0.03,'#FFD3E1','#E7AFC0',0.014);
+    /* 다리 */
+    rr(g,-0.68,0,0.10,0.16,0.04,'#EFB6CB','#D99AB2',0.012);
+    rr(g, 0.58,0,0.10,0.16,0.04,'#EFB6CB','#D99AB2',0.012);
+    /* 소품 */
+    back(g,0.26,function(){
+      rr(g,-0.52,0.98,0.10,0.10,0.02,'#FFD9E2','#E7B6C6',0.008);
+      ci(g,-0.30,1.03,0.060,'#FFF3FA','#E7CBD8',0.010);
+      rr(g,0.26,0.98,0.20,0.14,0.03,'#FFF6FA','#E7CBD8',0.010);
+      rr(g,0.30,1.02,0.12,0.06,0.01,'#FFC6D7',null);
+      ci(g,0.52,1.02,0.035,'#FFE38A','#DCB65A',0.008);
+    });
+  }});
+  it({ k:'jukebox', n:'레트로 주크박스', cat:'furn', np:2, w:1.05, d:0.78, h:1.75, draw:function(g){
+    /* 몸통 */
+    bx(g,0,0,0.96,0.70,1.34,'#C97A5A','#A85F42','#8E4C33','#6E3A26',0.022);
+    /* 아치 윗부분 */
+    g.beginPath(); g.moveTo(-0.48,1.30); g.bezierCurveTo(-0.48,1.78,0.48,1.78,0.48,1.30);
+    g.lineTo(0.48,1.28); g.lineTo(-0.48,1.28); g.closePath();
+    var ag = g.createLinearGradient(0,1.28,0,1.76);
+    ag.addColorStop(0,'#E98D66'); ag.addColorStop(1,'#F6C08E');
+    g.fillStyle=ag; g.fill(); g.strokeStyle='#A85F42'; g.lineWidth=0.018; g.stroke();
+    /* 네온 아치 */
+    g.beginPath(); g.moveTo(-0.36,1.32); g.bezierCurveTo(-0.36,1.68,0.36,1.68,0.36,1.32);
+    g.strokeStyle='#FFE38A'; g.lineWidth=0.030; g.stroke();
+    g.beginPath(); g.moveTo(-0.26,1.32); g.bezierCurveTo(-0.26,1.58,0.26,1.58,0.26,1.32);
+    g.strokeStyle='#FFB6CB'; g.lineWidth=0.018; g.stroke();
+    /* 내부 무대 */
+    rr(g,-0.36,0.86,0.72,0.42,0.06,'#3A2A24','#241A16',0.014);
+    rr(g,-0.30,0.90,0.60,0.34,0.04,'#FFD9A8',null);
+    g.save(); g.globalAlpha=.65;
+    rr(g,-0.20,0.94,0.16,0.24,0.02,'#FFF3C0',null);
+    rr(g,0.06,1.02,0.14,0.16,0.02,'#FFC6D7',null);
+    g.restore();
+    /* 스피커 그릴 */
+    rr(g,-0.36,0.30,0.72,0.48,0.06,'#F2D6B8','#C9A983',0.012);
+    g.save(); g.globalAlpha=.5;
+    for (var i=0;i<9;i++) ln(g,-0.30+i*0.075,0.34,-0.30+i*0.075,0.74,'#C99A6E',0.010);
+    g.restore();
+    el(g,0,0.54,0.22,0.16,'#E8C9A6','#C9A983',0.010);
+    el(g,0,0.54,0.13,0.09,'#B98A5E',null);
+    /* 크롬 테두리 · 버튼 */
+    rr(g,-0.50,0.24,1.00,0.05,0.02,'#E8EAF2','#BFC4D2',0.010);
+    ci(g,-0.30,0.18,0.030,'#7FE0A8','#4FAF78',0.008);
+    ci(g,-0.16,0.18,0.030,'#FFE38A','#DCB65A',0.008);
+    ci(g,0.00,0.18,0.026,'#FF8FA8','#D96782',0.008);
+    rr(g,-0.02,0.34,0.16,0.10,0.02,'#FFF3C0','#E0C68A',0.008);
+    /* 받침 */
+    rr(g,-0.46,0,0.92,0.10,0.03,'#8E4C33','#6E3A26',0.012);
+  }});
+  it({ k:'fridge_bar', n:'미니 냉장고 바', cat:'furn', np:2, w:0.92, d:0.66, h:1.55, draw:function(g){
+    /* 몸통 */
+    bx(g,0,0.06,0.86,0.60,1.30,'#BFE3D2','#A6D2BE','#8CBCA6','#6F9C86',0.022);
+    /* 냉동칸 선 */
+    rr(g,-0.43,0.94,0.86,0.04,0.01,'#7FB49C',null);
+    /* 크롬 손잡이 */
+    rr(g,0.30,0.62,0.05,0.28,0.02,'#E8EAF2','#BFC4D2',0.010);
+    rr(g,0.30,1.02,0.05,0.22,0.02,'#E8EAF2','#BFC4D2',0.010);
+    /* 냉장고 문 반사 */
+    g.save(); g.globalAlpha=.35;
+    rr(g,-0.36,0.14,0.22,1.10,0.04,'#FFFFFF',null);
+    g.restore();
+    /* 위에 올린 음료 · 병 */
+    back(g,0.42,function(){
+      rr(g,-0.30,1.36,0.09,0.22,0.03,'#C79A5E','#A87E3E',0.010);
+      ci(g,-0.255,1.61,0.042,'#E8C27A','#C99A2E',0.008);
+      rr(g,-0.16,1.36,0.08,0.18,0.03,'#8FD3EE','#63B3D2',0.010);
+      ci(g,-0.12,1.56,0.036,'#FFF3D8','#E0C68A',0.008);
+      rr(g, 0.02,1.36,0.10,0.20,0.03,'#FFB6CB','#E58CA9',0.010);
+      ci(g,0.07,1.58,0.036,'#FFF3D8','#E0C68A',0.008);
+      ci(g,0.24,1.45,0.052,'#FFD3A8','#E0A868',0.008);
+    });
+    /* 자석 스티커 */
+    ci(g,-0.26,0.72,0.045,'#FFE38A','#DCB65A',0.008);
+    ci(g,-0.14,0.60,0.032,'#FF9EB5','#DC7089',0.006);
+    ci(g,-0.32,0.52,0.028,'#9BD9FF',null);
+    /* 바닥 받침 */
+    rr(g,-0.42,0,0.84,0.08,0.02,'#6F9C86','#56806C',0.010);
+  }});
+  it({ k:'tea_table_round', n:'원형 유리 티테이블', cat:'furn', np:2, w:1.20, d:1.05, h:0.66, draw:function(g){
+    /* 골드 프레임 다리 3개 */
+    ln(g,0,0.02,-0.26,0.52,'#E7C87A',0.030);
+    ln(g,0,0.02, 0.26,0.52,'#E7C87A',0.030);
+    back(g,0.60,function(){ ln(g,0,0.02,0,0.54,'#D9B45E',0.028); });
+    el(g,0,0.50,0.30,0.10,'#EFD08A','#C99A2E',0.012);
+    /* 유리 상판 */
+    el(g,0,0.56,0.58,0.20,'rgba(214,238,249,.85)','#A9C9DC',0.016);
+    el(g,0,0.58,0.52,0.17,'rgba(240,250,255,.6)',null);
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.arc(-0.18,0.60,0.22,Math.PI*1.05,Math.PI*1.5); g.strokeStyle='#FFFFFF'; g.lineWidth=0.016; g.stroke();
+    g.restore();
+    /* 티세트 */
+    el(g,-0.16,0.60,0.11,0.045,'#FFFDF8','#DCD5C8',0.010);
+    el(g,-0.16,0.615,0.075,0.030,'#E8D3B4',null);
+    rr(g,0.10,0.60,0.12,0.09,0.02,'#FFFFFF','#DCD5C8',0.008);
+    g.beginPath(); g.arc(0.24,0.645,0.030,-Math.PI*0.5,Math.PI*0.5); g.strokeStyle='#DCD5C8'; g.lineWidth=0.010; g.stroke();
+    ci(g,-0.02,0.63,0.030,'#FFC6D7','#E58CA9',0.006);
+    /* 김 */
+    g.save(); g.globalAlpha=.5;
+    g.beginPath(); g.moveTo(0.12,0.70); g.quadraticCurveTo(0.08,0.76,0.13,0.82);
+    g.strokeStyle='#D8CFC0'; g.lineWidth=0.010; g.stroke();
+    g.restore();
+    /* 꽃병 */
+    back(g,0.34,function(){
+      rr(g,0.32,0.60,0.08,0.12,0.03,'#E8D3F0','#C9AEDC',0.008);
+      ln(g,0.36,0.72,0.34,0.90,'#9BC48F',0.014);
+      ci(g,0.34,0.92,0.040,'#FFC6D7','#E58CA9',0.008);
+    });
+  }});
+  it({ k:'shelf3_wood', n:'3단 원목 장식장', cat:'furn', np:1, w:1.45, d:0.44, h:1.58, draw:function(g){
+    /* 밝은 뒤판 */
+    back(g,0.36,function(){ rr(g,-0.64,0.08,1.28,1.38,0.04,'#F9EDD9','#E4CFB2',0.012); });
+    /* 옆판 */
+    rr(g,-0.70,0,0.10,1.48,0.04,'#D9B48C','#C09A72',0.014);
+    rr(g, 0.60,0,0.10,1.48,0.04,'#D9B48C','#C09A72',0.014);
+    /* 선반 4장 */
+    for (var s=0;s<4;s++) rr(g,-0.70,0.08+s*0.40,1.40,0.06,0.02,'#EBCFA8','#D3B084',0.012);
+    /* 1단 — 화분 · 책 세 권 · 작은 상자 */
+    rr(g,-0.54,0.14,0.20,0.16,0.04,'#F2C6A0','#D9A878',0.010);
+    ln(g,-0.44,0.30,-0.44,0.46,'#8FC487',0.014);
+    ci(g,-0.44,0.48,0.055,'#A6DBA0','#79B874',0.010);
+    ci(g,-0.34,0.42,0.035,'#C9E9C0',null);
+    rr(g,-0.14,0.14,0.10,0.26,0.01,'#FFB6CB','#E58CA9',0.008);
+    rr(g,-0.02,0.14,0.09,0.22,0.01,'#BFD8F2','#93B7D9',0.008);
+    rr(g, 0.09,0.14,0.11,0.25,0.01,'#FFE6A8','#E0C26A',0.008);
+    rr(g,0.30,0.14,0.22,0.14,0.04,'#FFF6EA','#E0C9AB',0.008);
+    ci(g,0.41,0.21,0.030,'#FF9EB5','#DC7089',0.006);
+    /* 2단 — 유리병 · 시계 · 상자 */
+    rr(g,-0.56,0.54,0.12,0.20,0.05,'#D9ECF8','#AECDE3',0.010);
+    ci(g,-0.50,0.76,0.035,'#CBE4F4',null);
+    ci(g,-0.16,0.68,0.085,'#FFF3D8','#E0C68A',0.010);
+    ci(g,-0.16,0.68,0.062,'#FFFDF8',null);
+    ln(g,-0.16,0.68,-0.16,0.72,'#8A6A4A',0.008); ln(g,-0.16,0.68,-0.11,0.66,'#8A6A4A',0.008);
+    rr(g,0.10,0.54,0.28,0.18,0.04,'#F2D3DE','#DFB0C0',0.008);
+    ln(g,0.24,0.72,0.24,0.78,'#DFB0C0',0.010);
+    /* 3단 — 케이크 · 화병 */
+    ci(g,-0.34,1.00,0.080,'#FFE6F0','#E7BCD0',0.010);
+    ci(g,-0.34,1.07,0.030,'#EF6A72','#C94E56',0.006);
+    rr(g,0.02,0.94,0.10,0.16,0.04,'#E8D3F0','#C9AEDC',0.008);
+    ln(g,0.07,1.10,0.05,1.24,'#8FC487',0.012);
+    ci(g,0.05,1.26,0.045,'#FFC6D7','#E58CA9',0.008);
+    ci(g,0.18,1.20,0.030,'#FFF0C4','#E0C68A',0.008);
+    /* 위 장식 · 다리 */
+    ci(g,0.34,1.36,0.045,'#DDCDF5','#B5A0E2',0.008);
+    rr(g,-0.62,0,0.09,0.10,0.02,'#C09A72',null);
+    rr(g, 0.53,0,0.09,0.10,0.02,'#C09A72',null);
+  }});
+  it({ k:'fire_table', n:'캠핑 파이어 테이블', cat:'furn', np:1, w:1.30, d:1.05, h:0.64, draw:function(g){
+    /* 다리 */
+    ln(g,-0.30,0.02,-0.20,0.24,'#C79A6E',0.038);
+    ln(g, 0.30,0.02, 0.20,0.24,'#C79A6E',0.038);
+    back(g,0.40,function(){ ln(g,0,0.02,0,0.24,'#B98A5E',0.034); });
+    /* 두께 있는 원형 상판 */
+    el(g,0,0.22,0.46,0.150,'#D3A87A','#B98A5E',0.016);
+    el(g,0,0.27,0.44,0.135,'#EBCFA8',null);
+    g.save(); g.globalAlpha=.30;
+    el(g,0,0.285,0.28,0.080,'none','#CBA57A',0.008);
+    el(g,0,0.285,0.37,0.108,'none','#CBA57A',0.008);
+    g.restore();
+    /* 화로 */
+    el(g,0,0.29,0.19,0.062,'#F0E4D2','#C9B99F',0.014);
+    el(g,0,0.30,0.145,0.045,'#6A564A',null);
+    /* 장작 · 불꽃 */
+    ln(g,-0.12,0.31,0.12,0.34,'#A87E4E',0.020);
+    ln(g,-0.11,0.35,0.11,0.30,'#B98A5E',0.018);
+    g.beginPath(); g.moveTo(-0.07,0.31);
+    g.bezierCurveTo(-0.08,0.43,0.00,0.47,0.01,0.57);
+    g.bezierCurveTo(0.08,0.47,0.07,0.41,0.04,0.31);
+    g.closePath(); g.fillStyle='#FFB454'; g.fill();
+    g.beginPath(); g.moveTo(-0.02,0.31);
+    g.bezierCurveTo(-0.02,0.39,0.02,0.41,0.02,0.48);
+    g.bezierCurveTo(0.05,0.41,0.04,0.35,0.02,0.31);
+    g.closePath(); g.fillStyle='#FFE9A8'; g.fill();
+    el(g,0,0.34,0.40,0.11,'rgba(255,190,110,.16)');
+    /* 머그컵 · 담요 */
+    back(g,0.52,function(){
+      rr(g,-0.52,0.34,0.12,0.10,0.03,'#FFFDF8','#DCD5C8',0.010);
+      el(g,-0.46,0.39,0.045,0.014,'#C9A78F');
+      rr(g,0.22,0.32,0.24,0.075,0.03,'#E7CBC0','#CBA79A',0.008);
+      rr(g,0.22,0.355,0.24,0.03,0.02,'#FFD9E4',null);
+    });
+  }});
+  it({ k:'swing_chair', n:'스윙 그네 의자', cat:'furn', np:1, w:1.35, d:1.15, h:1.98, seat:'chair', draw:function(g){
+    /* 뒤쪽 A 프레임 */
+    back(g,0.42,function(){
+      ln(g,-0.52,0.04,-0.30,1.56,'#C79A6E',0.042);
+      ln(g, 0.52,0.04, 0.30,1.56,'#C79A6E',0.042);
+      ln(g,-0.26,0.86,0.26,0.86,'#C79A6E',0.034);
+    });
+    /* 앞쪽 다리 */
+    ln(g,-0.52,0.04,-0.30,1.56,'#D9B48C',0.042);
+    ln(g, 0.52,0.04, 0.30,1.56,'#D9B48C',0.042);
+    /* 윗 가로대 */
+    rr(g,-0.36,1.54,0.72,0.09,0.04,'#EBCFA8','#D3A87A',0.014);
+    /* 매다는 줄 */
+    ln(g,-0.26,1.54,-0.30,1.14,'#CFC3B2',0.016);
+    ln(g, 0.26,1.54, 0.30,1.14,'#CFC3B2',0.016);
+    /* 등받이 살 */
+    back(g,0.14,function(){
+      for (var i=0;i<5;i++) ln(g,-0.28+i*0.14,0.78,-0.28+i*0.14,1.12,'#D9B48C',0.028);
+      rr(g,-0.34,1.10,0.68,0.08,0.03,'#EBCFA8','#D3A87A',0.012);
+    });
+    /* 좌판 */
+    rr(g,-0.36,0.72,0.72,0.09,0.03,'#EBCFA8','#D3A87A',0.014);
+    /* 쿠션 */
+    rr(g,-0.30,0.79,0.60,0.13,0.06,'#FFD9E4','#E9AFC0',0.012);
+    rr(g,-0.24,0.86,0.48,0.20,0.09,'#FFF3F8','#EBC6D3',0.012);
+    /* 꽃 장식 · 잔디 */
+    ci(g,0.30,1.18,0.045,'#FFC6D7','#E58CA9',0.010);
+    ci(g,0.30,1.18,0.016,'#FFF3C0');
+    g.save(); g.globalAlpha=.35;
+    el(g,0,0.04,0.52,0.055,'#A6DBA0');
+    g.restore();
+    ln(g,0.44,0.06,0.50,0.52,'#8FC487',0.014);
+    ci(g,0.51,0.56,0.030,'#FFC6D7');
+    ci(g,0.46,0.34,0.022,'#FFF0C4');
+  }});
+  /* ======================= 2026-11-26 추가 — 소품 10종 더 ======================= */
+  it({ k:'neon_rainbow', n:'무지개 네온 램프', cat:'prop', np:2, w:0.85, d:0.42, h:0.92, draw:function(g){
+    /* 받침 */
+    rr(g,-0.30,0,0.60,0.10,0.04,'#E8EAF2','#C0C5D2',0.012);
+    ln(g,-0.22,0.10,-0.22,0.44,'#C9CDD8',0.020);
+    ln(g, 0.22,0.10, 0.22,0.44,'#C9CDD8',0.020);
+    /* 무지개 3겹 */
+    var cols = ['#FF9EB5','#FFD873','#9BD9FF'];
+    for (var i=0;i<3;i++){
+      g.beginPath();
+      g.arc(0,0.44,0.34-i*0.075,Math.PI*1.02,Math.PI*1.98,false);
+      g.strokeStyle = cols[i]; g.lineWidth = 0.052; g.lineCap='round'; g.stroke();
+      g.save(); g.globalAlpha=.45;
+      g.beginPath();
+      g.arc(0,0.44,0.34-i*0.075,Math.PI*1.02,Math.PI*1.98,false);
+      g.strokeStyle='#FFFFFF'; g.lineWidth=0.018; g.stroke();
+      g.restore();
+    }
+    /* 구름 · 네온 빛 */
+    el(g,-0.34,0.44,0.09,0.045,'#FFFFFF');
+    el(g, 0.34,0.44,0.09,0.045,'#FFFFFF');
+    g.save(); g.globalAlpha=.18;
+    el(g,0,0.52,0.46,0.30,'#FFC6D7');
+    g.restore();
+    /* 별 장식 */
+    ci(g,-0.10,0.80,0.022,'#FFE38A'); ci(g,0.12,0.76,0.016,'#FFE38A');
+  }});
+  it({ k:'whale_night', n:'고래 수면등', cat:'prop', np:2, w:0.80, d:0.50, h:0.52, draw:function(g){
+    /* 고래 몸통 */
+    g.beginPath(); g.moveTo(-0.34,0.16);
+    g.bezierCurveTo(-0.34,0.42,0.10,0.46,0.28,0.34);
+    g.bezierCurveTo(0.38,0.28,0.38,0.16,0.28,0.12);
+    g.bezierCurveTo(0.10,0.04,-0.34,0.04,-0.34,0.16);
+    g.closePath();
+    var wg2 = g.createLinearGradient(0,0.44,0,0.06);
+    wg2.addColorStop(0,'#BFE3F8'); wg2.addColorStop(1,'#8FC6E8');
+    g.fillStyle=wg2; g.fill(); g.strokeStyle='#6FA8CC'; g.lineWidth=0.014; g.stroke();
+    /* 꼬리 */
+    poly(g,[[0.26,0.20],[0.46,0.32],[0.40,0.18],[0.46,0.06],[0.26,0.12]],'#A5D5F0','#6FA8CC',0.012);
+    /* 배 */
+    g.beginPath(); g.moveTo(-0.28,0.14);
+    g.bezierCurveTo(-0.10,0.06,0.14,0.07,0.26,0.13);
+    g.bezierCurveTo(0.10,0.18,-0.12,0.18,-0.28,0.14);
+    g.closePath(); g.fillStyle='#F4FBFF'; g.fill();
+    /* 눈 · 볼 */
+    ci(g,-0.22,0.26,0.020,'#3F5876'); ci(g,-0.20,0.29,0.007,'#FFFFFF');
+    ci(g,-0.14,0.20,0.026,'rgba(247,180,200,.6)');
+    /* 물뿜기 */
+    g.save(); g.globalAlpha=.85;
+    ci(g,-0.30,0.40,0.022,'#CFEFFF'); ci(g,-0.34,0.48,0.016,'#CFEFFF'); ci(g,-0.30,0.54,0.011,'#CFEFFF');
+    g.restore();
+    /* 무늬 */
+    g.save(); g.globalAlpha=.5;
+    g.beginPath(); g.arc(-0.02,0.30,0.10,Math.PI*1.1,Math.PI*1.6); g.strokeStyle='#FFFFFF'; g.lineWidth=0.012; g.stroke();
+    g.restore();
+    /* 따뜻한 불빛 */
+    el(g,-0.02,0.14,0.42,0.075,'rgba(255,235,190,.35)');
+  }});
+  it({ k:'macaron_tower', n:'마카롱 3단 트레이', cat:'prop', np:2, w:0.62, d:0.52, h:0.86, draw:function(g){
+    /* 접시 */
+    el(g,0,0.04,0.20,0.065,'#F6F1E8','#D8CFC0',0.012);
+    ln(g,0,0.06,0,0.74,'#C9A983',0.018);
+    var lv = [0.24,0.46,0.68], ws = [0.26,0.21,0.16];
+    var cols2 = ['#FFC6D7','#FFE38A','#BFE3D2','#DDCDF5','#FFD3A8'];
+    for (var i=0;i<3;i++){
+      el(g,0,lv[i],ws[i],ws[i]*0.30,'#FBF6EE','#D8CFC0',0.010);
+      /* 마카롱 */
+      var n = i===0? 3 : (i===1? 2 : 1);
+      for (var j=0;j<n;j++){
+        var mx = -ws[i]*0.45 + j*(ws[i]*0.9/Math.max(1,n-1||1));
+        if (n===1) mx = 0;
+        ci(g,mx,lv[i]+0.055,0.045,cols2[(j+i)%cols2.length], shadeC(cols2[(j+i)%cols2.length],0.85), 0.008);
+        rr(g,mx-0.045,lv[i]+0.030,0.090,0.014,0.006,'#FFF6EE',null);
+        rr(g,mx-0.045,lv[i]+0.070,0.090,0.012,0.006,shadeC(cols2[(j+i)%cols2.length],0.92),null);
+      }
+    }
+    /* 꼭대기 리본 */
+    ci(g,0,0.78,0.035,'#FF9EB5','#DC7089',0.008);
+    poly(g,[[-0.01,0.78],[-0.09,0.84],[-0.09,0.72]],'#FF9EB5','#DC7089',0.006);
+    poly(g,[[0.01,0.78],[0.09,0.84],[0.09,0.72]],'#FF9EB5','#DC7089',0.006);
+    /* 옆 마카롱 */
+    ci(g,0.24,0.10,0.045,'#BFE3D2',shadeC('#BFE3D2',0.85),0.008);
+  }});
+  it({ k:'fountain_mini', n:'미니 분수대', cat:'prop', np:2, w:0.90, d:0.90, h:1.05, draw:function(g){
+    /* 물대야 */
+    el(g,0,0.16,0.40,0.16,'#DDE4EC','#B9C4D2',0.016);
+    el(g,0,0.18,0.34,0.13,'#A9D9F0',null);
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.arc(0,0.18,0.26,Math.PI*1.05,Math.PI*1.5); g.strokeStyle='#FFFFFF'; g.lineWidth=0.014; g.stroke();
+    g.restore();
+    /* 기둥 · 위 그릇 */
+    rr(g,-0.05,0.18,0.10,0.44,0.03,'#E4EAF2','#C0CAD8',0.012);
+    el(g,0,0.64,0.24,0.09,'#E4EAF2','#C0CAD8',0.012);
+    el(g,0,0.66,0.20,0.07,'#A9D9F0',null);
+    rr(g,-0.04,0.66,0.08,0.22,0.03,'#E4EAF2','#C0CAD8',0.010);
+    /* 꼭대기 물줄기 */
+    g.beginPath(); g.moveTo(0,0.88);
+    g.bezierCurveTo(0.06,0.96,-0.06,0.98,0.00,1.02);
+    g.strokeStyle='#CFEFFF'; g.lineWidth=0.016; g.stroke();
+    g.beginPath(); g.moveTo(0,0.90);
+    g.bezierCurveTo(-0.16,0.92,-0.22,0.80,-0.24,0.68);
+    g.strokeStyle='rgba(207,239,255,.85)'; g.lineWidth=0.012; g.stroke();
+    g.beginPath(); g.moveTo(0,0.90);
+    g.bezierCurveTo(0.18,0.92,0.24,0.80,0.26,0.68);
+    g.strokeStyle='rgba(207,239,255,.85)'; g.lineWidth=0.012; g.stroke();
+    /* 물방울 */
+    g.save(); g.globalAlpha=.9;
+    ci(g,-0.10,0.92,0.014,'#CFEFFF'); ci(g,0.12,0.94,0.012,'#CFEFFF'); ci(g,0.02,1.00,0.010,'#CFEFFF');
+    ci(g,-0.26,0.52,0.012,'#CFEFFF'); ci(g,0.28,0.46,0.012,'#CFEFFF');
+    g.restore();
+    /* 이끼 · 꽃 */
+    ci(g,0.30,0.22,0.045,'#9BD08F','#6FAF6C',0.008);
+    ci(g,0.22,0.20,0.028,'#FFC6D7','#E58CA9',0.006);
+    ci(g,-0.32,0.22,0.030,'#FFF0C4',null);
+  }});
+  it({ k:'star_projector', n:'별빛 프로젝터', cat:'prop', np:2, w:0.60, d:0.55, h:0.66, draw:function(g){
+    /* 받침 */
+    el(g,0,0.04,0.20,0.065,'#2E3245','#1F2231',0.012);
+    /* 몸통 (둥근) */
+    ci(g,0,0.30,0.20,'#3C4258','#262A38',0.016);
+    el(g,0,0.34,0.14,0.10,'#5C6785',null);
+    /* 렌즈 · 빛 */
+    ci(g,0.06,0.40,0.060,'#FFE9A8','#D9B45E',0.012);
+    ci(g,0.06,0.40,0.032,'#FFF6D8',null);
+    /* 별 투사 */
+    g.save(); g.globalAlpha=.85;
+    ln(g,0.10,0.46,0.44,0.86,'rgba(255,233,168,.5)',0.020);
+    ci(g,0.30,0.68,0.022,'#FFF3C0'); ci(g,0.40,0.82,0.030,'#FFF3C0'); ci(g,0.44,0.60,0.016,'#FFF3C0');
+    ci(g,0.22,0.56,0.014,'#FFF3C0');
+    g.restore();
+    /* 조작 다이얼 */
+    ci(g,-0.12,0.28,0.030,'#8C99B2','#6B7791',0.008);
+    rr(g,-0.20,0.16,0.10,0.06,0.02,'#7FE0A8','#4FAF78',0.006);
+    /* 달 모양 장식 */
+    g.beginPath(); g.arc(-0.06,0.44,0.055,Math.PI*0.3,Math.PI*1.6);
+    g.strokeStyle='#FFF3C0'; g.lineWidth=0.014; g.stroke();
+  }});
+  it({ k:'typewriter', n:'빈티지 타자기', cat:'prop', np:2, w:0.80, d:0.60, h:0.72, draw:function(g){
+    /* 본체 */
+    bx(g,0,0,0.72,0.54,0.22,'#4A4A58','#3A3A46','#2E2E38','#232330',0.016);
+    /* 키보드 */
+    rr(g,-0.28,0.24,0.56,0.14,0.03,'#3A3A46',null);
+    for (var r3=0;r3<3;r3++) for (var c3=0;c3<8;c3++){
+      ci(g,-0.24+c3*0.068+r3*0.008,0.27+r3*0.042,0.020,'#EDE7DC','#B9B2A4',0.006);
+    }
+    /* 종이 */
+    back(g,0.30,function(){
+      rr(g,-0.20,0.46,0.40,0.30,0.01,'#FFFDF6','#E0D8C8',0.010);
+      g.save(); g.globalAlpha=.6;
+      for (var i=0;i<4;i++) ln(g,-0.15,0.52+i*0.055,0.12,0.52+i*0.055,'#8C8578',0.008);
+      g.restore();
+    });
+    /* 타자봉 · 리본 스풀 */
+    back(g,0.20,function(){
+      rr(g,-0.24,0.40,0.48,0.06,0.02,'#5C5C6C','#42424E',0.010);
+      ci(g,-0.28,0.44,0.035,'#FFC6D7','#DC7089',0.008);
+      ci(g, 0.28,0.44,0.035,'#FFD3A8','#DD9A55',0.008);
+    });
+    /* 캐리지 · 크롬 */
+    rr(g,-0.30,0.44,0.60,0.04,0.02,'#C9CDD8','#9AA1B0',0.010);
+    rr(g,-0.34,0.40,0.06,0.06,0.02,'#B4B9C6',null);
+    /* 옆 손잡이 */
+    ci(g,0.38,0.34,0.045,'#E8EAF2','#BFC4D2',0.010);
+    /* 받침 다리 */
+    rr(g,-0.30,0,0.60,0.03,0.01,'#2E2E38',null);
+    /* 음표 */
+    g.save(); g.globalAlpha=.75;
+    ci(g,0.34,0.68,0.026,'#6B7791'); ln(g,0.365,0.69,0.365,0.80,'#6B7791',0.010);
+    g.restore();
+  }});
+  it({ k:'flower_dome', n:'꽃다발 유리돔', cat:'prop', np:2, w:0.62, d:0.52, h:0.82, draw:function(g){
+    /* 나무 받침 */
+    el(g,0,0.06,0.24,0.075,'#BE7C45','#96592B',0.014);
+    rr(g,-0.24,0.06,0.48,0.05,0.02,'#DDA771',null);
+    /* 유리 돔 */
+    g.beginPath(); g.moveTo(-0.24,0.10);
+    g.bezierCurveTo(-0.26,0.56,-0.16,0.74,0,0.78);
+    g.bezierCurveTo(0.16,0.74,0.26,0.56,0.24,0.10);
+    g.closePath();
+    g.fillStyle='rgba(232,246,252,.82)'; g.fill();
+    g.strokeStyle='#B6CEDC'; g.lineWidth=0.014; g.stroke();
+    /* 꽃다발 */
+    ln(g,0,0.10,-0.08,0.34,'#6FAF6C',0.016);
+    ln(g,0,0.10, 0.06,0.36,'#7FC077',0.016);
+    ln(g,0,0.10, 0.00,0.40,'#6FAF6C',0.016);
+    el(g,-0.16,0.28,0.075,0.035,'#7CBE78','#5E9E5C',0.008);
+    ci(g,-0.10,0.40,0.062,'#FFC6D7','#E58CA9',0.010);
+    ci(g, 0.02,0.46,0.070,'#FFD3E1','#E7AFC0',0.010);
+    ci(g, 0.13,0.38,0.055,'#FFF0C4','#E0C68A',0.008);
+    ci(g,-0.02,0.36,0.030,'#FFF6D8',null);
+    ci(g, 0.16,0.26,0.040,'#DDCDF5','#B5A0E2',0.008);
+    /* 리본 */
+    rr(g,-0.06,0.14,0.12,0.05,0.02,'#FF9EB5','#DC7089',0.006);
+    /* 하이라이트 */
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.arc(-0.10,0.42,0.16,Math.PI*1.05,Math.PI*1.45); g.strokeStyle='#FFFFFF'; g.lineWidth=0.012; g.stroke();
+    g.restore();
+    /* 덮개 손잡이 */
+    ci(g,0,0.80,0.035,'#DDA771','#96592B',0.010);
+  }});
+  it({ k:'piano_orgel', n:'미니 피아노 오르골', cat:'prop', np:2, w:0.85, d:0.60, h:0.70, draw:function(g){
+    /* 다리 */
+    ln(g,-0.28,0.02,-0.30,0.34,'#3A2E28',0.024);
+    ln(g, 0.28,0.02, 0.30,0.34,'#3A2E28',0.024);
+    /* 본체 (그랜드 피아노 실루엣) */
+    g.beginPath(); g.moveTo(-0.34,0.34);
+    g.lineTo(0.30,0.34); g.lineTo(0.34,0.44);
+    g.bezierCurveTo(0.16,0.54,-0.10,0.52,-0.34,0.44);
+    g.closePath(); g.fillStyle='#FFB6CB'; g.fill();
+    g.strokeStyle='#DC8FA8'; g.lineWidth=0.014; g.stroke();
+    /* 뚜껑 열린 안쪽 */
+    poly(g,[[-0.30,0.44],[0.26,0.44],[0.10,0.56],[-0.22,0.54]],'#FFF6FA','#E7C6D2',0.010);
+    /* 건반 */
+    rr(g,-0.32,0.30,0.64,0.09,0.02,'#FFFFFF','#DCD5C8',0.010);
+    for (var i=0;i<9;i++) ln(g,-0.32+i*0.071,0.30,-0.32+i*0.071,0.39,'#C9C9BA',0.008);
+    for (var j=0;j<7;j++){ if (j%7===2||j%7===6) continue; rr(g,-0.30+j*0.071,0.36,0.032,0.045,0.006,'#2B2B33',null); }
+    /* 오르골 태엽 · 발레리나 */
+    ci(g,0.34,0.30,0.032,'#EFD08A','#C99A2E',0.008);
+    ln(g,0.10,0.52,0.10,0.62,'#E7B6C6',0.012);
+    ci(g,0.10,0.64,0.030,'#FFF6FA','#E7C6D2',0.008);
+    poly(g,[[0.08,0.62],[0.12,0.62],[0.16,0.52],[0.10,0.52]],'#FFFFFF',null);
+    /* 음표 */
+    g.save(); g.globalAlpha=.7;
+    ci(g,-0.20,0.68,0.020,'#E79CB3'); ln(g,-0.18,0.69,-0.18,0.78,'#E79CB3',0.008);
+    g.restore();
+  }});
+  it({ k:'jelly_bear_lamp', n:'젤리 베어 램프', cat:'prop', np:2, w:0.62, d:0.55, h:0.78, draw:function(g){
+    /* 받침 */
+    el(g,0,0.04,0.18,0.06,'#FFE9F0','#EFC6D6',0.012);
+    /* 곰 몸 */
+    el(g,0,0.24,0.19,0.18,'rgba(255,190,214,.92)','#E58CA9',0.014);
+    el(g,0,0.53,0.16,0.15,'rgba(255,205,225,.95)','#E58CA9',0.014);
+    ci(g,-0.12,0.64,0.065,'rgba(255,205,225,.95)','#E58CA9',0.012);
+    ci(g, 0.12,0.64,0.065,'rgba(255,205,225,.95)','#E58CA9',0.012);
+    ci(g,-0.12,0.64,0.032,'rgba(255,235,244,.9)',null);
+    ci(g, 0.12,0.64,0.032,'rgba(255,235,244,.9)',null);
+    /* 팔 · 다리 */
+    el(g,-0.20,0.26,0.06,0.09,'rgba(255,200,222,.9)','#E58CA9',0.010);
+    el(g, 0.20,0.26,0.06,0.09,'rgba(255,200,222,.9)','#E58CA9',0.010);
+    el(g,-0.10,0.08,0.075,0.045,'rgba(255,200,222,.9)','#E58CA9',0.010);
+    el(g, 0.10,0.08,0.075,0.045,'rgba(255,200,222,.9)','#E58CA9',0.010);
+    /* 얼굴 */
+    ci(g,-0.06,0.55,0.016,'#8A4E63'); ci(g,0.06,0.55,0.016,'#8A4E63');
+    el(g,0,0.49,0.020,0.014,'#8A4E63');
+    g.beginPath(); g.arc(0,0.50,0.030,Math.PI*0.15,Math.PI*0.85);
+    g.strokeStyle='#8A4E63'; g.lineWidth=0.008; g.stroke();
+    ci(g,-0.10,0.50,0.022,'rgba(255,150,180,.7)'); ci(g,0.10,0.50,0.022,'rgba(255,150,180,.7)');
+    /* 반짝 · 불빛 */
+    g.save(); g.globalAlpha=.22;
+    el(g,0,0.36,0.34,0.32,'#FFC6D7');
+    g.restore();
+    ci(g,-0.18,0.60,0.012,'#FFFFFF'); ci(g,0.16,0.28,0.010,'#FFFFFF');
+  }});
+  it({ k:'aurora_lamp', n:'오로라 드림램프', cat:'prop', np:2, w:0.66, d:0.55, h:0.92, draw:function(g){
+    /* 받침 */
+    el(g,0,0.04,0.20,0.065,'#E8EAF2','#BFC4D2',0.012);
+    rr(g,-0.10,0.06,0.20,0.10,0.03,'#DCE0E8',null);
+    /* 유리 원통 */
+    rr(g,-0.17,0.14,0.34,0.52,0.10,'rgba(226,240,252,.55)','#B9CBDA',0.014);
+    /* 오로라 빛 */
+    g.save(); g.globalAlpha=.55;
+    g.beginPath(); g.moveTo(-0.15,0.60);
+    g.bezierCurveTo(-0.04,0.46,0.04,0.62,0.15,0.44);
+    g.lineTo(0.15,0.36); g.bezierCurveTo(0.04,0.54,-0.04,0.38,-0.15,0.52);
+    g.closePath(); g.fillStyle='#8FE3C9'; g.fill();
+    g.beginPath(); g.moveTo(-0.15,0.44);
+    g.bezierCurveTo(-0.02,0.32,0.06,0.46,0.15,0.30);
+    g.lineTo(0.15,0.24); g.bezierCurveTo(0.04,0.40,-0.04,0.26,-0.15,0.36);
+    g.closePath(); g.fillStyle='#B6A8F0'; g.fill();
+    g.restore();
+    /* 뚜껑 · 버튼 */
+    el(g,0,0.68,0.17,0.06,'#E8EAF2','#BFC4D2',0.012);
+    ci(g,0,0.74,0.030,'#8FE3C9','#5FB89E',0.008);
+    /* 위로 퍼지는 빛 */
+    g.save(); g.globalAlpha=.4;
+    poly(g,[[-0.15,0.72],[-0.34,0.92],[0.34,0.92],[0.15,0.72]],'rgba(143,227,201,.5)',null);
+    g.restore();
+    ci(g,-0.24,0.88,0.014,'#CFF3E7'); ci(g,0.22,0.90,0.012,'#DCD3FA');
+  }});
+
   var MAP = {};
   IT.forEach(function(o){ MAP[o.k] = o; });
   return { list:IT, map:MAP, P:P, KX:KX, KZ:KZ };
@@ -16089,9 +17341,9 @@ var MYR_ITEM = (function(){
   var SPC = 264, OXS = 132, OYS = 208, SPR = 48;
 
   var THEMES = {
-    wood:      { n:'우드',      wall:'#F8E8CE', wallTop:'#FFF6E6', base:'#E6CCA6', molding:'#EFD9B6',
-                 floor:'#DCA877', floor2:'#D5A06E', plank:'#BC8553', riser:'#C6894F', riserTop:'#E7B27C',
-                 stairTop:'#E8B57F', stairSide:'#C68A55', rail:'#A9713D', ceil:'#FFFBF2' },
+    wood:      { n:'우드',      wall:'#FBEFDD', wallTop:'#FFF9EF', base:'#EEDCC2', molding:'#F6E6CC',
+                 floor:'#F2E2C9', floor2:'#EBDABE', plank:'#DCC7A8', riser:'#E4CFB2', riserTop:'#F8EAD3',
+                 stairTop:'#F6E7CE', stairSide:'#E2CCAF', rail:'#CDB08D', ceil:'#FFFBF4' },
     mint:      { n:'민트',      wall:'#E7F6EE', wallTop:'#F6FDF9', base:'#CFE8DB', molding:'#DCF1E5',
                  floor:'#EFE3CF', floor2:'#E7D9C1', plank:'#D2C0A2', riser:'#DCCBB0', riserTop:'#F1E3CB',
                  stairTop:'#F3E7D1', stairSide:'#D6C4A6', rail:'#C2A87F', ceil:'#FBFFFC' },
@@ -16101,18 +17353,18 @@ var MYR_ITEM = (function(){
     night:     { n:'밤하늘',    wall:'#3F4370', wallTop:'#2E3256', base:'#4C4A74', molding:'#575A8A',
                  floor:'#8E6A4E', floor2:'#836046', plank:'#71513A', riser:'#7A5940', riserTop:'#9C7454',
                  stairTop:'#A07A57', stairSide:'#7E5C42', rail:'#6A4A33', ceil:'#232647', stars:true },
-    cherry:    { n:'체리 카페', wall:'#FBE7DE', wallTop:'#FFF4EC', base:'#EBC7B6', molding:'#F6D9C8',
-                 floor:'#C99A78', floor2:'#C0916F', plank:'#A97A58', riser:'#B9895F', riserTop:'#D9A87C',
-                 stairTop:'#DBA97D', stairSide:'#B4835A', rail:'#8E6242', ceil:'#FFF7F0' },
+    cherry:    { n:'체리 카페', wall:'#FCEBE3', wallTop:'#FFF6F0', base:'#F0D2C2', molding:'#F8DFD1',
+                 floor:'#EED8C4', floor2:'#E7CFB9', plank:'#D6B99F', riser:'#DDC3A9', riserTop:'#F5E4CE',
+                 stairTop:'#F3E1CA', stairSide:'#DCC0A4', rail:'#C4A186', ceil:'#FFF8F2' },
     lavender:  { n:'라벤더',    wall:'#EDE4F8', wallTop:'#F8F3FF', base:'#D6C8EC', molding:'#E3D7F4',
                  floor:'#E8DCCB', floor2:'#E0D2BE', plank:'#C6B49B', riser:'#D3C0A6', riserTop:'#EDDCC2',
                  stairTop:'#EEDFC6', stairSide:'#D2BE9F', rail:'#B49B78', ceil:'#FCF9FF', petals:true, petalCol:'rgba(181,160,226,.5)' },
     lemon:     { n:'레몬 크림', wall:'#FFF6D8', wallTop:'#FFFDF0', base:'#F0E2B4', molding:'#F8EDC8',
                  floor:'#E7D9B8', floor2:'#DFD0AC', plank:'#C8B48C', riser:'#D8C6A0', riserTop:'#F1E3C2',
                  stairTop:'#F2E5C4', stairSide:'#D9C6A1', rail:'#BCA47A', ceil:'#FFFDF4' },
-    forest:    { n:'포레스트 그린', wall:'#DDEBDD', wallTop:'#EFF7EE', base:'#BFD6BE', molding:'#CFE3CD',
-                 floor:'#B58A62', floor2:'#AC815A', plank:'#8D6845', riser:'#9C7450', riserTop:'#BC9268',
-                 stairTop:'#BA9066', stairSide:'#96704B', rail:'#7A5836', ceil:'#F2F8F0' },
+    forest:    { n:'포레스트 그린', wall:'#E3F0E2', wallTop:'#F3FAF2', base:'#C8DDC6', molding:'#D8E9D6',
+                 floor:'#E7D6BE', floor2:'#DECBAF', plank:'#CDB694', riser:'#D6C1A3', riserTop:'#F1E1C8',
+                 stairTop:'#F0DFC6', stairSide:'#D6C0A2', rail:'#BFA382', ceil:'#F5FBF3' },
     grey:      { n:'모던 그레이', wall:'#E9E8E6', wallTop:'#F6F5F3', base:'#CFCCC8', molding:'#DDDAD5',
                  floor:'#D8D2CB', floor2:'#D0C9C1', plank:'#B8B0A7', riser:'#C4BCB2', riserTop:'#DED6CC',
                  stairTop:'#DCD4CA', stairSide:'#C0B7AC', rail:'#A09789', ceil:'#FBFAF9' },
@@ -16188,6 +17440,21 @@ var MYR_ITEM = (function(){
   }
 
   /* ---------- 그림 캐시 ---------- */
+  /* 새 가구·소품용 — 파스텔 그림에 따뜻한 브라운 외곽선을 살짝 둘러 스티커처럼 아기자기하게 */
+  function cuteOutline(cv, col, px2){
+    var w = cv.width, h = cv.height;
+    var sil = document.createElement('canvas'); sil.width = w; sil.height = h;
+    var sg = sil.getContext('2d');
+    sg.drawImage(cv, 0, 0);
+    sg.globalCompositeOperation = 'source-in';
+    sg.fillStyle = col; sg.fillRect(0, 0, w, h);
+    var out = document.createElement('canvas'); out.width = w; out.height = h;
+    var og = out.getContext('2d');
+    var d = [[-px2,0],[px2,0],[0,-px2],[0,px2],[-px2,-px2],[px2,-px2],[-px2,px2],[px2,px2]];
+    for (var i=0;i<d.length;i++) og.drawImage(sil, d[i][0], d[i][1]);
+    og.drawImage(cv, 0, 0);
+    return out;
+  }
   function spr(k){
     if (SPRC[k]) return SPRC[k];
     var o = ITEM[k]; if (!o) return null;
@@ -16198,8 +17465,8 @@ var MYR_ITEM = (function(){
     g.lineJoin = 'round'; g.lineCap = 'round';
     if (o.cat !== 'wall'){
       var d = o.d || 0.6, w = o.w || 1;
-      g.beginPath(); g.ellipse(-d*0.3*KX, d*0.3*KZ, w*0.46, Math.max(0.10, d*0.30), 0, 0, Math.PI*2);
-      g.fillStyle = 'rgba(96,74,48,.10)'; g.fill();
+      g.beginPath(); g.ellipse(-d*0.3*KX, d*0.3*KZ, w*0.48, Math.max(0.12, d*0.31), 0, 0, Math.PI*2);
+      g.fillStyle = 'rgba(130,85,70,.14)'; g.fill();
     }
     try { o.draw(g); } catch(e){ console.warn('[myhome] draw', k, e && e.message); }
     g.restore();
@@ -16308,16 +17575,16 @@ var MYR_ITEM = (function(){
     for (var z=0; z<=D1; z+=0.62){
       var y = py(z, STEP_H);
       if (y < yTop - 40 || y > yEdge + 4) continue;
-      g.fillStyle = 'rgba(96,64,36,.09)'; g.fillRect(0, y, MY.W, 1);
+      g.fillStyle = 'rgba(150,112,86,.07)'; g.fillRect(0, y, MY.W, 1);
     }
     /* 위층은 살짝 그늘 (아래층과 구분) */
     var sh = g.createLinearGradient(0, yTop, 0, yEdge);
-    sh.addColorStop(0, 'rgba(70,45,25,.10)'); sh.addColorStop(1, 'rgba(70,45,25,0)');
+    sh.addColorStop(0, 'rgba(150,110,85,.09)'); sh.addColorStop(1, 'rgba(150,110,85,0)');
     g.fillStyle = sh; g.fillRect(0, yTop, MY.W, yEdge - yTop);
     /* 위층 앞면(단 턱) */
     g.fillStyle = th.riser; g.fillRect(0, yEdge, MY.W, Math.max(0, yFoot - yEdge));
     g.fillStyle = th.riserTop; g.fillRect(0, yEdge, MY.W, Math.max(2, 0.10*MY.S));
-    g.fillStyle = 'rgba(90,60,35,.12)'; g.fillRect(0, yFoot - 2, MY.W, 2);
+    g.fillStyle = 'rgba(150,112,86,.10)'; g.fillRect(0, yFoot - 2, MY.W, 2);
     /* 아래층 홀 — 마루 널 한 줄씩 색을 살짝 달리해 결을 만든다 */
     var yHall = Math.max(yFoot, 0);
     g.fillStyle = th.floor; g.fillRect(0, yHall, MY.W, MY.H - yHall + 2);
@@ -16328,11 +17595,11 @@ var MYR_ITEM = (function(){
       if (y2 < -6 || y1 > MY.H+6) continue;
       g.fillStyle = bi % 2 ? th.floor : th.floor2;
       g.fillRect(0, y1, MY.W, Math.max(1, y2-y1));
-      g.fillStyle = 'rgba(96,64,36,.13)';
+      g.fillStyle = 'rgba(160,122,96,.09)';
       g.fillRect(0, y1, MY.W, 1);
       /* 널 이음(세로) — 줄마다 어긋나게 */
       var off2 = ((bi*1.9) % 3.3) - 1.6;
-      g.fillStyle = 'rgba(96,64,36,.10)';
+      g.fillStyle = 'rgba(160,122,96,.07)';
       for (var k=-4;k<5;k++){
         var xx = px(k*(HX1-HX0)/6 + off2, bands[bi]);
         g.fillRect(xx, y1, 1.5, Math.max(1, y2-y1));
@@ -16917,8 +18184,8 @@ var MYR_ITEM = (function(){
     var cats = MY.tray === 'all' ? ['furn','prop','wall','theme','pet'] : (MY.tray === 'wall' ? ['wall','theme'] : [MY.tray]);
     var list = LIST.filter(function(o){ return cats.indexOf(o.cat) >= 0 && ownedCount(o.k) > 0; });
     if (!list.length){
-      body.innerHTML = '<div class="myr-empty"><b>아직 여기엔 아무것도 없어요</b><small>🎁 1P 가구 뽑기로 하나씩 모아 보세요!</small>'
-        + '<button type="button" data-myract="roll">🎁 1P 가구 뽑기</button></div>';
+      body.innerHTML = '<div class="myr-empty"><b>아직 여기엔 아무것도 없어요</b><small>🛍️ 1P 상점에서 하나씩 사서 모아 보세요!</small>'
+        + '<button type="button" data-myract="shop">🛍️ 1P 상점 열기</button></div>';
       return;
     }
     var h = '<div class="myr-grid">';
@@ -16945,7 +18212,7 @@ var MYR_ITEM = (function(){
     (typeof KIDS !== 'undefined' ? KIDS : []).forEach(function(id){ if (id !== kid) fam.push({ k:avPreset(id), nm:famName(id) }); });
     fam.push({ k:'cap_track', nm:'아빠' });
     fam.push({ k:'flower_wave', nm:'엄마' });
-    function card(kk, nm, badge){
+    function card(kk, nm){
       var n = (r.chars || []).filter(function(c){ return c.k === kk && (nm ? c.nm === nm : true); }).length;
       return '<button type="button" class="myr-c pc" data-myradd="' + esc(kk) + '" data-nm="' + esc(nm || '') + '">'
         + '<img class="fr" src="assets/avatars/' + esc(kk) + '.webp" alt="">'
@@ -16953,8 +18220,8 @@ var MYR_ITEM = (function(){
         + (n ? '<span class="cnt">×' + n + '</span>' : '<span class="cnt">+</span>')
         + '</button>';
     }
-    var h = '<div class="pgd-lab">👤 내 캐릭터 <span>' + esc(famName(kid)) + '</span></div><div class="myr-grid">' + card(mine, famName(kid)) + '</div>';
-    h += '<div class="pgd-lab" style="margin-top:9px">👨‍👩‍👧‍👦 가족 <span>같이 놀기</span></div><div class="myr-grid">';
+    var h = '<div class="pgd-lab">👤 내 캐릭터 · 가족 <span>같이 놀기</span></div><div class="myr-grid">';
+    h += card(mine, famName(kid));
     fam.forEach(function(f){ h += card(f.k, f.nm); });
     h += '</div>';
     if (owned.length){
@@ -16966,9 +18233,10 @@ var MYR_ITEM = (function(){
       });
       h += '</div>';
     } else {
-      h += '<div class="pgd-tip">상점에서 산 캐릭터도 여기서 불러올 수 있어요</div>';
+      h += '<div class="pgd-tip">상점에서 산 캐릭터가 여기서 불러와져요</div>'
+        + '<div style="text-align:center;margin-top:5px"><button type="button" class="myr-empty-b" data-myract="shop" data-tab="preset">🛍️ 캐릭터 사러 가기</button></div>';
     }
-    h += '<div class="pgd-tip">톡 누르면 마이홈에 한 명씩 늘어나요 · ✋ 옮기기로 자유롭게 옮겨요</div>';
+    h += '<div class="pgd-tip">톡 누르면 집꾸미기에 한 명씩 와요 · ✋ 옮기기로 자유롭게 옮겨요</div>';
     return h;
   }
   function addChar(preset, nm){
@@ -16982,6 +18250,98 @@ var MYR_ITEM = (function(){
     var sub = (preset === avPreset(MY.kid) && !nm) ? '내 캐릭터를 한 명 더 불렀어요' : ((nm || '친구') + '를 불렀어요');
     say(sub);
     buildTray();
+  }
+
+  /* ---------- 🛍️ 집꾸미기 상점 (가구·소품·벽·테마·동물·캐릭터 모두 1P) ---------- */
+  var MYS_TABS = [['furn','가구'],['prop','소품'],['wall','벽·테마'],['pet','🐾 동물'],['preset','👥 캐릭터']];
+  function shopTabsHtml(){
+    return MYS_TABS.map(function(t){
+      return '<button type="button" data-myshoptab="' + t[0] + '"' + (MY.shopTab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>';
+    }).join('');
+  }
+  function presetNm(k){
+    if (typeof AV_PRESETS === 'undefined') return k;
+    var f = AV_PRESETS.filter(function(p){ return p.k === k; })[0];
+    return f ? f.n : k;
+  }
+  function renderShop(){
+    var tabs = $m('myrShopTabs'), body = $m('myrShopBody');
+    if (!tabs || !body) return;
+    var kid = MY.kid, r = room();
+    tabs.innerHTML = shopTabsHtml();
+    var pts = (typeof pointsOf === 'function') ? pointsOf(kid) : 0;
+    var note = $m('myrShopNote');
+    if (note) note.textContent = '💎 ' + pts + 'P · 1개 = 1P';
+    var h = '<div class="myr-grid">';
+    if (MY.shopTab === 'preset'){
+      (typeof AV_PRESETS === 'undefined' ? [] : AV_PRESETS).forEach(function(p){
+        var own = (typeof avUnlocked === 'function') ? avUnlocked(kid, 'preset', p.k) : false;
+        h += '<button type="button" class="myr-c pc' + (own ? ' done' : '') + '" data-myrbuy="preset:' + esc(p.k) + '" data-nm="' + esc(p.n) + '">'
+          + '<img class="fr" loading="lazy" decoding="async" src="assets/avatars/' + esc(p.k) + '.webp" alt="">'
+          + '<span class="nm">' + esc(p.n) + '</span>'
+          + '<span class="prc' + (own ? ' own' : '') + '">' + (own ? '보유' : '1P') + '</span>'
+          + '</button>';
+      });
+    } else {
+      var cats = MY.shopTab === 'wall' ? ['wall','theme'] : [MY.shopTab];
+      LIST.filter(function(o){ return cats.indexOf(o.cat) >= 0; }).forEach(function(o){
+        var n = (r && Number((r.inv || {})[o.k])) || 0;
+        h += '<button type="button" class="myr-c" data-myrbuy="' + esc(o.k) + '">'
+          + '<img src="' + thumbOf(o.k) + '" alt="" loading="lazy" decoding="async">'
+          + '<span class="nm">' + esc(o.n) + '</span>'
+          + '<span class="prc' + (n ? ' own' : '') + '">' + (n ? '×' + n : '1P') + '</span>'
+          + '</button>';
+      });
+    }
+    h += '</div><div class="pgd-tip">토톡 누르면 💎 1P로 사요 · 산 물건은 🎒 보관함에서 집에 놓아요</div>';
+    body.innerHTML = h;
+  }
+  function openShop(tab){
+    var el = $m('myrShop'); if (!el || !MY.kid) return;
+    MY.shopTab = tab || MY.shopTab || 'furn';
+    if (MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); }
+    el.hidden = false;
+    MY.shopOpen = true;
+    renderShop();
+    refreshHead();
+  }
+  function closeShop(){
+    var el = $m('myrShop'); if (el) el.hidden = true;
+    MY.shopOpen = false;
+  }
+  function myrBuy(key){
+    var kid = MY.kid; if (!kid) return;
+    room(true);
+    var isP = key.indexOf('preset:') === 0;
+    if (isP && (typeof avUnlocked === 'function') && avUnlocked(kid, 'preset', key.slice(7))){
+      if (typeof toast === 'function') toast('이미 가지고 있는 캐릭터예요');
+      return;
+    }
+    var pts = (typeof pointsOf === 'function') ? pointsOf(kid) : 0;
+    if (pts < 1){
+      if (typeof toast === 'function') toast('💎 P가 모자라요 · 공부를 하면 하루 1P씩 쌓여요', 2600);
+      return;
+    }
+    mutate(function(s){
+      s.shop = s.shop || {};
+      s.shop.spent = s.shop.spent || {};
+      s.shop.spent[kid] = (Number(s.shop.spent[kid]) || 0) + 1;
+      var rr = s.myRoom && s.myRoom[kid]; if (!rr) return;
+      if (isP){
+        s.shop.unlocked = s.shop.unlocked || {};
+        var arr = (s.shop.unlocked[kid] || []).slice();
+        if (arr.indexOf(key) < 0) arr.push(key);
+        s.shop.unlocked[kid] = arr;
+      } else {
+        rr.inv = rr.inv || {};
+        rr.inv[key] = (Number(rr.inv[key]) || 0) + 1;
+      }
+    });
+    var nm = isP ? presetNm(key.slice(7)) : ((ITEM[key] || {}).n || key);
+    if (typeof toast === 'function') toast('🛍️ ' + nm + ' 샀어요 · 💎 -1P', 1800);
+    if (isP) say('🎀 ' + nm + ' — 보관함 👥 사람 탭에 생겼어요');
+    renderShop(); refreshHead();
+    try { buildTray(); } catch(e){}
   }
 
   /* ---------- 테마 ---------- */
@@ -17017,16 +18377,7 @@ var MYR_ITEM = (function(){
     }
   }
   /* 확장 카탈로그 1회 선물 — 새 가구·소품·벽장식·테마·동물을 보관함에 채워 준다 */
-  function ensureGift(r){
-    if (!r || Number(r.gift2) >= 2) return;
-    var want = LIST.map(function(o){ return o.k; });
-    mutate(function(s){
-      var rr2 = s.myRoom && s.myRoom[MY.kid]; if (!rr2) return;
-      rr2.inv = rr2.inv || {};
-      for (var i=0;i<want.length;i++){ if (!(Number(rr2.inv[want[i]]) > 0)) rr2.inv[want[i]] = 1; }
-      rr2.gift2 = 2;
-    });
-  }
+  /* 기본 9종만 시작 — 나머지 가구·소품·동물은 🛍️ 1P 상점에서 하나씩 사서 모은다 (자동 선물 없음) */
   function open(kid){
     if (!state){ if (typeof toast === 'function') toast('잠시 뒤에 다시 눌러 주세요'); return; }
     var kids = (typeof KIDS !== 'undefined' && KIDS) ? KIDS : [];
@@ -17036,13 +18387,14 @@ var MYR_ITEM = (function(){
     el.hidden = false;
     document.body.classList.add('myr-open');
     ensureHero(room(true));
-    ensureGift(room());
     if (!MY.inited) initCanvas();
     resize();
     MY.on = true;
     MY.move = false; MY.sel = null;
     var mb = $m('myrMove'); if (mb){ mb.classList.remove('on'); mb.setAttribute('aria-pressed','false'); }
     MY.tray = 'all'; MY.trayOpen = true;
+    MY.shopOpen = false;
+    if ($m('myrShop')) $m('myrShop').hidden = true;
     $m('myrTray').hidden = false;
     el.classList.add('bag');
     buildTray(); refreshHead();
@@ -17087,12 +18439,12 @@ var MYR_ITEM = (function(){
     }
     var tt = $m('myrTitle');
     if (tt && MY.kid){
-      var t2 = '🏡 ' + famName(MY.kid) + '의 마이홈';
+      var t2 = '🏡 ' + famName(MY.kid) + '의 집꾸미기';
       if (tt.textContent !== t2) tt.textContent = t2;
     }
     var r = room();
     var room2 = $m('myrTrayNote');
-    if (room2){ var t3 = '뽑기 ' + ((r && r.rolls) || 0) + '번 · 가구 ' + ((r && r.items && r.items.length) || 0) + '개'; if (room2.textContent !== t3) room2.textContent = t3; }
+    if (room2){ var t3 = '가구 ' + ((r && r.items && r.items.length) || 0) + '개 · 사람 ' + ((r && r.chars && r.chars.length) || 0) + '명'; if (room2.textContent !== t3) room2.textContent = t3; }
     var sw = $m('myrSwitch');
     if (sw && (!sw.dataset.k || sw.dataset.k !== MY.kid + '|' + String(MY.trayOpen))){
       sw.dataset.k = MY.kid + '|' + String(MY.trayOpen);
@@ -17318,6 +18670,12 @@ var MYR_ITEM = (function(){
     if (op){ ev.preventDefault(); ev.stopPropagation(); open(op.dataset.m || (typeof activeKid === 'function' ? activeKid() : null)); return; }
     if (!MY.on) return;
     if (t.closest('#myrExit')){ close(); return; }
+    if (t.closest('#myrShopBtn')){ openShop(MY.shopTab || 'furn'); return; }
+    if (t.closest('#myrShopX')){ closeShop(); return; }
+    var st2 = t.closest('[data-myshoptab]');
+    if (st2){ MY.shopTab = st2.dataset.myshoptab; renderShop(); return; }
+    var by2 = t.closest('[data-myrbuy]');
+    if (by2){ myrBuy(by2.dataset.myrbuy); return; }
     if (t.closest('#myrRoll')){ doRoll(); return; }
     var rl = t.closest('[data-myrroll]');
     if (rl){
@@ -17327,9 +18685,10 @@ var MYR_ITEM = (function(){
       return;
     }
     var kb = t.closest('[data-myrkid]');
-    if (kb){ var nk = kb.dataset.myrkid; if (nk && nk !== MY.kid){ MY.kid = nk; ensureHero(room(true)); MY.sel = null; $m('myrSel').hidden = true; buildTray(); refreshHead(); focusChar(true); say(famName(nk) + '의 마이홈'); } return; }
+    if (kb){ var nk = kb.dataset.myrkid; if (nk && nk !== MY.kid){ MY.kid = nk; ensureHero(room(true)); MY.sel = null; $m('myrSel').hidden = true; buildTray(); if (MY.shopOpen) renderShop(); refreshHead(); focusChar(true); say(famName(nk) + '의 집꾸미기'); } return; }
     if (t.closest('#myrMove')){
       MY.move = !MY.move;
+      if (MY.move && MY.shopOpen) closeShop();
       if (MY.move && MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); }
       var mb = $m('myrMove');
       mb.classList.toggle('on', MY.move);
@@ -17345,7 +18704,7 @@ var MYR_ITEM = (function(){
       var k = plc.dataset.myrplace, o = ITEM[k]; if (!o) return;
       if (o.cat === 'theme'){ applyTheme(o.theme); refreshHead(); return; }
       var own = ownedCount(k), pl = placedCount(k);
-      if (pl >= own){ say('다 놓았어요 · 🎁 뽑기로 더 모을 수 있어요'); return; }
+      if (pl >= own){ say('다 놓았어요 · 🛍️ 1P 상점에서 더 살 수 있어요'); return; }
       var spot = freeSpot(o);
       placeItem(k, spot);
       MY.camXg = clamp(spot.x, HX0+2, HX1-2); MY.camZg = clamp(spot.z - 1.0, 0.5, HZ1-1.5);
@@ -17357,9 +18716,11 @@ var MYR_ITEM = (function(){
     var ad = t.closest('[data-myradd]');
     if (ad){ addChar(ad.dataset.myradd, ad.dataset.nm || ''); return; }
     var act = t.closest('[data-myract]');
+    if (act && act.dataset.myract === 'shop'){ openShop(act.dataset.tab || 'furn'); return; }
     if (act && act.dataset.myract === 'roll'){ doRoll(); return; }
     if (t.closest('#myrBag')){
       MY.trayOpen = !MY.trayOpen;
+      if (MY.trayOpen && MY.shopOpen) closeShop();
       $m('myrTray').hidden = !MY.trayOpen;
       $m('myr').classList.toggle('bag', MY.trayOpen);
       if (MY.trayOpen) buildTray();
@@ -17399,8 +18760,18 @@ var MYR_ITEM = (function(){
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && MY.on) close(); });
   document.addEventListener('visibilitychange', function(){ if (document.hidden) stop(); else if (MY.on && !MY.raf) start(); });
 
+  /* 🛍️ 메인 상점에서 바로 집꾸미기 상점을 연다 */
+  window.myrOpenShop = function(kid){
+    try {
+      var kk2 = kid || (typeof activeKid === 'function' ? activeKid() : null);
+      open(kk2);
+      openShop('furn');
+    } catch(e){}
+  };
+
   window.__myhome = {
     state: MY, open: open, close: close, catalog: LIST, themes: THEMES, thumb: thumbOf,
+    shop: function(t){ openShop(t || 'furn'); return MY.shopTab; },
     room: function(){ return room(); },
     add: function(k){ var o = ITEM[k]; if (!o) return null; return placeItem(k, freeSpot(o)); },
     addChar: addChar, roll: doRoll, tray: function(t){ MY.tray = t || 'all'; buildTray(); return MY.tray; },
