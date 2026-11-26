@@ -3414,11 +3414,12 @@ function normalizeRoutineRest(raw){
   return out;
 }
 /* 🌳 놀이터 부지 좌표계 (2026-11-26 5개 마을 확대) — 저장 좌표 정리·이전용 */
+var OLD_VIL_CX = -30;                     /* 2026-11-26 삭제된 동화마을의 옛 중심 x */
+function inOldVillageX(x){ var n = Number(x); return isFinite(n) && n > -58 && n < -2; }
 var PGG = {
-  order: ['park', 'village', 'beach', 'camp', 'winter'],
+  order: ['park', 'beach', 'camp', 'winter'],
   bands: {
     park:    { cx:-102, x0:-44, x1: 44, z0:-32, z1: 32 },
-    village: { cx: -30, x0:-28, x1: 28, z0:-28, z1: 26 },
     beach:   { cx:  24, x0:-26, x1: 26, z0:-28, z1: 24 },
     camp:    { cx:  74, x0:-24, x1: 24, z0:-27, z1: 25 },
     winter:  { cx: 122, x0:-24, x1: 24, z0:-27, z1: 25 }
@@ -3431,8 +3432,15 @@ var PGG = {
     winter:  { cx:  72, x0:-14, x1: 14, z0:-19, z1: 17, sx:1.55, sz:1.35 }
   }
 };
+/* 옛 동화마을 집을 옮겨 놓을 놀이공원 '집 골목' 자리 (동쪽 길 끝 · 기구와 겹치지 않음) */
+var PG_HOUSE_SPOTS = (function(){
+  var out = [], zs = [-13.0, -8.0, -3.0, 2.0, 7.0, 12.0, 17.0, 22.0, 27.0];
+  zs.forEach(function(z){ out.push([39.2, z]); });
+  zs.forEach(function(z){ out.push([-38.6, z]); });
+  return out;
+})();
 function pgBandOf(x){
-  var best = 'village', bd = 1e9;
+  var best = 'park', bd = 1e9;
   PGG.order.forEach(function(k){
     var v = PGG.bands[k], d = Math.abs(x - v.cx);
     if (x >= v.cx + v.x0 - 1 && x <= v.cx + v.x1 + 1 && d < bd){ bd = d; best = k; }
@@ -3445,11 +3453,12 @@ function pgFixXY(x, z){
           Math.round(Math.min(Math.max(z, v.z0 + 1), v.z1 - 1) * 100) / 100];
 }
 function pgMigXY(x, z){
-  var k = 'village';
-  PGG.order.forEach(function(kk){
+  var k = 'park';
+  ['park', 'village', 'beach', 'camp', 'winter'].forEach(function(kk){
     var o = PGG.old[kk];
     if (x >= o.cx + o.x0 - 1 && x <= o.cx + o.x1 + 1) k = kk;
   });
+  if (k === 'village') k = 'park';          /* 옛 동화마을 좌표는 놀이공원으로 */
   var o = PGG.old[k], v = PGG.bands[k];
   return pgFixXY(v.cx + (x - o.cx) * o.sx, z * o.sz);
 }
@@ -3549,6 +3558,26 @@ function normalizeState(raw){
     if (!isFinite(nz)) nz = 0;
     return pgMig ? pgMigXY(nx, nz) : pgFixXY(nx, nz);
   };
+  /* 🏡 동화마을 삭제(2026-11-26) — 그 자리에 있던 캐릭터는 놀이공원 광장으로, 집은 집 골목으로.
+     DB 는 지우지 않고 읽을 때만 옮긴다(저장은 앱이 다음에 저장할 때 자연스럽게 새 좌표로). */
+  var houseSlot = 0;
+  var pgCharFix = function(x, z){
+    if (!pgMig && inOldVillageX(x)){
+      var vx = Number(x) - OLD_VIL_CX, vz = Number(z);
+      if (!isFinite(vx)) vx = 0;
+      if (!isFinite(vz)) vz = 0;
+      return pgFixXY(PGG.bands.park.cx + clamp(vx * 0.48, -12.5, 12.5), clamp(vz * 0.42, -9.0, 9.0));
+    }
+    return pgFix(x, z);
+  };
+  var pgBuildFix = function(x, z){
+    if (!pgMig && inOldVillageX(x)){
+      var sp = PG_HOUSE_SPOTS[houseSlot % PG_HOUSE_SPOTS.length];
+      houseSlot++;
+      return [PGG.bands.park.cx + sp[0], sp[1]];
+    }
+    return pgFix(x, z);
+  };
   var pgOut = {};
   KIDS.forEach(function(id){
     var arr = Array.isArray(pgRaw2[id]) ? pgRaw2[id] : null;
@@ -3558,7 +3587,7 @@ function normalizeState(raw){
       if (!x || typeof x !== 'object') return;
       if (typeof x.preset !== 'string' || !AV_PRESETS.some(function(p){ return p.k === x.preset; })) return;
       if (list.length >= 24) return;
-      var pp = pgFix(x.x, x.z);
+      var pp = pgCharFix(x.x, x.z);
       var nx = pp[0], nz = pp[1];
       list.push({
         id: (typeof x.id === 'string' && x.id) ? x.id.slice(0, 24) : (id + '-pg' + i),
@@ -3585,7 +3614,7 @@ function normalizeState(raw){
       var bx = Number(x.x), bz = Number(x.z);
       if (!isFinite(bx)) bx = 0;
       if (!isFinite(bz)) bz = 0;
-      var bp = pgFix(bx, bz);
+      var bp = pgBuildFix(bx, bz);
       bx = bp[0]; bz = bp[1];
       var br2 = Number(x.rot);
       if (!isFinite(br2)) br2 = 0;
@@ -3610,6 +3639,7 @@ function normalizeState(raw){
     var oo = {};
     Object.keys(m2).forEach(function(k){
       if (!/^[a-z]{2,16}(_[a-z]{2,12})?$/.test(k)) return;
+      if (k.indexOf('village_') === 0) return;      /* 사라진 동화마을 기구 자리 */
       var it = m2[k];
       if (!it || typeof it !== 'object') return;
       var rx2 = Number(it.x), rz2 = Number(it.z), rt2 = Number(it.rot);
@@ -3632,6 +3662,7 @@ function normalizeState(raw){
     var po = {};
     Object.keys(m3).forEach(function(k){
       if (!/^[a-z]{2,16}_\d{1,4}$/.test(k)) return;
+      if (k.indexOf('village_') === 0) return;      /* 사라진 동화마을 소품 자리 */
       var it = m3[k];
       if (!it || typeof it !== 'object') return;
       var px3 = Number(it.x), pz3 = Number(it.z);
@@ -9549,7 +9580,7 @@ var WALK = 3.1;                     /* 걷는 속도 (m/s) */
 var PG = {
   on: false, kid: null, ready: false,
   cv: null, ctx: null, W: 390, H: 844, dpr: 1,
-  vil: 'village', S: 26, Sgoal: 26,
+  vil: 'park', S: 26, Sgoal: 26,
   camX: 0, camZ: 0, camXg: 0, camZg: 0,
   hero: '', heroIdx: 0,
   chars: {}, charOrder: [],
@@ -9569,10 +9600,9 @@ var PG = {
   move: false, moveSel: { type:'', key:'' }, rideSel: '', propSel: ''
 };
 
-/* 5개 마을 — 2026-11-26 부지 대확장 · 5개 마을이 서로 겹치지 않게 나란히 놓는다 */
+/* 4개 마을 — 2026-11-26 동화마을 삭제 · 놀이공원이 첫 번째(기본) 마을 */
 var VLIST = [
   { k:'park',    n:'놀이공원', ic:'🎡', cx:-102, b:{ x0:-44, x1:44, z0:-32, z1:32 } },
-  { k:'village', n:'동화마을', ic:'🏡', cx:-30, b:{ x0:-28, x1:28, z0:-28, z1:26 } },
   { k:'beach',   n:'바닷가',   ic:'🏖️', cx: 24, b:{ x0:-26, x1:26, z0:-28, z1:24 } },
   { k:'camp',    n:'숲속캠핑', ic:'🌲', cx: 74, b:{ x0:-24, x1:24, z0:-27, z1:25 } },
   { k:'winter',  n:'겨울나라', ic:'❄️', cx: 122, b:{ x0:-24, x1:24, z0:-27, z1:25 } }
@@ -9580,18 +9610,19 @@ var VLIST = [
 /* 옛 부지(2026-11-26 이전) 좌표는 state 정규화에서 한 번 옮긴다 (PGG · pgMigXY) */
 var VIL = {};
 VLIST.forEach(function(v){ VIL[v.k] = v; });
-function vilOf(k){ return VIL[k] || VIL.village; }
-function vilIndex(k){ for (var i = 0; i < VLIST.length; i++) if (VLIST[i].k === k) return i; return 1; }
+function vilOf(k){ return VIL[k] || VIL.park; }
+function vilIndex(k){ for (var i = 0; i < VLIST.length; i++) if (VLIST[i].k === k) return i; return 0; }
 function vilPrev(k){ var i = vilIndex(k); return VLIST[(i + VLIST.length - 1) % VLIST.length].k; }
 function vilNext(k){ var i = vilIndex(k); return VLIST[(i + 1) % VLIST.length].k; }
 
-/* 옛 저장 좌표(월드 x) → 어느 마을인지 */
+/* 옛 저장 좌표(월드 x) → 어느 마을인지 (동화마을 자리는 놀이공원으로) */
 function legacyVil(x){
   for (var i = 0; i < VLIST.length; i++){
     var v = VLIST[i];
     if (x >= v.cx - (v.b.x1 - v.b.x0) / 2 - 1 && x <= v.cx + (v.b.x1 - v.b.x0) / 2 + 1) return v.k;
   }
-  var best = 'village', bd = 1e9;
+  if (inOldVillageX(x)) return 'park';
+  var best = 'park', bd = 1e9;
   VLIST.forEach(function(v){ var d = Math.abs(x - v.cx); if (d < bd){ bd = d; best = v.k; } });
   return best;
 }
@@ -10520,129 +10551,109 @@ function decorateScene(S, k, b){
 function buildScene(k){
   var v = VIL[k], b = v.b, S = { props: [], rides: [], seats: [], signs: [], dots: [] };
 
-  if (k === 'village'){
-    S.stream = { c: 9.0, w: 2.4 };
-    S.paths = [
-      [[-16, -20], [-9.5, -10], [-3.5, -1], [2.5, 2.2], [7.6, 1.2]],
-      [[-3.5, -0.6], [-2.6, 7], [-4.4, 15.5]]
-    ];
-    S.props.push(
-      { t:'shroomHouse', x:-7, z:-9, v:{ cap:'#E2635C', cap2:'#C3453F' } },
-      { t:'shroomHouse', x:2.4, z:-13.8, v:{ cap:'#5C9BE8', cap2:'#3D7BC9' } },
-      { t:'shroomSmall', x:-15.0, z:8.0, v:{ cap:'#F2C15B' } },
-      { t:'shroomSmall', x:15.4, z:-7.0, v:{ cap:'#F0A0BC' } },
-      { t:'shroomSmall', x:15.8, z:9.0, v:{ cap:'#E2635C' } },
-      { t:'clock', x:-15.2, z:-16.0 },
-      { t:'well', x:-12.0, z:-2.0 },
-      { t:'mail', x:-4.6, z:-5.6 },
-      { t:'cart', x:0.6, z:-5.4 },
-      { t:'lamp', x:4.2, z:4.6 }, { t:'lamp', x:-9.6, z:-12.4 }, { t:'lamp', x:3.4, z:-9.4 },
-      { t:'lamp', x:-13.2, z:4.6 }, { t:'lamp', x:12.6, z:4.2 },
-      { t:'flowerbed', x:-10.8, z:-6.4 }, { t:'flowerbed', x:4.8, z:-11.6 },
-      { t:'flowerbed', x:-13.4, z:2.2 }, { t:'flowerbed', x:12.4, z:-1.2 },
-      { t:'stump', x:-3.4, z:-3.6 }, { t:'stump', x:8.4, z:5.6 }, { t:'stump', x:1.2, z:9.6 },
-      { t:'mushroom', x:-1.8, z:-7.8, v:{ cap:'#E2635C' } },
-      { t:'mushroom', x:2.4, z:2.6, v:{ cap:'#F2C15B' } },
-      { t:'mushroom', x:-7.0, z:3.4, v:{ cap:'#F0A0BC' } },
-      { t:'mushroom', x:5.6, z:-2.6, v:{ cap:'#E2635C' } },
-      { t:'rock', x:6.0, z:-3.0 }, { t:'rock', x:-9.4, z:6.4 }, { t:'rock', x:13.2, z:11.2 },
-      { t:'bush', x:-13.6, z:-10.2, v:{ berry:1 } }, { t:'bush', x:5.2, z:-14.8 },
-      { t:'bush', x:16.0, z:-12.0, v:{ berry:1 } }, { t:'bush', x:-16.2, z:1.6 },
-      { t:'bush', x:-6.2, z:8.4 }, { t:'bush', x:11.8, z:-4.4, v:{ berry:1 } },
-      { t:'cherry', x:-16.6, z:-6.8 }, { t:'cherry', x:16.4, z:2.0 }, { t:'cherry', x:-12.4, z:12.4 },
-      { t:'tree', x:5.0, z:-17.0, v:{ tone:0 } }, { t:'tree', x:-11.2, z:-18.2, v:{ tone:1 } },
-      { t:'tree', x:16.2, z:-16.6, v:{ tone:2 } }, { t:'tree', x:-16.6, z:14.6, v:{ tone:1 } },
-      { t:'tree', x:7.0, z:13.8, v:{ tone:0 } }, { t:'tree', x:12.6, z:15.6, v:{ tone:2 } },
-      { t:'tree', x:-2.2, z:16.0, v:{ tone:0 } }, { t:'tree', x:14.6, z:-14.0, v:{ tone:1 } },
-      { t:'plantRow', x:8.6, z:-5.2 }, { t:'plantRow', x:9.2, z:7.4 }, { t:'plantRow', x:-11.6, z:9.8 },
-      { t:'fence', x:-8.4, z:13.2 }, { t:'fence', x:-5.2, z:13.2 },
-      { t:'daisy', x:-1.0, z:5.2, v:{ set:0 } }, { t:'daisy', x:6.6, z:0.4, v:{ set:1 } },
-      { t:'daisy', x:-11.0, z:4.0, v:{ set:2 } }, { t:'daisy', x:3.0, z:11.8, v:{ set:0 } },
-      { t:'bridge', x:9.0, z:1.0, v:{ w:6.4 }, sign:'beach', signAt:[5.6, 3.0] }
-    );
-    S.rides.push({ k:'swing', x:-3.6, z:11.4 }, { k:'seesaw', x:2.8, z:9.0 }, { k:'sand', x:-0.6, z:14.2 });
-    S.seats.push({ x:-4.6, z:6.6, t:'bench', n:'벤치' }, { x:10.6, z:10.6, t:'bench', n:'다리 옆 벤치' },
-                 { x:-9.8, z:-4.6, t:'bench', n:'우물 옆 벤치' });
-    /* 바닷가 이정표는 다리 옆(signAt 5.6,3.0) 하나만 — 겹치던 4.4,3.6 중복 제거 */
-    S.signs.push({ x:-4.2, z:3.2, to:'park', label:'놀이공원', dir:'left' });
-  }
-
   if (k === 'park'){
     S.plaza = { x: 0, z: 0.5, r: 8.0 };
-    S.pw = 1.35;
-    /* 넓어진 부지 — 광장을 축으로 기구마다 곁길을 내고, 큰길은 양쪽 끝까지 뻗는다 */
-    S.paths = [
-      [[-44, 12.0], [-34, 9.0], [-24, 6.5], [-14, 3.6], [-4, 1.6]],
-      [[4, 1.6], [14, 3.6], [24, 7.0], [34, 10.0], [44, 13.0]],
-      [[-1.5, -2.0], [-3.0, -8.0], [-4.0, -14.0], [-5.0, -18.6]],
-      [[-8, 2.2], [-11.0, 1.0], [-12.6, 0.2]],
-      [[-14, 3.6], [-18, 4.4], [-22.4, 6.2]],
-      [[-18, 9.0], [-21.0, 13.5], [-22.6, 16.6]],
-      [[-14, 4.0], [-21.0, -3.0], [-26.0, -9.0], [-27.6, -11.4]],
-      [[6.0, 0.4], [8.0, -8.0], [9.4, -14.6]],
-      [[14, 3.6], [19.0, 5.4], [21.2, 6.4]],
-      [[24, 7.0], [28.0, -2.0], [30.0, -9.0], [30.0, -18.4]],
-      [[21.2, 6.4], [26.0, 13.0], [27.4, 17.6]]
+    S.pw = 1.02;
+    /* 넓은 부지(88×64) — 가운데 광장을 두른 순환로, 바깥으로 대형 기구 9종이 방사형으로 */
+    var parkRing = [];
+    for (var pra = 0; pra < 360; pra += 15){
+      var pra2 = pra * Math.PI / 180;
+      parkRing.push([+(12.4 * Math.cos(pra2)).toFixed(2), +(0.5 + 9.4 * Math.sin(pra2)).toFixed(2)]);
+    }
+    parkRing.push([12.4, 0.5]);
+    S.paths = [parkRing,
+      /* 동쪽 집 골목 — 옛 동화마을 집들이 옮겨 오는 길 */
+      [[12.4, 0.5], [21.0, 0.7], [29.0, 0.9], [34.6, 0.9]],
+      [[34.6, -15.0], [35.4, -8.0], [36.0, -1.0], [36.4, 6.0], [36.8, 13.0], [37.2, 21.0]]
     ];
+    /* 대형 기구 9종 — 광장에서 뻗은 큰길 끝에 우뚝 */
+    var parkBig = [
+      ['coaster',    24.3,  18.1],
+      ['trampoline',  6.5,  20.5],
+      ['carousel',   -7.4,  23.3],
+      ['viking',    -21.0,  15.8],
+      ['bumper',    -26.0,   0.5],
+      ['drop',      -17.8, -12.4],
+      ['ferris',     -8.0, -24.2],
+      ['balloon',     7.4, -22.3],
+      ['teacup',     17.0, -11.8]
+    ];
+    parkBig.forEach(function(bg){
+      S.rides.push({ k: bg[0], x: bg[1], z: bg[2] });
+      var ba = Math.atan2((bg[2] - 0.5) / 9.4, bg[1] / 12.4);
+      var bx = 12.4 * Math.cos(ba), bz = 0.5 + 9.4 * Math.sin(ba);
+      S.paths.push([[+bx.toFixed(2), +bz.toFixed(2)],
+                    [+(bx + (bg[1] - bx) * 0.55).toFixed(2), +(bz + (bg[2] - bz) * 0.55).toFixed(2)],
+                    [+(bx + (bg[1] - bx) * 0.88).toFixed(2), +(bz + (bg[2] - bz) * 0.88).toFixed(2)]]);
+    });
+    /* 작은 놀이터 기구 10종 — 순환로 바깥에 한 바퀴 아기자기하게 */
+    var parkSmall = [
+      ['slide', 18], ['sand', 54], ['swing', 90], ['seesaw', 126], ['jumprope', 162],
+      ['horse', 198], ['jungle', 234], ['monkey', 270], ['bar', 306], ['zipline', 342]
+    ];
+    parkSmall.forEach(function(sm){
+      var sa = sm[1] * Math.PI / 180;
+      var sx2 = 17.2 * Math.cos(sa), sz2 = 0.5 + 13.0 * Math.sin(sa);
+      var rx2 = 12.4 * Math.cos(sa), rz2 = 0.5 + 9.4 * Math.sin(sa);
+      S.rides.push({ k: sm[0], x: +sx2.toFixed(2), z: +sz2.toFixed(2) });
+      S.paths.push([[+rx2.toFixed(2), +rz2.toFixed(2)],
+                    [+(rx2 + (sx2 - rx2) * 0.72).toFixed(2), +(rz2 + (sz2 - rz2) * 0.72).toFixed(2)]]);
+    });
     S.props.push(
       { t:'fountain', x:0, z:-5.5 },
-      { t:'balloon', x:34.0, z:4.0 }, { t:'cart', x:14.6, z:2.6 },
-      { t:'well', x:-13.6, z:8.6 }, { t:'mail', x:-7.8, z:12.8 },
-      { t:'clock', x:-35.0, z:13.0 }, { t:'plantRow', x:36.0, z:16.0 },
-      /* 광장 가장자리 울타리·화단 */
-      { t:'hedge', x:-8.8, z:-9.0 }, { t:'hedge', x:-2.0, z:-9.8 }, { t:'hedge', x:4.8, z:-9.8 }, { t:'hedge', x:10.6, z:-8.6 },
-      { t:'hedge', x:-12.4, z:-5.6 }, { t:'hedge', x:12.4, z:-5.0 },
-      { t:'flowerbed', x:-9.6, z:7.4 }, { t:'flowerbed', x:-3.2, z:9.6 }, { t:'flowerbed', x:7.8, z:9.0 },
-      { t:'flowerbed', x:-16.0, z:1.2 }, { t:'flowerbed', x:18.4, z:1.0 },
-      /* 광장 안팎 화단·나무·불빛 */
+      { t:'balloon', x:34.0, z:4.0 }, { t:'cart', x:20.6, z:3.6 },
+      { t:'well', x:-13.6, z:8.6 }, { t:'mail', x:-3.4, z:12.4 },
+      { t:'clock', x:-35.0, z:13.0 }, { t:'plantRow', x:33.2, z:-6.0 },
+      /* 광장 가장자리 울타리 */
+      { t:'hedge', x:8.7, z:0.5 }, { t:'hedge', x:4.35, z:8.03 }, { t:'hedge', x:-4.35, z:8.03 },
+      { t:'hedge', x:-8.7, z:0.5 }, { t:'hedge', x:-4.35, z:-7.03 }, { t:'hedge', x:4.35, z:-7.03 },
+      /* 광장 화단 */
       { t:'flowerbed', x:-6.2, z:4.8 }, { t:'flowerbed', x:6.4, z:4.6 },
-      { t:'flowerbed', x:-4.4, z:-6.8 }, { t:'flowerbed', x:4.8, z:-6.6 },
+      { t:'flowerbed', x:-4.4, z:-6.8 }, { t:'flowerbed', x:4.8, z:-6.4 },
+      /* 기구 사이 화단 */
+      { t:'flowerbed', x:18.6, z:10.0 }, { t:'flowerbed', x:-18.6, z:10.2 },
+      { t:'flowerbed', x:-19.6, z:-8.0 }, { t:'flowerbed', x:21.8, z:-6.4 },
+      { t:'flowerbed', x:-2.0, z:-17.0 },
       { t:'daisy', x:-3.4, z:6.4, v:{ set:2 } }, { t:'daisy', x:3.6, z:6.2, v:{ set:1 } },
       { t:'daisy', x:-2.6, z:-2.2, v:{ set:0 } }, { t:'daisy', x:3.0, z:-2.0, v:{ set:2 } },
+      { t:'daisy', x:-5.6, z:2.6, v:{ set:1 } }, { t:'daisy', x:5.8, z:2.4, v:{ set:0 } },
+      { t:'daisy', x:12.4, z:5.0, v:{ set:2 } }, { t:'daisy', x:-12.0, z:-17.0, v:{ set:0 } },
+      { t:'daisy', x:-16.0, z:7.6, v:{ set:1 } }, { t:'daisy', x:20.0, z:11.0, v:{ set:2 } },
       { t:'plantRow', x:-8.6, z:3.0 }, { t:'plantRow', x:9.0, z:2.8 },
-      { t:'plantRow', x:11.4, z:11.2 }, { t:'plantRow', x:-11.2, z:11.6 }, { t:'plantRow', x:3.2, z:-12.4 },
-      /* 가로등 — 큰길·곁길을 따라 */
-      { t:'lamp', x:-6.0, z:3.4 }, { t:'lamp', x:6.0, z:3.4 }, { t:'lamp', x:-18.0, z:5.6 },
-      { t:'lamp', x:18.0, z:5.6 }, { t:'lamp', x:-30.0, z:9.0 }, { t:'lamp', x:30.0, z:9.0 },
-      { t:'lamp', x:-19.6, z:-6.6 }, { t:'lamp', x:22.0, z:-6.0 }, { t:'lamp', x:-3.4, z:-16.0 },
-      { t:'lamp', x:8.2, z:-11.0 }, { t:'lamp', x:27.4, z:-2.0 }, { t:'lamp', x:-20.0, z:13.0 },
-      { t:'lamp', x:22.6, z:14.6 },
+      { t:'plantRow', x:13.6, z:8.4 }, { t:'plantRow', x:-13.6, z:12.6 }, { t:'plantRow', x:5.6, z:-13.6 },
+      /* 가로등 — 순환로를 따라 */
+      { t:'lamp', x:-6.0, z:3.4 }, { t:'lamp', x:6.0, z:3.4 },
+      { t:'lamp', x:14.8, z:2.6 }, { t:'lamp', x:10.68, z:6.5 }, { t:'lamp', x:4.08, z:10.2 },
+      { t:'lamp', x:-4.08, z:10.2 }, { t:'lamp', x:-10.68, z:6.5 }, { t:'lamp', x:-13.2, z:0.5 },
+      { t:'lamp', x:-10.68, z:-5.5 }, { t:'lamp', x:-4.08, z:-9.2 }, { t:'lamp', x:4.08, z:-9.2 },
+      { t:'lamp', x:10.68, z:-5.5 },
       /* 나무·수풀·바위 — 부지 가장자리와 기구 사이사이 */
-      { t:'bush', x:-16.2, z:-9.0 }, { t:'bush', x:13.0, z:-10.4, v:{ berry:1 } },
-      { t:'bush', x:-20.0, z:2.0, v:{ berry:1 } }, { t:'bush', x:19.6, z:-2.6 },
-      { t:'bush', x:-30.0, z:-2.0 }, { t:'bush', x:32.0, z:2.0 },
-      { t:'bush', x:-18.0, z:17.0 }, { t:'bush', x:14.0, z:18.0, v:{ berry:1 } },
+      { t:'bush', x:-16.6, z:-6.0 }, { t:'bush', x:13.0, z:-10.4, v:{ berry:1 } },
+      { t:'bush', x:-19.4, z:5.6, v:{ berry:1 } }, { t:'bush', x:19.6, z:-2.6 },
+      { t:'bush', x:-33.0, z:-8.5 }, { t:'bush', x:32.0, z:2.0 },
+      { t:'bush', x:-14.6, z:18.6 }, { t:'bush', x:14.0, z:18.0, v:{ berry:1 } },
       { t:'tree', x:-40.0, z:-22.0, v:{ tone:0 } }, { t:'tree', x:-30.0, z:-24.0, v:{ tone:1 } },
       { t:'tree', x:-40.0, z:6.0, v:{ tone:2 } }, { t:'tree', x:-38.0, z:22.0, v:{ tone:0 } },
-      { t:'tree', x:40.0, z:-24.0, v:{ tone:1 } }, { t:'tree', x:38.0, z:-6.0, v:{ tone:2 } },
-      { t:'tree', x:40.0, z:6.0, v:{ tone:0 } }, { t:'tree', x:38.0, z:26.0, v:{ tone:1 } },
-      { t:'tree', x:-12.0, z:-27.0, v:{ tone:2 } }, { t:'tree', x:2.0, z:-27.0, v:{ tone:0 } },
+      { t:'tree', x:40.0, z:-24.0, v:{ tone:1 } }, { t:'tree', x:41.8, z:-16.6, v:{ tone:2 } },
+      { t:'tree', x:42.2, z:24.6, v:{ tone:0 } }, { t:'tree', x:38.0, z:26.0, v:{ tone:1 } },
+      { t:'tree', x:-16.5, z:-27.5, v:{ tone:2 } }, { t:'tree', x:2.0, z:-27.0, v:{ tone:0 } },
       { t:'tree', x:22.0, z:-28.0, v:{ tone:1 } }, { t:'tree', x:-22.0, z:-28.0, v:{ tone:0 } },
-      { t:'tree', x:-2.0, z:27.0, v:{ tone:1 } }, { t:'tree', x:12.0, z:27.0, v:{ tone:2 } },
-      { t:'cherry', x:-34.0, z:-6.0 }, { t:'cherry', x:34.0, z:-8.0 },
-      { t:'cherry', x:-26.0, z:14.0 }, { t:'cherry', x:36.0, z:10.0 },
-      { t:'cherry', x:-8.0, z:19.0 }, { t:'cherry', x:8.0, z:19.6 },
-      { t:'pine', x:-42.0, z:-14.0 }, { t:'pine', x:42.0, z:-16.0 }, { t:'pine', x:42.0, z:14.0 },
+      { t:'tree', x:0.0, z:27.5, v:{ tone:1 } }, { t:'tree', x:12.0, z:27.0, v:{ tone:2 } },
+      { t:'cherry', x:-34.0, z:-6.0 }, { t:'cherry', x:30.6, z:-15.2 },
+      { t:'cherry', x:-31.0, z:18.0 }, { t:'cherry', x:28.0, z:28.6 },
+      { t:'cherry', x:-15.5, z:21.0 }, { t:'cherry', x:13.5, z:22.5 },
+      { t:'pine', x:-42.6, z:-18.4 }, { t:'pine', x:42.0, z:-16.0 }, { t:'pine', x:42.0, z:14.0 },
       { t:'rock', x:-27.0, z:-18.0 }, { t:'rock', x:20.0, z:-16.0 }, { t:'rock', x:-16.0, z:23.0 },
-      { t:'stump', x:-23.0, z:10.0 }, { t:'stump', x:16.0, z:14.0 }, { t:'stump', x:16.0, z:-6.0 },
+      { t:'stump', x:-19.0, z:7.0 }, { t:'stump', x:14.0, z:13.5 }, { t:'stump', x:20.8, z:-9.6 },
       { t:'mushroom', x:-11.4, z:-14.0, v:{ cap:'#E2635C' } }, { t:'mushroom', x:13.0, z:-14.6, v:{ cap:'#F2C15B' } },
-      { t:'mushroom', x:-22.0, z:3.0, v:{ cap:'#F0A0BC' } }, { t:'mushroom', x:24.0, z:16.0, v:{ cap:'#E2635C' } },
-      { t:'fence', x:-6.4, z:15.4 }, { t:'fence', x:-2.6, z:15.4 },
-      { t:'daisy', x:-4.4, z:6.6, v:{ set:0 } }, { t:'daisy', x:4.6, z:6.2, v:{ set:1 } },
-      { t:'daisy', x:-12.0, z:-17.0, v:{ set:2 } }, { t:'daisy', x:12.4, z:5.0, v:{ set:0 } },
-      { t:'daisy', x:-18.0, z:10.0, v:{ set:1 } }, { t:'daisy', x:20.0, z:11.0, v:{ set:2 } }
+      { t:'mushroom', x:-19.0, z:-2.0, v:{ cap:'#F0A0BC' } }, { t:'mushroom', x:31.0, z:10.0, v:{ cap:'#E2635C' } },
+      { t:'fence', x:-6.4, z:15.4 }, { t:'fence', x:-2.6, z:15.4 }
     );
-    S.rides.push({ k:'carousel', x:-16.0, z:-1.5 }, { k:'ferris', x:10.0, z:-20.0 },
-                 { k:'viking', x:-26.0, z:6.5 }, { k:'teacup', x:24.0, z:8.0 },
-                 { k:'bumper', x:-30.0, z:-14.0 }, { k:'drop', x:-6.0, z:-22.0 },
-                 { k:'balloon', x:30.0, z:-22.0 }, { k:'trampoline', x:-24.0, z:20.0 },
-                 { k:'coaster', x:30.0, z:20.0 });
-    S.seats.push({ x:-6.6, z:12.4, t:'bench', n:'광장 벤치' }, { x:6.8, z:12.0, t:'bench', n:'광장 벤치' },
-                 { x:-14.6, z:5.4, t:'bench', n:'광장 벤치' }, { x:12.6, z:6.4, t:'bench', n:'광장 벤치' },
-                 { x:-5.2, z:-1.6, t:'bench', n:'분수 옆 벤치' }, { x:5.4, z:-1.8, t:'bench', n:'분수 옆 벤치' },
-                 { x:-21.0, z:-0.6, t:'bench', n:'벤치' }, { x:21.6, z:-0.4, t:'벤치' });
-    S.signs.push({ x:-9.8, z:1.2, to:'village', label:'동화마을', dir:'left' },
-                 { x:9.8, z:1.2, to:'beach', label:'바닷가', dir:'right' });
+    S.seats.push({ x:8.31, z:4.1, t:'bench', n:'광장 벤치' }, { x:-8.31, z:4.1, t:'bench', n:'광장 벤치' },
+                 { x:-8.31, z:-3.1, t:'bench', n:'광장 벤치' }, { x:8.31, z:-3.1, t:'bench', n:'광장 벤치' },
+                 { x:-5.2, z:-1.6, t:'bench', n:'분수 옆 벤치' }, { x:5.4, z:-1.8, t:'bench', n:'분수 옆 벤치' });
+    S.signs.push({ x:-9.6, z:3.4, to:'winter', label:'겨울나라', dir:'left' },
+                 { x:9.6, z:3.4, to:'beach', label:'바닷가', dir:'right' });
   }
 
   if (k === 'beach'){
@@ -10675,7 +10686,7 @@ function buildScene(k){
     S.rides.push({ k:'boat', x:12.2, z:7.6 }, { k:'sand', x:-7.0, z:0.6 });
     S.seats.push({ x:-8.6, z:-1.8, t:'lounger', n:'선베드' }, { x:1.6, z:-2.2, t:'lounger', n:'선베드' },
                  { x:7.4, z:-3.8, t:'lounger', n:'선베드' });
-    S.signs.push({ x:-6.2, z:-6.0, to:'village', label:'동화마을', dir:'left' },
+    S.signs.push({ x:-6.2, z:-6.0, to:'park', label:'놀이공원', dir:'left' },
                  { x:5.6, z:-8.4, to:'camp', label:'숲속캠핑', dir:'right' });
   }
 
@@ -11146,12 +11157,21 @@ function rideShadow(g, w, d){
   g.fillStyle = 'rgba(56,78,48,.16)'; g.fill();
 }
 
-/* ---------- 미니 롤러코스터 · 자이로드롭 · 열기구의 움직임 (그림과 탑승 위치가 같은 식을 쓴다) ---------- */
-function coasterX(t){ return 3.05 * Math.sin(t * 0.42); }
+/* ---------- 롤러코스터 · 자이로드롭 · 열기구 · 놀이터 기구의 움직임 (그림과 탑승 위치가 같은 식을 쓴다) ---------- */
+function coasterX(t){ return 4.00 * Math.sin(t * 0.36); }
 function coasterH(x){
-  return 0.62 + Math.exp(-Math.pow((x - 0.35) / 1.50, 2)) * 2.05 + Math.exp(-Math.pow((x + 2.50) / 0.95, 2)) * 1.00;
+  return 0.55 + Math.exp(-Math.pow((x - 0.90) / 1.55, 2)) * 2.85 + Math.exp(-Math.pow((x + 3.00) / 1.05, 2)) * 1.25;
 }
 function coasterZ(x){ return 0.10 * Math.sin(x * 0.75); }
+/* 미끄럼틀 — 위에서 아래로 한 번 미끄러진다 */
+function slideP(t){ return (t * 0.50) % 1; }
+function slideLift(t){ return 1.85 - slideP(t) * 1.58; }
+/* 구름사다리 — 아치를 따라 매달려 간다 */
+function monkeyX(t){ return -2.10 + ((t * 0.34) % 1) * 4.20; }
+function monkeyH(x){ var c = Math.max(-2.40, Math.min(2.40, x)); return 1.52 + 1.12 * Math.cos(c * 0.55); }
+/* 짚라인 — 타워에서 도착 기둥으로 */
+function zipX(t){ return -2.55 + ((t * 0.30) % 1) * 5.40; }
+function zipH(x){ var c = Math.max(-2.85, Math.min(3.15, x)); return 3.75 - (c + 2.85) / 6.00 * 1.80; }
 function dropLift(t){ return 1.15 + (Math.sin(t * 0.42) * 0.5 + 0.5) * 4.55; }
 function balloonLift(t){ return 1.18 + Math.sin(t * 0.9) * 0.10; }
 
@@ -11194,7 +11214,7 @@ function coasterCar(g, x, h, z, dir, col){
 /* ---------- 놀이기구 (매 프레임 그림, 단위 좌표) ---------- */
 var RIDE = {
   carousel: {
-    w: 8.0, h: 6.4, label: '회전목마', r: 3.0, sc: 1.45,
+    w: 8.0, h: 6.4, label: '회전목마', r: 3.0, sc: 1.75,
     seat: function(r, t){ var a = t * 0.7; return [r.x + Math.cos(a) * 1.80, r.z + Math.sin(a) * 1.30]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -11215,7 +11235,7 @@ var RIDE = {
       for (i = 0; i < 6; i++){
         a = t * 0.7 + i * Math.PI / 3;
         if (Math.sin(a) > 0) continue;
-        RIDE.horse(g, Math.cos(a) * 1.80, Math.sin(a) * 1.30 - 0.42, t + i);
+        RIDE.carouselHorse(g, Math.cos(a) * 1.80, Math.sin(a) * 1.30 - 0.42, t + i);
       }
       /* 기둥 */
       g.fillStyle = '#EFD9B4'; g.fillRect(-0.13, -3.05, 0.26, 2.65);
@@ -11246,12 +11266,12 @@ var RIDE = {
       for (i = 0; i < 6; i++){
         a = t * 0.7 + i * Math.PI / 3;
         if (Math.sin(a) <= 0) continue;
-        RIDE.horse(g, Math.cos(a) * 1.80, Math.sin(a) * 1.30 - 0.42, t + i);
+        RIDE.carouselHorse(g, Math.cos(a) * 1.80, Math.sin(a) * 1.30 - 0.42, t + i);
       }
       g.restore();
     }
   },
-  horse: function(g, x, z, ph){
+  carouselHorse: function(g, x, z, ph){
     g.save();
     g.translate(x, z - Math.abs(Math.sin(ph * 2.4)) * 0.22);
     ln(g, 0, 0.05, 0, -1.05, '#E0C9A4', 0.045);
@@ -11279,7 +11299,7 @@ var RIDE = {
     g.restore();
   },
   ferris: {
-    w: 8.6, h: 8.6, label: '대관람차', r: 2.4, sc: 1.45,
+    w: 8.6, h: 8.6, label: '대관람차', r: 2.4, sc: 1.80,
     seat: function(r, t){ var a = t * 0.3; return [r.x + Math.cos(a) * 3.0, r.z + Math.sin(a) * 0.55]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11319,7 +11339,7 @@ var RIDE = {
     }
   },
   viking: {
-    w: 7.4, h: 6.6, label: '바이킹', r: 2.1, sc: 1.45,
+    w: 7.4, h: 6.6, label: '바이킹', r: 2.1, sc: 1.75,
     seat: function(r, t){ var a = Math.sin(t * 0.9) * 0.5; return [r.x + Math.sin(a) * 1.1, r.z + 0.2]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -11376,7 +11396,7 @@ var RIDE = {
     }
   },
   teacup: {
-    w: 5.0, h: 3.0, label: '티컵', r: 1.7, sc: 1.35,
+    w: 5.0, h: 3.0, label: '회전컵', r: 1.7, sc: 1.70,
     seat: function(r, t){ var a = t * 0.9; return [r.x + Math.cos(a) * 1.05, r.z + Math.sin(a) * 0.85]; },
     draw: function(g, r, t){
       var u = PG.S;
@@ -11407,7 +11427,7 @@ var RIDE = {
     }
   },
   bumper: {
-    w: 8.4, h: 4.4, label: '범퍼카', r: 2.6, sc: 1.35,
+    w: 8.4, h: 4.4, label: '범퍼카', r: 2.6, sc: 1.75,
     seat: function(r, t){ var a = t * 0.5; return [r.x + Math.cos(a) * 1.55, r.z + 0.55 + Math.sin(a) * 0.30]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11441,7 +11461,7 @@ var RIDE = {
     }
   },
   trampoline: {
-    w: 5.2, h: 2.6, label: '트램펄린', r: 1.2, sc: 1.35,
+    w: 5.2, h: 2.6, label: '방방이', r: 1.2, sc: 1.70,
     seat: function(r){ return [r.x, r.z + 0.25]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11480,53 +11500,78 @@ var RIDE = {
     }
   },
   coaster: {
-    w: 9.2, h: 6.2, label: '미니 롤러코스터', r: 2.6, sc: 1.45,
+    w: 9.2, h: 6.2, label: '롤러코스터', r: 2.6, sc: 2.15,
     seat: function(r, t){ var x = coasterX(t); return [r.x + x, r.z + 0.30 + coasterZ(x)]; },
     draw: function(g, r, t){
-      var u = PG.S, i, x, h, pass;
+      var u = PG.S, i, x, h, pass, py;
       g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
-      rideShadow(g, 3.55, 1.05);
-      /* 지지대 — 성기게 세우고 가운데 버팀대를 덧붙인다 */
-      for (i = 0; i <= 8; i++){
-        x = -3.2 + 6.4 * i / 8;
+      rideShadow(g, 4.20, 1.20);
+      /* 뒤쪽 2단 아치 — 큰 아치 뒤로 한 겹 더 서서 우뚝해 보이게 */
+      g.beginPath();
+      for (i = 0; i <= 30; i++){
+        x = -3.70 + 7.40 * i / 30;
+        py = -0.92 - coasterH(x) * 0.66;
+        if (i === 0) g.moveTo(x, py); else g.lineTo(x, py);
+      }
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      g.strokeStyle = '#E7DCCB'; g.lineWidth = 0.24; g.stroke();
+      g.strokeStyle = '#B9A488'; g.lineWidth = 0.06; g.stroke();
+      for (i = 1; i < 7; i++){
+        x = -3.50 + 7.00 * i / 7;
+        ln(g, x, -0.92, x, -0.92 - coasterH(x) * 0.66, '#DCCFBB', 0.05);
+      }
+      /* 기둥 — 나무 격자 버팀대를 엇갈리게 세운다 */
+      for (i = 0; i <= 10; i++){
+        x = -3.90 + 7.80 * i / 10;
         h = coasterH(x);
-        ln(g, x, coasterZ(x), x, coasterZ(x) - h, '#CAD3DA', Math.max(0.045, 0.085 - h * 0.012));
-        if (i % 2 === 0 && h > 1.05){
-          ln(g, x - 0.55, coasterZ(x) - h * 0.45, x + 0.55, coasterZ(x) - h * 0.45, '#DCE3E8', 0.04);
+        ln(g, x, coasterZ(x), x, coasterZ(x) - h, '#C6B79E', Math.max(0.05, 0.105 - h * 0.012));
+        if (i % 2 === 0 && h > 0.90){
+          ln(g, x - 0.44, coasterZ(x) - 0.08, x + 0.44, coasterZ(x) - h + 0.10, '#DFD3BF', 0.035);
+          ln(g, x + 0.44, coasterZ(x) - 0.08, x - 0.44, coasterZ(x) - h + 0.10, '#DFD3BF', 0.035);
+          ln(g, x - 0.48, coasterZ(x) - h * 0.52, x + 0.48, coasterZ(x) - h * 0.52, '#D6C9B4', 0.042);
         }
       }
-      /* 선로 */
+      /* 선로 — 세 줄 */
       for (pass = 0; pass < 3; pass++){
         g.beginPath();
-        for (i = 0; i <= 40; i++){
-          x = -3.2 + 6.4 * i / 40;
+        for (i = 0; i <= 56; i++){
+          x = -4.00 + 8.00 * i / 56;
           h = coasterH(x);
-          var py = coasterZ(x) - h;
+          py = coasterZ(x) - h;
           if (i === 0) g.moveTo(x, py); else g.lineTo(x, py);
         }
         g.lineCap = 'round'; g.lineJoin = 'round';
         g.strokeStyle = pass === 0 ? '#B4793C' : (pass === 1 ? '#F2D49E' : '#C98A4A');
-        g.lineWidth = pass === 0 ? 0.34 : (pass === 1 ? 0.24 : 0.07);
+        g.lineWidth = pass === 0 ? 0.30 : (pass === 1 ? 0.21 : 0.06);
         if (pass === 2){ g.setLineDash && g.setLineDash([0.12, 0.26]); }
         g.stroke();
         if (pass === 2 && g.setLineDash) g.setLineDash([]);
       }
-      /* 기차 두 칸 */
-      var tx = coasterX(t), dir = Math.cos(t * 0.42) >= 0 ? 1 : -1;
+      /* 꼭대기 깃발 */
+      ln(g, 0.90, coasterZ(0.90) - coasterH(0.90), 0.90, coasterZ(0.90) - coasterH(0.90) - 0.72, '#B4864F', 0.05);
+      poly(g, [0.90, coasterZ(0.90) - coasterH(0.90) - 0.72, 1.62, coasterZ(0.90) - coasterH(0.90) - 0.55, 0.90, coasterZ(0.90) - coasterH(0.90) - 0.38], '#F58BA8');
+      /* 기차 세 칸 */
+      var tx = coasterX(t), dir = Math.cos(t * 0.36) >= 0 ? 1 : -1;
       coasterCar(g, tx, coasterH(tx), coasterZ(tx), dir, '#E8503F');
-      var tx2 = tx - dir * 0.82;
-      if (tx2 > -3.15 && tx2 < 3.15) coasterCar(g, tx2, coasterH(tx2), coasterZ(tx2), dir, '#F5C64E');
-      /* 승강장 */
-      rr(g, -3.95, -0.34, 1.05, 0.34, 0.06, '#E7D6B8');
-      rr(g, -3.95, -0.34, 1.05, 0.34, 0.06, null, '#CBB48C', 0.04);
-      ln(g, -3.90, -0.34, -3.90, -1.55, '#C6B096', 0.06);
-      ln(g, -2.95, -0.34, -2.95, -1.55, '#C6B096', 0.06);
-      rr(g, -4.10, -1.62, 1.36, 0.16, 0.06, '#F58BA8');
+      var tx2 = tx - dir * 0.86, tx3 = tx - dir * 1.72;
+      if (tx2 > -3.96 && tx2 < 3.96) coasterCar(g, tx2, coasterH(tx2), coasterZ(tx2), dir, '#F5C64E');
+      if (tx3 > -3.96 && tx3 < 3.96) coasterCar(g, tx3, coasterH(tx3), coasterZ(tx3), dir, '#8FD8F2');
+      /* 승강장 — 발판·기둥·지붕 */
+      el(g, -4.30, -0.30, 1.10, 0.36, 'rgba(90,110,90,.13)');
+      rr(g, -5.15, -0.52, 1.90, 0.44, 0.09, '#E7D6B8');
+      rr(g, -5.15, -0.52, 1.90, 0.44, 0.09, null, '#C2A87E', 0.05);
+      for (i = 0; i < 5; i++) ln(g, -4.94 + i * 0.40, -0.50, -4.94 + i * 0.40, -0.10, 'rgba(194,168,126,.45)', 0.045);
+      ln(g, -4.95, -0.52, -4.95, -1.92, '#C6B096', 0.075);
+      ln(g, -3.45, -0.52, -3.45, -1.92, '#C6B096', 0.075);
+      ln(g, -4.95, -1.92, -3.45, -1.92, '#D3BE9C', 0.055);
+      poly(g, [-5.50, -1.92, -2.90, -1.92, -3.18, -2.34, -5.22, -2.34], '#F58BA8');
+      poly(g, [-5.50, -1.92, -2.90, -1.92, -3.18, -2.34, -5.22, -2.34], null, '#DE7C97', 0.035);
+      for (i = 0; i < 6; i++) ell2(g, -5.28 + i * 0.42, -1.90, 0.12, 0.085, i % 2 ? '#FFF3F7' : '#FFD3DE');
       g.restore();
     }
   },
   drop: {
-    w: 5.2, h: 10.4, label: '자이로드롭', r: 1.9, sc: 1.45,
+    w: 5.2, h: 10.4, label: '자이로드롭', r: 1.9, sc: 1.85,
     seat: function(r, t){ var a = t * 0.32; return [r.x + Math.cos(a) * 0.92, r.z + 0.55 + Math.sin(a) * 0.15]; },
     draw: function(g, r, t){
       var u = PG.S, i, a;
@@ -11564,7 +11609,7 @@ var RIDE = {
     }
   },
   balloon: {
-    w: 6.4, h: 9.2, label: '열기구', r: 1.6, sc: 1.45,
+    w: 6.4, h: 9.2, label: '열기구', r: 1.6, sc: 1.75,
     seat: function(r, t){ return [r.x, r.z + 0.45]; },
     draw: function(g, r, t){
       var u = PG.S, i;
@@ -11769,6 +11814,207 @@ var RIDE = {
     draw: function(g, r, t){
       drawSpr(g, 'sled', '', r.x + Math.sin(t * 0.9) * 1.4, r.z, ARTD.sled[0], ARTD.sled[1]);
     }
+  },
+  /* ---------- 놀이터 기구 7종 (미끄럼틀·구름사다리·철봉·정글짐·짚라인·흔들말·줄넘기) ---------- */
+  slide: {
+    w: 5.4, h: 4.0, label: '미끄럼틀', r: 1.4,
+    seat: function(r, t){ var p = slideP(t); return [r.x - 0.90 + p * 2.90, r.z + 0.18]; },
+    draw: function(g, r, t){
+      var u = PG.S, i;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 2.45, 0.90);
+      /* 사다리 */
+      ln(g, -1.98, 0.18, -1.98, -2.05, '#B6C2C9', 0.11);
+      ln(g, -1.12, 0.18, -1.12, -2.05, '#B6C2C9', 0.11);
+      for (i = 0; i < 6; i++) ln(g, -1.98, -0.18 - i * 0.34, -1.12, -0.18 - i * 0.34, '#C3D0D8', 0.10);
+      ln(g, -1.98, 0.18, -1.98, -2.05, '#9FB0BA', 0.13);
+      ln(g, -1.12, 0.18, -1.12, -2.05, '#9FB0BA', 0.13);
+      /* 다리 */
+      ln(g, -1.55, 0.14, -1.55, -2.10, '#9AA9B2', 0.10);
+      ln(g, 0.34, 0.34, 0.34, -1.72, '#9AA9B2', 0.10);
+      /* 상단 발판 · 난간 */
+      rr(g, -2.18, -2.30, 1.40, 0.30, 0.09, '#F7C6D2');
+      rr(g, -2.18, -2.30, 1.40, 0.30, 0.09, null, '#DE9FB2', 0.035);
+      ln(g, -2.12, -2.28, -2.12, -3.02, '#F58BA8', 0.06);
+      ln(g, -0.86, -2.28, -0.86, -2.96, '#F58BA8', 0.06);
+      /* 미끄럼 판 */
+      poly(g, [-1.02, -2.16, 2.12, -0.62, 2.12, -0.08, -1.02, -1.62], '#FFD86B');
+      poly(g, [-1.02, -2.16, 2.12, -0.62, 2.12, -0.08, -1.02, -1.62], null, '#E2AE3F', 0.05);
+      ln(g, -1.02, -2.16, 2.12, -0.62, '#F58BA8', 0.13);
+      ln(g, -1.02, -1.62, 2.12, -0.08, '#F58BA8', 0.13);
+      ln(g, -0.52, -1.88, 1.58, -0.60, 'rgba(255,255,255,.55)', 0.10);
+      /* 깃발 */
+      ln(g, -1.50, -2.32, -1.50, -2.92, '#C79A66', 0.05);
+      poly(g, [-1.50, -2.92, -0.94, -2.78, -1.50, -2.64], '#8FD8F2');
+      g.restore();
+    }
+  },
+  monkey: {
+    w: 5.6, h: 3.8, label: '구름사다리', r: 1.2,
+    seat: function(r, t){ return [r.x + monkeyX(t), r.z + 0.16]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, x, y, pass;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 2.55, 0.85);
+      ln(g, -2.48, 0.34, -2.22, -2.02, '#C79A66', 0.13);
+      ln(g, -2.24, 0.36, -2.02, -2.02, '#C79A66', 0.13);
+      ln(g, 2.48, 0.34, 2.22, -2.02, '#C79A66', 0.13);
+      ln(g, 2.24, 0.36, 2.02, -2.02, '#C79A66', 0.13);
+      ln(g, -2.38, 0.34, 2.38, 0.34, '#B4803F', 0.09);
+      /* 아치 사다리 — 두 줄 레일 */
+      for (pass = 0; pass < 2; pass++){
+        g.beginPath();
+        for (i = 0; i <= 24; i++){
+          x = -2.30 + 4.60 * i / 24;
+          y = -(monkeyH(x) + pass * 0.26);
+          if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.strokeStyle = pass ? '#9BD9F0' : '#7FC7E8'; g.lineWidth = 0.085; g.lineCap = 'round'; g.stroke();
+      }
+      /* 디딤대 */
+      for (i = 0; i <= 11; i++){
+        x = -2.30 + 4.60 * i / 11;
+        y = -monkeyH(x);
+        ln(g, x, y, x, y - 0.26, i % 2 ? '#FFD86B' : '#FFB3C7', 0.07);
+      }
+      g.restore();
+    }
+  },
+  bar: {
+    w: 3.8, h: 3.2, label: '철봉', r: 0.9,
+    seat: function(r){ return [r.x + 0.05, r.z + 0.14]; },
+    draw: function(g, r, t){
+      var u = PG.S, i;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 1.70, 0.62);
+      el(g, -1.08, 0.10, 0.38, 0.16, '#B6C2C9');
+      el(g, 1.08, 0.10, 0.38, 0.16, '#B6C2C9');
+      ln(g, -1.08, 0.08, -1.08, -2.30, '#A7B4BE', 0.14);
+      ln(g, 1.08, 0.08, 1.08, -2.30, '#A7B4BE', 0.14);
+      ln(g, -1.08, -2.30, 1.08, -2.30, '#C9D2D8', 0.15);
+      ln(g, -1.04, -2.36, 1.04, -2.36, '#EAF3F9', 0.06);
+      for (i = 0; i < 3; i++){
+        ell2(g, -1.08, -1.02 - i * 0.36, 0.055, 0.055, '#8E9BA3');
+        ell2(g, 1.08, -1.02 - i * 0.36, 0.055, 0.055, '#8E9BA3');
+      }
+      ln(g, -0.72, -1.42, 0.72, -1.42, '#C9D2D8', 0.085);
+      ln(g, -0.70, -1.40, 0.70, -1.40, '#EAF3F9', 0.03);
+      ln(g, -0.72, -1.84, 0.72, -1.84, '#C9D2D8', 0.075);
+      g.restore();
+    }
+  },
+  jungle: {
+    w: 5.2, h: 3.9, label: '정글짐', r: 1.7,
+    seat: function(r){ return [r.x, r.z + 0.18]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, y, lv = [-0.55, -1.45, -2.30];
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 2.30, 0.92);
+      /* 네 기둥 */
+      ln(g, -1.60, -0.62, -1.60, -3.00, '#E8837A', 0.12);
+      ln(g, 1.60, -0.62, 1.60, -3.00, '#FFD86B', 0.12);
+      ln(g, -1.60, 0.62, -1.60, -2.38, '#8FD8F2', 0.13);
+      ln(g, 1.60, 0.62, 1.60, -2.38, '#A5E0A5', 0.13);
+      /* 세 단 가로대 */
+      for (i = 0; i < 3; i++){
+        y = lv[i];
+        ln(g, -1.60, y, 1.60, y, i % 2 ? '#B9A6F2' : '#FFB3C7', 0.085);
+        ln(g, -1.60, y - 0.62, 1.60, y - 0.62, i % 2 ? '#B9A6F2' : '#FFB3C7', 0.07);
+      }
+      ln(g, -1.60, 0.62, -1.60, -0.62, '#B9A6F2', 0.07);
+      ln(g, 1.60, 0.62, 1.60, -0.62, '#B9A6F2', 0.07);
+      /* 사선 버팀대 */
+      ln(g, -1.56, -0.55, 1.56, -2.30, '#D6DEE4', 0.06);
+      ln(g, 1.56, -0.55, -1.56, -2.30, '#D6DEE4', 0.06);
+      /* 꼭대기 발판 · 깃발 */
+      rr(g, -1.76, -3.10, 3.52, 0.34, 0.10, '#F7C6D2');
+      rr(g, -1.76, -3.10, 3.52, 0.34, 0.10, null, '#DE9FB2', 0.035);
+      ln(g, 1.42, -3.10, 1.42, -3.86, '#C79A66', 0.05);
+      poly(g, [1.42, -3.86, 2.04, -3.72, 1.42, -3.58], '#FFD86B');
+      g.restore();
+    }
+  },
+  zipline: {
+    w: 7.4, h: 4.6, label: '짚라인', r: 2.0,
+    seat: function(r, t){ return [r.x + zipX(t), r.z + 0.14]; },
+    draw: function(g, r, t){
+      var u = PG.S, i;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 3.30, 0.95);
+      /* 출발 타워 */
+      ln(g, -2.95, 0.60, -2.72, -3.55, '#C79A66', 0.14);
+      ln(g, -2.42, 0.66, -2.60, -3.55, '#C79A66', 0.14);
+      ln(g, -2.72, -3.55, -2.60, -3.55, '#B4803F', 0.10);
+      for (i = 0; i < 5; i++) ln(g, -2.92 + i * 0.04, 0.34 - i * 0.78, -2.50, 0.34 - i * 0.78, '#D9A05B', 0.065);
+      rr(g, -3.14, -3.92, 1.24, 0.30, 0.08, '#F58BA8');
+      rr(g, -3.14, -3.92, 1.24, 0.30, 0.08, null, '#DE7C97', 0.03);
+      /* 도착 기둥 */
+      ln(g, 3.05, 0.52, 2.92, -1.72, '#C79A66', 0.12);
+      ln(g, 3.38, 0.58, 3.26, -1.72, '#C79A66', 0.12);
+      rr(g, 2.86, -2.02, 0.86, 0.26, 0.07, '#8FD8F2');
+      rr(g, 2.86, -2.02, 0.86, 0.26, 0.07, null, '#6FBEDC', 0.03);
+      /* 케이블 두 줄 */
+      ln(g, -2.80, -3.76, 3.16, -1.94, '#6E7B83', 0.05);
+      ln(g, -2.66, -3.70, 3.28, -1.88, '#9AA9B2', 0.03);
+      g.restore();
+    }
+  },
+  horse: {
+    w: 3.4, h: 2.8, label: '흔들말', r: 0.9,
+    seat: function(r){ return [r.x, r.z + 0.10]; },
+    draw: function(g, r, t){
+      var u = PG.S, i, sy0;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 1.25, 0.55);
+      /* 바닥 판 */
+      el(g, 0, 0.02, 1.18, 0.46, '#CFE3EC');
+      el(g, 0, -0.02, 1.08, 0.40, '#EAF5FA');
+      el(g, 0, -0.04, 0.86, 0.30, '#F7FCFE');
+      /* 스프링 — 뚜렷한 코일 */
+      for (i = 0; i < 4; i++){
+        sy0 = -0.14 - i * 0.15;
+        g.beginPath();
+        g.moveTo(-0.30, sy0);
+        g.quadraticCurveTo(0, sy0 - 0.13, 0.30, sy0 - 0.03);
+        g.strokeStyle = i % 2 ? '#9FB4C0' : '#C6D7E0';
+        g.lineWidth = 0.09; g.lineCap = 'round'; g.stroke();
+      }
+      ln(g, 0, -0.10, 0, -0.34, '#8E9BA3', 0.09);
+      /* 말 */
+      g.save();
+      g.translate(0, -0.52);
+      g.scale(0.92, 0.92);
+      RIDE.carouselHorse(g, 0, 0.12, t * 1.1);
+      g.restore();
+      /* 앞 손잡이 */
+      ln(g, 0.42, -1.24, 0.42, -1.62, '#F58BA8', 0.055);
+      ell2(g, 0.42, -1.64, 0.09, 0.06, '#FFD86B');
+      g.restore();
+    }
+  },
+  jumprope: {
+    w: 4.8, h: 3.4, label: '줄넘기', r: 1.1,
+    seat: function(r){ return [r.x, r.z + 0.10]; },
+    draw: function(g, r, t){
+      var u = PG.S, ph = (t * 0.85) % (Math.PI * 2), ry = (Math.cos(ph) + 1) * 0.5;
+      g.save(); g.translate(sX(r.x), sY(r.z)); g.scale(u, u);
+      rideShadow(g, 2.15, 0.75);
+      rr(g, -1.62, -0.20, 3.24, 0.46, 0.22, '#F4C8D2');
+      rr(g, -1.58, -0.24, 3.16, 0.40, 0.19, '#FBE3E9');
+      ln(g, -1.66, 0.10, -1.66, -2.06, '#C79A66', 0.12);
+      ln(g, 1.66, 0.10, 1.66, -2.06, '#C79A66', 0.12);
+      ell2(g, -1.66, -2.10, 0.14, 0.09, '#FFD86B');
+      ell2(g, 1.66, -2.10, 0.14, 0.09, '#FFD86B');
+      g.beginPath();
+      g.moveTo(-1.66, -2.06);
+      g.quadraticCurveTo(0, -2.06 + ry * 2.02, 1.66, -2.06);
+      g.strokeStyle = '#7C8FA0'; g.lineWidth = 0.055; g.lineCap = 'round'; g.stroke();
+      g.beginPath();
+      g.moveTo(-1.66, -2.02);
+      g.quadraticCurveTo(0, -2.02 + ry * 2.02, 1.66, -2.02);
+      g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 0.022; g.stroke();
+      g.restore();
+    }
   }
 };
 /* ---------- 기구 확대 — 그림·충돌 반경·탑승 자리를 같은 배율로 키워 어깨지지 않게 ---------- */
@@ -11804,6 +12050,13 @@ function rideSeatLift(c){
   if (c.ride === 'coaster') return coasterH(coasterX(PG.time)) * s;
   if (c.ride === 'drop') return dropLift(PG.time) * s;
   if (c.ride === 'balloon') return balloonLift(PG.time) * s;
+  if (c.ride === 'slide') return slideLift(PG.time) * s;
+  if (c.ride === 'monkey') return (monkeyH(monkeyX(PG.time)) - 1.42) * s;
+  if (c.ride === 'bar') return 0.95 * s;
+  if (c.ride === 'jungle') return 3.02 * s;
+  if (c.ride === 'zipline') return (zipH(zipX(PG.time)) - 1.30) * s;
+  if (c.ride === 'horse') return (1.18 + Math.abs(Math.sin(PG.time * 2.0)) * 0.16) * s;
+  if (c.ride === 'jumprope') return (0.10 + Math.abs(Math.sin(PG.time * 3.2)) * 0.72) * s;
   return (RIDE_MOUNT[c.ride] != null ? RIDE_MOUNT[c.ride] : 0.4) * s;
 }
 
@@ -12245,7 +12498,8 @@ function pgOpen(kid){
   PG.autoCam = false;
   followUI(false);
   pgTitle(); pgSwitch(); refreshChars();
-  PG.vil = PG.lastVil[kid] || (PG.chars[PG.hero] ? PG.chars[PG.hero].vil : 'village');
+  PG.vil = PG.lastVil[kid] || (PG.chars[PG.hero] ? PG.chars[PG.hero].vil : 'park');
+  if (!VIL[PG.vil]) PG.vil = 'park';        /* 사라진 마을(동화마을)이 남아 있으면 놀이공원으로 */
   var c0 = PG.chars[PG.hero];
   if (c0 && c0.vil !== PG.vil && PG.charOrder.length) PG.vil = c0.vil;
   zonePill(); heroChip();
