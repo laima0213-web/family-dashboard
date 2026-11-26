@@ -12342,13 +12342,14 @@ function jumpToHero(){
 function portalShow(entry){
   var el = $('pgPortal');
   if (!el) return;
-  /* 입장문이 조작 바·꾸미기 패널 위로 올라오도록 — 먼저 열려 있던 것들을 닫고 옮기기 모드도 해지 */
+  /* 입장문이 조작 바·꾸미기 패널 위로 올라오도록 — 먼저 열려 있던 것들을 닫는다.
+     ✋ 옮기기(PG.move)는 마을을 넘어가도 그대로 켜 둔다 — 고른 물건만 해제. */
   decoShow(false);
   hideBuildBar();
   hideRideBar();
   hidePropBar();
-  if (PG.move) moveToggle(false);
-  else PG.moveSel = { type:'', key:'' };
+  PG.moveSel = { type:'', key:'' };
+  PG.selBuild = '';
   portalRender();
   el.hidden = false;
   var x = $('pgPortalClose');
