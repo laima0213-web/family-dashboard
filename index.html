@@ -18327,7 +18327,9 @@ var MYR_ITEM = (function(){
   var STEP_H = 1.12;                  /* 단 높이 */
   var STX = 1.4;                      /* 계단 반폭 */
   var STZ1 = D1 + 2.1;                /* 계단 끝(아래) */
-  var CH = 1.95;                      /* 캐릭터 키(m) */
+  /* 11-26 은혜님 "사람보다 가구들이 커야지" — 침대·식탁·벽난로·옷장이 사람보다 큼직하게 보이도록
+     캐릭터 키를 1.95m → 1.56m(0.8배)로 낮췄다. 반려동물은 이 키의 무릎~허리 아래에 오는 크기. */
+  var CH = 1.56;                      /* 캐릭터 키(m) — 가구 대비 0.8배 */
   var SPC = 264, OXS = 132, OYS = 208, SPR = 48;
 
   var THEMES = {
@@ -18376,6 +18378,87 @@ var MYR_ITEM = (function(){
     tray:'all', trayOpen:true, tapId:0, walkT:0, hintT:9, rollTok:0, banner:''
   };
   var SPRC = {}, SPRES = {}, THUM = {}, IMGC = {};
+
+  /* ---------- 🐾 동화책 손그림 반려동물 (assets/pets/*.webp 일러스트) ----------
+     도형으로 그리던 petOf() 대신, 손그림 그림(투명 배경 256×256)을 그대로 쓴다.
+     · 방 안: drawPetArt() — 그림 높이를 o.h(m)에 맞춰 화면 해상도로 직접 그린다.
+     · 상점·보관함 카드: petThumb() — 그림의 투명 여백을 잘라 카드 한가운데에 꽉 채운다.
+     그림이 아직 안 왔거나 404면 예전 도형 그림(drawSpr)으로 자연스럽게 넘어간다. */
+  var PETIMG = {}, PETART = {}, PETFAIL = {};
+  var PET_BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  function petArt(im){
+    try{
+      var n = 96, c = document.createElement('canvas');
+      c.width = n; c.height = n;
+      var g2 = c.getContext('2d');
+      g2.drawImage(im, 0, 0, n, n);
+      var d = g2.getImageData(0, 0, n, n).data;
+      var x0 = n, y0 = n, x1 = -1, y1 = -1;
+      for (var y=0;y<n;y++) for (var x=0;x<n;x++){
+        if (d[(y*n+x)*4+3] > 16){ if (x<x0) x0=x; if (x>x1) x1=x; if (y<y0) y0=y; if (y>y1) y1=y; }
+      }
+      if (x1 < 0) return null;
+      return { x0:x0/n, y0:y0/n, x1:(x1+1)/n, y1:(y1+1)/n };
+    }catch(e){ return null; }
+  }
+  function petImg(k){
+    if (PETIMG[k]) return PETIMG[k];
+    var im = new Image();
+    im.decoding = 'async';
+    im.onload = function(){
+      PETART[k] = petArt(im);
+      THUM[k] = '';                                  /* 카드 그림 다시 만들기 */
+      if (MY.shopOpen && MY.shopTab === 'pet'){ try { renderShop(); } catch(e){} }
+      var tr = $m('myrTray');
+      if (tr && !tr.hidden && MY.tray !== 'people'){ try { buildTray(); } catch(e){} }
+    };
+    im.onerror = function(){ PETFAIL[k] = 1; };
+    im.src = 'assets/pets/' + k + '.webp';
+    PETIMG[k] = im;
+    return im;
+  }
+  function preloadPets(){
+    LIST.forEach(function(o){ if (o.cat === 'pet') petImg(o.k); });
+  }
+  function petArtReady(k){
+    var im = PETIMG[k];
+    return !!(im && im.complete && im.naturalWidth && PETART[k] && !PETFAIL[k]);
+  }
+  function drawPetArt(g, k, X, Y, flip){
+    if (!petArtReady(k)) return false;
+    var im = PETIMG[k], a = PETART[k], o = ITEM[k] || {};
+    var iw = im.naturalWidth || 256, ih = im.naturalHeight || 256;
+    var sw = (a.x1-a.x0)*iw, sh = (a.y1-a.y0)*ih;
+    var H = (o.h || 0.6) * MY.S;                       /* 보이는 그림 높이(px) */
+    var W = H * sw / sh;
+    g.save();
+    g.translate(X, Y);
+    /* 바닥 그림자 — 발밑에 살짝 */
+    g.save();
+    g.globalAlpha = 0.15; g.fillStyle = '#82554A';
+    g.beginPath(); g.ellipse(0, -H*0.02, W*0.44, Math.max(2, W*0.13), 0, 0, Math.PI*2); g.fill();
+    g.restore();
+    if (flip) g.scale(-1, 1);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(im, a.x0*iw, a.y0*ih, sw, sh, -W/2, -H, W, H);
+    g.restore();
+    return true;
+  }
+  function petThumb(k){
+    if (THUM[k]) return THUM[k];
+    if (!petArtReady(k)) return PET_BLANK;
+    var im = PETIMG[k], a = PETART[k];
+    var iw = im.naturalWidth || 256, ih = im.naturalHeight || 256;
+    var n = 200, c = document.createElement('canvas');
+    c.width = n; c.height = n;
+    var g2 = c.getContext('2d'); g2.imageSmoothingQuality = 'high';
+    var sw = (a.x1-a.x0)*iw, sh = (a.y1-a.y0)*ih;
+    var s = Math.min(182/sw, 182/sh);
+    var w = sw*s, h = sh*s;
+    g2.drawImage(im, a.x0*iw, a.y0*ih, sw, sh, (n-w)/2, (n-h)/2, w, h);
+    try { THUM[k] = c.toDataURL('image/png'); } catch(e){ THUM[k] = PET_BLANK; }
+    return THUM[k];
+  }
 
   /* ---------- 작은 도구 ---------- */
   function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
@@ -18474,6 +18557,8 @@ var MYR_ITEM = (function(){
     return cv;
   }
   function thumbOf(k){
+    var oKat = ITEM[k];
+    if (oKat && oKat.cat === 'pet') return petThumb(k);
     if (THUM[k]) return THUM[k];
     var cv = spr(k); if (!cv) return '';
     var cw = cv.width;
@@ -18719,13 +18804,15 @@ var MYR_ITEM = (function(){
       var seatIt = seatItem(c.seat) || {};
       var seatKind = (ITEM[seatIt.k] || {}).seat;
       if (seatKind === 'bed'){
-        /* 침대는 눕기 — 머리가 머리판(뒤쪽)으로 */
+        /* 침대는 눕기 — 머리가 머리판(뒤쪽)으로 (자세 오프셋은 예전 그대로) */
         g.translate(0, -0.34*MY.S);
         g.rotate(-Math.PI*0.26);
         g.translate(0, -0.18*MY.S);
       } else {
         g.beginPath(); g.rect(-size*0.6, -size*1.02, size*1.2, size*0.60); g.clip();
-        g.translate(0, -0.42*MY.S);
+        /* 11-26 캐릭터가 작아져도 의자에 파묻혀 보이지 않게 —
+           잘리는 허리 높이를 예전(1.95m 시절)과 같게 맞춰 앉힌다 */
+        g.translate(0, -(0.42*MY.S + 0.42*(1.95 - CH)*(400/372)*MY.S));
       }
     }
     if (c.flip) g.scale(-1, 1);
@@ -18850,7 +18937,7 @@ var MYR_ITEM = (function(){
       g.save(); g.globalAlpha = .32; g.fillStyle = '#8FDDB0';
       g.beginPath(); g.ellipse(X, Y, (o.w||0.6)*MY.S*0.5, (o.w||0.6)*MY.S*0.22, 0, 0, Math.PI*2); g.fill(); g.restore();
     }
-    drawSpr(g, it.k, X, Y - hop, flip);
+    if (!drawPetArt(g, it.k, X, Y - hop, flip)) drawSpr(g, it.k, X, Y - hop, flip);
     if (a && a.say > 0) drawPetBubble(g, X, Y - hop, o, a);
   }
 
@@ -19410,6 +19497,7 @@ var MYR_ITEM = (function(){
     el.hidden = false;
     document.body.classList.add('myr-open');
     ensureHero(room(true));
+    preloadPets();
     if (!MY.inited) initCanvas();
     resize();
     MY.on = true;
