@@ -18323,7 +18323,7 @@ var MYR_ITEM = (function(){
   var HX0 = -4.4, HX1 = 4.4;          /* 집 폭 8.8m — 인형의 집처럼 아기자기하게 */
   var D1 = 4.0;                       /* 위층(단) 깊이 — 아늑하게 넓힘 */
   var ZD = 8.2;                       /* 아치 문·반칸막이 경계 (실내 ↔ 야외 테라스) */
-  var HZ1 = 11.7;                     /* 야외 잔디 테라스 끝 */
+  var HZ1 = 13.8;                     /* 야외 잔디 테라스 끝 — 11-26 넓은 화단으로 5.6m */
   var WALL_B = 3.50;                  /* 벽 높이 */
   var STEP_H = 1.12;                  /* 단 높이 */
   var HOUSE_TOP = STEP_H + WALL_B + 0.20;   /* 잘라 낸 집 윗면(몰딩 포함) */
@@ -18331,7 +18331,13 @@ var MYR_ITEM = (function(){
   var STX = (SX1 - SX0) / 2;          /* 계단 반폭 */
   var STZ1 = D1 + 2.05;               /* 계단 끝(아래) */
   var ARC_W = 1.18;                   /* 아치 문 반폭 */
-  var GRASS_D = { a:'#E1F3CF', b:'#D4EBBC', base:'#DAEFC8', line:'rgba(146,192,132,.26)' };
+  /* 11-26 은혜님 "화단 넓고 내려가는 계단 3단" — 아치 문 밖으로 3단 내려가 넓은 잔디 마당 */
+  var TERR_E = -0.60;                 /* 잔디 마당 높이(아치 문 마루 0 에서 3단 내려간 값) */
+  var TER_Z = ZD + 1.08;              /* 3단 계단이 끝나고 잔디가 시작되는 z */
+  var TER_N = 3, TER_H = -TERR_E/3;   /* 내려가는 계단 3단 — 0.2m씩 */
+  var TBL_Z = TER_Z + 2.30;           /* 잔디 가운데 정원 테이블 */
+  var TBL = { x: 0.05, z: TBL_Z, r: 1.30 };   /* 캐릭터·동물이 돌아서 걷는 반경 */
+  var GRASS_D = { a:'#DEF0CB', b:'#D5EBC0', base:'#DAEFC8', line:'rgba(146,192,132,.20)' };
   var GRASS_N = { a:'#B7D3AB', b:'#ABCD9F', base:'#B2CFA6', line:'rgba(90,124,92,.22)' };
   /* 11-26 은혜님 "사람보다 가구들이 커야지" — 침대·식탁·벽난로·옷장이 사람보다 큼직하게 보이도록
      캐릭터 키를 1.95m → 1.56m(0.8배)로 낮췄다. 반려동물은 이 키의 무릎~허리 아래에 오는 크기. */
@@ -18379,7 +18385,7 @@ var MYR_ITEM = (function(){
 
   var MY = {
     on:false, kid:null, cv:null, ctx:null, W:390, H:844, dpr:1, inited:false,
-    S:26, Sgoal:26, camX:0, camZ:7, camXg:0, camZg:7,
+    S:26, Sgoal:26, camX:0, camZ:7, camXg:0, camZg:7, follow:true, zoom:1,
     t:0, raf:0, last:0, move:false, sel:null, drag:null, pan:null, pinch:null,
     tray:'all', trayOpen:true, tapId:0, walkT:0, hintT:9, rollTok:0, banner:''
   };
@@ -18519,7 +18525,7 @@ var MYR_ITEM = (function(){
     function lvlBand(z){
       if (z < D1 - 0.05) return [0.85, D1 - 0.45];
       if (z < ZD) return [D1 + 0.55, ZD - 0.60];
-      return [ZD + 0.55, HZ1 - 0.55];
+      return [TER_Z + 0.35, HZ1 - 0.55];
     }
     function overlap(a, b){
       var oa = ITEM[a.k] || {}, ob = ITEM[b.k] || {};
@@ -18921,17 +18927,29 @@ var MYR_ITEM = (function(){
 
   /* ---------- 테라스 왼쪽 낮은 정원 담장 ---------- */
   function gardenWall(g, th){
-    var S = MY.S, h = 0.80;
-    quadP(g, P3(HX0, ZD, h), P3(HX0, HZ1-0.02, h), P3(HX0, HZ1-0.02, 0), P3(HX0, ZD, 0), '#F3E4CB');
-    quadP(g, P3(HX0, ZD, h+0.09), P3(HX0, HZ1-0.02, h+0.09), P3(HX0, HZ1-0.02, h), P3(HX0, ZD, h), '#FBF1E0');
-    quadP(g, P3(HX0, ZD, h+0.10), P3(HX0, HZ1-0.02, h+0.10), P3(HX0, HZ1-0.02, h+0.08), P3(HX0, ZD, h+0.08), 'rgba(255,255,255,.60)');
-    for (var z=ZD+0.55; z<HZ1-0.4; z+=2.2){
-      sideRect(g, z-0.09, z+0.09, 0, h+0.16, '#F8EBD8');
-      sideRect(g, z-0.09, z+0.09, h+0.02, h+0.16, '#FAF0DF');
+    var S = MY.S, h = 0.80, z0 = ZD, z1 = HZ1 - 0.02;
+    /* 바닥 높이 — 계단 구간에서는 0 → TERR_E 로 따라 내려간다 */
+    function gE(z){ return z <= ZD ? 0 : (z >= TER_Z ? TERR_E : TERR_E*(z-ZD)/(TER_Z-ZD)); }
+    /* (z,e) 띠 — 위 테두리와 아래 바닥선을 잇는 벽면 */
+    function band(offA, offB, fill){
+      var zh = [z0, TER_Z, z1], i, p;
+      g.beginPath();
+      p = P3(HX0, zh[0], gE(zh[0]) + offB); g.moveTo(p.x, p.y);
+      for (i=1;i<zh.length;i++){ p = P3(HX0, zh[i], gE(zh[i]) + offB); g.lineTo(p.x, p.y); }
+      for (i=zh.length-1;i>=0;i--){ p = P3(HX0, zh[i], gE(zh[i]) + offA); g.lineTo(p.x, p.y); }
+      g.closePath(); g.fillStyle = fill; g.fill();
     }
-    var spots = [ZD+1.1, ZD+3.3, HZ1-0.9];
+    band(0, h, '#F3E4CB');
+    band(h, h+0.09, '#FBF1E0');
+    band(h+0.08, h+0.10, 'rgba(255,255,255,.60)');
+    for (var z=ZD+0.85; z<HZ1-0.4; z+=2.2){
+      var e0 = gE(z);
+      sideRect(g, z-0.09, z+0.09, e0, e0 + h + 0.16, '#F8EBD8');
+      sideRect(g, z-0.09, z+0.09, e0 + h + 0.02, e0 + h + 0.16, '#FAF0DF');
+    }
+    var spots = [ZD+0.95, ZD+2.95, HZ1-1.0];
     for (var i=0;i<spots.length;i++){
-      var X = px(HX0, spots[i]), Y = py(spots[i], h+0.10);
+      var X = px(HX0, spots[i]), Y = py(spots[i], gE(spots[i]) + h+0.10);
       g.fillStyle = '#E4B98C'; g.fillRect(X-4, Y-9, 8, 9);
       g.fillStyle = '#F5D7B4'; g.fillRect(X-5, Y-11, 10, 3);
       flower5(g, X-2, Y-15, 2.6, i%2 ? '#F9C3D4' : '#FFE9A3', '#FFFFFF');
@@ -18942,30 +18960,63 @@ var MYR_ITEM = (function(){
   /* ---------- 야외 잔디 테라스 바닥 ---------- */
   function drawTerrace(g, th){
     var C = th.stars ? GRASS_N : GRASS_D;
-    var yA = py(ZD, 0);
-    /* 잔디 기본 */
-    var yB = py(HZ1, 0);
-    g.fillStyle = C.base; g.fillRect(0, yA, MY.W, yB - yA + 2);
-    /* 타일 격자 */
-    var tz = 0.72, tx = 1.05;
-    for (var z=ZD; z<HZ1; z+=tz){
+    /* 잔디 기본 — 아치 문에서 3단 내려온 넓은 마당 */
+    var yA = py(TER_Z, TERR_E);
+    var yB = py(HZ1, TERR_E);
+    g.fillStyle = C.base; g.fillRect(0, yA - 2, MY.W, yB - yA + 4);
+    /* 잔디 타일 격자 */
+    var tz = 0.78, tx = 1.12;
+    for (var z=TER_Z; z<HZ1; z+=tz){
       var z2 = Math.min(HZ1, z+tz);
-      var y1 = py(z,0), y2 = py(z2,0);
+      var y1 = py(z,TERR_E), y2 = py(z2,TERR_E);
       if (y2 < yA-4 || y1 > MY.H+4) continue;
-      var rIdx = Math.round((z-ZD)/tz);
+      var rIdx = Math.round((z-TER_Z)/tz);
       for (var x=HX0; x<HX1; x+=tx){
         var x2 = Math.min(HX1, x+tx);
         var odd = ((rIdx + Math.round((x-HX0)/tx)) % 2) === 0;
-        quadP(g, P3(x,z,0), P3(x2,z,0), P3(x2,z2,0), P3(x,z2,0), odd ? C.a : C.b, C.line, 1);
+        quadP(g, P3(x,z,TERR_E), P3(x2,z,TERR_E), P3(x2,z2,TERR_E), P3(x,z2,TERR_E), odd ? C.a : C.b, C.line, 1);
       }
     }
-    /* 경계(아치·난간) 아래 그늘 */
-    var shA = py(ZD, 0), shB = py(ZD+0.55, 0);
+    /* 아치 문 밖 — 3단 내려가는 계단 */
+    terraceSteps(g, th);
+    /* 경계 그늘 */
+    var shA = py(TER_Z, TERR_E), shB = py(TER_Z+0.60, TERR_E);
     var sg = g.createLinearGradient(0, shA, 0, shB);
-    sg.addColorStop(0, 'rgba(92,110,80,.18)'); sg.addColorStop(1, 'rgba(92,110,80,0)');
+    sg.addColorStop(0, 'rgba(92,110,80,.16)'); sg.addColorStop(1, 'rgba(92,110,80,0)');
     g.fillStyle = sg; g.fillRect(0, shA, MY.W, shB-shA);
+    /* 테이블 자리 — 둥근 돌 바닥 */
+    var S0 = MY.S, TX = px(TBL.x, TBL.z), TY = py(TBL.z, TERR_E);
+    g.save();
+    g.beginPath(); g.ellipse(TX, TY, 1.72*S0, 1.72*S0*KZ, 0, 0, Math.PI*2);
+    g.fillStyle = th.stars ? '#D8D5C8' : '#F5EEE0'; g.fill();
+    g.strokeStyle = 'rgba(196,180,152,.55)'; g.lineWidth = 1.4; g.stroke();
+    g.beginPath(); g.ellipse(TX, TY, 1.42*S0, 1.42*S0*KZ, 0, 0, Math.PI*2);
+    g.strokeStyle = 'rgba(206,190,162,.45)'; g.lineWidth = 1; g.stroke();
+    g.restore();
+    /* 계단 아래에서 테이블로 잇는 디딤돌 */
+    for (var zz=TER_Z+0.18; zz<TBL.z-1.55; zz+=0.40){
+      var off = ((zz*10)%2 < 1) ? 0.09 : -0.09;
+      var X = px(off, zz), Y = py(zz, TERR_E);
+      g.save(); g.globalAlpha = .92;
+      g.beginPath(); g.ellipse(X, Y, 0.34*S0, 0.17*S0, 0, 0, Math.PI*2);
+      g.fillStyle = th.stars ? '#D6D2C6' : '#F4EDDD'; g.fill();
+      g.strokeStyle = 'rgba(180,166,140,.5)'; g.lineWidth = 1; g.stroke();
+      g.restore();
+    }
+    /* 잔디 가장자리 작은 들꽃 — 가운데 길은 비워 둔다 */
+    var fcol = ['#FFFFFF','#FFE3EE','#FFF4C2','#E7DBFA'];
+    for (var i=0;i<30;i++){
+      var fz = TER_Z + 0.55 + ((i*47)%100)/100*(HZ1-TER_Z-1.1);
+      var edge = ((i*31)%100)/100;
+      var fx = edge < 0.5 ? (HX0 + 0.45 + edge*1.7) : (HX1 - 0.45 - (edge-0.5)*1.7);
+      if (Math.hypot(fx-TBL.x, fz-TBL.z) < 1.85) continue;
+      var FX = px(fx, fz), FY = py(fz, TERR_E) - 1;
+      g.save(); g.globalAlpha = .85;
+      flower5(g, FX, FY, 2.2, fcol[i%4], '#F6D24E');
+      g.restore();
+    }
     /* 테라스 앞 — 살짝 그늘진 뒤 페이지 배경으로 잦아든다 */
-    var yEnd = py(HZ1, 0);
+    var yEnd = py(HZ1, TERR_E);
     if (MY.H > yEnd + 4){
       var eg = g.createLinearGradient(0, yEnd, 0, MY.H);
       if (th.stars){
@@ -18980,30 +19031,49 @@ var MYR_ITEM = (function(){
       }
       g.fillStyle = eg; g.fillRect(0, yEnd, MY.W, MY.H - yEnd + 2);
     }
-    /* 아치 문 앞 디딤돌길 */
-    for (var zz=ZD+0.18; zz<HZ1-0.55; zz+=0.46){
-      var off = ((zz*10)%2 < 1) ? 0.07 : -0.07;
-      var X = px(off, zz), Y = py(zz, 0), S = MY.S;
-      g.save();
-      g.globalAlpha = .95;
-      g.beginPath(); g.ellipse(X, Y, 0.42*S, 0.20*S, 0, 0, Math.PI*2);
-      g.fillStyle = th.stars ? '#D6D2C6' : '#F4EDDD'; g.fill();
-      g.strokeStyle = 'rgba(180,166,140,.55)'; g.lineWidth = 1; g.stroke();
-      g.restore();
-    }
-    /* 잔디 위 작은 들꽃 */
-    var fcol = ['#FFFFFF','#FFE3EE','#FFF4C2','#E7DBFA'];
-    for (var i=0;i<26;i++){
-      var fz = ZD + 0.45 + ((i*47)%100)/100*(HZ1-ZD-0.9);
-      var fx = HX0 + 0.4 + ((i*83)%100)/100*(HX1-HX0-0.8);
-      if (Math.abs(fx) < 1.0) continue;                 /* 디딤돌길은 비워 둔다 */
-      var FX = px(fx, fz), FY = py(fz, 0) - 1;
-      g.save(); g.globalAlpha = .85;
-      flower5(g, FX, FY, 2.1, fcol[i%4], '#F6D24E');
-      g.restore();
-    }
     /* 왼쪽 낮은 정원 담장 */
     gardenWall(g, th);
+  }
+
+  /* 아치 문 밖 3단 계단 — 왼쪽 나무계단과 같은 결로 잔디 마당까지 내려간다 */
+  function terraceSteps(g, th){
+    var run = (TER_Z - ZD)/TER_N, S = MY.S;
+    for (var i=0;i<TER_N;i++){
+      var za = ZD + i*run, zb = za + run;
+      var eT = -TER_H*(i+1);
+      var eB = Math.max(TERR_E, eT - TER_H);
+      var X0 = px(HX0, za), X1 = px(HX1, za);
+      /* 디딤판 */
+      quadP(g, P3(HX0,za,eT), P3(HX1,za,eT), P3(HX1,zb,eT), P3(HX0,zb,eT), '#F9F0DD');
+      /* 디딤판 이음선 */
+      g.save(); g.globalAlpha = .5; g.strokeStyle = '#E3D2B4'; g.lineWidth = 1;
+      for (var jx = HX0 + 1.1; jx < HX1 - 0.4; jx += 1.1){
+        var p1 = P3(jx, za, eT), p2 = P3(jx, zb, eT);
+        g.beginPath(); g.moveTo(p1.x, p1.y); g.lineTo(p2.x, p2.y); g.stroke();
+      }
+      g.restore();
+      /* 단 턱(수직면) */
+      if (eB < eT - 0.001){
+        var yTop = py(zb, eT), yBot = py(zb, eB);
+        var rg = g.createLinearGradient(0, yTop, 0, yBot);
+        rg.addColorStop(0, '#E8CCA4'); rg.addColorStop(0.35, '#D9B98F'); rg.addColorStop(1, '#C8A57A');
+        g.fillStyle = rg;
+        g.fillRect(px(HX0, zb), yTop, px(HX1, zb) - px(HX0, zb), Math.max(2, yBot - yTop));
+        /* 단 코 하이라이트 */
+        g.fillStyle = 'rgba(255,252,242,.92)';
+        g.fillRect(px(HX0, zb), yTop - 1.2, px(HX1, zb) - px(HX0, zb), 2);
+        /* 턱 아래 그림자 */
+        g.fillStyle = 'rgba(112,82,52,.16)';
+        g.fillRect(px(HX0, zb), yBot - Math.max(1.5, (yBot-yTop)*0.22), px(HX1, zb) - px(HX0, zb), Math.max(1.5, (yBot-yTop)*0.22));
+        /* 턱 세로 이음선 */
+        g.save(); g.globalAlpha = .35; g.strokeStyle = '#B08A5E'; g.lineWidth = 1;
+        for (var kx = HX0 + 1.1; kx < HX1 - 0.4; kx += 1.1){
+          var kk = px(kx, zb);
+          g.beginPath(); g.moveTo(kk, yTop); g.lineTo(kk, yBot); g.stroke();
+        }
+        g.restore();
+      }
+    }
   }
 
   /* ---------- 테라스 꽃밭·화분 소품 ---------- */
@@ -19088,28 +19158,83 @@ var MYR_ITEM = (function(){
     g.beginPath(); g.ellipse(X, Y-0.30*S*s, 0.16*S*s, 0.05*S*s, 0, 0, Math.PI*2); g.fill();
   }
   var DECO = [
-    { z: ZD + 0.55, f: function(g){ roseBush(g, HX0 + 0.92, ZD + 0.55, 1.00); } },
-    { z: ZD + 1.35, f: function(g){ lavenderPot(g, HX0 + 0.78, ZD + 1.35, 0.95); } },
-    { z: ZD + 2.15, f: function(g){ topiary(g, HX0 + 0.95, ZD + 2.15, 0.92); } },
-    { z: ZD + 2.85, f: function(g){ daisies(g, HX0 + 0.95, ZD + 2.85, 0.95); } },
-    { z: ZD + 0.62, f: function(g){ hydrangea(g, HX1 - 0.98, ZD + 0.62, 0.98); } },
-    { z: ZD + 1.55, f: function(g){ fencePot(g, HX1 - 0.72, ZD + 1.55, 1.00); } },
-    { z: ZD + 2.35, f: function(g){ roseBush(g, HX1 - 1.02, ZD + 2.35, 0.86); } },
-    { z: ZD + 2.95, f: function(g){ daisies(g, HX1 - 0.72, ZD + 2.95, 0.85); } }
+    /* 왼쪽 화단 — 잔디 가장자리로 물러나 크게 */
+    { z: TER_Z + 0.42, f: function(g){ roseBush(g, HX0 + 1.02, TER_Z + 0.42, 1.20); } },
+    { z: TER_Z + 1.35, f: function(g){ lavenderPot(g, HX0 + 0.78, TER_Z + 1.35, 1.15); } },
+    { z: TER_Z + 2.30, f: function(g){ topiary(g, HX0 + 1.02, TER_Z + 2.30, 1.12); } },
+    { z: TER_Z + 3.25, f: function(g){ hydrangea(g, HX0 + 1.02, TER_Z + 3.25, 1.18); } },
+    { z: TER_Z + 4.10, f: function(g){ daisies(g, HX0 + 0.92, TER_Z + 4.10, 1.05); } },
+    /* 오른쪽 화단 */
+    { z: TER_Z + 0.44, f: function(g){ hydrangea(g, HX1 - 1.04, TER_Z + 0.44, 1.18); } },
+    { z: TER_Z + 1.38, f: function(g){ fencePot(g, HX1 - 0.74, TER_Z + 1.38, 1.18); } },
+    { z: TER_Z + 2.32, f: function(g){ roseBush(g, HX1 - 1.04, TER_Z + 2.32, 1.12); } },
+    { z: TER_Z + 3.26, f: function(g){ topiary(g, HX1 - 0.92, TER_Z + 3.26, 1.10); } },
+    { z: TER_Z + 4.12, f: function(g){ daisies(g, HX1 - 0.78, TER_Z + 4.12, 1.05); } },
+    /* 잔디 가운데 — 의자 둘 · 테이블 (z 순서를 따로 두어 캐릭터가 사이에 서도 자연스럽게) */
+    { z: TBL_Z - 0.05, f: function(g){ gardenChair(g, TBL.x - 1.32, TBL.z - 0.12); } },
+    { z: TBL_Z - 0.02, f: function(g){ gardenChair(g, TBL.x + 1.32, TBL.z - 0.20); } },
+    { z: TBL_Z + 0.02, f: function(g){ gardenTable(g); } }
   ];
+  /* 잔디 가운데 정원 의자 */
+  function gardenChair(g, x, z){
+    var S = MY.S, X = px(x, z), Y = py(z, 0);
+    g.save(); g.globalAlpha = .16; g.fillStyle = '#5E7C52';
+    g.beginPath(); g.ellipse(X, Y, 0.34*S, 0.13*S, 0, 0, Math.PI*2); g.fill(); g.restore();
+    /* 등받이 기둥 */
+    g.fillStyle = '#E0C39C';
+    g.fillRect(X-0.22*S, Y-0.74*S, 0.045*S, 0.34*S);
+    g.fillRect(X+0.18*S, Y-0.74*S, 0.045*S, 0.34*S);
+    /* 등받이 쿠션 */
+    g.beginPath(); g.ellipse(X, Y-0.76*S, 0.25*S, 0.21*S, 0, 0, Math.PI*2); g.fillStyle='#FFFCF4'; g.fill();
+    g.strokeStyle='#EBDCC4'; g.lineWidth=1.2; g.stroke();
+    g.beginPath(); g.ellipse(X+0.01*S, Y-0.78*S, 0.17*S, 0.13*S, 0, 0, Math.PI*2); g.fillStyle='#FFE6EE'; g.fill();
+    /* 다리 */
+    g.fillStyle = '#E0C39C';
+    g.fillRect(X-0.23*S, Y-0.44*S, 0.045*S, 0.42*S);
+    g.fillRect(X+0.19*S, Y-0.44*S, 0.045*S, 0.42*S);
+    /* 좌석 */
+    g.beginPath(); g.ellipse(X, Y-0.46*S, 0.29*S, 0.12*S, 0, 0, Math.PI*2); g.fillStyle='#FFFCF4'; g.fill();
+    g.strokeStyle='#EBDCC4'; g.lineWidth=1.2; g.stroke();
+  }
+  /* 잔디 가운데 정원 테이블 — 은혜님 "화단에도 저렇게 테이블 놓고" */
+  function gardenTable(g){
+    var S = MY.S, X = px(TBL.x, TBL.z), Y = py(TBL.z, 0);
+    g.save(); g.globalAlpha = .17; g.fillStyle = '#5E7C52';
+    g.beginPath(); g.ellipse(X, Y, 0.84*S, 0.29*S, 0, 0, Math.PI*2); g.fill(); g.restore();
+    /* 받침·기둥 */
+    g.beginPath(); g.ellipse(X, Y-0.04*S, 0.34*S, 0.12*S, 0, 0, Math.PI*2); g.fillStyle='#E9D2AF'; g.fill();
+    g.fillStyle = '#DEBE92'; g.fillRect(X-0.075*S, Y-0.68*S, 0.15*S, 0.66*S);
+    /* 상판 */
+    g.beginPath(); g.ellipse(X, Y-0.70*S, 0.80*S, 0.27*S, 0, 0, Math.PI*2); g.fillStyle='#FFFCF3'; g.fill();
+    g.strokeStyle = '#E7D3B4'; g.lineWidth = 1.5; g.stroke();
+    g.beginPath(); g.ellipse(X, Y-0.685*S, 0.66*S, 0.21*S, 0, 0, Math.PI*2); g.fillStyle = 'rgba(247,238,223,.9)'; g.fill();
+    /* 꽃병 */
+    g.fillStyle = '#EAF4F8';
+    g.beginPath(); g.moveTo(X-0.075*S, Y-0.70*S); g.lineTo(X+0.075*S, Y-0.70*S);
+    g.lineTo(X+0.048*S, Y-0.87*S); g.lineTo(X-0.048*S, Y-0.87*S); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(180,200,210,.75)'; g.lineWidth = 1; g.stroke();
+    flower5(g, X-0.055*S, Y-0.95*S, 0.055*S, '#F9C3D4', '#FFF0F4');
+    flower5(g, X+0.050*S, Y-0.99*S, 0.050*S, '#FFE9A3', '#FFFFFF');
+    flower5(g, X+0.000*S, Y-1.04*S, 0.045*S, '#FFFFFF', '#F6D24E');
+    g.fillStyle = '#A9D49A'; g.fillRect(X-0.012*S, Y-0.90*S, 0.024*S, 0.09*S);
+  }
   /* 테라스 앞 화단 — 맨 앞에서 장면을 감싸는 나무 상자 */
   function frontPlanter(g, th){
     var z1 = HZ1 - 0.02, z0 = z1 - 0.34, top = 0.40;
     boxP(g, HX0+0.02, HX1-0.02, z0, z1, 0, top, '#E8CEA8', '#D9B98C', '#C7A87C');
     quadP(g, P3(HX0+0.02,z0,top), P3(HX1-0.02,z0,top), P3(HX1-0.02,z1,top), P3(HX0+0.02,z1,top), 'rgba(120,96,70,.30)');
     var S = MY.S;
-    for (var x = HX0+0.28; x < HX1-0.2; x += 0.46){
+    for (var x = HX0+0.34; x < HX1-0.2; x += 0.72){
       var kind = Math.round((x - HX0) * 10) % 3;
       var X = px(x, z1-0.16), Y = py(z1-0.16, top);
-      if (kind === 0) flower5(g, X, Y-2, 0.048*S, '#FFFFFF', '#F6D24E');
-      else if (kind === 1) flower5(g, X, Y-2, 0.052*S, '#F9C3D4', '#FFF0F4');
-      else flower5(g, X, Y-2, 0.044*S, '#FFE9A3', '#FFFFFF');
-      g.beginPath(); g.ellipse(X, Y+1, 0.16*S, 0.05*S, 0, 0, Math.PI*2); g.fillStyle = 'rgba(150,200,132,.85)'; g.fill();
+      /* 잎 무더기 위에 꽃 송이 세 개 */
+      g.beginPath(); g.ellipse(X, Y-1, 0.27*S, 0.10*S, 0, 0, Math.PI*2);
+      g.fillStyle = kind === 1 ? '#A9D49A' : '#BCE0AC'; g.fill();
+      var pet = [['#FFFFFF','#F6D24E'],['#F9C3D4','#FFF0F4'],['#FFE9A3','#FFFFFF']][kind];
+      flower5(g, X-0.11*S, Y-0.11*S, 0.055*S, pet[0], pet[1]);
+      flower5(g, X+0.10*S, Y-0.14*S, 0.050*S, pet[0], pet[1]);
+      flower5(g, X, Y-0.22*S, 0.058*S, pet[0], pet[1]);
+      if (kind === 0) flower5(g, X-0.02*S, Y-0.34*S, 0.062*S, '#F4A9C1', '#FFF0F4');
     }
     /* 앞면으로 흘러내리는 아이비 */
     g.save();
@@ -19427,10 +19552,11 @@ var MYR_ITEM = (function(){
     g.drawImage(cv, -OXS*res*kk, -OYS*res*kk, cv.width*kk, cv.height*kk);
     g.restore();
   }
+  function terE(z){ z = Number(z) || 0; return z > ZD + 0.01 ? TERR_E : 0; }
   function elevOf(it){
     if (it.lvl) return STEP_H;
     if (it.k && ITEM[it.k] && ITEM[it.k].cat === 'wall') return STEP_H;
-    return 0;
+    return terE(it.z);
   }
   function drawItem(g, it, sc){
     var o = ITEM[it.k]; if (!o) return;
@@ -19444,6 +19570,7 @@ var MYR_ITEM = (function(){
   function charElev(c){
     if (c.z < D1 - 0.02) return STEP_H;
     if (c.z < STZ1 && c.x > SX0 - 0.30 && c.x < SX1 + 0.30) return STEP_H * clamp((STZ1 - c.z)/(STZ1 - D1), 0, 1);
+    if (c.z > ZD) return TERR_E * clamp((c.z - ZD)/(TER_Z - ZD), 0, 1);
     return 0;
   }
   function drawCharEnt(g, c){
@@ -19612,8 +19739,10 @@ var MYR_ITEM = (function(){
     var T = HOUSE_TOP;
     return [
       P3(HX0, 0, T), P3(HX1, 0, T),
-      P3(HX1, 0, STEP_H), P3(HX1, D1, STEP_H), P3(HX1, D1, 0), P3(HX1, ZD, 0), P3(HX1, HZ1, 0),
-      P3(HX0, HZ1, 0), P3(HX0, ZD, 0), P3(HX0, D1, 0), P3(HX0, D1, STEP_H), P3(HX0, 0, STEP_H)
+      P3(HX1, 0, STEP_H), P3(HX1, D1, STEP_H), P3(HX1, D1, 0), P3(HX1, ZD, 0),
+      P3(HX1, TER_Z, TERR_E), P3(HX1, HZ1, TERR_E),
+      P3(HX0, HZ1, TERR_E), P3(HX0, TER_Z, TERR_E), P3(HX0, ZD, 0),
+      P3(HX0, D1, 0), P3(HX0, D1, STEP_H), P3(HX0, 0, STEP_H)
     ];
   }
   function polyPath(g, poly, dx, dy){
@@ -19666,7 +19795,7 @@ var MYR_ITEM = (function(){
   /* 앞쪽 바닥 단면(두께) */
   function drawFrontSlab(g, th){
     var S = MY.S;
-    var fL0 = P3(HX0, HZ1, 0), fR0 = P3(HX1, HZ1, 0);
+    var fL0 = P3(HX0, HZ1, TERR_E), fR0 = P3(HX1, HZ1, TERR_E);
     var fL = { x: fL0.x - 0.30*S, y: fL0.y }, fR = { x: fR0.x + 0.30*S, y: fR0.y };
     var hS = 0.62*S, wRW = fR.x - fL.x;
     g.save();
@@ -19694,8 +19823,8 @@ var MYR_ITEM = (function(){
   /* 왼쪽·오른쪽 벽 단면 + 위쪽 마감 */
   function drawHouseCaps(g, th){
     var S = MY.S, T = HOUSE_TOP;
-    var left  = [[HX0,0,T],[HX0,0,STEP_H],[HX0,D1,STEP_H],[HX0,D1,0],[HX0,ZD,0],[HX0,HZ1,0]];
-    var right = [[HX1,0,T],[HX1,0,STEP_H],[HX1,D1,STEP_H],[HX1,D1,0],[HX1,ZD,0],[HX1,HZ1,0]];
+    var left  = [[HX0,0,T],[HX0,0,STEP_H],[HX0,D1,STEP_H],[HX0,D1,0],[HX0,ZD,0],[HX0,TER_Z,TERR_E],[HX0,HZ1,TERR_E]];
+    var right = [[HX1,0,T],[HX1,0,STEP_H],[HX1,D1,STEP_H],[HX1,D1,0],[HX1,ZD,0],[HX1,TER_Z,TERR_E],[HX1,HZ1,TERR_E]];
     /* ---------- 왼쪽·오른쪽 벽 단면 ---------- */
     function sideCap(pts, dir){
       g.save();
@@ -19798,7 +19927,7 @@ var MYR_ITEM = (function(){
       if (!gate && e.z >= ZD - 0.02){ drawGate(g, th); gate = true; }
       if (e.t === 'i'){ if (e.o.cat === 'pet') drawPet(g, e.d, e.o); else drawItem(g, e.d); }
       else if (e.t === 'c') drawCharEnt(g, e.d);
-      else e.d.f(g);
+      else { g.save(); g.translate(0, -TERR_E*MY.S); e.d.f(g); g.restore(); }
     }
     if (!rail) drawRail(g, th);
     if (!gate) drawGate(g, th);
@@ -19806,7 +19935,7 @@ var MYR_ITEM = (function(){
     /* 4) 앞 바닥 두께 → 맨 앞 화단 상자 → 좌우·위 끝마감 */
     drawHouseCaps(g, th);
     drawFrontSlab(g, th);
-    frontPlanter(g, th);
+    g.save(); g.translate(0, -TERR_E*MY.S); frontPlanter(g, th); g.restore();
     drawBadge(g);
   }
   function drawBadge(g){
@@ -19823,37 +19952,70 @@ var MYR_ITEM = (function(){
   }
 
   /* ---------- 카메라 ---------- */
+  /* 11-26 은혜님 "크기를 줄이고 늘릴 필요 없어 · 캐릭터가 지나갈 때 그 길을 보여주면 돼"
+     — 집 전체를 구겨 담지 않고, 화면 폭을 마당 폭으로 쓰는 고정 배율로 열고
+       캐릭터가 걸어가면 카메라가 그 길을 부드럽게 따라간다. */
+  var FIXW = 8.45;                       /* 화면 폭(m) — 390px 폰에서 S≈46 (방 폭이 화면을 꽉 채움) */
+  function baseS(){ return clamp(MY.W / FIXW, 34, 58); }
+  function homeS(){ return baseS() * (MY.zoom || 1); }
   function drawBounds(){
-    return { top: 100, bot: MY.H - (MY.trayOpen ? MY.H*0.445 : 74) };
+    var bot = MY.H - 74;
+    if (MY.trayOpen) bot = MY.H - MY.H*0.445;
+    return { top: 96, bot: bot };
   }
+  /* 🏠 전체 — 집 전체가 한 번에 보이는 보기 */
   function fitView(hard){
     var b = drawBounds();
     var availH = Math.max(150, b.bot - b.top), availW = MY.W - 14;
-    /* 사선(셰어) 때문에 생기는 좌우 폭까지 계산해 3단 구조 전체가 들어오게 */
     var worldW = (HX1 - HX0) + HZ1*KX + 0.46;      /* 좌우 끝마감 두께까지 */
-    var worldH = HOUSE_TOP + HZ1*KZ + 0.42;         /* 위 끝마감 ~ 앞 바닥 두께 */
+    var worldH = HOUSE_TOP + HZ1*KZ + 0.48 + 0.42;  /* 위 끝마감 ~ 앞 바닥 두께 */
     var s = Math.min(availW/worldW, availH/worldH);
     MY.Sgoal = clamp(s, 9, 60);
     if (hard) MY.S = MY.Sgoal;
-    /* 남는 자리는 위 45% · 아래 55%로 나눠 집을 화면 가운데에 둔다 */
     var top = b.top + Math.max(0, (availH - worldH*MY.Sgoal)*0.45);
     var cz = (MY.H/2 - top - HOUSE_TOP*MY.Sgoal)/(KZ*MY.Sgoal);
     MY.camZg = cz;
     MY.camXg = (HX0 + HX1)/2 + (HZ1/2 - cz)*KX;
     if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
   }
-  /* 처음 들어올 때: 집 전체가 보이게 */
-  function openView_unused(){
+  /* 캐릭터 추적 — 캐릭터를 보이는 영역(보관함 위쪽) 가운데에 둔다 */
+  function centerOnHero(hard){
+    var h = hero(); if (!h) return;
+    var S = MY.Sgoal || MY.S || baseS();
     var b = drawBounds();
-    var availH = Math.max(150, b.bot - b.top);
-    var worldH = WALL_B + (HZ1 - 0)*KZ;
-    MY.Sgoal = MY.S = clamp(availH/worldH, 12, 46);
-    var cz = (MY.H/2 - b.top - (STEP_H + WALL_B)*MY.S)/(KZ*MY.S);
-    MY.camXg = MY.camX = 0;
-    MY.camZg = MY.camZ = cz;
-    clampCam();
+    var midY = (b.top + b.bot)/2;
+    var cz = h.z - (midY - MY.H/2 + charElev(h)*S)/(KZ*S);
+    /* 집이 빈 하늘로 새지 않게 — 집 위 끝·앞 끝을 보이는 영역에 붙여 둔다 */
+    var czMin = (b.top - MY.H/2 + HOUSE_TOP*S)/(KZ*S);
+    var czMax = HZ1 - (b.bot - MY.H/2 + TERR_E*S)/(KZ*S);
+    if (czMin <= czMax) cz = clamp(cz, czMin, czMax);
+    else cz = (czMin + czMax)/2;
+    MY.camZg = cz;
+    MY.camXg = clamp(h.x + (h.z - cz)*KX, HX0 + 1.0, HX1 - 1.0);
+    if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
+  }
+  /* 보관함·상점을 열고 닿을 때 — 추적 중이면 고정 배율 유지한 채 다시 잡는다 */
+  function relayout(hard){
+    if (MY.follow && !MY.shopOpen){
+      MY.Sgoal = homeS();
+      if (hard) MY.S = MY.Sgoal;
+      centerOnHero(hard);
+    } else {
+      fitView(hard);
+    }
+  }
+  /* 바닥을 톡 눌러 걷기 시작하면 — 고정 배율로 돌아와 다시 따라간다 */
+  function resumeFollow(){
+    MY.Sgoal = homeS();
+    if (!MY.follow){ MY.follow = true; centerOnHero(false); }
   }
   function focusChar(hard){
+    if (MY.follow){
+      MY.Sgoal = homeS();
+      if (hard) MY.S = MY.Sgoal;
+      centerOnHero(hard);
+      return;
+    }
     var r = room(); if (!r) return;
     var h = hero(r); if (!h) return;
     MY.camXg = clamp(h.x, HX0+2, HX1-2);
@@ -19861,7 +20023,13 @@ var MYR_ITEM = (function(){
     if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
   }
   function zoomBy(f){
+    MY.zoom = clamp((MY.zoom || 1)*f, 0.62, 1.9);
     var cx = invX(MY.W/2, MY.camZ), cz = invZ(MY.H/2, 0);
+    if (MY.follow){
+      MY.Sgoal = homeS();
+      centerOnHero(false);
+      return;
+    }
     MY.Sgoal = clamp(MY.Sgoal*f, 9, 66);
     MY.S = MY.Sgoal;
     MY.camXg = MY.camX = cx; MY.camZg = MY.camZ = cz;
@@ -19908,9 +20076,32 @@ var MYR_ITEM = (function(){
     } else if (lev){
       p = p.concat(stairRun(c, fromUp));
     }
-    p.push({ x: clamp(tx, HX0+0.7, HX1-0.7), z: clamp(tz, 0.7, HZ1-0.7) });
+    /* 가운데 정원 테이블은 밟고 서지 않게 테두리로 밀어낸다 */
+    var tgt = { x: clamp(tx, HX0+0.7, HX1-0.7), z: clamp(tz, 0.7, HZ1-0.7) };
+    var dT = Math.hypot(tgt.x - TBL.x, tgt.z - TBL.z);
+    if (dT < TBL.r){
+      var ang = dT < 0.04 ? Math.PI/2 : Math.atan2(tgt.z - TBL.z, tgt.x - TBL.x);
+      tgt.x = clamp(TBL.x + Math.cos(ang)*(TBL.r + 0.06), HX0+0.7, HX1-0.7);
+      tgt.z = clamp(TBL.z + Math.sin(ang)*(TBL.r + 0.06), 0.7, HZ1-0.7);
+    }
+    p.push(tgt);
+    /* 마지막 길이 테이블을 가로지르면 옆으로 돌아서 간다 */
+    if (p.length > 1){
+      var wo = detourAround(p[p.length-2], tgt);
+      if (wo) p.splice(p.length-1, 0, wo);
+    }
     c.path = p;
     c.seat = '';
+  }
+  /* a→b 직선이 정원 테이블 원을 스치면 돌아갈 길목을 돌려준다 */
+  function detourAround(a, b){
+    var cx = TBL.x, cz = TBL.z, R = TBL.r + 0.42;
+    var vx = b.x-a.x, vz = b.z-a.z, L2 = vx*vx + vz*vz;
+    if (L2 < 1e-6) return null;
+    var t = clamp(((cx-a.x)*vx + (cz-a.z)*vz)/L2, 0, 1);
+    if (Math.hypot(cx-(a.x+vx*t), cz-(a.z+vz*t)) > R) return null;
+    var side = (vx >= 0) ? 1 : -1;
+    return { x: clamp(cx + side*R, HX0+0.7, HX1-0.7), z: clamp(cz, 0.7, HZ1-0.7) };
   }
   function stepChars(dt){
     var r = room(); if (!r) return;
@@ -19959,13 +20150,14 @@ var MYR_ITEM = (function(){
     var levels = (lvl == null) ? [0, 1] : [lvl];
     for (var li=0; li<levels.length; li++){
       var L = levels[li];
-      var zs = L ? [3.5, 2.9, 2.1, 1.3, 0.7] : [6.2, 7.0, 7.7, 9.4, 10.6, 11.7, 12.4];
+      var zs = L ? [3.5, 2.9, 2.1, 1.3, 0.7] : [6.2, 7.0, 7.7, 9.4, 10.4, 11.4, 12.4, 13.2];
       var xs = [0, 1.5, -1.5, 3.0, -3.0, 4.4, -4.4, 5.5, -5.5];
       for (var zi=0; zi<zs.length; zi++) for (var xi=0; xi<xs.length; xi++){
         var cx = xs[xi], cz = zs[zi];
         if (cx - w/2 < HX0 + 0.3 || cx + w/2 > HX1 - 0.3) continue;
         if (!L && cx > SX0 - w*0.55 && cx < SX1 + w*0.55 && cz < STZ1 + 0.85) continue;
         if (!L && cz > ZD - 0.6 && cz < ZD + 0.6 && Math.abs(cx) < ARC_W + w*0.5) continue;
+        if (!L && cz > ZD && Math.hypot(cx - TBL.x, cz - TBL.z) < TBL.r + w*0.5) continue;
         var occupied = (r.items||[]).some(function(it){
           var oo = ITEM[it.k]; if (!oo || oo.cat === 'wall' || oo.cat === 'theme') return false;
           if ((it.lvl?1:0) !== L) return false;
@@ -20246,7 +20438,7 @@ var MYR_ITEM = (function(){
   function openShop(tab){
     var el = $m('myrShop'); if (!el || !MY.kid) return;
     MY.shopTab = tab || MY.shopTab || 'furn';
-    if (MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); }
+    if (MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); relayout(false); }
     el.hidden = false;
     MY.shopOpen = true;
     renderShop();
@@ -20347,7 +20539,9 @@ var MYR_ITEM = (function(){
     $m('myrTray').hidden = false;
     el.classList.add('bag');
     buildTray(); refreshHead();
-    fitView(true);
+    MY.follow = true; MY.zoom = 1;
+    MY.Sgoal = homeS(); MY.S = MY.Sgoal;
+    centerOnHero(true);
     MY.hintT = 7;
     say('왼쪽 계단으로 위층, 가운데 아치 문으로 잔디 정원에 나가요');
     MY.last = 0;
@@ -20372,6 +20566,7 @@ var MYR_ITEM = (function(){
     MY.last = ts;
     MY.t += dt;
     if (MY.hintT > 0) MY.hintT -= dt;
+    if (MY.follow && !MY.pan && !MY.drag && !MY.shopOpen) centerOnHero(false);
     if (!MY.drag) easeCam(dt);
     stepChars(dt);
     stepPets(dt);
@@ -20457,6 +20652,8 @@ var MYR_ITEM = (function(){
     var up = y < yEdge;
     var e = up ? STEP_H : 0;
     var z = invZ(y, e), xx = invX(x, z);
+    /* 테라스는 3단 내려가 있으니 그 높이로 한 번 더 맞춘다 */
+    if (!up && z > ZD){ z = invZ(y, TERR_E); xx = invX(x, z); }
     return { x: clamp(xx, HX0+0.6, HX1-0.6), z: clamp(z, 0.6, HZ1-0.6), up:up };
   }
   function bindPointer(cv){
@@ -20489,6 +20686,7 @@ var MYR_ITEM = (function(){
           var a = pts[ids[0]], b = pts[ids[1]];
           var d = Math.hypot(a.x-b.x, a.y-b.y);
           MY.Sgoal = MY.S = clamp(MY.pinch.S * (d/Math.max(10, MY.pinch.d)), 9, 66);
+          MY.zoom = clamp(MY.S/baseS(), 0.62, 1.9);
           draw();
         }
         return;
@@ -20513,6 +20711,7 @@ var MYR_ITEM = (function(){
       if (MY.pan && MY.pan.id === ev.pointerId){
         var mdx = p.x - MY.pan.sx, mdy = p.y - MY.pan.sy;
         if (Math.abs(mdx) + Math.abs(mdy) > 6) MY.pan.moved = true;
+        if (MY.pan.moved) MY.follow = false;      /* 손으로 밀어 보는 동안은 추적 잠시 멈춤 */
         MY.camX = MY.camXg = MY.pan.cx - mdx/MY.S;
         MY.camZ = MY.camZg = MY.pan.cz - mdy/(MY.S*KZ);
         clampCam();
@@ -20554,6 +20753,8 @@ var MYR_ITEM = (function(){
   function onTap(x, y){
     var r = room(); if (!r) return;
     var hit = hitAt(x, y);
+    /* 바닥·가구를 톡 누르면 추적 재개 (전체 보기·손으로 민 뒤에도) */
+    if (!MY.move && !(hit && hit.t === 'c')) resumeFollow();
     if (MY.move){
       if (hit) selectHit(hit);
       else { MY.sel = null; var b = $m('myrSel'); if (b) b.hidden = true; }
@@ -20642,7 +20843,7 @@ var MYR_ITEM = (function(){
     if (t.closest('#myrMove')){
       MY.move = !MY.move;
       if (MY.move && MY.shopOpen) closeShop();
-      if (MY.move && MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); }
+      if (MY.move && MY.trayOpen){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); relayout(false); }
       var mb = $m('myrMove');
       mb.classList.toggle('on', MY.move);
       mb.setAttribute('aria-pressed', MY.move ? 'true' : 'false');
@@ -20660,10 +20861,10 @@ var MYR_ITEM = (function(){
       if (pl >= own){ say('다 놓았어요 · 🛍️ 1P 상점에서 더 살 수 있어요'); return; }
       var spot = freeSpot(o);
       placeItem(k, spot);
-      MY.camXg = clamp(spot.x, HX0+2, HX1-2); MY.camZg = clamp(spot.z - 1.0, 0.5, HZ1-1.5);
+      if (!MY.follow){ MY.camXg = clamp(spot.x, HX0+2, HX1-2); MY.camZg = clamp(spot.z - 1.0, 0.5, HZ1-1.5); }
       say(o.n + ' 놓았어요! ✋ 옮기기로 자리를 바꿔 보세요');
       buildTray(); refreshHead();
-      if (MY.trayOpen && MY.H < 760) { /* 좁은 화면에서는 보관함을 접어 준다 */ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); }
+      if (MY.trayOpen && MY.H < 760) { /* 좁은 화면에서는 보관함을 접어 준다 */ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); relayout(false); }
       return;
     }
     var ad = t.closest('[data-myradd]');
@@ -20677,14 +20878,14 @@ var MYR_ITEM = (function(){
       $m('myrTray').hidden = !MY.trayOpen;
       $m('myr').classList.toggle('bag', MY.trayOpen);
       if (MY.trayOpen) buildTray();
-      fitView(false);
+      relayout(false);
       refreshHead();
       return;
     }
-    if (t.closest('#myrTrayX')){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); fitView(false); refreshHead(); return; }
+    if (t.closest('#myrTrayX')){ MY.trayOpen = false; $m('myrTray').hidden = true; $m('myr').classList.remove('bag'); relayout(false); refreshHead(); return; }
     if (t.closest('#myrIn')){ zoomBy(1.22); return; }
     if (t.closest('#myrOut')){ zoomBy(0.82); return; }
-    if (t.closest('#myrFit')){ fitView(false); say('집 전체가 보이게 맞췄어요'); return; }
+    if (t.closest('#myrFit')){ MY.follow = false; MY.zoom = 1; fitView(false); say('집 전체가 보이게 맞췄어요'); return; }
     var sm = t.closest('[data-m]');
     if (sm && t.closest('#myrSel')){
       var mm = sm.dataset.m;
@@ -20708,8 +20909,8 @@ var MYR_ITEM = (function(){
     }
   }, true);
 
-  window.addEventListener('resize', function(){ if (MY.on){ resize(); fitView(false); } });
-  window.addEventListener('orientationchange', function(){ setTimeout(function(){ if (MY.on){ resize(); fitView(false); } }, 220); });
+  window.addEventListener('resize', function(){ if (MY.on){ resize(); relayout(false); } });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){ if (MY.on){ resize(); relayout(false); } }, 220); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && MY.on) close(); });
   document.addEventListener('visibilitychange', function(){ if (document.hidden) stop(); else if (MY.on && !MY.raf) start(); });
 
