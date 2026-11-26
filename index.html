@@ -3500,6 +3500,7 @@ function defaultState(){
     routineRest: {},                             /* 생활 루틴 쉬어가기 표시 */
     reading: {},
     avatars: {},
+    brush: {},                                   /* 🏆 오늘도 치카 100원! — [YYYY-MM][아이] = { "1":"O", "2":"X" } */
     mealSchool: { atpt:'S10', code:'9151118', name:'석산초등학교', addr:'경상남도 양산시 동면 금오16길 105' },
     shop: { bonus:{}, spent:{}, unlocked:{}, pendingGift:{}, claimedSets:{}, claimedStreaks:{} },
     playground: {},                              /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 */
@@ -3941,6 +3942,36 @@ function normalizeState(raw){
   });
   out.myRoom = mrOut;
   /* /MYR-NORM */
+/* BRUSH-NORM */
+  /* 🏆 오늘도 치카 100원! — [YYYY-MM][아이] = { "1":"O", "2":"X" } (O = 성공 100원 · X = 실패)
+     ⚠️ Firebase RTDB 는 숫자 키만 있는 객체를 JSON 배열로 돌려준다(ex. {"1":"X","2":"O"} → [null,"X","O"]).
+        배열이면 index 가 곧 날짜(배열[1] = 1일)이므로 두 경우를 모두 읽어 객체로 되돌린다.
+        이 복원이 빠져 있으면 저장 후 실시간 스냅샷·새로고침에서 brush 가 통째로 날아간다. */
+  var brushRaw = (r.brush && typeof r.brush === 'object') ? r.brush : {};
+  var brushOut = {};
+  Object.keys(brushRaw).forEach(function(ym){
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(ym)) return;   /* YYYY-MM 만 */
+    var monRaw = brushRaw[ym];
+    if (!monRaw || typeof monRaw !== 'object') return;
+    var byKid = {};
+    KIDS.forEach(function(id){
+      var src = monRaw[id];
+      if (!src || typeof src !== 'object') return;
+      var m = {};
+      Object.keys(src).forEach(function(dk){
+        var d = Math.floor(Number(dk));
+        if (!isFinite(d) || d < 1 || d > 31) return;
+        var v = src[dk];
+        if (typeof v === 'string') v = v.trim().toUpperCase();
+        if (v !== 'O' && v !== 'X') return;      /* true/false·null 등은 미체크로 둔다 */
+        m[String(d)] = v;
+      });
+      if (Object.keys(m).length) byKid[id] = m;
+    });
+    if (Object.keys(byKid).length) brushOut[ym] = byKid;
+  });
+  out.brush = brushOut;
+  /* /BRUSH-NORM */
 
 
 
