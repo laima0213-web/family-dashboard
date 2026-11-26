@@ -3552,6 +3552,7 @@ function normalizeState(raw){
   /* 🌳 자연 놀이터 — 아이별 배치 캐릭터 [{ id, preset, x, z, ride }] */
   var pgRaw2 = (r.playground && typeof r.playground === 'object') ? r.playground : {};
   var pgMig = !(Number(r.pgGeo) >= 2);          /* 2026-11-26 부지 확대 전에 저장된 좌표를 새 부지로 옮긴다 */
+  var pgReset = (Number(r.pgGeo) || 0) < 3;     /* 놀이공원 기구 19종 개편 — 옛 기구·소품 '옮긴 자리' 기록은 한 번만 버린다 */
   var pgFix = function(x, z){
     var nx = Number(x), nz = Number(z);
     if (!isFinite(nx)) nx = 0;
@@ -3640,6 +3641,7 @@ function normalizeState(raw){
     Object.keys(m2).forEach(function(k){
       if (!/^[a-z]{2,16}(_[a-z]{2,12})?$/.test(k)) return;
       if (k.indexOf('village_') === 0) return;      /* 사라진 동화마을 기구 자리 */
+      if (pgReset && k.indexOf('park_') === 0) return;   /* 개편 전 놀이공원 기구 자리 */
       var it = m2[k];
       if (!it || typeof it !== 'object') return;
       var rx2 = Number(it.x), rz2 = Number(it.z), rt2 = Number(it.rot);
@@ -3663,6 +3665,7 @@ function normalizeState(raw){
     Object.keys(m3).forEach(function(k){
       if (!/^[a-z]{2,16}_\d{1,4}$/.test(k)) return;
       if (k.indexOf('village_') === 0) return;      /* 사라진 동화마을 소품 자리 */
+      if (pgReset && k.indexOf('park_') === 0) return;   /* 개편 전 놀이공원 소품 자리 */
       var it = m3[k];
       if (!it || typeof it !== 'object') return;
       var px3 = Number(it.x), pz3 = Number(it.z);
@@ -3673,7 +3676,7 @@ function normalizeState(raw){
     if (Object.keys(po).length) prpOut[id] = po;
   });
   out.pgProps = prpOut;
-  out.pgGeo = 2;                     /* 새 부지 좌표계 (한 번만 옮긴다) */
+  out.pgGeo = 3;                     /* 새 부지 + 놀이공원 19종 기구 좌표계 (한 번만 옮긴다) */
   var sc = (r.sched && typeof r.sched === 'object') ? r.sched : null;
   if (sc && sc.date === todayKey()){
     out.sched = { date: sc.date, items: normalizeList(sc.items, [], 's') };
