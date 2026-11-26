@@ -14212,19 +14212,106 @@ var MYR_ITEM = (function(){
     g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2);
     g.strokeStyle = col; g.lineWidth = lw || 0.03; g.lineCap = 'round'; g.stroke();
   }
+  /* 색 섞기 — 파스텔 톤온톤(밝게·어둡게·다른 색과) */
+  function pc(hex,to,k){
+    if (typeof hex !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
+    if (typeof to !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(to)) return hex;
+    var a=parseInt(hex.slice(1),16), b=parseInt(to.slice(1),16);
+    var r=Math.round(((a>>16)&255)*(1-k)+((b>>16)&255)*k);
+    var g2=Math.round(((a>>8)&255)*(1-k)+((b>>8)&255)*k);
+    var b2=Math.round((a&255)*(1-k)+(b&255)*k);
+    return '#'+((1<<24)+(r<<16)+(g2<<8)+b2).toString(16).slice(1);
+  }
+  /* 위는 살짝 밝고 아래로 갈수록 톤이 가라앉는 파스텔 그라데이션 (스윗한 볼륨감) */
+  function silk(g,y0,y1,col,amt){
+    if (typeof col !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(col)) return col;
+    var k = amt==null ? 0.20 : amt;
+    var gr = g.createLinearGradient(0, y0, 0, y1);
+    gr.addColorStop(0, pc(col,'#FFFFFF',k));
+    gr.addColorStop(0.52, col);
+    gr.addColorStop(1, pc(col,'#8E675A',Math.min(0.26,k*0.55)));
+    return gr;
+  }
   /* 상자: cx 가운데 · y 밑동 · w 폭 · d 깊이 · h 높이 */
   function bx(g,cx,y,w,d,h,top,front,side,st,lw){
     var x0=cx-w/2, x1=cx+w/2;
-    if (side) poly(g,[[x1,y],[x1-d*KX,y+d*KZ],[x1-d*KX,y+d*KZ+h],[x1,y+h]],side,st,lw);
-    if (top)  poly(g,[[x0,y+h],[x1,y+h],[x1-d*KX,y+h+d*KZ],[x0-d*KX,y+h+d*KZ]],top,st,lw);
-    if (front){ g.fillStyle = front; rr(g,x0,y,w,h, Math.min(0.055, Math.min(Math.abs(w),Math.abs(h))*0.22), front, st, lw); }
+    if (side) poly(g,[[x1,y],[x1-d*KX,y+d*KZ],[x1-d*KX,y+d*KZ+h],[x1,y+h]],silk(g,y+h,y,side,0.16),st,lw);
+    if (top)  poly(g,[[x0,y+h],[x1,y+h],[x1-d*KX,y+h+d*KZ],[x0-d*KX,y+h+d*KZ]],pc(top,'#FFFFFF',0.14),st,lw);
+    if (front){
+      var fr = silk(g,y+h,y,front,0.22);
+      g.fillStyle = fr;
+      rr(g,x0,y,w,h, Math.min(0.055, Math.min(Math.abs(w),Math.abs(h))*0.22), fr, st, lw);
+      /* 앞면 위쪽에 부드러운 하이라이트 띠 */
+      if (typeof front === 'string' && /^#[0-9a-fA-F]{6}$/.test(front) && h > 0.12){
+        g.save(); g.globalAlpha = 0.20;
+        g.fillStyle = '#FFFFFF';
+        rr(g, x0+0.03, y+h-0.075, Math.max(0.02, w-0.06), 0.045, 0.03, '#FFFFFF');
+        g.fillStyle = pc(front,'#FFFFFF',0.55);
+        rr(g, x0+0.03, y+h-0.075, Math.max(0.02, w-0.06), 0.045, 0.03, pc(front,'#FFFFFF',0.55));
+        g.restore();
+      }
+    }
   }
   /* 뒤쪽(깊이 dz)으로 옮겨 그리기 */
   function back(g,dz,fn){ g.save(); g.translate(-dz*KX, dz*KZ); fn(); g.restore(); }
-  /* 둥근 가구: 앞면 + 위판 */
+  /* 둥근 가구: 앞면 + 위판 — 쿠션처럼 부풀고 위는 밝게 */
   function soft(g,cx,y,w,d,h,r,top,front,st,lw){
-    rr(g,cx-w/2,y,w,h,r,front,st,lw);
-    rr(g,cx-w/2-d*KX*0.5,y+h-0.02,w,d*KZ,r,top,st,lw);
+    rr(g,cx-w/2,y,w,h,r,silk(g,y+h,y,front,0.26),st,lw);
+    rr(g,cx-w/2-d*KX*0.5,y+h-0.02,w,d*KZ,r,pc(top,'#FFFFFF',0.12),st,lw);
+  }
+  /* ── 스윗 디테일 도우미 (레이스 · 리본 · 작은 꽃 · 반짝이 · 하트) ── */
+  function laceRow(g,x,y,w,n,col){
+    var step=w/n, rr0=step*0.55;
+    g.save(); g.strokeStyle=col||'#FFFDF4'; g.lineWidth=0.016; g.fillStyle=col||'#FFFDF4';
+    for (var i=0;i<n;i++){
+      var cx=x+step*(i+0.5);
+      g.beginPath(); g.arc(cx,y,rr0,0,Math.PI); g.fill();
+    }
+    g.restore();
+  }
+  function ribbonBow(g,x,y,r,col,colD){
+    var c=col||'#FFB3C8', cD=colD||pc(c,'#8E675A',0.42);
+    g.save();
+    g.beginPath(); g.ellipse(x-r*0.95,y+r*0.10,r*0.95,r*0.62,-0.36,0,Math.PI*2);
+    g.fillStyle=c; g.fill(); g.strokeStyle=cD; g.lineWidth=r*0.18; g.stroke();
+    g.beginPath(); g.ellipse(x+r*0.95,y+r*0.10,r*0.95,r*0.62,0.36,0,Math.PI*2);
+    g.fillStyle=c; g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(x,y+r*0.10);
+    g.quadraticCurveTo(x-r*0.55,y+r*1.05,x-r*0.95,y+r*1.35);
+    g.quadraticCurveTo(x-r*0.20,y+r*1.20,x,y+r*0.35);
+    g.quadraticCurveTo(x+r*0.20,y+r*1.20,x+r*0.95,y+r*1.35);
+    g.quadraticCurveTo(x+r*0.55,y+r*1.05,x,y+r*0.10);
+    g.fillStyle=c; g.fill(); g.strokeStyle=cD; g.lineWidth=r*0.16; g.stroke();
+    g.beginPath(); g.arc(x,y+r*0.10,r*0.46,0,Math.PI*2);
+    g.fillStyle=pc(c,'#FFFFFF',0.32); g.fill(); g.strokeStyle=cD; g.lineWidth=r*0.16; g.stroke();
+    g.restore();
+  }
+  function flowerBit(g,x,y,r,col,core){
+    var c=col||'#FFC6D7', k=core||'#FFE7A3';
+    g.save();
+    for (var i=0;i<5;i++){
+      var a=i*Math.PI*2/5-Math.PI/2;
+      g.beginPath(); g.ellipse(x+Math.cos(a)*r*0.62,y+Math.sin(a)*r*0.62,r*0.50,r*0.50,0,0,Math.PI*2);
+      g.fillStyle=c; g.fill();
+    }
+    g.beginPath(); g.arc(x,y,r*0.42,0,Math.PI*2); g.fillStyle=k; g.fill();
+    g.restore();
+  }
+  function sparkBit(g,x,y,r,col){
+    g.save(); g.fillStyle=col||'#FFFFFF';
+    g.beginPath();
+    g.moveTo(x,y-r); g.quadraticCurveTo(x+r*0.22,y-r*0.22,x+r,y);
+    g.quadraticCurveTo(x+r*0.22,y+r*0.22,x,y+r);
+    g.quadraticCurveTo(x-r*0.22,y+r*0.22,x-r,y);
+    g.quadraticCurveTo(x-r*0.22,y-r*0.22,x,y-r);
+    g.fill(); g.restore();
+  }
+  function heartBit(g,x,y,r,col){
+    g.save(); g.fillStyle=col||'#FFB3C8';
+    g.beginPath(); g.moveTo(x,y+r*0.95);
+    g.bezierCurveTo(x-r*1.7,y-r*0.15,x-r*0.9,y-r*1.45,x,y-r*0.35);
+    g.bezierCurveTo(x+r*0.9,y-r*1.45,x+r*1.7,y-r*0.15,x,y+r*0.95);
+    g.closePath(); g.fill(); g.restore();
   }
   function face(g,x,y,r,col){          /* 몬스터·곰 인형 얼굴 */
     ci(g,x-0.115,y,0.038,'#5B4630'); ci(g,x+0.115,y,0.038,'#5B4630');
@@ -14254,6 +14341,14 @@ var MYR_ITEM = (function(){
     back(g,1.10,function(){ rr(g,-1.0,0.50,0.86,0.32,0.15,P.white,P.creamD,0.02);
                             rr(g,0.14,0.50,0.86,0.32,0.15,P.white,P.creamD,0.02); });   /* 베개 */
     el(g,-0.52,0.66,0.20,0.05,'rgba(255,255,255,.35)');
+    /* 11-26 스윗 디테일 — 이불 레이스 단 · 리본 · 반짝이 · 베갯잇 파이핑 */
+    laceRow(g, -1.06, 0.475, 2.12, 16, '#FFF7FA');
+    ribbonBow(g, 0.00, 0.520, 0.078, P.pinkD, P.pinkD);
+    rr(g, -1.02, 0.588, 0.90, 0.012, 0.006, '#FFFFFF', null);
+    rr(g, 0.10, 0.588, 0.90, 0.012, 0.006, '#FFFFFF', null);
+    heartBit(g, -0.60, 0.72, 0.042, '#FFC2D4');
+    sparkBit(g, 0.70, 0.86, 0.055, '#FFFFFF');
+    sparkBit(g, 0.55, 0.99, 0.034, '#FFF3C4');
   }});
   it({ k:'bed_kid', n:'어린이 침대', cat:'furn', w:1.7, d:1.2, h:0.92, seat:'bed', draw:function(g){
     back(g,1.14,function(){ rr(g,-0.85,0.22,1.7,0.56,0.24,P.mint,P.mintD,0.03); });
@@ -14262,6 +14357,10 @@ var MYR_ITEM = (function(){
     bx(g,0,0.42,1.58,0.62,0.10,P.mint,P.mintD,P.mintD,P.mintD,0.02);
     back(g,0.88,function(){ rr(g,-0.74,0.44,0.66,0.28,0.13,P.white,P.creamD,0.02); });
     ci(g,0.42,0.56,0.05,P.lemon);
+    /* 11-26 스윗 디테일 — 레이스 · 리본 */
+    laceRow(g, -0.76, 0.445, 1.52, 13, '#FFFDF6');
+    ribbonBow(g, -0.62, 0.62, 0.065, P.mintD, P.mintD);
+    sparkBit(g, 0.34, 0.70, 0.040, '#FFFFFF');
   }});
   it({ k:'bunk', n:'이층 침대', cat:'furn', w:2.0, d:1.15, h:2.05, seat:'bed', draw:function(g){
     bx(g,0,0,2.0,1.15,1.62,P.woodL,P.wood,P.woodD,P.woodDD,0.03);
@@ -14322,6 +14421,11 @@ var MYR_ITEM = (function(){
     soft(g, 1.02,0.2,0.30,0.72,0.40,0.13,P.pinkD,P.pinkD,null,0.02);
     ci(g,-0.34,0.60,0.13,P.lemon,P.gold,0.02); ci(g,0.34,0.58,0.11,P.mint,P.mintD,0.02);
     ln(g,-0.9,0.05,-0.9,0.16,P.woodDD,0.05); ln(g,0.9,0.05,0.9,0.16,P.woodDD,0.05);
+    /* 11-26 스윗 디테일 — 레이스 스커트 · 꽃 쿠션 · 리본 */
+    laceRow(g, -1.02, 0.075, 2.04, 15, '#FFF7FA');
+    flowerBit(g, 0.62, 0.46, 0.070, '#FFF0F6', '#F7C244');
+    ribbonBow(g, -0.02, 0.44, 0.070, P.pinkD, P.pinkD);
+    sparkBit(g, 0.86, 0.78, 0.045, '#FFFFFF');
   }});
   it({ k:'table', n:'테이블', cat:'furn', w:1.5, d:1.2, h:0.74, draw:function(g){
     var i, legs=[[-0.58,1.02],[0.58,1.02],[-0.58,0.06],[0.58,0.06]];
@@ -14337,6 +14441,15 @@ var MYR_ITEM = (function(){
     ln(g, -0.21, 1.07, -0.17, 1.10, P.white, 0.022);
     ci(g, 0.06, 1.10, 0.075, P.pink, P.pinkD, 0.018);
     rr(g, 0.20, 1.05, 0.30, 0.05, 0.02, P.lemon, P.gold, 0.014);
+    /* 11-26 스윗 디테일 — 레이스 도일리 · 작은 꽃 · 반짝이 */
+    el(g, -0.34, 1.02, 0.17, 0.075, '#FFFCF6', '#EBD9C2', 0.012);
+    for (var q=0;q<8;q++){
+      var an=q*Math.PI/4;
+      ln(g, -0.34+Math.cos(an)*0.06, 1.02+Math.sin(an)*0.028, -0.34+Math.cos(an)*0.16, 1.02+Math.sin(an)*0.070, '#EBD9C2', 0.006);
+    }
+    flowerBit(g, 0.20, 1.10, 0.055, '#FFE0EA', '#F7C244');
+    flowerBit(g, 0.36, 1.13, 0.040, '#FFF1C9', '#F2A9BE');
+    sparkBit(g, -0.62, 1.12, 0.045, '#FFFFFF');
   }});
   it({ k:'table_low', n:'낮은 테이블', cat:'furn', w:1.3, d:0.8, h:0.42, draw:function(g){
     var legs=[[-0.50,0.68],[0.50,0.68],[-0.50,0.06],[0.50,0.06]];
@@ -14351,6 +14464,10 @@ var MYR_ITEM = (function(){
     rr(g,-0.36,0.44,0.28,0.05,0.02,P.white,P.creamD,0.014);
     ci(g,0.18,0.48,0.085,P.mint,P.mintD,0.016);
     ci(g,0.18,0.57,0.05,P.pink,P.pinkD,0.014);
+    /* 11-26 스윗 디테일 — 레이스 매트 · 하트 */
+    laceRow(g, -0.62, 0.335, 1.04, 9, '#FFFDF6');
+    heartBit(g, -0.24, 0.48, 0.040, '#FFC2D4');
+    sparkBit(g, 0.44, 0.62, 0.038, '#FFFFFF');
   }});
   it({ k:'bookshelf', n:'책장', cat:'furn', w:1.7, d:0.42, h:2.1, draw:function(g){
     bx(g,0,0,1.7,0.42,2.06,P.woodL,P.wood,P.woodD,P.woodDD,0.03);
@@ -14377,6 +14494,12 @@ var MYR_ITEM = (function(){
     }
     ci(g,0.34,0.80,0.07,P.mint,P.mintD,0.015);
     ci(g,-0.32,0.80,0.06,P.pink,P.pinkD,0.015);
+    /* 11-26 스윗 디테일 — 레이스 러너 · 꽃병 · 리본 */
+    rr(g, -0.56, 0.865, 1.10, 0.030, 0.012, '#FFFCF6', '#EBD9C2', 0.010);
+    laceRow(g, -0.56, 0.868, 1.10, 12, '#FFFFFF');
+    flowerBit(g, -0.30, 0.905, 0.052, '#FFE0EA', '#F7C244');
+    flowerBit(g, -0.16, 0.918, 0.038, '#FFF1C9', '#F2A9BE');
+    ribbonBow(g, 0.30, 0.905, 0.062, P.pink, P.pinkD);
   }});
   it({ k:'sink', n:'주방 싱크대', cat:'furn', w:1.9, d:0.68, h:1.0, draw:function(g){
     bx(g,0,0,1.9,0.68,0.88,P.creamD,P.cream,P.creamD,P.greyD,0.025);
@@ -14390,6 +14513,14 @@ var MYR_ITEM = (function(){
     rr(g,-0.42,0.30,0.44,0.48,0.04,P.white,P.greyD,0.018);
     ci(g,-0.68,0.54,0.03,P.wood,P.woodDD,0.012); ci(g,-0.20,0.54,0.03,P.wood,P.woodDD,0.012);
     rr(g,0.10,0.96,0.5,0.06,0.02,P.woodL,P.woodDD,0.015);                /* 도마 */
+    /* 11-26 스윗 디테일 — 레이스 타월 · 하트 자석 · 허브 화분 */
+    rr(g, -0.92, 0.86, 0.30, 0.34, 0.03, '#FFFDF6', '#EBD9C2', 0.012);
+    laceRow(g, -0.92, 0.876, 0.30, 6, '#F3DCE2');
+    heartBit(g, 0.62, 0.34, 0.042, '#FFC2D4');
+    poly(g, [[0.62,1.09],[0.80,1.09],[0.77,1.20],[0.65,1.20]], '#E6B58A', '#C99B72', 0.010);
+    ci(g, 0.66, 1.24, 0.045, '#9ED493', '#6FA96A', 0.008);
+    ci(g, 0.76, 1.26, 0.036, '#B7E0AC', '#6FA96A', 0.008);
+    sparkBit(g, 0.86, 1.18, 0.034, '#FFFFFF');
   }});
   it({ k:'fridge', n:'냉장고', cat:'furn', w:0.95, d:0.72, h:1.75, draw:function(g){
     bx(g,0,0,0.95,0.72,1.72,P.white,'#F4FAF6',P.grey,P.greyD,0.025);
@@ -14399,6 +14530,14 @@ var MYR_ITEM = (function(){
     ci(g,0.02,1.38,0.06,P.lemon,P.gold,0.015);
     rr(g,-0.34,0.22,0.34,0.26,0.04,P.white,P.greyD,0.015);
     ci(g,0.22,1.40,0.05,P.mint,P.mintD,0.015);
+    /* 11-26 스윗 디테일 — 리본 · 하트 자석 · 쪽지 */
+    ribbonBow(g, -0.02, 0.735, 0.058, P.pink, P.pinkD);
+    heartBit(g, 0.10, 1.14, 0.036, '#FFC2D4');
+    heartBit(g, -0.30, 0.94, 0.030, '#FFE0EA');
+    rr(g, -0.36, 1.02, 0.22, 0.20, 0.014, '#FFFDF6', '#E7DCC6', 0.010);
+    ln(g, -0.32, 1.12, -0.18, 1.12, '#D9C6A8', 0.008);
+    ln(g, -0.32, 1.08, -0.20, 1.08, '#D9C6A8', 0.008);
+    ln(g, -0.32, 1.04, -0.22, 1.04, '#D9C6A8', 0.008);
   }});
   it({ k:'stove', n:'가스레인지', cat:'furn', w:0.95, d:0.68, h:0.95, draw:function(g){
     bx(g,0,0,0.95,0.68,0.86,P.creamD,P.cream,P.creamD,P.greyD,0.025);
@@ -14407,6 +14546,11 @@ var MYR_ITEM = (function(){
     back(g,0.4,function(){ rr(g,-0.16,0.96,0.32,0.24,0.06,'#C9D3D7','#A9B7BC',0.02); });  /* 냄비 */
     ci(g,0,1.24,0.04,P.wood,P.woodDD,0.012);
     rr(g,-0.34,0.24,0.68,0.06,0.02,P.woodD,P.woodDD,0.015);
+    /* 11-26 스윗 디테일 — 레이스 타월 · 작은 꽃 */
+    rr(g, 0.38, 0.34, 0.20, 0.22, 0.02, '#FFFDF6', '#EBD9C2', 0.010);
+    laceRow(g, 0.38, 0.352, 0.20, 5, '#F3DCE2');
+    flowerBit(g, -0.62, 1.06, 0.055, '#FFE0EA', '#F7C244');
+    sparkBit(g, 0.10, 1.34, 0.040, '#FFFFFF');
   }});
   it({ k:'island', n:'주방 아일랜드', cat:'furn', w:2.1, d:1.0, h:1.0, draw:function(g){
     bx(g,0,0,2.1,1.0,0.90,P.creamD,P.white,P.creamD,P.greyD,0.025);
@@ -14414,6 +14558,12 @@ var MYR_ITEM = (function(){
     bx(g,0,0.90,2.2,1.06,0.09,P.woodL,P.wood,P.woodD,P.woodDD,0.02);
     el(g,-0.5,1.02,0.22,0.10,P.white,P.creamD,0.02); el(g,0.0,1.04,0.20,0.09,P.lemon,P.gold,0.02);
     ci(g,0.55,1.06,0.11,P.pink,P.pinkD,0.018);
+    /* 11-26 스윗 디테일 — 레이스 러너 · 꽃다발 · 반짝이 */
+    laceRow(g, -0.92, 1.00, 1.84, 14, '#FFFDF6');
+    flowerBit(g, 0.55, 1.20, 0.070, '#FFE0EA', '#F7C244');
+    flowerBit(g, 0.42, 1.13, 0.048, '#FFF1C9', '#F2A9BE');
+    ci(g, 0.68, 1.12, 0.042, '#FFF1C9', '#EAD08A', 0.008);
+    sparkBit(g, -0.74, 1.10, 0.042, '#FFFFFF');
   }});
   it({ k:'fireplace', n:'벽난로', cat:'furn', w:1.8, d:0.55, h:1.9, draw:function(g){
     bx(g,0,0,1.8,0.55,1.10,P.brickD,P.brick,P.brickD,P.brickD,0.03);
@@ -14478,6 +14628,15 @@ var MYR_ITEM = (function(){
       el(g,-0.1,1.34,0.12,0.12,'rgba(255,255,255,.7)');
     });
     ci(g,0.0,0.86,0.05,P.pink,P.pinkD,0.014);
+    /* 11-26 스윗 디테일 — 거울 광채 · 레이스 · 향수 · 리본 */
+    g.save(); g.globalAlpha=.34; el(g, 0, 1.24, 0.42, 0.50, '#FFF3C4'); g.restore();
+    rr(g, -0.58, 0.86, 1.16, 0.028, 0.010, '#FFFCF6', '#EBD9C2', 0.008);
+    laceRow(g, -0.58, 0.862, 1.16, 12, '#FFFFFF');
+    ci(g, -0.34, 0.925, 0.048, '#FFD9E6', '#F0AFC7', 0.012);
+    rr(g, -0.28, 0.895, 0.070, 0.036, 0.014, '#F7C9DB', '#F0AFC7', 0.008);
+    ci(g, 0.30, 0.930, 0.042, '#DCEFF8', '#BBD9EA', 0.012);
+    ribbonBow(g, 0.02, 0.930, 0.058, P.pink, P.pinkD);
+    sparkBit(g, 0.10, 1.44, 0.045, '#FFFFFF');
   }});
   it({ k:'shelf_small', n:'선반장', cat:'furn', w:1.1, d:0.35, h:1.3, draw:function(g){
     bx(g,0,0,1.1,0.35,1.26,P.woodL,P.wood,P.woodD,P.woodDD,0.025);
@@ -14610,6 +14769,10 @@ var MYR_ITEM = (function(){
     ln(g,-0.30,0.80,-0.30,1.36,'rgba(255,255,255,.75)',0.02);
     ln(g, 0.30,0.80, 0.30,1.36,'rgba(255,255,255,.55)',0.016);
     rr(g,-0.86,1.40,1.72,0.10,0.04,'#F1E2C8','#C4AC87',0.02);
+    /* 11-26 스윗 디테일 — 레이스 · 하트 · 반짝이 */
+    laceRow(g, -0.80, 0.075, 1.60, 14, '#FFFFFF');
+    heartBit(g, 0.66, 1.20, 0.040, '#FFC2D4');
+    sparkBit(g, -0.52, 1.28, 0.042, '#FFFFFF');
   }});
   it({ k:'dining4', n:'원목 4인 식탁', cat:'furn', np:1, w:2.1, d:1.75, h:0.9, draw:function(g){
     back(g,1.05,function(){
@@ -14638,6 +14801,11 @@ var MYR_ITEM = (function(){
       ci(g,-0.17,1.28,0.045,'#FFB6C1',P.pinkD,0.012);
     });
     ci(g,0.02,1.02,0.09,P.white,P.creamD,0.014);
+    /* 11-26 스윗 디테일 — 레이스 러너 · 작은 꽃 · 반짝이 */
+    g.save(); g.globalAlpha=.75; rr(g, -0.06, 0.845, 1.24, 0.030, 0.012, '#FFF7FA', null); g.restore();
+    laceRow(g, -0.06, 0.848, 1.24, 13, '#FFF7FA');
+    flowerBit(g, 0.84, 1.10, 0.050, '#FFE0EA', '#F7C244');
+    sparkBit(g, -0.80, 1.14, 0.040, '#FFFFFF');
   }});
   it({ k:'bar_stool', n:'바 스툴', cat:'furn', np:1, w:0.6, d:0.6, h:1.05, seat:'stool', draw:function(g){
     var legs=[[-0.18,0.34],[0.18,0.34],[0,0.0]];
@@ -15089,6 +15257,11 @@ var MYR_ITEM = (function(){
     el(g,0.17,0.70,0.16,0.10,'#8FCB86',P.greenD,0.02);
     el(g,0,0.88,0.15,0.11,'#9ED493',P.greenD,0.02);
     ln(g,0,0.34,0,0.86,P.greenD,0.035);
+    /* 11-26 스윗 디테일 — 화분 리본 · 작은 꽃 */
+    rr(g, -0.18, 0.30, 0.36, 0.05, 0.02, '#FFF7FA', '#EBD9C2', 0.010);
+    ribbonBow(g, 0, 0.30, 0.052, P.pink, P.pinkD);
+    flowerBit(g, -0.14, 0.78, 0.040, '#FFE0EA', '#F7C244');
+    flowerBit(g, 0.16, 0.84, 0.034, '#FFF1C9', '#F2A9BE');
   }});
   it({ k:'flower_basket', n:'꽃바구니', cat:'prop', w:0.7, d:0.5, h:0.6, draw:function(g){
     el(g,0,0.02,0.24,0.08,'rgba(120,95,60,.12)');
@@ -15614,6 +15787,13 @@ var MYR_ITEM = (function(){
     poly(g,[[-0.92,1.56],[-0.62,1.72],[-0.70,0.10],[-0.94,0.16]],'#FFD7E2','#F0B6C8',0.02);
     poly(g,[[0.92,1.56],[0.62,1.72],[0.70,0.10],[0.94,0.16]],'#FFD7E2','#F0B6C8',0.02);
     rr(g,-0.98,1.60,1.96,0.10,0.04,P.wood,P.woodDD,0.02);
+    /* 11-26 스윗 디테일 — 커튼 러플 · 레이스 발란스 · 창밖 반짝이 */
+    poly(g, [[-0.98,1.62],[0.98,1.62],[0.98,1.50],[-0.98,1.50]], '#FFF7FA', '#F0C6D4', 0.012);
+    laceRow(g, -0.96, 1.505, 1.92, 16, '#FFFFFF');
+    laceRow(g, -0.94, 0.20, 0.30, 5, '#FFF0F6');
+    laceRow(g, 0.64, 0.20, 0.30, 5, '#FFF0F6');
+    sparkBit(g, -0.44, 1.30, 0.038, '#FFFFFF');
+    sparkBit(g, 0.52, 0.60, 0.030, '#FFF6DA');
   }});
   it({ k:'frame_pic', n:'액자', cat:'wall', w:0.95, d:0.08, h:0.78, wy:1.55, draw:function(g){
     rr(g,-0.47,-0.02,0.94,0.78,0.05,'#C08A54','#9A6A3C',0.025);
@@ -15918,96 +16098,239 @@ var MYR_ITEM = (function(){
     ci(g,0.50,0.14,0.05,P.pink,P.pinkD,0.01);
   }});
 
-  /* ======================= 🐾 반려동물 ======================= */
+  /* ======================= 🐾 반려동물 (2026-11-26 Dreamy Room 파스텔 리뉴얼) =======================
+     · 톤온톤 파스텔 외곽선 · 통통한 볼륨 · 반짝이는 눈 · 연핑크 볼터치 · 목걸이/리본/방울 포인트
+     · 12종 모두 같은 뼈대를 쓰고 색·귀 모양·꼬리·무늬·장식만 바꾼다 */
   function petOf(sp){
+    var u = sp.s || 1;                                  /* 전체 크기 */
+    var body  = sp.b, belly = sp.be || '#FFF8EE';
+    var ink   = sp.ln || pc(body,'#8E675A',0.66);       /* 따뜻한 톤온톤 외곽선 */
+    var ink2  = pc(ink,'#5A3E36',0.34);                 /* 입·수염 같은 가는 결 */
+    var bodyD = pc(body,'#8E675A',0.26);                /* 아래쪽 그늘 */
+    var bodyL = pc(body,'#FFFFFF',0.62);                /* 윗면 빛 */
+    var earC  = sp.ear || pc(body,'#8E675A',0.12);
+    var earL  = pc(earC,'#FFFFFF',0.50);
+    var pink  = sp.nose || '#E7919F';
+    var earIn = sp.ear2 || pc(pink,'#FFFFFF',0.52);
+    var col   = sp.col || '#F7B7C8';
+    var colD  = pc(col,'#8E675A',0.45);
+    var mark  = sp.mk || pc(body,'#8E675A',0.36);
+    var eyeC  = sp.eye || '#4A3A2C';
+    var LW    = 0.028;
     return function(g){
-      var s = sp.s || 1, body = sp.b, line = dk(sp.b, sp.dk || 0.78), belly = sp.be || '#FFF7EC';
-      el(g,0,0.02,0.26*s,0.09*s,'rgba(110,88,60,.16)');
-      /* 꼬리 */
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      function elr(cx,cy,rx,ry,rot,fill,stroke,lw){
+        g.beginPath(); g.ellipse(cx*u,cy*u,rx*u,ry*u,rot||0,0,Math.PI*2);
+        if (fill){ g.fillStyle=fill; g.fill(); }
+        if (stroke){ g.strokeStyle=stroke; g.lineWidth=(lw==null?LW:lw)*u; g.stroke(); }
+      }
+      function ci2(cx,cy,r,fill,stroke,lw){ elr(cx,cy,r,r,0,fill,stroke,lw); }
+      function clipEl(cx,cy,rx,ry,fn){
+        g.save(); g.beginPath(); g.ellipse(cx*u,cy*u,rx*u,ry*u,0,0,Math.PI*2); g.clip(); fn(); g.restore();
+      }
+
+      /* 꼬리 (몸 뒤) */
       if (sp.tail === 'curl'){
-        g.beginPath(); g.arc(0.20*s,0.26*s,0.11*s,Math.PI*0.35,Math.PI*2.05);
-        g.strokeStyle=body; g.lineWidth=0.055*s; g.lineCap='round'; g.stroke();
+        g.beginPath(); g.moveTo(0.120*u,0.230*u);
+        g.bezierCurveTo(0.330*u,0.290*u, 0.360*u,0.130*u, 0.200*u,0.150*u);
+        g.strokeStyle=ink; g.lineWidth=0.086*u; g.stroke();
+        g.strokeStyle=body; g.lineWidth=0.058*u; g.stroke();
+        g.save(); g.globalAlpha=.45; g.strokeStyle=bodyL; g.lineWidth=0.018*u; g.stroke(); g.restore();
       } else if (sp.tail === 'long'){
-        ln(g,0.17*s,0.16*s,0.28*s,0.34*s,body,0.05*s);
-        ci(g,0.30*s,0.37*s,0.055*s,belly,line,0.012*s);
+        g.beginPath(); g.moveTo(0.115*u,0.215*u);
+        g.bezierCurveTo(0.300*u,0.190*u, 0.370*u,0.430*u, 0.225*u,0.505*u);
+        g.strokeStyle=ink; g.lineWidth=0.090*u; g.stroke();
+        g.strokeStyle=body; g.lineWidth=0.060*u; g.stroke();
+        g.save(); g.globalAlpha=.40; g.strokeStyle=bodyL; g.lineWidth=0.016*u; g.stroke(); g.restore();
       } else {
-        ci(g,0.24*s,0.22*s,0.075*s,belly,line,0.014*s);
+        var pf = [[0.205,0.235,0.084],[0.285,0.300,0.062],[0.150,0.300,0.054]];
+        pf.forEach(function(p){ ci2(p[0],p[1],p[2]+0.016, ink); });
+        pf.forEach(function(p){ ci2(p[0],p[1],p[2], body); });
+        g.save(); g.globalAlpha=.42; ci2(0.300,0.315,0.030, bodyL); g.restore();
       }
-      /* 몸통 */
-      el(g,0,0.22*s,0.215*s,0.20*s,body,line,0.026*s);
-      el(g,0,0.20*s,0.115*s,0.135*s,belly);
-      /* 발 */
-      el(g,-0.14*s,0.045*s,0.075*s,0.055*s,body,line,0.018*s);
-      el(g, 0.14*s,0.045*s,0.075*s,0.055*s,body,line,0.018*s);
-      /* 귀 */
-      if (sp.ears === 'point'){
-        poly(g,[[-0.21*s,0.46*s],[-0.17*s,0.67*s],[-0.06*s,0.50*s]],body,line,0.02*s);
-        poly(g,[[ 0.21*s,0.46*s],[ 0.17*s,0.67*s],[ 0.06*s,0.50*s]],body,line,0.02*s);
-        poly(g,[[-0.17*s,0.49*s],[-0.15*s,0.61*s],[-0.10*s,0.51*s]],sp.ear||belly);
-        poly(g,[[ 0.17*s,0.49*s],[ 0.15*s,0.61*s],[ 0.10*s,0.51*s]],sp.ear||belly);
-      } else if (sp.ears === 'long'){
-        el(g,-0.11*s,0.70*s,0.065*s,0.21*s,body,line,0.022*s);
-        el(g, 0.11*s,0.70*s,0.065*s,0.21*s,body,line,0.022*s);
-        el(g,-0.11*s,0.70*s,0.030*s,0.15*s,'#FFD7E2');
-        el(g, 0.11*s,0.70*s,0.030*s,0.15*s,'#FFD7E2');
-      } else if (sp.ears === 'flop'){
-        el(g,-0.20*s,0.42*s,0.085*s,0.135*s,sp.ear||dk(body,0.94),line,0.02*s);
-        el(g, 0.20*s,0.42*s,0.085*s,0.135*s,sp.ear||dk(body,0.94),line,0.02*s);
-      } else {
-        ci(g,-0.17*s,0.57*s,0.075*s,sp.ear||body,line,0.02*s);
-        ci(g, 0.17*s,0.57*s,0.075*s,sp.ear||body,line,0.02*s);
-      }
+
+      /* 귀 (머리 뒤) */
+      var E = sp.ears || 'round';
+      [-1,1].forEach(function(sx){
+        if (E === 'long'){
+          elr(0.104*sx,0.768,0.084,0.180,sx*0.15, body, ink, LW);
+          elr(0.104*sx,0.782,0.048,0.136,sx*0.15, earIn);
+        } else if (E === 'lop'){
+          elr(0.185*sx,0.445,0.062,0.170,sx*0.13, earC, ink, LW);
+          elr(0.185*sx,0.468,0.030,0.118,sx*0.13, earL);
+        } else if (E === 'point'){
+          elr(0.150*sx,0.600,0.080,0.122,-sx*0.26, body, ink, LW);
+          elr(0.153*sx,0.610,0.040,0.078,-sx*0.26, earIn);
+        } else if (E === 'curly'){
+          var cc=[[0.222,0.585,0.070],[0.243,0.480,0.078],[0.222,0.378,0.060]];
+          cc.forEach(function(p){ ci2(p[0]*sx,p[1],p[2]+0.016, ink); });
+          cc.forEach(function(p){ ci2(p[0]*sx,p[1],p[2], earC); });
+          cc.forEach(function(p){ g.save(); g.globalAlpha=.45; ci2(p[0]*sx-0.018*sx,p[1]+0.020,p[2]*0.42, earL); g.restore(); });
+        } else {
+          ci2(0.163*sx,0.612,0.084, body, ink, LW);
+          ci2(0.163*sx,0.616,0.046, earIn);
+        }
+      });
+
+      /* 몸통 — 통통한 타원 + 배 + 아래 그늘 + 윗면 빛 */
+      elr(0,0.190,0.240,0.178,0, body, ink, LW);
+      clipEl(0,0.190,0.240,0.178,function(){
+        elr(0,0.150,0.150,0.126,0, belly);
+        g.save(); g.globalAlpha=.30; elr(0,0.055,0.240,0.085,0, bodyD); g.restore();
+        g.save(); g.globalAlpha=.32; elr(-0.080,0.300,0.115,0.052,0, bodyL); g.restore();
+      });
+
+      /* 앞발 + 발가락 */
+      [-1,1].forEach(function(sx){
+        elr(0.130*sx,0.045,0.086,0.058,0, body, ink, 0.024);
+        g.save(); g.globalAlpha=.45; g.strokeStyle=ink2; g.lineWidth=0.010*u;
+        [[-0.028,0.014],[0.004,0.020],[0.034,0.012]].forEach(function(t){
+          g.beginPath(); g.moveTo((0.130*sx+t[0])*u,0.012*u); g.lineTo((0.130*sx+t[0]+t[1]*0.1)*u,0.040*u); g.stroke();
+        });
+        g.restore();
+      });
+
       /* 머리 */
-      ci(g,0,0.46*s,0.205*s,body,line,0.026*s);
-      /* 무늬 */
-      if (sp.m === 'patch'){
-        el(g,-0.09*s,0.54*s,0.10*s,0.085*s,sp.p2||'#E8C69A');
-      } else if (sp.m === 'calico'){
-        el(g,-0.10*s,0.55*s,0.09*s,0.075*s,'#4E4A52');
-        el(g, 0.11*s,0.53*s,0.075*s,0.06*s,'#E8A05C');
-      } else if (sp.m === 'stripes'){
-        ln(g,-0.06*s,0.60*s,-0.03*s,0.52*s,dk(body,0.86),0.018*s);
-        ln(g,0.0,0.62*s,0.0,0.53*s,dk(body,0.86),0.018*s);
-        ln(g,0.06*s,0.60*s,0.03*s,0.52*s,dk(body,0.86),0.018*s);
+      elr(0,0.452,0.220,0.214,0, body, ink, LW);
+      clipEl(0,0.452,0.220,0.214,function(){
+        g.save(); g.globalAlpha=.26; elr(-0.080,0.545,0.105,0.068,0, bodyL); g.restore();
+        /* 무늬 */
+        if (sp.m === 'stripes'){
+          g.save(); g.globalAlpha=.85; g.strokeStyle=mark; g.lineWidth=0.030*u; g.lineCap='round';
+          [[-0.080,0.652,-0.032,0.578],[0,0.664,0,0.586],[0.080,0.652,0.032,0.578]].forEach(function(l){
+            g.beginPath(); g.moveTo(l[0]*u,l[1]*u); g.lineTo(l[2]*u,l[3]*u); g.stroke();
+          });
+          g.restore();
+        } else if (sp.m === 'calico'){
+          elr(-0.125,0.560,0.112,0.098,-0.28,'#F0C6A2');
+          elr( 0.135,0.518,0.086,0.072, 0.30,'#CDB7AC');
+          elr(-0.050,0.638,0.058,0.046, 0,'#E7B893');
+        } else if (sp.m === 'patch'){
+          elr(-0.100,0.560,0.105,0.088,0, sp.p2||'#EFC9A4');
+        }
+      });
+
+      /* 햄스터 볼주머니 */
+      if (sp.cheek){
+        [-1,1].forEach(function(sx){ elr(0.150*sx,0.362,0.076,0.058,0, body, ink, 0.022); });
       }
-      /* 눈 */
-      ci(g,-0.077*s,0.48*s,0.033*s,sp.eye||'#4A3A2C');
-      ci(g, 0.077*s,0.48*s,0.033*s,sp.eye||'#4A3A2C');
-      ci(g,-0.068*s,0.491*s,0.010*s,'#FFFFFF');
-      ci(g, 0.086*s,0.491*s,0.010*s,'#FFFFFF');
-      /* 코·입 */
-      el(g,0,0.405*s,0.030*s,0.022*s,sp.nose||'#C4707F');
-      g.beginPath(); g.arc(-0.014*s,0.385*s,0.022*s,0,Math.PI); g.strokeStyle=line; g.lineWidth=0.011*s; g.stroke();
-      g.beginPath(); g.arc( 0.014*s,0.385*s,0.022*s,0,Math.PI); g.stroke();
-      /* 볼터치 */
-      el(g,-0.145*s,0.42*s,0.036*s,0.022*s,'rgba(255,150,170,.35)');
-      el(g, 0.145*s,0.42*s,0.036*s,0.022*s,'rgba(255,150,170,.35)');
+
+      /* 주둥이 밝은 털 */
+      elr(0,0.392,0.108,0.072,0, belly);
+
+      /* 목걸이 띠 */
+      g.beginPath();
+      g.moveTo(-0.152*u,0.262*u);
+      g.quadraticCurveTo(0,0.292*u,0.152*u,0.262*u);
+      g.quadraticCurveTo(0,0.208*u,-0.152*u,0.262*u);
+      g.closePath();
+      g.fillStyle = silk(g,0.300*u,0.196*u,col,0.24); g.fill();
+      g.strokeStyle = colD; g.lineWidth = 0.014*u; g.stroke();
+      g.save(); g.globalAlpha=.35; g.strokeStyle='#FFFFFF'; g.lineWidth=0.010*u;
+      g.beginPath(); g.moveTo(-0.140*u,0.262*u); g.quadraticCurveTo(0,0.289*u,0.140*u,0.262*u); g.stroke();
+      g.restore();
+
+      /* 목걸이 장식 — 리본 또는 방울 */
+      if (sp.acc === 'bow'){
+        elr(-0.048,0.238,0.052,0.036,-0.34, col, colD, 0.013);
+        elr( 0.048,0.238,0.052,0.036, 0.34, col, colD, 0.013);
+        ci2(0,0.234,0.027, pc(col,'#FFFFFF',0.30), colD, 0.013);
+        ci2(0,0.232,0.010,'rgba(255,255,255,.75)');
+      } else {
+        ci2(0,0.236,0.034,'#FFD679','#D9A63C',0.014);
+        ci2(-0.010,0.246,0.011,'rgba(255,255,255,.85)');
+        g.beginPath(); g.moveTo(0,0.212*u); g.lineTo(0,0.226*u);
+        g.strokeStyle='#D9A63C'; g.lineWidth=0.012*u; g.stroke();
+      }
+
+      /* 눈 — 반짝 하이라이트 두 개 */
+      [-1,1].forEach(function(t){
+        var ex=0.084*t, ey=0.486, r=0.042;
+        ci2(ex,ey,r, eyeC);
+        ci2(ex-0.013*t,ey+0.013,r*0.42,'#FFFFFF');
+        ci2(ex+0.014*t,ey-0.016,r*0.20,'rgba(255,255,255,.92)');
+      });
+
+      /* 코 — 동글동글 하트 모양 */
+      g.beginPath();
+      g.moveTo(0,0.362*u);
+      g.quadraticCurveTo(-0.034*u,0.408*u,-0.020*u,0.420*u);
+      g.quadraticCurveTo(0,0.430*u,0.020*u,0.420*u);
+      g.quadraticCurveTo(0.034*u,0.408*u,0,0.362*u);
+      g.closePath(); g.fillStyle = pink; g.fill();
+      ci2(-0.008,0.412,0.007,'rgba(255,255,255,.70)');
+
+      /* 입 — 작은 ω */
+      g.strokeStyle=ink2; g.lineWidth=0.011*u;
+      g.beginPath(); g.moveTo(0,0.360*u); g.lineTo(0,0.348*u); g.stroke();
+      g.beginPath(); g.arc(-0.017*u,0.348*u,0.018*u,0,Math.PI); g.stroke();
+      g.beginPath(); g.arc( 0.017*u,0.348*u,0.018*u,0,Math.PI); g.stroke();
+
+      /* 볼터치 — 연핑크 물감 */
+      [-1,1].forEach(function(t){
+        var cx=0.148*t*u, cy=0.406*u, R=0.052*u;
+        var rg=g.createRadialGradient(cx,cy,R*0.12,cx,cy,R);
+        rg.addColorStop(0,'rgba(255,128,158,.58)');
+        rg.addColorStop(0.65,'rgba(255,158,184,.34)');
+        rg.addColorStop(1,'rgba(255,175,198,0)');
+        g.fillStyle=rg; g.beginPath(); g.ellipse(cx,cy,R,R*0.72,0,0,Math.PI*2); g.fill();
+      });
+
+      /* 수염 */
+      if (sp.whisker){
+        g.save(); g.globalAlpha=.50; g.strokeStyle=ink; g.lineWidth=0.009*u;
+        [-1,1].forEach(function(t){
+          [[0.404,0.014],[0.374,-0.014]].forEach(function(l){
+            g.beginPath(); g.moveTo(0.138*t*u,l[0]*u); g.lineTo(0.244*t*u,(l[0]+l[1])*u); g.stroke();
+          });
+        });
+        g.restore();
+      }
+
+      /* 머리 위 잔머리 */
+      if (sp.tuft){
+        g.strokeStyle=ink; g.lineWidth=0.014*u;
+        g.beginPath(); g.moveTo(-0.012*u,0.663*u);
+        g.quadraticCurveTo(0.030*u,0.702*u,0.064*u,0.672*u); g.stroke();
+      }
     };
   }
   it({ k:'pet_maltese', n:'말티즈', cat:'pet', np:1, w:0.6, d:0.5, h:0.66, pet:{say:'멍!', speed:0.78},
-       draw:petOf({b:'#FFFDF7', be:'#FFF4E6', ears:'flop', tail:'puff', s:1}) });
+       draw:petOf({b:'#FFF8EC', be:'#FFFFFF', ear:'#FFE7CB', ears:'flop', tail:'puff', s:1.00,
+                   col:'#FFB3C8', acc:'bow', tuft:1}) });
   it({ k:'pet_poodle', n:'푸들', cat:'pet', np:1, w:0.6, d:0.5, h:0.64, pet:{say:'멍멍!', speed:0.82},
-       draw:petOf({b:'#F6E3C8', be:'#FFF7E9', ear:'#EBD3AE', ears:'round', tail:'puff', s:0.98}) });
+       draw:petOf({b:'#F8DFBE', be:'#FFF7E7', ear:'#EFCF9E', ears:'curly', tail:'puff', s:0.98,
+                   col:'#BFE8D2', acc:'bell', tuft:1}) });
   it({ k:'pet_shiba', n:'시바견', cat:'pet', np:1, w:0.62, d:0.52, h:0.68, pet:{say:'왈왈!', speed:0.92},
-       draw:petOf({b:'#E7B072', be:'#FFF1DC', ears:'point', tail:'curl', s:1.02}) });
+       draw:petOf({b:'#EFBE8C', be:'#FFF6E7', ears:'point', tail:'curl', s:1.02,
+                   col:'#F0907A', acc:'bell'}) });
   it({ k:'pet_retriever', n:'리트리버', cat:'pet', np:1, w:0.68, d:0.56, h:0.74, pet:{say:'멍!', speed:0.88},
-       draw:petOf({b:'#EBC98F', be:'#FBEBCB', ear:'#DDB470', ears:'flop', tail:'long', s:1.12}) });
+       draw:petOf({b:'#F2CE99', be:'#FFF3DA', ear:'#E2B77A', ears:'flop', tail:'long', s:1.12,
+                   col:'#A5D5EA', acc:'bow'}) });
   it({ k:'pet_cheese', n:'치즈냥', cat:'pet', np:1, w:0.58, d:0.48, h:0.62, pet:{say:'야옹~', speed:0.7},
-       draw:petOf({b:'#F7DFAE', be:'#FFF6DF', ears:'point', tail:'long', s:0.95, m:'stripes'}) });
+       draw:petOf({b:'#F9E2B4', be:'#FFF9E9', ears:'point', tail:'long', s:0.95, m:'stripes', mk:'#DCA75F',
+                   col:'#FFB3C8', acc:'bell', whisker:1}) });
   it({ k:'pet_calico', n:'삼색냥', cat:'pet', np:1, w:0.58, d:0.48, h:0.62, pet:{say:'야옹~', speed:0.7},
-       draw:petOf({b:'#FFFDF8', be:'#FFF7EC', ears:'point', tail:'long', s:0.95, m:'calico'}) });
+       draw:petOf({b:'#FFFCF4', be:'#FFFFFF', ears:'point', tail:'long', s:0.95, m:'calico',
+                   col:'#C7AFE8', acc:'bow', whisker:1}) });
   it({ k:'pet_russian', n:'러시안블루', cat:'pet', np:1, w:0.58, d:0.48, h:0.62, pet:{say:'냐~', speed:0.66},
-       draw:petOf({b:'#A9B4C4', be:'#DCE3EC', ears:'point', tail:'long', s:0.98, eye:'#7FA85F'}) });
+       draw:petOf({b:'#B7C1D2', be:'#E7ECF3', ears:'point', tail:'long', s:0.98, eye:'#8FB86A',
+                   col:'#BFE8D2', acc:'bell', whisker:1}) });
   it({ k:'pet_black', n:'검은냥', cat:'pet', np:1, w:0.58, d:0.48, h:0.62, pet:{say:'야옹!', speed:0.7},
-       draw:petOf({b:'#56525C', be:'#736E79', ears:'point', tail:'long', s:0.95, eye:'#E8C95E', nose:'#D98FA0'}) });
+       draw:petOf({b:'#6E6470', be:'#867C8C', ears:'point', tail:'long', s:0.95, eye:'#FFD98A', nose:'#E7919F',
+                   col:'#FFE3C4', acc:'bow', whisker:1}) });
   it({ k:'pet_rabbit_white', n:'흰 토끼', cat:'pet', np:1, w:0.56, d:0.48, h:0.72, pet:{say:'깡총!', speed:0.62},
-       draw:petOf({b:'#FFFEF9', be:'#FFF8EC', ears:'long', tail:'puff', s:1.0, nose:'#E8A0B4'}) });
+       draw:petOf({b:'#FFFCF5', be:'#FFFFFF', ears:'long', tail:'puff', s:1.00, nose:'#E89FB2',
+                   col:'#FFC2D4', acc:'bow'}) });
   it({ k:'pet_rabbit_lop', n:'롭이어 토끼', cat:'pet', np:1, w:0.58, d:0.5, h:0.66, pet:{say:'깡총!', speed:0.6},
-       draw:petOf({b:'#C89B6E', be:'#F6E3CC', ear:'#B08356', ears:'flop', tail:'puff', s:1.02, nose:'#B07A6A'}) });
+       draw:petOf({b:'#D2A878', be:'#F9EBD4', ear:'#BC8F60', ears:'lop', tail:'puff', s:1.02, nose:'#C08A8E',
+                   col:'#FFF0C0', acc:'bell'}) });
   it({ k:'pet_rabbit_grey', n:'회색 토끼', cat:'pet', np:1, w:0.56, d:0.48, h:0.70, pet:{say:'깡총!', speed:0.62},
-       draw:petOf({b:'#C6C6CC', be:'#F1F1F4', ears:'long', tail:'puff', s:0.98, nose:'#C08F9C'}) });
+       draw:petOf({b:'#CDCBD4', be:'#F5F4F8', ears:'long', tail:'puff', s:0.98, nose:'#C79AA6',
+                   col:'#A8D6EA', acc:'bow'}) });
   it({ k:'pet_hamster', n:'햄스터', cat:'pet', np:1, w:0.46, d:0.4, h:0.48, pet:{say:'찍찍!', speed:0.55},
-       draw:petOf({b:'#EBCB9A', be:'#FFF6E6', ears:'round', tail:'puff', s:0.74, nose:'#D08BA1'}) });
+       draw:petOf({b:'#F1D3A4', be:'#FFF8EA', ears:'round', tail:'puff', s:0.74, nose:'#D08BA1',
+                   col:'#C7E8CE', acc:'bell', cheek:1, whisker:1, tuft:1}) });
 
   var THEME = [
     { k:'theme_wood',       n:'우드 테마',     th:'wood' },
@@ -17385,7 +17708,7 @@ var MYR_ITEM = (function(){
     t:0, raf:0, last:0, move:false, sel:null, drag:null, pan:null, pinch:null,
     tray:'all', trayOpen:true, tapId:0, walkT:0, hintT:9, rollTok:0, banner:''
   };
-  var SPRC = {}, THUM = {}, IMGC = {};
+  var SPRC = {}, SPRES = {}, THUM = {}, IMGC = {};
 
   /* ---------- 작은 도구 ---------- */
   function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
@@ -17458,37 +17781,54 @@ var MYR_ITEM = (function(){
   function spr(k){
     if (SPRC[k]) return SPRC[k];
     var o = ITEM[k]; if (!o) return null;
-    var cv = document.createElement('canvas'); cv.width = SPC; cv.height = SPC;
+    var res = (o.cat === 'pet') ? 2 : 1;          /* 동물은 2배 해상도 — 파스텔 디테일이 뭉개지지 않게 */
+    var SZ = Math.round(SPC*res);
+    var cv = document.createElement('canvas'); cv.width = SZ; cv.height = SZ;
     var g = cv.getContext('2d');
     g.save();
-    g.translate(OXS, OYS); g.scale(SPR, -SPR);
+    g.translate(OXS*res, OYS*res); g.scale(SPR*res, -SPR*res);
     g.lineJoin = 'round'; g.lineCap = 'round';
-    if (o.cat !== 'wall'){
-      var d = o.d || 0.6, w = o.w || 1;
-      g.beginPath(); g.ellipse(-d*0.3*KX, d*0.3*KZ, w*0.48, Math.max(0.12, d*0.31), 0, 0, Math.PI*2);
-      g.fillStyle = 'rgba(130,85,70,.14)'; g.fill();
-    }
     try { o.draw(g); } catch(e){ console.warn('[myhome] draw', k, e && e.message); }
     g.restore();
-    SPRC[k] = cv;
+    /* 11-26 — 그림 전체에 따뜻한 파스텔 스티커 외곽선 (반려동물은 자체 외곽선이 있어 그대로) */
+    if (o.cat !== 'theme' && o.cat !== 'pet'){
+      try { cv = cuteOutline(cv, '#B99A8B', Math.max(2, Math.round(1.8*res))); } catch(e){}
+    }
+    /* 바닥 그림자는 외곽선 뒤에 깔아 둔다 */
+    if (o.cat !== 'wall'){
+      var d = o.d || 0.6, w = o.w || 1;
+      var g2 = cv.getContext('2d');
+      g2.save(); g2.translate(OXS*res, OYS*res); g2.scale(SPR*res, -SPR*res);
+      g2.beginPath(); g2.ellipse(-d*0.3*KX, d*0.3*KZ, w*0.48, Math.max(0.12, d*0.31), 0, 0, Math.PI*2);
+      g2.fillStyle = 'rgba(130,85,70,.14)'; g2.fill();
+      g2.restore();
+    }
+    SPRC[k] = cv; SPRES[k] = res;
     return cv;
   }
   function thumbOf(k){
     if (THUM[k]) return THUM[k];
     var cv = spr(k); if (!cv) return '';
-    var g = cv.getContext('2d'), d = g.getImageData(0,0,SPC,SPC).data;
-    var minX = SPC, minY = SPC, maxX = 0, maxY = 0;
-    for (var y=0;y<SPC;y++) for (var x=0;x<SPC;x++){
-      if (d[(y*SPC+x)*4+3] > 14){
+    var cw = cv.width;
+    var g = cv.getContext('2d'), d = g.getImageData(0,0,cw,cw).data;
+    var minX = cw, minY = cw, maxX = 0, maxY = 0;
+    for (var y=0;y<cw;y++) for (var x=0;x<cw;x++){
+      if (d[(y*cw+x)*4+3] > 14){
         if (x<minX) minX=x; if (x>maxX) maxX=x; if (y<minY) minY=y; if (y>maxY) maxY=y;
       }
     }
-    if (maxX <= minX || maxY <= minY){ minX=0; minY=0; maxX=SPC-1; maxY=SPC-1; }
-    var w = maxX-minX+1, h = maxY-minY+1, s = Math.min(190/w, 190/h);
+    if (maxX <= minX || maxY <= minY){ minX=0; minY=0; maxX=cw-1; maxY=cw-1; }
+    /* 11-26 — 그림이 카드 왼쪽에 붙어 잘린 것처럼 보이지 않도록
+       사방에 여백을 주고, 그림 중심을 카드 한가운데로 정확히 맞춘다 */
+    var bw = maxX-minX+1, bh = maxY-minY+1;
+    var pad = Math.max(6, Math.round(Math.max(bw,bh)*0.12));
+    var ccx = (minX+maxX+1)/2, ccy = (minY+maxY+1)/2;
+    var halfW = bw/2 + pad, halfH = bh/2 + pad;
+    var s = Math.min(190/(halfW*2), 190/(halfH*2));
     var t = document.createElement('canvas');
-    t.width = Math.max(8, Math.round(w*s)); t.height = Math.max(8, Math.round(h*s));
+    t.width = Math.max(8, Math.round(halfW*2*s)); t.height = Math.max(8, Math.round(halfH*2*s));
     var tg = t.getContext('2d'); tg.imageSmoothingQuality = 'high';
-    tg.drawImage(cv, minX, minY, w, h, 0, 0, t.width, t.height);
+    tg.drawImage(cv, ccx-halfW, ccy-halfH, halfW*2, halfH*2, 0, 0, t.width, t.height);
     try { THUM[k] = t.toDataURL('image/png'); } catch(e){ THUM[k] = ''; }
     return THUM[k];
   }
@@ -17670,10 +18010,11 @@ var MYR_ITEM = (function(){
   /* ---------- 가구·캐릭터 그리기 ---------- */
   function drawSpr(g, k, X, Y, flip, alpha){
     var cv = spr(k); if (!cv) return;
-    var kk = MY.S/SPR;
+    var res = SPRES[k] || 1;
+    var kk = MY.S/(SPR*res);
     g.save(); g.translate(X, Y); if (flip) g.scale(-1,1);
     if (alpha != null) g.globalAlpha = alpha;
-    g.drawImage(cv, -OXS*kk, -OYS*kk, cv.width*kk, cv.height*kk);
+    g.drawImage(cv, -OXS*res*kk, -OYS*res*kk, cv.width*kk, cv.height*kk);
     g.restore();
   }
   function elevOf(it){
