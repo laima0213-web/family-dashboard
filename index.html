@@ -14172,7 +14172,7 @@ window.__pg = {
    · 앞(z=0)에서 뒤로 갈수록 화면에서 왼쪽(-x·KX) 위(+y·KZ)로 간다
    ============================================================ */
 var MYR_ITEM = (function(){
-  var KX = 0.36, KZ = 0.70;   /* 11-26 3단 개편 — 옆벽·테라스가 한눈에 보이도록 사선을 조금 넓혔다 */
+  var KX = 0.19, KZ = 0.58;   /* 11-26 돌하우스 개편 — 정면에 가깝게 눕혀 방이 큼직하게 보이도록 */
   var P = {
     wood:'#C98F62', woodD:'#A87C58', woodL:'#E5BE93', woodDD:'#8A6247',
     cream:'#FFF8EC', creamD:'#EFDCC0', wall:'#F8E8CE',
@@ -18320,13 +18320,14 @@ var MYR_ITEM = (function(){
   var ITEM = C.map, LIST = C.list, P = C.P || {}, KX = C.KX || 0.36, KZ = C.KZ || 0.70;
 
   /* ---------- 집 구조 (11-26 3단 개편: 왼쪽 옆벽 + 넓은 위층 · 가운데 아치 문 · 앞쪽 잔디 테라스) ---------- */
-  var HX0 = -6.6, HX1 = 6.6;          /* 집 폭 13.2m */
-  var D1 = 4.2;                       /* 위층(단) 깊이 — 아늑하게 넓힘 */
-  var ZD = 8.6;                       /* 아치 문·반칸막이 경계 (실내 ↔ 야외 테라스) */
-  var HZ1 = 13.0;                     /* 야외 잔디 테라스 끝 */
-  var WALL_B = 3.95;                  /* 벽 높이 */
+  var HX0 = -4.4, HX1 = 4.4;          /* 집 폭 8.8m — 인형의 집처럼 아기자기하게 */
+  var D1 = 4.0;                       /* 위층(단) 깊이 — 아늑하게 넓힘 */
+  var ZD = 8.2;                       /* 아치 문·반칸막이 경계 (실내 ↔ 야외 테라스) */
+  var HZ1 = 11.7;                     /* 야외 잔디 테라스 끝 */
+  var WALL_B = 3.50;                  /* 벽 높이 */
   var STEP_H = 1.12;                  /* 단 높이 */
-  var SX0 = HX0 + 0.24, SX1 = HX0 + 1.80;   /* 왼쪽 계단 폭 */
+  var HOUSE_TOP = STEP_H + WALL_B + 0.20;   /* 잘라 낸 집 윗면(몰딩 포함) */
+  var SX0 = HX0 + 0.24, SX1 = HX0 + 1.62;   /* 왼쪽 계단 폭 */
   var STX = (SX1 - SX0) / 2;          /* 계단 반폭 */
   var STZ1 = D1 + 2.05;               /* 계단 끝(아래) */
   var ARC_W = 1.18;                   /* 아치 문 반폭 */
@@ -18485,9 +18486,11 @@ var MYR_ITEM = (function(){
     if (av.preset) return av.preset;
     return ({ k1:'fox_sailor', k2:'bun_ribbon' })[kid] || 'fox_sailor';
   }
+  var SETTLED = null;
   function room(mk){
     if (!state) return null;
     var r = state.myRoom && state.myRoom[MY.kid];
+    if (r && SETTLED !== r){ try { settleRoom(r); } catch(e){} SETTLED = r; }
     if (!r && mk){
       mutate(function(s){
         s.myRoom = s.myRoom || {};
@@ -18497,23 +18500,73 @@ var MYR_ITEM = (function(){
     }
     return r || null;
   }
+  /* ---------- 예전 저장 좌표가 새 집(8.8m) 밖이면 안으로 당겨 온다 ----------
+     · 저장 데이터는 건드리지 않고 메모리에서만 자리를 맞춘다 (Firebase 쓰기 없음) */
+  function settleRoom(r){
+    if (!r) return;
+    var items = r.items || [], moved = [];
+    items.forEach(function(it){
+      var o = ITEM[it.k] || {};
+      var isWall = (o.cat === 'wall');
+      var hw = isWall ? 0.55 : Math.min(1.55, (o.w || 1) * 0.5 + 0.12);
+      var ox = Number(it.x) || 0;
+      it.x = clamp(ox, HX0 + hw, HX1 - hw);
+      if (Math.abs(it.x - ox) > 0.02) moved.push(it);
+      if (!isWall) it.z = clamp(Number(it.z) || 0, 0.40, HZ1 - 0.40);
+      else it.z = clamp(Number(it.z) || 0, 0, 0.6);
+    });
+    /* 폭이 줄어 안으로 밀려 들어온 가구끼리 겹치면 위아래(z)로 비켜 준다 */
+    function lvlBand(z){
+      if (z < D1 - 0.05) return [0.85, D1 - 0.45];
+      if (z < ZD) return [D1 + 0.55, ZD - 0.60];
+      return [ZD + 0.55, HZ1 - 0.55];
+    }
+    function overlap(a, b){
+      var oa = ITEM[a.k] || {}, ob = ITEM[b.k] || {};
+      if ((oa.cat === 'wall') !== (ob.cat === 'wall')) return false;
+      if (oa.cat === 'wall') return false;
+      var aUp = (Number(a.lvl) ? 1 : 0), bUp = (Number(b.lvl) ? 1 : 0);
+      if (aUp !== bUp) return false;
+      return Math.abs(a.x - b.x) < ((oa.w || 1) + (ob.w || 1)) * 0.46
+          && Math.abs(a.z - b.z) < ((oa.d || 0.6) + (ob.d || 0.6)) * 0.85;
+    }
+    var STEPS = [0, 0.78, -0.78, 1.45, -1.45, 2.1, -2.1, 2.7, -2.7];
+    moved.forEach(function(a){
+      var band = lvlBand(a.z), z0 = a.z;
+      for (var pass = 0; pass < 2; pass++){
+        var clash = items.filter(function(b){ return b !== a && overlap(a, b); })[0];
+        if (!clash) break;
+        for (var i = 0; i < STEPS.length; i++){
+          var zc = clamp(z0 + STEPS[i], band[0], band[1]);
+          var save = a.z; a.z = zc;
+          var again = items.filter(function(b){ return b !== a && overlap(a, b); })[0];
+          if (!again) break;
+          a.z = save;
+        }
+      }
+    });
+    (r.chars || []).forEach(function(c){
+      c.x = clamp(Number(c.x) || 0, HX0 + 0.80, HX1 - 0.80);
+      c.z = clamp(Number(c.z) || 0, 0.70, HZ1 - 0.80);
+    });
+  }
   function freshRoom(kid){
     var p = avPreset(kid);
     return {
       v:1, theme:'wood', rolls:0,
       inv:{ bed:1, desk:1, rug_flower:1, table:1, window_arch:1, garland:1, frame_pic:1, clock_wall:1, wall_shelf:1 },
       items:[
-        { id:uid(), k:'bed',         x:-4.6, z:3.5, r:0, lvl:1, wy:0 },
-        { id:uid(), k:'desk',        x: 4.7, z:3.3, r:0, lvl:1, wy:0 },
-        { id:uid(), k:'rug_flower',  x: 0.2, z:7.5, r:0, lvl:0, wy:0 },
-        { id:uid(), k:'table',       x: 2.9, z:7.8, r:0, lvl:0, wy:0 },
-        { id:uid(), k:'window_arch', x:-3.2, z:0.1, r:0, lvl:1, wy:1.15 },
-        { id:uid(), k:'garland',     x: 1.6, z:0.1, r:0, lvl:1, wy:2.35 },
-        { id:uid(), k:'frame_pic',   x: 4.1, z:0.1, r:0, lvl:1, wy:1.62 },
-        { id:uid(), k:'clock_wall',  x:-0.9, z:0.1, r:0, lvl:1, wy:2.62 },
-        { id:uid(), k:'wall_shelf',  x:-2.3, z:0.1, r:0, lvl:1, wy:1.42 }
+        { id:uid(), k:'bed',         x:-3.3, z:3.1, r:0, lvl:1, wy:0 },
+        { id:uid(), k:'desk',        x: 3.1, z:3.0, r:0, lvl:1, wy:0 },
+        { id:uid(), k:'rug_flower',  x: 0.3, z:7.2, r:0, lvl:0, wy:0 },
+        { id:uid(), k:'table',       x: 2.5, z:7.4, r:0, lvl:0, wy:0 },
+        { id:uid(), k:'window_arch', x: 1.5, z:0.1, r:0, lvl:1, wy:1.15 },
+        { id:uid(), k:'garland',     x:-0.6, z:0.1, r:0, lvl:1, wy:2.35 },
+        { id:uid(), k:'frame_pic',   x: 3.7, z:0.1, r:0, lvl:1, wy:1.62 },
+        { id:uid(), k:'clock_wall',  x:-1.5, z:0.1, r:0, lvl:1, wy:2.62 },
+        { id:uid(), k:'wall_shelf',  x: 0.1, z:0.1, r:0, lvl:1, wy:1.42 }
       ],
-      chars:[ { id:uid(), k:p, x:0.8, z:6.4, seat:'', me:true, nm:famName(kid) } ]
+      chars:[ { id:uid(), k:p, x:0.6, z:6.2, seat:'', me:true, nm:famName(kid) } ]
     };
   }
 
@@ -18659,9 +18712,9 @@ var MYR_ITEM = (function(){
   /* ---------- 왼쪽 옆벽 (햇살 커튼 창문) ----------
      사선 투영에서 x=HX0 면은 아주 얇게 보이므로, 왼쪽 벽은 방 안쪽을 향한
      넓은 벽면으로 세우고 오른쪽 모서리에 기둥·그림자를 줘 'ㄱ'자 모서리로 읽히게 한다. */
-  var LWR = HX0 + 2.95;               /* 왼쪽 벽이 끝나는 x (모서리) */
+  var LWR = HX0 + 2.35;               /* 왼쪽 벽이 끝나는 x (모서리) */
   function drawSideWall(g, th){
-    var XL = HX0 - 9, XR = LWR;          /* 왼쪽 끝까지 이어 그려 화면을 줄여도 벽 이음매가 보이지 않게 */
+    var XL = HX0, XR = LWR;              /* 집 왼쪽 끝에서 딱 끊는다 */
     var X0 = px(XL, 0), X1 = px(XR, 0);
     var yb = py(0, STEP_H), yt = yb - WALL_B*MY.S, S = MY.S;
     /* 벽면 */
@@ -18709,7 +18762,7 @@ var MYR_ITEM = (function(){
     g.fillStyle = cg; g.fillRect(X1 - 0.9*S, yt, 0.9*S, yb - yt);
 
     /* ---------- 창문 ---------- */
-    var wx0 = HX0 + 0.34, wx1 = HX0 + 2.46;            /* x 구간 */
+    var wx0 = HX0 + 0.26, wx1 = HX0 + 1.90;            /* x 구간 */
     var we0 = STEP_H + 0.62, we1 = STEP_H + 2.46;      /* 높이 */
     var WX0 = px(wx0, 0), WX1 = px(wx1, 0), WY0 = py(0, we1), WY1 = py(0, we0);
     var WW = WX1 - WX0, WH = WY1 - WY0;
@@ -18835,7 +18888,7 @@ var MYR_ITEM = (function(){
   function drawSun(g, th){
     if (th.stars) return;
     var S = MY.S;
-    var wx0 = HX0 + 0.42, wx1 = HX0 + 2.42;
+    var wx0 = HX0 + 0.34, wx1 = HX0 + 1.86;
     /* 창에서 위층 마루로 길게 드리운 빛 */
     var a = P3(wx0, 0.05, STEP_H), b = P3(wx1, 0.05, STEP_H);
     var c = P3(wx1 + 0.55, 2.35, STEP_H), d2 = P3(wx0 + 0.55, 2.35, STEP_H);
@@ -19095,7 +19148,7 @@ var MYR_ITEM = (function(){
     quadP(g, P3(xa, Z, ph+0.09), P3(xb, Z, ph+0.09), P3(xb, Z, ph-0.01), P3(xa, Z, ph-0.01), '#E4CAA6');
     quadP(g, P3(xa, Z-0.13, ph+0.10), P3(xb, Z-0.13, ph+0.10), P3(xb, Z, ph+0.10), P3(xa, Z, ph+0.10), 'rgba(255,255,255,.30)');
     /* 상판 위 꽃상자 */
-    var fb0 = -4.35, fb1 = -1.65;
+    var fb0 = HX0 + 0.62, fb1 = -1.72;
     boxP(g, fb0, fb1, Z-0.30, Z-0.04, ph+0.09, ph+0.30, '#C99C74', '#B98A62', '#A87A54');
     for (var fx = fb0+0.16; fx < fb1-0.06; fx += 0.36){
       var FX = px(fx, Z-0.17), FY = py(Z-0.17, ph+0.30);
@@ -19550,6 +19603,146 @@ var MYR_ITEM = (function(){
     if (a && a.say > 0) drawPetBubble(g, X, Y - hop, o, a);
   }
 
+
+  /* ============================================================
+     🏠 인형의 집(돌하우스) 마감 — 방 바깥은 포근한 파스텔 배경,
+     안쪽만 잘라 그리고 왼쪽·오른쪽·앞쪽에 두툼한 벽 단면·바닥 두께를 준다
+     ============================================================ */
+  function housePoly(){
+    var T = HOUSE_TOP;
+    return [
+      P3(HX0, 0, T), P3(HX1, 0, T),
+      P3(HX1, 0, STEP_H), P3(HX1, D1, STEP_H), P3(HX1, D1, 0), P3(HX1, ZD, 0), P3(HX1, HZ1, 0),
+      P3(HX0, HZ1, 0), P3(HX0, ZD, 0), P3(HX0, D1, 0), P3(HX0, D1, STEP_H), P3(HX0, 0, STEP_H)
+    ];
+  }
+  function polyPath(g, poly, dx, dy){
+    g.beginPath();
+    for (var i=0;i<poly.length;i++){
+      var p = poly[i], X = p.x + (dx||0), Y = p.y + (dy||0);
+      if (i) g.lineTo(X, Y); else g.moveTo(X, Y);
+    }
+    g.closePath();
+  }
+  /* 방 바깥 배경 — 크림 → 라벤더 → 하늘색 */
+  function drawBackdrop(g, th){
+    var W = MY.W, H = MY.H;
+    var gr = g.createLinearGradient(0, 0, 0, H);
+    if (th.stars){
+      gr.addColorStop(0, '#222446'); gr.addColorStop(0.5, '#2F3360'); gr.addColorStop(1, '#474A79');
+    } else {
+      gr.addColorStop(0, '#FFF8EE'); gr.addColorStop(0.34, '#FDF1F6');
+      gr.addColorStop(0.66, '#F2EDFB'); gr.addColorStop(1, '#E8F2FB');
+    }
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    /* 집 뒤로 은은한 빛 */
+    var cx = px((HX0+HX1)/2, HZ1*0.42), cy = py(HZ1*0.42, 2.4);
+    var rg = g.createRadialGradient(cx, cy, 8, cx, cy, Math.max(W, H)*0.60);
+    rg.addColorStop(0, th.stars ? 'rgba(140,150,220,.30)' : 'rgba(255,255,255,.78)');
+    rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, W, H);
+    /* 아기자기한 파스텔 방울 — 배경이 허전하지 않게 */
+    g.save();
+    for (var i=0;i<26;i++){
+      var bx = ((i*137.5) % 100)/100*W, by = ((i*61.7) % 100)/100*H;
+      var r = (i%3===0) ? 5.4 : 3.4;
+      g.globalAlpha = th.stars ? 0.5 : 0.42;
+      g.fillStyle = th.stars ? '#FFF6C8'
+        : ['#FFE7EF','#E9E0FA','#DCEFFB','#FFF6DA'][i%4];
+      g.beginPath(); g.arc(bx, by, r, 0, Math.PI*2); g.fill();
+    }
+    g.restore();
+  }
+  function drawHouseShadow(g, poly){
+    g.save();
+    g.shadowColor = 'rgba(120,98,74,.26)';
+    g.shadowBlur = Math.max(10, 0.55*MY.S);
+    g.shadowOffsetX = 0; g.shadowOffsetY = Math.max(5, 0.30*MY.S);
+    polyPath(g, poly, 0, 0);
+    g.fillStyle = 'rgba(255,252,246,.98)';
+    g.fill();
+    g.restore();
+  }
+  /* 앞쪽 바닥 단면(두께) */
+  function drawFrontSlab(g, th){
+    var S = MY.S;
+    var fL0 = P3(HX0, HZ1, 0), fR0 = P3(HX1, HZ1, 0);
+    var fL = { x: fL0.x - 0.30*S, y: fL0.y }, fR = { x: fR0.x + 0.30*S, y: fR0.y };
+    var hS = 0.62*S, wRW = fR.x - fL.x;
+    g.save();
+    /* 아래로 떨어지는 그림자 */
+    g.fillStyle = 'rgba(122,96,70,.13)';
+    roundRect(g, fL.x - 5, fL.y + hS*0.62, wRW + 10, hS*0.72, 9); g.fill();
+    /* 단면 */
+    var sg = g.createLinearGradient(0, fL.y - 1, 0, fL.y + hS);
+    sg.addColorStop(0, '#F6E7CF'); sg.addColorStop(0.24, '#EBD5B6'); sg.addColorStop(1, '#DCC09A');
+    roundRect(g, fL.x - 3, fL.y - 1, wRW + 6, hS + 1, 6);
+    g.fillStyle = sg; g.fill();
+    /* 윗면 하이라이트 */
+    g.fillStyle = '#FFF9EC'; g.fillRect(fL.x - 3, fL.y - 1.5, wRW + 6, Math.max(2, 0.10*S));
+    /* 나무 결 세로선 */
+    g.save(); g.globalAlpha = .22; g.strokeStyle = '#B08A5E'; g.lineWidth = 1;
+    for (var x2 = fL.x + 0.34*S; x2 < fR.x - 0.1*S; x2 += 0.34*S){
+      g.beginPath(); g.moveTo(x2, fL.y + 0.10*S); g.lineTo(x2 - 0.03*S, fL.y + hS - 0.10*S); g.stroke();
+    }
+    g.restore();
+    /* 맨 아래 둥근 테두리 */
+    g.strokeStyle = 'rgba(180,148,110,.55)'; g.lineWidth = 1.4;
+    roundRect(g, fL.x - 3, fL.y - 1, wRW + 6, hS + 1, 6); g.stroke();
+    g.restore();
+  }
+  /* 왼쪽·오른쪽 벽 단면 + 위쪽 마감 */
+  function drawHouseCaps(g, th){
+    var S = MY.S, T = HOUSE_TOP;
+    var left  = [[HX0,0,T],[HX0,0,STEP_H],[HX0,D1,STEP_H],[HX0,D1,0],[HX0,ZD,0],[HX0,HZ1,0]];
+    var right = [[HX1,0,T],[HX1,0,STEP_H],[HX1,D1,STEP_H],[HX1,D1,0],[HX1,ZD,0],[HX1,HZ1,0]];
+    /* ---------- 왼쪽·오른쪽 벽 단면 ---------- */
+    function sideCap(pts, dir){
+      g.save();
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      function path(dx, dy){
+        g.beginPath();
+        for (var i=0;i<pts.length;i++){
+          var p = P3(pts[i][0], pts[i][1], pts[i][2]);
+          var X = p.x + dx, Y = p.y + dy;
+          if (i) g.lineTo(X, Y); else g.moveTo(X, Y);
+        }
+      }
+      /* 바깥 그림자 */
+      path(dir*0.12*S, 0.12*S);
+      g.strokeStyle = 'rgba(126,100,74,.20)'; g.lineWidth = 0.56*S; g.stroke();
+      /* 두툼한 벽 두께(바깥면) */
+      path(dir*0.04*S, 0);
+      g.strokeStyle = '#DFC5A0'; g.lineWidth = 0.50*S; g.stroke();
+      /* 크림 몰딩(안쪽면) */
+      path(-dir*0.01*S, 0);
+      g.strokeStyle = '#FDF7EC'; g.lineWidth = 0.34*S; g.stroke();
+      /* 바깥 우드 테두리선 */
+      path(dir*0.24*S, 0);
+      g.strokeStyle = 'rgba(188,156,118,.75)'; g.lineWidth = 1.6; g.stroke();
+      /* 안쪽 우드 라인 */
+      path(-dir*0.16*S, 0);
+      g.strokeStyle = 'rgba(196,166,130,.45)'; g.lineWidth = 1.2; g.stroke();
+      g.restore();
+    }
+    sideCap(left, -1);
+    sideCap(right, 1);
+
+    /* ---------- 위쪽(뒷벽 윗면) 마감 ---------- */
+    g.save();
+    var a = P3(HX0, 0, T), b = P3(HX1, 0, T);
+    g.lineCap = 'round';
+    g.strokeStyle = 'rgba(126,100,74,.18)'; g.lineWidth = 0.54*S;
+    g.beginPath(); g.moveTo(a.x - 0.06*S, a.y + 0.07*S); g.lineTo(b.x + 0.06*S, b.y + 0.07*S); g.stroke();
+    g.strokeStyle = '#DFC5A0'; g.lineWidth = 0.48*S;
+    g.beginPath(); g.moveTo(a.x - 0.05*S, a.y + 0.02*S); g.lineTo(b.x + 0.05*S, b.y + 0.02*S); g.stroke();
+    g.strokeStyle = '#FDF7EC'; g.lineWidth = 0.34*S;
+    g.beginPath(); g.moveTo(a.x - 0.02*S, a.y); g.lineTo(b.x + 0.02*S, b.y); g.stroke();
+    g.strokeStyle = 'rgba(188,156,118,.7)'; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(a.x - 0.06*S, a.y - 0.20*S); g.lineTo(b.x + 0.06*S, b.y - 0.20*S); g.stroke();
+    g.restore();
+  }
+
   /* ---------- 렌더 ---------- */
   function THM(r){ return THEMES[(r && r.theme) || 'wood'] || THEMES.wood; }
   /* 11-26 — 소품이 가구에 가려 뒤로 숨던 문제.
@@ -19572,7 +19765,13 @@ var MYR_ITEM = (function(){
     var r = room();
     var th = THM(r);
     g.setTransform(MY.dpr, 0, 0, MY.dpr, 0, 0);
-    g.fillStyle = th.ceil; g.fillRect(0, 0, MY.W, MY.H);
+    /* 0) 인형의 집 바깥 배경 + 집 그림자 + 안쪽만 잘라 그리기 */
+    drawBackdrop(g, th);
+    var poly = housePoly();
+    drawHouseShadow(g, poly);
+    g.save();
+    polyPath(g, poly, 0, 0);
+    g.clip();
     /* 1) 뒤벽 → 왼쪽 옆벽 → 벽장식 */
     drawWall(g, th);
     drawSideWall(g, th);
@@ -19603,7 +19802,10 @@ var MYR_ITEM = (function(){
     }
     if (!rail) drawRail(g, th);
     if (!gate) drawGate(g, th);
-    /* 4) 맨 앞 화단 상자 */
+    g.restore();
+    /* 4) 앞 바닥 두께 → 맨 앞 화단 상자 → 좌우·위 끝마감 */
+    drawHouseCaps(g, th);
+    drawFrontSlab(g, th);
     frontPlanter(g, th);
     drawBadge(g);
   }
@@ -19622,19 +19824,20 @@ var MYR_ITEM = (function(){
 
   /* ---------- 카메라 ---------- */
   function drawBounds(){
-    return { top: 84, bot: MY.H - (MY.trayOpen ? MY.H*0.40 : 74) };
+    return { top: 100, bot: MY.H - (MY.trayOpen ? MY.H*0.445 : 74) };
   }
   function fitView(hard){
     var b = drawBounds();
-    var availH = Math.max(150, b.bot - b.top), availW = MY.W - 10;
+    var availH = Math.max(150, b.bot - b.top), availW = MY.W - 14;
     /* 사선(셰어) 때문에 생기는 좌우 폭까지 계산해 3단 구조 전체가 들어오게 */
-    var worldW = (HX1 - HX0) + HZ1*KX + 0.5;
-    var worldH = STEP_H + WALL_B + HZ1*KZ + 0.3;
+    var worldW = (HX1 - HX0) + HZ1*KX + 0.46;      /* 좌우 끝마감 두께까지 */
+    var worldH = HOUSE_TOP + HZ1*KZ + 0.42;         /* 위 끝마감 ~ 앞 바닥 두께 */
     var s = Math.min(availW/worldW, availH/worldH);
-    MY.Sgoal = clamp(s, 9, 40);
+    MY.Sgoal = clamp(s, 9, 60);
     if (hard) MY.S = MY.Sgoal;
-    var top = b.top + Math.max(0, (availH - worldH*MY.Sgoal)*0.30);
-    var cz = (MY.H/2 - top - (STEP_H + WALL_B)*MY.Sgoal)/(KZ*MY.Sgoal);
+    /* 남는 자리는 위 45% · 아래 55%로 나눠 집을 화면 가운데에 둔다 */
+    var top = b.top + Math.max(0, (availH - worldH*MY.Sgoal)*0.45);
+    var cz = (MY.H/2 - top - HOUSE_TOP*MY.Sgoal)/(KZ*MY.Sgoal);
     MY.camZg = cz;
     MY.camXg = (HX0 + HX1)/2 + (HZ1/2 - cz)*KX;
     if (hard){ MY.camX = MY.camXg; MY.camZ = MY.camZg; }
@@ -19743,7 +19946,7 @@ var MYR_ITEM = (function(){
   function freeSpot(o, lvl){
     var r = room(); if (!r) return { x:0, z:9, lvl:0 };
     if (o.cat === 'wall'){
-      for (var x=-5.6; x<=5.6; x+=0.5){
+      for (var x=HX0+0.85; x<=HX1-0.85; x+=0.5){
         var hit = (r.items||[]).some(function(it){
           var oo = ITEM[it.k]; if (!oo || oo.cat !== 'wall') return false;
           return Math.abs((it.x||0) - x) < (oo.w + o.w)*0.52;
@@ -20130,7 +20333,8 @@ var MYR_ITEM = (function(){
     var el = $m('myr'); if (!el) return;
     el.hidden = false;
     document.body.classList.add('myr-open');
-    ensureHero(room(true));
+    var rr0 = room(true); settleRoom(rr0); SETTLED = rr0;
+    ensureHero(rr0);
     preloadPets();
     if (!MY.inited) initCanvas();
     resize();
@@ -20293,7 +20497,9 @@ var MYR_ITEM = (function(){
         var dx = p.x - MY.drag.sx, dy = p.y - MY.drag.sy;
         if (Math.abs(dx) + Math.abs(dy) > 5) MY.drag.moved = true;
         var z = MY.drag.hit.d.z;
-        MY.drag.hit.d.x = clamp(MY.drag.hit.d.x + dx/(MY.S), HX0+0.3, HX1-0.3);
+        var dO = ITEM[MY.drag.hit.d.k] || {};
+        var dHW = Math.min(1.55, (dO.w || 1) * 0.5 + 0.10);
+        MY.drag.hit.d.x = clamp(MY.drag.hit.d.x + dx/(MY.S), HX0+dHW, HX1-dHW);
         if (MY.drag.hit.t === 'i' && ITEM[MY.drag.hit.d.k] && ITEM[MY.drag.hit.d.k].cat !== 'wall'){
           var e = elevOf(MY.drag.hit.d);
           MY.drag.hit.d.z = clamp(MY.drag.hit.d.z + dy/(MY.S*KZ), 0.6, HZ1-0.6);
@@ -20537,7 +20743,8 @@ var MYR_ITEM = (function(){
         return '<figure><img src="' + thumbOf(o.k) + '"><figcaption>' + esc(o.n) + '</figcaption></figure>';
       }).join('');
     },
-    paths: function(fn){ var st = JSON.parse(JSON.stringify(state)); fn(st); return null; }
+    paths: function(fn){ var st = JSON.parse(JSON.stringify(state)); fn(st); return null; },
+    settle: function(){ settleRoom(room()); return room(); }
   };
 })();
 
