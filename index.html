@@ -215,6 +215,54 @@ button{font:inherit;color:inherit}
 .st.miss{background:#FBEAEA;border:1px solid #F3D6D6;color:#C58A8A}
 .st.today{box-shadow:0 0 0 2px #8FC7A2;border-style:solid;color:#5C8F6D}
 
+/* ---------- 🏆 오늘도 치카 100원! (양치 100원 달력판) ---------- */
+.br-top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.br-tabs{display:flex;gap:2px;flex:0 0 auto;background:#F7F1E6;border-radius:999px;padding:2px}
+.br-tab{height:22px;border:0;background:transparent;border-radius:999px;padding:0 12px;
+  font-size:12px;font-weight:900;color:#95897B;cursor:pointer;line-height:1}
+.br-tab.on{background:#fff;color:#3E7CB1;box-shadow:0 2px 6px rgba(62,124,177,.22)}
+.br-sum{margin-left:auto;display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.br-money{font-size:15px;font-weight:900;color:#3E7CB1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.br-days{font-size:11px;font-weight:800;color:var(--sub)}
+.br-nav{display:flex;align-items:center;gap:4px;margin:0 0 6px}
+.br-mon{flex:1 1 auto;text-align:center;font-size:12.5px;font-weight:900;color:#7A6A58;letter-spacing:-.3px}
+.br-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.br-wd{text-align:center;font-size:10.5px;font-weight:900;color:#A2937F;padding-bottom:1px}
+.br-wd.su{color:#C98C8C}.br-wd.sa{color:#7FA0C4}
+.br-c{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;
+  border:1px solid #F1E7D6;background:#FFFDF6;border-radius:10px;padding:2px 0 3px;cursor:pointer}
+.br-c:active{transform:scale(.95)}
+.br-c.pad{border:0;background:transparent;cursor:default}
+.br-d{font-size:10px;font-weight:900;color:#A2947F;line-height:1.1;font-variant-numeric:tabular-nums}
+.br-coin{position:relative;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;
+  font-size:9.5px;font-weight:900;letter-spacing:-.4px;
+  background:radial-gradient(circle at 34% 28%,#FFFEFA,#EFE8DA 78%);border:1px dashed #DBCCB4;color:#B9AB96}
+.br-x{display:none;font-style:normal;position:absolute;inset:0;place-items:center;
+  font-size:18px;font-weight:900;color:#4C79A6;line-height:1;text-shadow:0 0 3px #FFFDFA,0 0 3px #FFFDFA}
+.br-c.ok .br-coin{background:radial-gradient(circle at 34% 26%,#A9DCF3,#5FA9D8 68%,#3D82B2);
+  border:1px solid #3B7DAE;color:#fff;text-shadow:0 1px 1px rgba(24,62,92,.35);
+  box-shadow:0 2px 6px rgba(63,131,178,.35)}
+.br-c.ok .br-coin::after{content:'';position:absolute;left:5px;top:4px;width:7px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,.55);transform:rotate(-25deg)}
+.br-c.miss .br-coin{background:radial-gradient(circle at 34% 28%,#FFFEFA,#F0E8DB 78%);border-style:solid;
+  border-color:#E3D6C2;color:#CFC3B0}
+.br-c.miss .br-x{display:grid}
+.br-c.today{border-color:#8FC7A2;box-shadow:0 0 0 2px rgba(143,199,162,.55);background:#F6FCF7}
+.br-c.today .br-d{color:#4E8F65}
+.br-tot{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.br-tot>div{display:flex;flex-direction:column;gap:1px;border-radius:12px;padding:5px 9px;
+  background:linear-gradient(160deg,#F3FAFF,#EAF4FD);border:1px solid #D9E9F6}
+.br-tot>div:last-child{background:linear-gradient(160deg,#FFF8E6,#FEF2D8);border-color:#F0E0B4}
+.br-tot span{font-size:10px;font-weight:900;color:#8C9AA6;letter-spacing:-.2px}
+.br-tot b{font-size:15px;font-weight:900;color:#3E7CB1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.br-tot>div:last-child b{color:#A9752F}
+.br-hint{margin-top:5px;font-size:10px;font-weight:800;color:#B0A392;line-height:1.3}
+@media (max-width:374px){
+  .br-coin{width:24px;height:24px;font-size:8.5px}
+  .br-money,.br-tot b{font-size:13.5px}
+  .br-tab{padding:0 10px;font-size:11px}
+}
+
 /* ---------- 우편함 ---------- */
 .mrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px}
 .lab{font-size:11px;font-weight:900;color:var(--faint);white-space:nowrap;min-width:34px}
@@ -1148,13 +1196,22 @@ button{font:inherit;color:inherit}
       "k1 k1 k1 k1 k1 k1 k2 k2 k2 k2 k2 k2"
       "cl cl cl cl rw rw rw rw wk wk wk wk"
       "kd kd kd kd kd kd kd kd kd kd kd kd"
-      "ca ca ca ca ca ca ml ml ml ml ml ml"
-      "wt wt wt wt wt wt wt wt wt wt wt wt";}
+      "br br br br br br ca ca ca ca ca ca"
+      "ml ml ml ml ml ml wt wt wt wt wt wt";}
   #kidA{grid-area:k1} #kidB{grid-area:k2} #clean{grid-area:cl}
   #kidDetail{grid-area:kd}
   #meal{grid-area:ml}
   #reward{grid-area:rw} #want{grid-area:wt}
-  #cal{grid-area:ca} #week{grid-area:wk}
+  #cal{grid-area:ca} #week{grid-area:wk} #brush{grid-area:br}
+  .br-coin{width:21px;height:21px;font-size:8px}
+  .br-x{font-size:14px}
+  .br-c{padding:1px 0 2px;border-radius:8px}
+  .br-d{font-size:8px}
+  .br-tab{height:17px;padding:0 9px;font-size:10px}
+  .br-money{font-size:12px}
+  .br-tot b{font-size:12px}
+  .br-tot>div{padding:3px 7px;border-radius:9px}
+  .br-mon{font-size:10.5px}
   .ktab .kth{font-size:9.5px}
   .tag{font-size:11px;padding:0 8px}
   .tag .v{font-size:9.5px;padding:0 4px;min-width:11px}
@@ -2422,9 +2479,10 @@ body.myr-open{overflow:hidden}
       <section class="card kid k2 prof" id="kidB" data-act="kid-pick" data-m="k2" role="button" tabindex="0" aria-label="둘째 프로필"></section>
     </div>
     <section class="card kd" id="kidDetail" aria-label="선택한 아이 오늘 기록"></section>
-    <section class="card" id="clean" aria-label="치즈집 청소"></section>
+    <section class="card" id="brush" aria-label="오늘도 치카 100원 달력판"></section>
     <section class="card" id="reward" aria-label="한 달 보상 도장판"></section>
     <section class="card" id="week" aria-label="이번 주 밀림 체크"></section>
+    <section class="card" id="clean" aria-label="치즈집 청소"></section>
     <section class="card" id="cal" aria-label="우리집 달력과 다가오는 일정"></section>
     <section class="card" id="meal" aria-label="학교 급식"></section>
     <section class="card" id="want" aria-label="이거 사주세요"></section>
@@ -7019,6 +7077,106 @@ function renderReward(){
 }
 
 /* ============================================================
+   14-b. 렌더링 — 🏆 오늘도 치카 100원! (양치 100원 달력판)
+     · state.brush[YYYY-MM][kid] = { "2": "O", "3": "X" }
+       O = 성공(100원) · X = 실패 · 칸이 없으면 미체크
+     · 2026-11 부터 시작 · 보기는 누구나, 칸 수정은 엄마·아빠 PIN
+   ============================================================ */
+var BRUSH_START = '2026-11';          /* 처음 시작한 달 — 이 앞으로는 못 감 */
+var brushMon = '';                    /* 보고 있는 달 ('' = 이번 달) */
+var brushKidMon = '';                 /* 고른 아이 ('' = 지금 고른 아이) */
+function brushMonth(){ return brushMon || monthKeyOf(); }
+function brushKid(){
+  var k = brushKidMon || activeKid();
+  return KIDS.indexOf(k) > -1 ? k : KIDS[0];
+}
+function brushMap(kid, ym){
+  var byKid = ((state && state.brush) || {})[ym] || {};
+  var m = byKid[kid];
+  return (m && typeof m === 'object') ? m : {};
+}
+function brushOkN(m){ return Object.keys(m || {}).filter(function(d){ return m[d] === 'O'; }).length; }
+function brushTotal(kid){
+  var all = (state && state.brush) || {}, sum = 0;
+  Object.keys(all).forEach(function(ym){ sum += brushOkN((all[ym] || {})[kid]) * 100; });
+  return sum;
+}
+function brushShift(delta){
+  var mk = brushMonth();
+  var d = new Date(Number(mk.slice(0,4)), Number(mk.slice(5,7)) - 1 + delta, 1);
+  var nx = monthKeyOf(d);
+  if (nx < BRUSH_START) return;
+  brushMon = nx;
+  renderBrush();
+}
+/* 미체크 → O → X → 미체크 순환. 잎 경로(state/brush/{YYYY-MM}/{아이})만 저장된다 */
+function brushCycle(kid, ym, day){
+  var key = String(day);
+  var cur = brushMap(kid, ym)[key] || '';
+  var next = !cur ? 'O' : (cur === 'O' ? 'X' : '');
+  mutate(function(s){
+    if (!s.brush || typeof s.brush !== 'object') s.brush = {};
+    if (!s.brush[ym] || typeof s.brush[ym] !== 'object') s.brush[ym] = {};
+    var m = s.brush[ym][kid];
+    if (!m || typeof m !== 'object') m = {};
+    if (!next) delete m[key]; else m[key] = next;
+    if (Object.keys(m).length) s.brush[ym][kid] = m;
+    else delete s.brush[ym][kid];
+    if (!Object.keys(s.brush[ym]).length) delete s.brush[ym];
+  });
+  return next;
+}
+function renderBrush(){
+  var el = $('#brush'); if (!el || !state) return;
+  var mk = brushMonth(), yr = Number(mk.slice(0,4)), monNum = Number(mk.slice(5,7));
+  var isNow = (mk === monthKeyOf());
+  var kid = brushKid(), map = brushMap(kid, mk), tk = todayKey();
+  /* 1일이 무슨 요일인지 → 월요일 시작 칸 수 */
+  var lead = (new Date(yr, monNum - 1, 1).getDay() + 6) % 7;
+  var lastDay = new Date(yr, monNum, 0).getDate();
+
+  var wd = ['월','화','수','목','금','토','일'].map(function(w, i){
+    return '<span class="br-wd' + (i === 5 ? ' sa' : i === 6 ? ' su' : '') + '">' + w + '</span>';
+  }).join('');
+  var cells = '';
+  for (var p = 0; p < lead; p++) cells += '<span class="br-c pad"></span>';
+  for (var day = 1; day <= lastDay; day++){
+    var st = map[String(day)] || '';
+    var key = mk + '-' + (day < 10 ? '0' + day : '' + day);
+    var cls = 'br-c' + (st === 'O' ? ' ok' : st === 'X' ? ' miss' : '') + (key === tk ? ' today' : '');
+    var lbl = monNum + '월 ' + day + '일 ' + (st === 'O' ? '성공 100원' : st === 'X' ? '실패' : '미체크');
+    cells += '<button class="' + cls + '" type="button" data-act="brush-cell" data-m="' + kid
+      + '" data-ym="' + mk + '" data-d="' + day + '" aria-label="' + lbl + ' · 엄마·아빠가 눌러 수정">'
+      + '<span class="br-d">' + day + '</span>'
+      + '<span class="br-coin">100<i class="br-x">✕</i></span></button>';
+  }
+
+  var okN = brushOkN(map), monWon = okN * 100, allWon = brushTotal(kid);
+  el.innerHTML =
+      '<div class="h2">🏆 오늘도 치카 100원!<small>🔒 칸 수정은 엄마·아빠</small></div>'
+    + '<div class="br-top"><div class="br-tabs">'
+    +   KIDS.map(function(id){
+          return '<button class="br-tab' + (id === kid ? ' on' : '') + '" type="button" data-act="brush-kid" data-m="' + id + '">'
+            + esc((FAMILY[id] || {}).name || id) + '</button>';
+        }).join('')
+    + '</div>'
+    +   '<span class="br-sum"><b class="br-money">' + won(monWon) + '</b><span class="br-days">' + okN + '일 성공</span></span>'
+    + '</div>'
+    + '<div class="br-nav">'
+    +   '<button class="cnav" type="button" data-act="brush-prev" aria-label="이전 달"' + (mk <= BRUSH_START ? ' disabled' : '') + '>◀</button>'
+    +   '<span class="br-mon">' + yr + '년 ' + monNum + '월</span>'
+    +   '<button class="cnav" type="button" data-act="brush-next" aria-label="다음 달">▶</button>'
+    +   (isNow ? '' : '<button class="cnow" type="button" data-act="brush-now">이번 달</button>')
+    + '</div>'
+    + '<div class="br-grid">' + wd + cells + '</div>'
+    + '<div class="br-tot">'
+    +   '<div><span>이번 달 합계</span><b>' + won(monWon) + '</b></div>'
+    +   '<div><span>전체 누적 합계</span><b>' + won(allWon) + '</b></div>'
+    + '</div>'
+    + '<div class="br-hint">칸을 톡 누르면 성공(O) → 실패(✕) → 되돌리기 · 성공 1번 = 100원</div>';
+}
+
+/* ============================================================
    15. 렌더링 — 이번 주 밀림 체크
    ============================================================ */
 function renderWeek(){
@@ -8251,7 +8409,7 @@ function upcomingItems(limit){
 function renderAll(){
   if (!state) return;
   renderClock(); renderWeather(); setSync(syncKind);
-  renderKids(); renderClean(); renderReward(); renderWeek();
+  renderKids(); renderClean(); renderReward(); renderWeek(); renderBrush();
   renderWant(); renderStudy(); renderReading(); renderCal(); renderMeal();
   setText('#appTitle', CFG.appTitle);
   var fs = $('#footStore');
@@ -9100,6 +9258,23 @@ document.addEventListener('click', function(ev){
   if (act === 'cal-prevm'){ calShiftMonth(-1); return; }
   if (act === 'cal-nextm'){ calShiftMonth(1); return; }
   if (act === 'cal-today'){ calSel = null; calView = null; schedEditId = null; renderCal(); return; }
+
+  /* 🏆 오늘도 치카 100원! — 보기(탭·달 넘기기)는 누구나, 칸 토글만 엄마·아빠 PIN */
+  if (act === 'brush-kid'){ brushKidMon = el.dataset.m; renderBrush(); return; }
+  if (act === 'brush-prev'){ brushShift(-1); return; }
+  if (act === 'brush-next'){ brushShift(1); return; }
+  if (act === 'brush-now'){ brushMon = ''; renderBrush(); return; }
+  if (act === 'brush-cell'){
+    var brKid = el.dataset.m, brYm = el.dataset.ym, brDay = Number(el.dataset.d);
+    var brName = (FAMILY[brKid] || {}).name || '';
+    requireParentPin(function(){
+      var nx = brushCycle(brKid, brYm, brDay);
+      renderBrush();
+      toast('🪥 ' + brName + ' ' + Number(brYm.slice(5,7)) + '/' + brDay + ' · '
+        + (nx === 'O' ? '성공 +100원' : nx === 'X' ? '실패 ✕' : '미체크로 되돌렸어요'), 2000);
+    });
+    return;
+  }
 
   /* 도장판 · 밀림 체크 칸 수정 */
   if (act === 'rew-cell' || act === 'week-cell'){
