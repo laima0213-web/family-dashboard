@@ -2327,10 +2327,11 @@ body.myr-open{overflow:hidden}
 .prof-btns .prof-edit{padding:2px 6px}
 @media (max-width:430px){ .prof-btns .prof-edit{font-size:10px;padding:2px 5px;letter-spacing:-.4px} }
 .prof-foot{width:100%}
-/* 카드가 좁아도 상점·놀이터·마이홈 세 버튼이 한 줄에 고르게 */
+/* 카드가 좁아도 🎁 선물 도착! · 🛍️ 상점 · 🏡 집꾸미기 버튼이 한 줄에 고르게 */
 .prof-foot{flex-wrap:wrap;row-gap:4px}
-.prof-btns{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+.prof-btns{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
 .prof-btns .prof-edit{width:100%;text-align:center;font-size:9.8px;padding:3px 1px;letter-spacing:-.6px}
+.prof-btns .prof-gift{grid-column:1 / -1;font-size:10.2px;padding:4px 1px;letter-spacing:-.3px}
 .prof-meta{flex:1 1 100%}
 
 /* /MYR-CSS */
@@ -6835,6 +6836,7 @@ function kidProfileHtml(id){
   var mD = tabDone(id,'morning'), eD = tabDone(id,'evening');
   var wk = weekDone(id), st = streakOf(id);
   var hasP = avHasPreset(id);
+  var giftN = giftPendAmt(id);   /* 🎁 받지 않은 선물 — 있어도 상점 버튼은 그대로 남는다 */
   return '<div class="prof-top">'
     + '<div class="prof-ava' + (hasP ? '' : ' none') + '">'
     +   (hasP ? avatarFace(id)
@@ -6852,9 +6854,8 @@ function kidProfileHtml(id){
     + '<div class="prof-foot">'
     +   '<span class="prof-meta" title="문제집 풀기를 며칠 연속으로 했는지 · 이번 주 7일 중 며칠 했는지">📘 연속 ' + st + '일 · 주 ' + wk + '/7</span>'
     +   '<span class="prof-btns">'
-    +     '<button class="prof-edit prof-shop' + (giftPendAmt(id) > 0 ? ' gift' : '') + '" type="button" data-act="avatar-open" data-m="' + id + '" title="'
-    +       (giftPendAmt(id) > 0 ? '🎁 선물 도착! 눌러서 선물상자를 열어요' : '캐릭터·배경·꾸미기 상점') + '">'
-    +       (giftPendAmt(id) > 0 ? '🎁 선물 도착!' : '🛍️ 상점') + '</button>'
+    +     (giftN > 0 ? '<button class="prof-edit prof-shop gift prof-gift" type="button" data-act="prof-gift" data-m="' + id + '" title="🎁 선물이 도착했어요 · 눌러서 선물상자를 열어요">🎁 선물 도착!' + (giftN > 1 ? ' +' + giftN + 'P' : '') + '</button>' : '')
+    +     '<button class="prof-edit prof-shop" type="button" data-act="shop-open" data-m="' + id + '" title="캐릭터·배경·꾸미기 상점">🛍️ 상점</button>'
     +     '<button class="prof-edit prof-home" type="button" data-act="myhome-open" data-m="' + id + '" title="넓은 집에서 가구를 놓고 캐릭터와 함께 꾸며요">🏡 집꾸미기</button>'
     +   '</span>'
     + '</div>';
@@ -8334,7 +8335,7 @@ function closeCommuteSheet(){ var s = $('#sheet'); if (s) s.hidden = true; avata
 /* ---------- 캐릭터 꾸미기 시트 ---------- */
 var avatarDraft = null;          // { kid, av:{preset,bg,deco} }
 var avatarTab = 'preset';
-function openAvatarSheet(id){
+function openAvatarSheet(id, shopOnly){
   if (!id) return;
   avatarDraft = { kid: id, av: avRec(id), pick: false };
   avatarTab = 'preset';
@@ -8346,9 +8347,10 @@ function openAvatarSheet(id){
   codexSetsOpen = true;
   /* 📖 도감 세트 · 🔥 연속 공부 보상부터 정산 — 상점을 여는 순간 새 선물이 함께 도착한다 */
   try { codexSyncClaims(false); } catch(e){}
-  /* 🎁 선물이 도착해 있으면, 상점을 여는 이 순간 3상자 뽑기가 열린다 */
+  /* 🎁 선물이 도착해 있으면, 상점을 여는 이 순간 3상자 뽑기가 열린다
+     · 카드의 '🛍️ 상점' 버튼으로 들어오면(shopOnly) 선물상자는 🎁 버튼에 남겨 두고 상점만 연다 */
   var pgift = giftPendAmt(id);
-  if (pgift > 0) setTimeout(function(){ p3Open(id); }, 240);
+  if (pgift > 0 && !shopOnly) setTimeout(function(){ p3Open(id); }, 240);
 }
 function renderAvatarSheet(){
   var body = $('#sheetBody'); if (!body || !avatarDraft) return;
@@ -8461,6 +8463,8 @@ document.addEventListener('click', function(ev){
   }
   if (act === 'kid-fold'){ prefs.kidOpen = false; savePrefs(); renderKids(); return; }
   if (act === 'avatar-open'){ openAvatarSheet(el.dataset.m); return; }
+  if (act === 'shop-open'){ openAvatarSheet(el.dataset.m, true); return; }   /* 카드의 🛍️ 상점 — 선물상자는 🎁 버튼에서 */
+  if (act === 'prof-gift'){ p3Open(el.dataset.m); return; }                   /* 카드의 🎁 선물 도착! — 바로 3상자 뽑기 */
   /* 독서리스트 */
   if (act === 'read-add'){ readingAdd(); return; }
   if (act === 'read-edit'){ readingEditId = el.dataset.id; renderReading(); focusEditInput('.rd.editing [data-rdin="t"]'); return; }
