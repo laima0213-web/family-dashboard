@@ -157,8 +157,16 @@ button{font:inherit;color:inherit}
 .cbtn.on{background:#5FA97A;border-color:#5FA97A;color:#fff;box-shadow:0 4px 10px rgba(95,169,122,.3)}
 .cbtn .n{font-size:11px;font-weight:900;background:#F3EADB;color:#8A7C6B;border-radius:999px;padding:1px 6px}
 .cbtn.on .n{background:rgba(255,255,255,.3);color:#fff}
-.clean-cnt{font-size:12px;color:var(--sub);margin-top:7px}
+.clean-cnt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:12px;color:var(--sub);margin-top:7px}
 .clean-cnt b{color:#5C8F6D}
+.cl-money{font-style:normal;font-weight:900;color:#3E7CB1;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.clean-tot{display:flex;gap:5px;margin-top:6px}
+.clean-tot>div{flex:1;display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  border-radius:12px;padding:6px 11px;
+  background:linear-gradient(160deg,#F5FBF4,#ECF7EE);border:1px solid #D8EBD9}
+.clean-tot span{font-size:10px;font-weight:900;color:#8C9AA6;letter-spacing:-.2px;white-space:nowrap}
+.clean-tot b{font-size:16px;font-weight:900;color:#3E7CB1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.cl-rate{margin-top:4px;font-size:10px;font-weight:800;color:#B0A392;line-height:1.3}
 .clean-foot{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
 .clean-log{font-size:10.5px;color:var(--faint);margin-top:5px;line-height:1.35}
 .undo{border:1px solid #EADFCB;background:#FFF8EA;border-radius:9px;padding:4px 8px;font-size:11.5px;font-weight:800;
@@ -1208,6 +1216,7 @@ button{font:inherit;color:inherit}
   .br-tab{height:17px;padding:0 9px;font-size:10px}
   .br-money{font-size:12px}
   .br-tot b{font-size:12px}
+  .clean-tot b{font-size:12px}
   .br-tot>div{padding:3px 7px;border-radius:9px}
   .br-mon{font-size:10.5px}
   .ktab .kth{font-size:9.5px}
@@ -4137,6 +4146,9 @@ function cleanCount(who, m){
   m = m || cleanMonthKey();
   return (state.clean || []).filter(function(e){ return String(e.date || '').slice(0,7) === m && e.who === who; }).length;
 }
+/* 치즈집 청소 1회당 금액 — 표시용 계산만 한다(저장 구조 state.clean 은 그대로) */
+var CLEAN_WON = 300;
+function cleanAmount(who, m){ return cleanCount(who, m) * CLEAN_WON; }
 function cleanToday(who){ return cleanOnDate(who, todayKey()); }
 function cleanSetDate(d){
   var today = todayKey();
@@ -7064,7 +7076,15 @@ function renderClean(){
             + esc(FAMILY[id].name) + ' <span class="n">' + cleanCount(id, mon) + '</span></button>';
         }).join('')
     + '</div>'
-    + '<div class="clean-cnt">' + monNum + '월 ' + KIDS.map(function(id){ return '<b>' + esc(FAMILY[id].name) + ' ' + cleanCount(id, mon) + '번</b>'; }).join(' · ') + '</div>'
+    + '<div class="clean-cnt">' + monNum + '월 ' + KIDS.map(function(id){
+        var n = cleanCount(id, mon);
+        return '<span><b>' + esc(FAMILY[id].name) + ' ' + n + '회</b> · <i class="cl-money">' + won(n * CLEAN_WON) + '</i></span>';
+      }).join('') + '</div>'
+    + '<div class="clean-tot"><div>'
+    +   '<span>' + monNum + '월 합계</span>'
+    +   '<b>' + won(KIDS.reduce(function(t, id){ return t + cleanCount(id, mon); }, 0) * CLEAN_WON) + '</b>'
+    + '</div></div>'
+    + '<div class="cl-rate">청소 1번 = 300원</div>'
     + '<div class="clean-foot">'
     +   '<button class="undo" type="button" data-act="clean-undo">↩ 되돌리기</button>'
     +   '<span class="today-rec' + (todayNames.length ? ' on' : '') + '">오늘 기록 · ' + (todayNames.length ? todayNames.join(', ') : '아직 없음') + '</span>'
@@ -8881,7 +8901,7 @@ document.addEventListener('click', function(ev){
       toast(cName + ' ' + cleanMd(cDate) + ' 청소 기록을 뺐어요');
     } else {
       mutate(function(s){ s.clean = s.clean.concat([{ id: uid('c'), date: cDate, who: m }]); });
-      toast('🐤 ' + cName + ' ' + cleanMd(cDate) + ' 청소 완료! ' + Number(cDate.slice(5,7)) + '월 ' + cleanCount(m, cDate.slice(0,7)) + '번');
+      toast('🐤 ' + cName + ' ' + cleanMd(cDate) + ' 청소 완료! ' + Number(cDate.slice(5,7)) + '월 ' + cleanCount(m, cDate.slice(0,7)) + '번 · ' + won(cleanAmount(m, cDate.slice(0,7))));
     }
     renderClean();
     return;
