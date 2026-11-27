@@ -21698,7 +21698,15 @@ var MYR_ITEM = (function(){
         MY.pan = { id: ev.pointerId, sx:p.x, sy:p.y, cx:MY.camX, cz:MY.camZ, moved:false };
         MY.tap = { x:p.x, y:p.y, t:Date.now() };
         var hit = MY.move ? hitAt(p.x, p.y) : null;
-        if (hit){ MY.drag = { id:ev.pointerId, hit:hit, sx:p.x, sy:p.y, ox:0, oz:0, moved:false }; MY.pan = null; selectHit(hit); }
+        if (hit){
+          /* 11-28 사람을 끌 때는 걷던 길·앉아 있던 자리를 놓아 준다 (그림이 손끝을 따라오도록).
+             원래 자리(ox·oz·olvl)를 기억해 두었다가 놓을 때 되돌린 뒤 저장해야
+             바뀐 잎 경로가 실제로 잡힌다 — 끄는 동안 state 를 그 자리에서 고치면 diff 가 0이 된다. */
+          if (hit.t === 'c'){ hit.d.path = []; hit.d.seat = ''; hit.d.seatWant = ''; }
+          MY.drag = { id:ev.pointerId, hit:hit, sx:p.x, sy:p.y, px0:p.x, py0:p.y, ox:hit.d.x, oz:hit.d.z,
+                      olvl:(hit.d.lvl ? 1 : 0), moved:false };
+          MY.pan = null; selectHit(hit);
+        }
       } else if (ids.length === 2){
         var a = pts[ids[0]], b = pts[ids[1]];
         MY.pinch = { d: Math.hypot(a.x-b.x, a.y-b.y), S: MY.S };
@@ -21717,12 +21725,19 @@ var MYR_ITEM = (function(){
       }
       if (MY.drag && MY.drag.id === ev.pointerId){
         var dx = p.x - MY.drag.sx, dy = p.y - MY.drag.sy;
-        if (Math.abs(dx) + Math.abs(dy) > 5) MY.drag.moved = true;
+        /* 누른 자리에서 움직인 거리로 판단 — 천천히 조금씩 끌어도 '옮겼다'로 잡히게 */
+        if (Math.abs(p.x - MY.drag.px0) + Math.abs(p.y - MY.drag.py0) > 5) MY.drag.moved = true;
         var z = MY.drag.hit.d.z;
         var dO = ITEM[MY.drag.hit.d.k] || {};
         var dHW = Math.min(1.55, (dO.w || 1) * 0.5 + 0.10);
         MY.drag.hit.d.x = clamp(MY.drag.hit.d.x + dx/(MY.S), HX0+dHW, HX1-dHW);
-        if (MY.drag.hit.t === 'i' && ITEM[MY.drag.hit.d.k] && ITEM[MY.drag.hit.d.k].cat !== 'wall'){
+        if (MY.drag.hit.t === 'c'){
+          /* 11-28 사람도 손으로 위·아래로 끌어 2층 ↔ 1층 ↔ 테라스 사이를 옮긴다.
+             높이는 charElev(z) 가 정하므로 z 만 따라가면 된다. */
+          var hc = MY.drag.hit.d;
+          hc.z = clamp(hc.z + dy/(MY.S*KZ), 0.6, HZ1-0.6);
+          hc.path = []; hc.seat = ''; hc.seatWant = '';
+        } else if (MY.drag.hit.t === 'i' && ITEM[MY.drag.hit.d.k] && ITEM[MY.drag.hit.d.k].cat !== 'wall'){
           var e = elevOf(MY.drag.hit.d);
           MY.drag.hit.d.z = clamp(MY.drag.hit.d.z + dy/(MY.S*KZ), 0.6, HZ1-0.6);
           /* 위층으로 올리거나 아래층·테라스로 내리면 층도 따라간다 */
@@ -21749,12 +21764,22 @@ var MYR_ITEM = (function(){
       if (MY.drag && MY.drag.id === ev.pointerId){
         var h = MY.drag.hit;
         if (MY.drag.moved){
-          if (h.t === 'i'){ saveItem(h.d.id, { x:+h.d.x.toFixed(2), z:+h.d.z.toFixed(2), lvl:h.d.lvl?1:0 }); }
-          else { saveChar(h.d.id, { x:+h.d.x.toFixed(2), z:+h.d.z.toFixed(2) }); }
+          var nx = +h.d.x.toFixed(2), nz = +h.d.z.toFixed(2), nlvl = h.d.lvl ? 1 : 0;
+          /* 끄는 동안 고친 값을 원래 자리로 되돌린 뒤 저장해야 diff 가 바뀐 잎 경로를 잡는다 */
+          h.d.x = MY.drag.ox; h.d.z = MY.drag.oz;
+          if (h.t === 'i'){ h.d.lvl = MY.drag.olvl; saveItem(h.d.id, { x:nx, z:nz, lvl:nlvl }); }
+          else {
+            /* 걷는 길·걸음 흔들림·앉기 시도 같은 화면용 임시값은 저장하지 않는다
+               (diff 가 객체를 그대로 저장하므로 여기서 지운 뒤 다시 붙이지 않는다) */
+            delete h.d.path; delete h.d.seatWant; delete h.d.seatTz; delete h.d.seatTry;
+            delete h.d.bob; delete h.d.idle;
+            saveChar(h.d.id, { x:nx, z:nz });
+          }
         }
         var pa = PET.a[h.d.id];
         if (pa){ pa.ox = 0; pa.oz = 0; pa.tx = 0; pa.tz = 0; pa.moving = false; pa.wait = 1.2; }
         MY.drag = null;
+        draw();
         return;
       }
       if (MY.pan && MY.pan.id === ev.pointerId){
