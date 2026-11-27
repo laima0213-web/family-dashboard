@@ -21779,8 +21779,12 @@ var MYR_ITEM = (function(){
   function onTap(x, y){
     var r = room(); if (!r) return;
     var hit = hitAt(x, y);
-    /* 바닥·가구를 톡 누르면 추적 재개 (전체 보기·손으로 민 뒤에도) */
-    if (!MY.move && !(hit && hit.t === 'c')) resumeFollow();
+    /* 11-28 — 추적 재개는 바닥·가구로 걸어갈 때만.
+       동물 쓰다듬기·벽난로/TV/스탠드 켜고 끄기는 그 자리에서 반응만 보이므로
+       손으로 끌어 보던 화면을 그대로 두고 주인공(hero) 쪽으로 시선을 되돌리지 않는다. */
+    var tapIt = (hit && hit.t === 'i') ? (ITEM[hit.d.k] || {}) : null;
+    var stayTap = !!(hit && hit.t === 'i' && (tapIt.cat === 'pet' || FX[hit.d.k]));
+    if (!MY.move && !stayTap && !(hit && hit.t === 'c')) resumeFollow();
     if (MY.move){
       if (hit) selectHit(hit);
       else { MY.sel = null; var b = $m('myrSel'); if (b) b.hidden = true; }
